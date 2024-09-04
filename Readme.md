@@ -1,5 +1,6 @@
 # Lola2Clash
 
+Translating Lola specs to the Clash code.
 
 Concepts like dynamic stream creation and parametrised streams depend on the runtime input values to create the streams on demand which cannot be statically determined during compilation to compile the circuit for. So, they are not in the scope here. 
 
