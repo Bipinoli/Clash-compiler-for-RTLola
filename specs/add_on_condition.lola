@@ -1,0 +1,8 @@
+input to_add: Bool
+input a: Int64
+input b: Int64
+
+output c := if to_add then a + b else a - b
+
+trigger c > 10 "c is too large"
+trigger c < 5 "c is too small"

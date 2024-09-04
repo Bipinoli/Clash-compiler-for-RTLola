@@ -1,0 +1,108 @@
+module Main where
+import Distribution.Compat.Prelude (readMaybe)
+
+
+------------------- utility functions
+
+
+eventIn :: Maybe a -> Bool
+eventIn x = case x of 
+    Just _ -> True 
+    Nothing -> False
+
+parseAsFloat :: String -> Maybe Float
+parseAsFloat x = readMaybe x :: Maybe Float
+
+parseAsBool :: String -> Maybe Bool
+parseAsBool x = readMaybe x :: Maybe Bool
+
+parseAsInteger :: String -> Maybe Integer
+parseAsInteger x = readMaybe x :: Maybe Integer
+
+exprOrElse :: Maybe a -> Maybe a -> Maybe a
+exprOrElse expr defaultExpr = case expr of 
+            Just v -> expr 
+            Nothing -> defaultExpr
+
+
+-------------------- inputs
+{{#*inline "all_maybe_inputs"}}{{#each inputs}}Maybe {{this.typ}}{{#unless @last}}, {{/unless}}{{/each}}{{/inline}}
+
+parseInputData :: [String] -> ({{>all_maybe_inputs}})
+parseInputData x = 
+    let 
+    	{{#each inputs}}
+        d{{@index}} = parseAs{{this.typ}} $ x !! {{@index}}
+        {{/each}}
+    in ({{#each inputs}}d{{@index}}{{#unless @last}}, {{/unless}}{{/each}})
+
+
+inputs :: IO ([String], [({{>all_maybe_inputs}})])
+inputs = do
+    untilEOF <- getContents 
+    let allLines = lines untilEOF
+    let linesWithoutComma = map (\line -> map (\c -> if c == ',' then ' ' else c) line) allLines
+    let fields = words $ head linesWithoutComma
+    let inputValues = map (parseInputData . words) $ tail linesWithoutComma
+    return (fields, inputValues)
+
+-------------------- outputs
+
+
+{{#each pacings}}
+pacing{{@index}} ::{{#each this.inputs}} Maybe {{this.typ}} ->{{/each}} Bool
+pacing{{@index}} {{#each this.inputs}}{{this.name}} {{/each}} = {{{this.expr}}}
+
+{{/each}}
+
+{{#each outputs}}
+{{this.name}}EvalPacing = pacing{{this.eval_pacing.pref}}
+{{this.name}}ClausePacing = pacing{{this.clause_pacing.pref}}
+
+{{this.name}} :: {{#each this.inputs as |inpt _|}}Maybe {{inpt.typ}} -> {{/each}}
+	Bool -> Bool -> Maybe {{this.typ}}
+{{this.name}} {{#each this.inputs}}m{{this.name}} {{/each}}evalPacing clausePacing = 
+    if evalPacing then
+        if clausePacing then
+            do
+                {{#each this.inputs}}
+                {{this.name}} <- m{{this.name}}
+                {{/each}}
+                if {{{this.clause_cond}}} then
+                    Just $ {{{this.clause_expr}}}
+                else Nothing
+        else Nothing
+    else Nothing
+
+{{/each}}
+
+
+-------------------- simulation
+{{#*inline "all_maybe_outputs"}}{{#each outputs}}Maybe {{this.typ}}{{#unless @last}}, {{/unless}}{{/each}}{{/inline}}
+
+{{#each inputs as |item index|}}
+extractIn{{@index}} :: ({{#each ../inputs}}Maybe {{this.typ}}{{#unless @last}}, {{/unless}}{{/each}}) -> Maybe {{this.typ}}
+extractIn{{@index}} ({{#each ../inputs as |_ index2|}}{{#if (eq index index2)}}x{{else}}_{{/if}}{{#unless @last}},{{/unless}}{{/each}}) = x
+
+{{/each}}
+
+run :: ({{>all_maybe_inputs}}) -> ({{>all_maybe_outputs}})
+run inputValues =
+    let 
+    	{{#each inputs}}
+        {{this.name}} = extractIn{{@index}} inputValues
+        {{/each}}
+        
+        {{#each outputs}}
+        {{this.name}}Out = {{this.name}} {{#each this.inputs}}{{this.name}}{{#if this.is_secondary}}Out{{/if}} {{/each}}({{this.name}}EvalPacing{{#each this.eval_pacing.inputs}} {{this.name}}{{/each}}) ({{this.name}}ClausePacing{{#each this.clause_pacing.inputs}} {{this.name}}{{/each}})
+        {{/each}}
+    in ({{#each outputs}}{{this.name}}Out{{#unless @last}}, {{/unless}}{{/each}})
+
+
+simulation :: [({{>all_maybe_inputs}})] -> [({{>all_maybe_outputs}})]
+simulation = map run
+
+main :: IO ()
+main = do
+    (fields, inputValues) <- inputs
+ 

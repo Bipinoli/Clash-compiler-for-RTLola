@@ -1,0 +1,10 @@
+import math
+input lat: Float
+input lon: Float
+constant intruder_lat: Float := 249.301
+constant intruder_lon: Float := 23.453
+
+output distance: Float := sqrt((intruder_lat - lat)**2.0 + (intruder_lon - lon)**2.0)
+output closer: Bool := distance.offset(by: -1).defaults(to: distance) >= distance
+
+trigger closer && distance < 0.1 "Too close to the intruder"
