@@ -17,3 +17,6 @@ Concepts like dynamic stream creation and parametrised streams depend on the run
 ### Not in scope 
 - Dynamic streams
 - Parameterised streams
+
+## Idea
+- don't split to HLC and LLC if not needed
