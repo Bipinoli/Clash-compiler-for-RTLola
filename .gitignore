@@ -5,3 +5,6 @@ scratch/
 # Added by cargo
 
 /target
+
+# *.o
+# *.hi
