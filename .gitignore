@@ -6,5 +6,5 @@ scratch/
 
 /target
 
-# *.o
-# *.hi
+*.o
+*.hi
