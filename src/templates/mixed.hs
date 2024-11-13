@@ -1,36 +1,23 @@
-module FirFilter.FirFilter where
+module Mixed where
 
 import Clash.Prelude
-import Clash.Explicit.Testbench
+
+systemClockFreq = 50000000 -- 50 MHz
+
+counter :: (HiddenClockResetEnable dom, KnownNat a) => Unsigned a -> Signal dom (Unsigned a)
+counter toCount = register 0 (mux (prevVal .<. pure (toCount - 1)) (prevVal + 1) 0)
+  where prevVal = counter toCount
+
+generateClock :: HiddenClockResetEnable dom => Unsigned 64 -> Unsigned 64 -> Signal dom Bool
+generateClock systemClockFreq desiredFreq = register False (mux (countSignal .==. maxVal) (pure True) (pure False))
+  where
+    countSignal = counter toCount
+    toCount = systemClockFreq `div` desiredFreq
+    maxVal = pure (toCount - 1)
+-- Test:
+-- clashi> sampleN @System 20 (generateClock 3 1)
 
 
-firFilter :: (HiddenClockResetEnable dom, NFDataX a, Num a, KnownNat n) => Vec (n+1) a -> Signal dom a -> Signal dom a
-firFilter coeffs xs = dotProduct (pure `fmap` coeffs) (iterateI (register 0) xs)
-    where dotProduct as bs = fold (+) $ zipWith (*) as bs
-
-
-topEntity :: Clock System -> Reset System -> Enable System -> Signal System (Signed 16) -> Signal System (Signed 16)
-topEntity = exposeClockResetEnable $ firFilter (2 :> 2 :> 2 :> 2 :> 2 :> Nil)
-
-
-
-
-testbench :: Signal System Bool
-testbench = done
-  where 
-    clk = tbSystemClockGen (not <$> done)
-    rst = systemResetGen
-    en = enableGen
-    inputs = stimuliGenerator clk rst (0 :> 5 :> 10 :> 5 :> 0 :> -5 :> -10 :> -5 :> 0 :> 5 :> 10 :> 5 :> 0 :> -5 :> -10 :> -5 :> 0 :> Nil)
-    expectedOutput = outputVerifier' clk rst (0 :> 0 :> 0 :> 0 :> 0 :> 30 :> 0 :> -30 :> -40 :> -30 :> 0 :> 30 :> Nil)
-    -- type level number SNat
-    done = expectedOutput $ ignoreFor clk rst en (SNat :: SNat 5) 0 (topEntity clk rst en inputs)
-
--- Mark testbench as top entity to generate Verilog
-{-# ANN testbench
-  (Synthesize
-    { t_name   = "testbench"
-    , t_inputs = []
-    , t_output = PortName "done"
-    }) #-}
+topEntity :: Clock System -> Reset System -> Enable System -> Unsigned 32 -> Signal System (Unsigned 32)
+topEntity = exposeClockResetEnable counter
 
