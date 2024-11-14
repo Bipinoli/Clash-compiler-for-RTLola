@@ -30,23 +30,23 @@
     },
     "files": [
         {
-            "name": "topEntity_shim.cpp",
-            "sha256": "460702d8afc7479b65dad3acb826f56baf7e34f11fea519fb6f597a0c8340150"
-        },
-        {
             "name": "topEntity.sdc",
             "sha256": "13d4c1aafcc09a84d81d3b60d513cb901384a10e27e5a5a16572a600f15895f3"
         },
         {
-            "name": "topEntity.v",
-            "sha256": "f29ef657b42acaf8f30944810cdd7960590060fde9ee3a11a440f2d0636dae9f"
+            "name": "Mixed_topEntity_types.vhdl",
+            "sha256": "d7c246954fcac20fabf4f2cba0e9584c795276de5656c5822ee357e1ca39195e"
+        },
+        {
+            "name": "topEntity.vhdl",
+            "sha256": "e235b49c9688b501d699bcd283cea51898dcd30f69d275f7198f79633209cc76"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "62768632937589630f91ae01710f1b512d706258cc2f834705ab8bd274c3a0d0",
+    "hash": "fecf9116ed3dc5cf3240bff8b576de01e4e546979af066a6d8df21bab96ccf44",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -55,7 +55,7 @@
                 "domain": "System",
                 "is_clock": true,
                 "name": "clk",
-                "type_name": "",
+                "type_name": "clk.Mixed_topEntity_types.clk_System",
                 "width": 1
             },
             {
@@ -63,7 +63,7 @@
                 "domain": "System",
                 "is_clock": false,
                 "name": "rst",
-                "type_name": "",
+                "type_name": "rst.Mixed_topEntity_types.rst_System",
                 "width": 1
             },
             {
@@ -71,35 +71,35 @@
                 "domain": "System",
                 "is_clock": false,
                 "name": "en",
-                "type_name": "",
+                "type_name": "en.Mixed_topEntity_types.en_System",
                 "width": 1
             },
             {
                 "direction": "in",
                 "is_clock": false,
                 "name": "a",
-                "type_name": "signed [31:0]",
+                "type_name": "signed(31 downto 0)",
                 "width": 32
             },
             {
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_0",
-                "type_name": "signed [31:0]",
+                "type_name": "signed(31 downto 0)",
                 "width": 32
             },
             {
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_1",
-                "type_name": "signed [31:0]",
+                "type_name": "signed(31 downto 0)",
                 "width": 32
             },
             {
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_2",
-                "type_name": "signed [31:0]",
+                "type_name": "signed(31 downto 0)",
                 "width": 32
             }
         ]

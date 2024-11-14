@@ -4,50 +4,169 @@
 `timescale 100fs/100fs
 module topEntity
     ( // Inputs
-      input  eta // clock
-    , input  eta1 // reset
-    , input  eta2 // enable
-    , input [31:0] eta_0
+      input  clk // clock
+    , input  rst // reset
+    , input  en // enable
+    , input signed [31:0] a
 
       // Outputs
-    , output wire [31:0] result
+    , output wire signed [31:0] result_0
+    , output wire signed [31:0] result_1
+    , output wire signed [31:0] result_2
     );
-  // mixed.hs:10:1-80
-  reg [31:0] counterSignal = 32'd0;
-  reg [31:0] result_1 = 32'd0;
-  // mixed.hs:10:1-80
+  // mixed.hs:65:1-9
+  wire  eta1;
+  // mixed.hs:56:1-122
+  wire signed [31:0] x1;
+  // mixed.hs:56:1-122
+  wire signed [31:0] x2;
+  // mixed.hs:56:1-122
+  wire signed [31:0] x3;
+  // mixed.hs:56:1-122
+  wire signed [31:0] x4;
+  reg signed [31:0] result_6 = 32'sd0;
+  // mixed.hs:35:1-126
+  reg signed [31:0] past0 = 32'sd0;
+  // mixed.hs:35:1-126
+  reg signed [31:0] past1 = 32'sd0;
+  wire [127:0] result_7;
+  reg signed [31:0] c$app_arg = 32'sd0;
+  // mixed.hs:12:1-92
   wire  b;
-  // mixed.hs:10:1-80
-  wire [31:0] t;
-  wire [31:0] result_2;
+  wire  result_8;
+  // mixed.hs:8:1-92
+  wire  b_0;
+  // mixed.hs:8:1-92
+  wire [63:0] t;
+  wire [63:0] result_9;
+  reg [63:0] result_10 = 64'd0;
+  reg  result_11 = 1'b0;
+  reg signed [31:0] c$app_arg_0 = 32'sd0;
+  reg signed [31:0] result_12 = 32'sd0;
+  reg signed [31:0] result_13 = 32'sd0;
+  wire [95:0] result;
+
+  assign result = {result_13,   result_12,
+                   result_6};
+
+  assign eta1 = result_11;
+
+  assign x1 = $signed(result_7[127:96]);
+
+  assign x2 = $signed(result_7[95:64]);
+
+  assign x3 = $signed(result_7[63:32]);
+
+  assign x4 = $signed(result_7[31:0]);
 
   // register begin
-  always @(posedge eta or  posedge  eta1) begin : counterSignal_register
-    if ( eta1) begin
-      counterSignal <= 32'd0;
-    end else if (eta2) begin
-      counterSignal <= result_2;
+  always @(posedge clk or  posedge  rst) begin : result_6_register
+    if ( rst) begin
+      result_6 <= 32'sd0;
+    end else if (eta1) begin
+      result_6 <= (((x1 + x2) + x3) + x4);
     end
   end
   // register end
 
   // register begin
-  always @(posedge eta or  posedge  eta1) begin : result_1_register
-    if ( eta1) begin
-      result_1 <= 32'd0;
-    end else if (eta2) begin
-      result_1 <= counterSignal;
+  always @(posedge clk or  posedge  rst) begin : past0_register
+    if ( rst) begin
+      past0 <= 32'sd0;
+    end else if (eta1) begin
+      past0 <= result_13;
     end
   end
   // register end
 
-  assign b = counterSignal < (eta_0 - 32'd1);
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : past1_register
+    if ( rst) begin
+      past1 <= 32'sd0;
+    end else if (eta1) begin
+      past1 <= past0;
+    end
+  end
+  // register end
 
-  assign t = counterSignal + 32'd1;
+  assign result_7 = {result_13,   past0,   past1,
+                     c$app_arg};
 
-  assign result_2 = b ? t : 32'd0;
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : c$app_arg_register
+    if ( rst) begin
+      c$app_arg <= 32'sd0;
+    end else if (eta1) begin
+      c$app_arg <= past1;
+    end
+  end
+  // register end
 
-  assign result = result_1;
+  assign b = result_10 == 64'd1;
+
+  assign result_8 = b ? 1'b1 : 1'b0;
+
+  assign b_0 = result_10 < 64'd1;
+
+  assign t = result_10 + 64'd1;
+
+  assign result_9 = b_0 ? t : 64'd0;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_10_register
+    if ( rst) begin
+      result_10 <= 64'd0;
+    end else if (en) begin
+      result_10 <= result_9;
+    end
+  end
+  // register end
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_11_register
+    if ( rst) begin
+      result_11 <= 1'b0;
+    end else if (en) begin
+      result_11 <= result_8;
+    end
+  end
+  // register end
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : c$app_arg_0_register
+    if ( rst) begin
+      c$app_arg_0 <= 32'sd0;
+    end else if (en) begin
+      c$app_arg_0 <= result_13;
+    end
+  end
+  // register end
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_12_register
+    if ( rst) begin
+      result_12 <= 32'sd0;
+    end else if (en) begin
+      result_12 <= c$app_arg_0;
+    end
+  end
+  // register end
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_13_register
+    if ( rst) begin
+      result_13 <= 32'sd0;
+    end else if (en) begin
+      result_13 <= a;
+    end
+  end
+  // register end
+
+  assign result_0 = $signed(result[95:64]);
+
+  assign result_1 = $signed(result[63:32]);
+
+  assign result_2 = $signed(result[31:0]);
 
 
 endmodule

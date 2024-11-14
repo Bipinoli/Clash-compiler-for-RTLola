@@ -60,7 +60,8 @@ streamD winB = register 0 sumVal
 
 
 
-topEntity :: Clock System -> Reset System -> Enable System -> Signal System (Signed 32) -> Signal System (Signed 32, Signed 32, Signed 32)
+topEntity :: Clock System -> Reset System -> Enable System -> 
+  "a_input" ::: Signal System (Signed 32) -> "b_c_d" ::: Signal System (Signed 32, Signed 32, Signed 32)
 topEntity clk rst en a = bundle (strmB, strmC, strmD)
   where
     strmB = exposeClockResetEnable (streamB a) clk rst en
