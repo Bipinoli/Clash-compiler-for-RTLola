@@ -1,4 +1,4 @@
-`timescale 1ns/1ns
+`timescale 1us/1ns
 module testbench;
     reg clk;
     reg rst;
@@ -12,15 +12,15 @@ module testbench;
 
     topEntity monitor (clk, rst, en, a, result_0, result_1, result_2, result_3);
 
-    // clock must have 100 MHz frequency as that has been assumed to generate enable signals
-    // i.e #10 = 10ns = 100MHz
+    // clock must have 100 MHz (10 ns) frequency as that has been assumed to generate enable signals
+    // 10 ns = 0.01 us
     always begin
-        #5 clk = ~clk;
+        #0.005 clk = ~clk;
     end
 
     initial
     begin
-        $monitor("a: %d, b: %d, c: %d, d: %d", result_0, result_1, result_2, result_3);
+        $monitor("time: %t, a: %d, b: %d, c: %d, d: %d", $time, result_0, result_1, result_2, result_3);
         // $monitor("time: %t, a: %d", $time, a);
     end
 
@@ -31,34 +31,34 @@ module testbench;
         a = 0;
 
         // 1 sec = 10^9 reps -> 0.1 s = 10^8 reps
-        #100_000_000; // 0.1 sec
+        #100; // 0.1 microseconds (with timescale 1us/1ns)
         rst = 0;
         a = 1;
-        #100_000_000; // 0.2 sec
+        #100;
         a = 2;  
-        #100_000_000;
+        #100;
         a = 3;  
-        #100_000_000;
+        #100;
         a = 4;  
-        #100_000_000;
+        #100;
         a = 5;  
-        #100_000_000;
+        #100;
         a = 6;  
-        #100_000_000;
+        #100;
         a = 7;  
-        #100_000_000;
+        #100;
         a = 8;  
-        #100_000_000;
+        #100;
         a = 9;  
-        #100_000_000;
+        #100;
         a = 10;  
-        #100_000_000;
+        #100;
         a = 11;  
-        #100_000_000;
+        #100;
         a = 12;  
-        #100_000_000;
+        #100;
         a = 13;  
-        #100_000_000;
+        #100;
         $finish; 
     end
 

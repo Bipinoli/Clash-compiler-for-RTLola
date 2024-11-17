@@ -5,6 +5,7 @@ import Clash.Prelude
 import Clash.Explicit.Testbench
 
 
+-- measured in picoseconds: 100 MHz = 10_000 ps
 systemClockPeriod = snatToInteger $ clockPeriod @System
 
 generateClock :: HiddenClockResetEnable dom => Integer -> Signal dom Bool
@@ -38,9 +39,9 @@ evalSignal = clockReducer 10
 
 
 streamB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Signed 32) -> Signal dom (Signed 32)
--- streamB enable a = mux enable 1 0
-streamB enable a = register 10 (mux enable a oldVal)
-    where oldVal = streamB enable a
+streamB enable a = mux enable a (-1)
+-- streamB enable a = register 10 (mux enable a oldVal)
+--     where oldVal = streamB enable a
 
 streamC :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Signed 32) -> Signal dom (Signed 32)
 -- streamC enable a = mux enable 1 0

@@ -16,114 +16,103 @@ module topEntity
     , output wire signed [31:0] result_3
     );
   wire signed [31:0] result_8;
-  reg signed [31:0] result_9 = 32'sd10;
-  // diff_freqs_simple.hs:10:1-73
+  // diff_freqs_simple.hs:11:1-73
   wire  b;
-  wire  result_10;
-  // diff_freqs_simple.hs:17:5-74
+  wire  result_9;
+  // diff_freqs_simple.hs:18:5-74
   wire  b_0;
-  // diff_freqs_simple.hs:17:5-74
+  // diff_freqs_simple.hs:18:5-74
   wire signed [63:0] t;
-  wire signed [63:0] result_11;
-  reg signed [63:0] result_12 = 64'sd0;
-  reg  result_13 = 1'b0;
-  wire signed [31:0] result_14;
-  reg signed [31:0] result_15 = 32'sd10;
-  // diff_freqs_simple.hs:10:1-73
+  wire signed [63:0] result_10;
+  reg signed [63:0] result_11 = 64'sd0;
+  reg  result_12 = 1'b0;
+  wire signed [31:0] result_13;
+  reg signed [31:0] result_14 = 32'sd10;
+  // diff_freqs_simple.hs:11:1-73
   wire  b_1;
-  wire  result_16;
-  // diff_freqs_simple.hs:17:5-74
+  wire  result_15;
+  // diff_freqs_simple.hs:18:5-74
   wire  b_2;
-  // diff_freqs_simple.hs:17:5-74
+  // diff_freqs_simple.hs:18:5-74
   wire signed [63:0] t_0;
-  wire signed [63:0] result_17;
-  reg signed [63:0] result_18 = 64'sd0;
-  reg  result_19 = 1'b0;
+  wire signed [63:0] result_16;
+  reg signed [63:0] result_17 = 64'sd0;
+  reg  result_18 = 1'b0;
   wire [127:0] result;
 
-  assign result = {a,   result_9,   result_15,
-                   result_9 + result_15};
+  assign result = {a,   result_8,   result_14,
+                   result_8 + result_14};
 
-  assign result_8 = result_13 ? a : result_9;
+  assign result_8 = result_12 ? a : -32'sd1;
+
+  assign b = result_11 == 64'sd9999999;
+
+  assign result_9 = b ? 1'b1 : 1'b0;
+
+  assign b_0 = result_11 < 64'sd9999999;
+
+  assign t = result_11 + 64'sd1;
+
+  assign result_10 = b_0 ? t : 64'sd0;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_9_register
+  always @(posedge clk or  posedge  rst) begin : result_11_register
     if ( rst) begin
-      result_9 <= 32'sd10;
+      result_11 <= 64'sd0;
     end else if (en) begin
-      result_9 <= result_8;
+      result_11 <= result_10;
     end
   end
   // register end
-
-  assign b = result_12 == 64'sd9999999;
-
-  assign result_10 = b ? 1'b1 : 1'b0;
-
-  assign b_0 = result_12 < 64'sd9999999;
-
-  assign t = result_12 + 64'sd1;
-
-  assign result_11 = b_0 ? t : 64'sd0;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_12_register
     if ( rst) begin
-      result_12 <= 64'sd0;
+      result_12 <= 1'b0;
     end else if (en) begin
-      result_12 <= result_11;
+      result_12 <= result_9;
     end
   end
   // register end
+
+  assign result_13 = result_18 ? a : result_14;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_13_register
+  always @(posedge clk or  posedge  rst) begin : result_14_register
     if ( rst) begin
-      result_13 <= 1'b0;
+      result_14 <= 32'sd10;
     end else if (en) begin
-      result_13 <= result_10;
+      result_14 <= result_13;
     end
   end
   // register end
 
-  assign result_14 = result_19 ? a : result_15;
+  assign b_1 = result_17 == 64'sd19999999;
+
+  assign result_15 = b_1 ? 1'b1 : 1'b0;
+
+  assign b_2 = result_17 < 64'sd19999999;
+
+  assign t_0 = result_17 + 64'sd1;
+
+  assign result_16 = b_2 ? t_0 : 64'sd0;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_15_register
+  always @(posedge clk or  posedge  rst) begin : result_17_register
     if ( rst) begin
-      result_15 <= 32'sd10;
+      result_17 <= 64'sd0;
     end else if (en) begin
-      result_15 <= result_14;
+      result_17 <= result_16;
     end
   end
   // register end
-
-  assign b_1 = result_18 == 64'sd19999999;
-
-  assign result_16 = b_1 ? 1'b1 : 1'b0;
-
-  assign b_2 = result_18 < 64'sd19999999;
-
-  assign t_0 = result_18 + 64'sd1;
-
-  assign result_17 = b_2 ? t_0 : 64'sd0;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_18_register
     if ( rst) begin
-      result_18 <= 64'sd0;
+      result_18 <= 1'b0;
     end else if (en) begin
-      result_18 <= result_17;
-    end
-  end
-  // register end
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : result_19_register
-    if ( rst) begin
-      result_19 <= 1'b0;
-    end else if (en) begin
-      result_19 <= result_16;
+      result_18 <= result_15;
     end
   end
   // register end
