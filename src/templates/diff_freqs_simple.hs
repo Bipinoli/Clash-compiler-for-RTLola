@@ -26,25 +26,23 @@ clockReducer factor = generateClock $ systemClockPeriod * factor
 
 
 bEnable :: HiddenClockResetEnable dom => Signal dom Bool
-bEnable = generateClock 100_000_000_000 -- 10 HZ -> 100_000_000_000 ps period
+bEnable = generateClock 100_000_000 -- 10 kHZ
 
 cEnable :: HiddenClockResetEnable dom => Signal dom Bool
-cEnable = generateClock 200_000_000_000 -- 5 HZ -> 200_000_000_000 ps period
+cEnable = generateClock 200_000_000 -- 5 kHZ
 
 dEnable :: HiddenClockResetEnable dom => Signal dom Bool
-dEnable = generateClock 400_000_000_000 -- 2.5 HZ -> 400_000_000_000 ps period
+dEnable = generateClock 400_000_000 -- 2.5 kHZ
 
 evalSignal :: HiddenClockResetEnable dom => Signal dom Bool
 evalSignal = clockReducer 10
 
 
 streamB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Signed 32) -> Signal dom (Signed 32)
-streamB enable a = mux enable a (-1)
--- streamB enable a = register 10 (mux enable a oldVal)
---     where oldVal = streamB enable a
+streamB enable a = register 10 (mux enable a oldVal)
+    where oldVal = streamB enable a
 
 streamC :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Signed 32) -> Signal dom (Signed 32)
--- streamC enable a = mux enable 1 0
 streamC enable a = register 10 (mux enable a oldVal)
     where oldVal = streamC enable a
 

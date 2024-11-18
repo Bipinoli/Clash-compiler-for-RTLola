@@ -20,6 +20,7 @@ module testbench;
 
     initial
     begin
+        $printtimescale(testbench);
         $monitor("time: %t, a: %d, b: %d, c: %d, d: %d", $time, result_0, result_1, result_2, result_3);
         // $monitor("time: %t, a: %d", $time, a);
     end
@@ -30,7 +31,6 @@ module testbench;
         en = 1;
         a = 0;
 
-        // 1 sec = 10^9 reps -> 0.1 s = 10^8 reps
         #100; // 0.1 microseconds (with timescale 1us/1ns)
         rst = 0;
         a = 1;
