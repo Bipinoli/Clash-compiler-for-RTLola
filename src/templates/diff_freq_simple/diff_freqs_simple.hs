@@ -38,21 +38,22 @@ evalSignal :: HiddenClockResetEnable dom => Signal dom Bool
 evalSignal = clockReducer 10
 
 
-streamB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Signed 32) -> Signal dom (Signed 32)
-streamB enable a = register 10 (mux enable a oldVal)
-    where oldVal = streamB enable a
+streamB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Signed 32) -> Signal dom (Signed 32)
+streamB eval enable a = register 10 (mux (eval .&&. enable) a oldVal)
+    where oldVal = streamB eval enable a
 
-streamC :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Signed 32) -> Signal dom (Signed 32)
-streamC enable a = register 10 (mux enable a oldVal)
-    where oldVal = streamC enable a
+streamC :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Signed 32) -> Signal dom (Signed 32)
+streamC eval enable a = register 10 (mux (eval .&&. enable) a oldVal)
+    where oldVal = streamC eval enable a
 
 streamD :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Signed 32) -> Signal dom (Signed 32) -> Signal dom (Signed 32)
 streamD enable a b = a + b
 
 
-topEntity :: Clock System -> Reset System -> Enable System -> Signal System (Signed 32) -> Signal System (Signed 32, Signed 32, Signed 32, Signed 32)
-topEntity clk rst en a = bundle (a, b, c, d)
+topEntity :: Clock System -> Reset System -> Enable System -> Signal System (Signed 32) -> Signal System (Bool, Signed 32, Signed 32, Signed 32, Signed 32)
+topEntity clk rst en a = bundle (eval, a, b, c, d)
     where 
-        b = exposeClockResetEnable (streamB bEnable a) clk rst en
-        c = exposeClockResetEnable (streamC cEnable a) clk rst en
+        b = exposeClockResetEnable (streamB eval bEnable a) clk rst en
+        c = exposeClockResetEnable (streamC eval cEnable a) clk rst en
         d = exposeClockResetEnable (streamD dEnable b c) clk rst en
+        eval = exposeClockResetEnable evalSignal clk rst en
