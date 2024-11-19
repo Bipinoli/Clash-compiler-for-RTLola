@@ -73,7 +73,7 @@ module topEntity
   end
   // register end
 
-  assign b_0 = result_14 == 64'sd9999;
+  assign b_0 = result_14 < 64'sd5000;
 
   assign result_12 = b_0 ? 1'b1 : 1'b0;
 
@@ -117,7 +117,7 @@ module topEntity
   end
   // register end
 
-  assign b_3 = result_20 == 64'sd19999;
+  assign b_3 = result_20 < 64'sd10000;
 
   assign result_18 = b_3 ? 1'b1 : 1'b0;
 
@@ -147,7 +147,7 @@ module topEntity
   end
   // register end
 
-  assign b_5 = result_24 == 64'sd9;
+  assign b_5 = result_24 < 64'sd5;
 
   assign result_22 = b_5 ? 1'b1 : 1'b0;
 

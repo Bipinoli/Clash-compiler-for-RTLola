@@ -2,4 +2,19 @@ input a: Int32
 
 output b @ 10kHz := a.hold().defaults(to: 0)
 output c := b.offset(by: -2).defaults(to: 10)
-output d @ 5kHz := b.aggregate(over: 4s, using: sum)
+output d @ 5kHz := b.aggregate(over: 0.0005s, using: sum)
+
+-- Simulation trace
+time, a
+0.0001, 1
+0.0002, 2
+0.0003, 3
+0.0004, 4
+0.0005, 5
+0.0006, 6
+0.0007, 7
+0.0008, 8
+0.0009, 9
+0.0010, 10
+0.0011, 11
+0.0012, 12

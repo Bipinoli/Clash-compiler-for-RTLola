@@ -18,14 +18,14 @@ generateClock desiredPeriodInPs = register False (mux (countSignal .<. halfToCou
 -- Test: (generating the clock which is half as fast as the system clk)
 -- clashi> sampleN @System 10 $ generateClock 20000 
 
-clockReducer :: HiddenClockResetEnable dom => Integer -> Signal dom Bool
-clockReducer factor = generateClock $ systemClockPeriod * factor
+clockDivider :: HiddenClockResetEnable dom => Integer -> Signal dom Bool
+clockDivider factor = generateClock $ systemClockPeriod * factor
 
 clk1 :: HiddenClockResetEnable dom => Signal dom Bool
 clk1 = generateClock 40_000 -- 25 Mhz = 40_000 ps period
 
 clk2 :: HiddenClockResetEnable dom => Signal dom Bool
-clk2 = clockReducer 2 
+clk2 = clockDivider 2 
 
 topEntity :: Clock System -> Reset System -> Enable System -> Signal System (Bool, Bool)
 topEntity = exposeClockResetEnable $ bundle (clk1, clk2)

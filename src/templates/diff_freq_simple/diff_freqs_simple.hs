@@ -5,24 +5,21 @@ import Clash.Prelude
 import Clash.Explicit.Testbench
 
 
--- measured in picoseconds: 100 MHz = 10_000 ps
 systemClockPeriod = snatToInteger $ clockPeriod @System
 
 generateClock :: HiddenClockResetEnable dom => Integer -> Signal dom Bool
-generateClock desiredPeriod = register False (mux (countSignal .==. maxVal) (pure True) (pure False))
+generateClock desiredPeriodInPs = register False (mux (countSignal .<. halfToCount) (pure True) (pure False))
   where
     countSignal = counter toCount
-    toCount = desiredPeriod `div` systemClockPeriod
-    maxVal = pure (toCount - 1)
+    toCount = desiredPeriodInPs `div` systemClockPeriod
+    halfToCount = pure $ toCount `div` 2
 
     counter :: HiddenClockResetEnable dom => Integer -> Signal dom Integer 
     counter toCount = register 0 (mux (prevVal .<. pure (toCount - 1)) (prevVal + 1) 0)
         where prevVal = counter toCount
--- Test: (generating the clock which is half as fast as the system clk)
--- clashi> sampleN @System 10 $ generateClock 20000 
 
-clockReducer :: HiddenClockResetEnable dom => Integer -> Signal dom Bool
-clockReducer factor = generateClock $ systemClockPeriod * factor
+clockDivider :: HiddenClockResetEnable dom => Integer -> Signal dom Bool
+clockDivider factor = generateClock $ systemClockPeriod * factor
 
 
 bEnable :: HiddenClockResetEnable dom => Signal dom Bool
@@ -35,7 +32,7 @@ dEnable :: HiddenClockResetEnable dom => Signal dom Bool
 dEnable = generateClock 400_000_000 -- 2.5 kHZ
 
 evalSignal :: HiddenClockResetEnable dom => Signal dom Bool
-evalSignal = clockReducer 10
+evalSignal = clockDivider 10
 
 
 streamB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Signed 32) -> Signal dom (Signed 32)
