@@ -1,0 +1,5 @@
+input a: Int32
+
+output b @ 10kHz := a.hold().defaults(to: 0)
+output c := b.offset(by: -2).defaults(to: 10)
+output d @ 5kHz := b.aggregate(over: 4s, using: sum)
