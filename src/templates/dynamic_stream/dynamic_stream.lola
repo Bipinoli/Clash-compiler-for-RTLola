@@ -1,0 +1,30 @@
+input a : Int32
+input b: Int32
+
+output distance 
+  spawn @(a && b)
+  eval @(a && b)
+    with b.hold(or: 0) - a.hold(or: 0)
+  close @true when stale.hold(or: false)
+
+output stale 
+  spawn @(a && b)
+  eval @0.00005s with b.aggregate(over: 0.00050s, using: count) = 0
+  close @true when stale.hold(or: false)
+
+
+-- Simulation trace
+time, a, b
+0.0001, 1, #
+0.0002, 2, 10
+0.0003, 3, #
+0.0004, 4, 14
+0.0005, 5, 25
+0.0006, 6, #
+0.0007, 7, #
+0.0008, 8, #
+0.0009, 9, #
+0.0010, 10, #
+0.0011, 11, #
+0.0012, 12, #
+0.0013, 13, 100
