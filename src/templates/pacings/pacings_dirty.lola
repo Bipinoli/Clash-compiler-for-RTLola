@@ -1,0 +1,87 @@
+input a : Int32
+input b : Int32
+input x : Int32
+
+// pacing - a & b
+output c := a + b
+
+output d @0.0001s := a.hold(or: 1) + b.hold(or: 2)
+
+output e @10kHz := a.hold(or: 10)
+output f @5kHz := e.offset(by: -2).defaults(to: 20)
+
+// Illegal as consumer can't have higher frequency than the producer
+// output g @8Hz := e.offset(by: -4).defaults(to: 30)
+
+// pacing - smallest of 10kHz & 5kHz = 5kHz
+output h := e + f
+
+output i @a := a.hold(or: 1) * b.hold(or: 2)
+
+output j @b := a.hold(or:1) * b.hold(or: 2)
+
+output k @(a|b) := a.hold(or:1) * b.hold(or: 2)
+
+output l @true := a.hold(or: 1) * b.hold(or: 2)
+
+output m @x := a.hold(or: 1) * b.hold(or: 2)
+
+// pacing - @x
+output n := l + m
+
+// pacing - (a ^ b ^ x) V (a ^ x) V (b ^ x)
+output o := k + m
+
+// pacing - a ^ b
+output p := i + j
+
+// pacing - (a ^ b) V b
+output q := j + k
+
+// pacing - (a ^ b)
+output r := i + j + k
+
+// Illegal: mix of event & periodic not allowed
+// output s := h + i
+
+// pacing - 10kHz
+output t := d + e
+
+// Illegal: activation condition can only condition the input streams
+// output u 
+//     spawn @(c | d)
+//     eval with c + d
+//     close when c - d = 0
+
+// pacing - close: a & b - output: a & b
+// output v 
+//    spawn @(a | b)
+//    eval with c + d.hold(or: 0)
+//    close when c - d.hold(or: 0) = 0
+
+// pacing - a | b
+// output w
+//    spawn @(a | b)
+//    eval @(a | b) with c.hold(or: 0) + d.hold(or: 0)
+//    close @(a | b) when c.hold(or: 0) - d.hold(or: 0) = 0
+
+
+
+
+------ Simulation trace 
+time, a, b, x
+0.0001, 1, #, #
+0.0002, 2, 10, #
+0.0003, 3, 11, #
+0.0004, 4, #, #
+0.0005, 5, 25, #
+0.0006, 6, #, #
+0.0007, 7, #, #
+0.0008, 8, #, #
+0.0009, 9, #, #
+0.0010, 10, #, #
+0.0011, 11, #, #
+0.0012, 12, #, #
+0.0013, 13, 100, #
+0.0014, #, #, #
+0.0015, #, #, 10
