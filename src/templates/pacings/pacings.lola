@@ -8,16 +8,16 @@ output c @ x3 := x1.hold(or: -1) + x2.hold(or: -1)
 output d @ true := x1.hold(or: -1) + x2.hold(or: -1)
 output e @ x1 := x1.hold(or: -1) + x2.hold(or: -1)
 
-output f := d + e 
-output g := b + e
-output h := a + c
+output f := d + e // @x1
+output g := b + e // @(x1 or (x1 and x2))
+output h := a + c // @(x1 and x2 and x3)
 
-output i @0.0001s := a.hold(or: -1) + b.hold(or: -1)
+output i @0.0001s := a.hold(or: -1) + b.hold(or: -1) // @10kHz
 output j @10kHz := a.hold(or: -1)
-output k := e.offset(by: -2).defaults(to: -1)
+output k := e.offset(by: -2).defaults(to: -1) // @x1
 output l @5kHz := k.hold(or: -1)
 
-output m := j + l
+output m := j + l // @5kHz
 
 
 -------------- Simulation trace
