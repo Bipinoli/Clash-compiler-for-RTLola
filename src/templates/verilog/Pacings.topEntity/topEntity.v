@@ -42,11 +42,11 @@ module topEntity
   reg  result_29 = 1'b0;
   wire signed [31:0] result_30;
   reg signed [31:0] result_31 = 32'sd0;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire signed [31:0] t_0;
   wire signed [31:0] result_32;
   reg signed [31:0] result_33 = 32'sd0;
-  // pacings/pacings.hs:124:1-9
+  // pacings/pacings.hs:130:1-9
   reg signed [31:0] holdA = -32'sd1;
   reg signed [31:0] c$app_arg = -32'sd1;
   // pacings/pacings.hs:7:1-73
@@ -59,45 +59,45 @@ module topEntity
   wire signed [63:0] result_35;
   reg signed [63:0] result_36 = 64'sd0;
   reg  result_37 = 1'b0;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire  eta;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire signed [31:0] t_2;
   wire signed [31:0] result_38;
   reg signed [31:0] result_39 = 32'sd0;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire  eta_0;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire signed [31:0] t_3;
   wire signed [31:0] result_40;
   reg signed [31:0] result_41 = 32'sd0;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire signed [31:0] t_4;
   wire signed [31:0] result_42;
   reg signed [31:0] result_43 = 32'sd0;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire signed [31:0] t_5;
   wire signed [31:0] result_44;
   reg signed [31:0] result_45 = 32'sd0;
-  // pacings/pacings.hs:124:1-9
+  // pacings/pacings.hs:130:1-9
   reg signed [31:0] c$a_app_arg = 32'sd0;
-  // pacings/pacings.hs:124:1-9
+  // pacings/pacings.hs:130:1-9
   reg signed [31:0] c$a_app_arg_0 = 32'sd0;
-  // pacings/pacings.hs:124:1-9
+  // pacings/pacings.hs:130:1-9
   wire  c$a_app_arg_1;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire  eta_1;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire signed [31:0] t_6;
   wire signed [31:0] result_46;
   reg signed [31:0] result_47 = 32'sd0;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire signed [31:0] t_7;
   wire signed [31:0] result_48;
   reg signed [31:0] result_49 = 32'sd0;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire  eta_2;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire signed [31:0] t_8;
   wire signed [31:0] result_50;
   reg signed [31:0] result_51 = 32'sd0;
@@ -105,16 +105,23 @@ module topEntity
   reg signed [31:0] cur = -32'sd1;
   // pacings/pacings.hs:56:1-116
   reg signed [31:0] past1 = -32'sd1;
+  // pacings/pacings.hs:56:1-116
+  reg signed [31:0] past2 = -32'sd1;
   wire [95:0] result_52;
-  reg signed [31:0] c$app_arg_0 = -32'sd1;
+  // pacings/pacings.hs:56:1-116
+  wire signed [31:0] c$past2_app_arg;
+  // pacings/pacings.hs:56:1-116
+  wire signed [31:0] c$past1_app_arg;
+  // pacings/pacings.hs:56:1-116
+  wire signed [31:0] c$cur_app_arg;
   wire signed [31:0] result_53;
-  // pacings/pacings.hs:64:1-113
+  // pacings/pacings.hs:70:1-113
   wire signed [31:0] t_9;
   wire signed [31:0] result_54;
   reg signed [31:0] result_55 = 32'sd0;
-  // pacings/pacings.hs:124:1-9
+  // pacings/pacings.hs:130:1-9
   reg signed [31:0] holdBx2 = -32'sd1;
-  // pacings/pacings.hs:124:1-9
+  // pacings/pacings.hs:130:1-9
   reg signed [31:0] holdBx1 = -32'sd1;
   wire [383:0] result;
 
@@ -375,7 +382,7 @@ module topEntity
     if ( rst) begin
       cur <= -32'sd1;
     end else if (en) begin
-      cur <= result_55;
+      cur <= c$cur_app_arg;
     end
   end
   // register end
@@ -385,23 +392,28 @@ module topEntity
     if ( rst) begin
       past1 <= -32'sd1;
     end else if (en) begin
-      past1 <= cur;
+      past1 <= c$past1_app_arg;
     end
   end
   // register end
-
-  assign result_52 = {cur,   past1,
-                      c$app_arg_0};
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : c$app_arg_0_register
+  always @(posedge clk or  posedge  rst) begin : past2_register
     if ( rst) begin
-      c$app_arg_0 <= -32'sd1;
+      past2 <= -32'sd1;
     end else if (en) begin
-      c$app_arg_0 <= past1;
+      past2 <= c$past2_app_arg;
     end
   end
   // register end
+
+  assign result_52 = {cur,   past1,   past2};
+
+  assign c$past2_app_arg = hasX1 ? past1 : past2;
+
+  assign c$past1_app_arg = hasX1 ? cur : past1;
+
+  assign c$cur_app_arg = hasX1 ? result_55 : cur;
 
   assign result_53 = $signed(result_52[31:0]);
 

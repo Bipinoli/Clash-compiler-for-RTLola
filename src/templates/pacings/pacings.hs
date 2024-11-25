@@ -56,9 +56,15 @@ pacing5kHz = generateClock 200_000_000
 window3 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Data -> Signal dom (Data, Data, Data)
 window3 enable x deflt = bundle (cur, past1, past2) 
   where 
-    cur = register deflt x
-    past1 = register deflt cur
-    past2 = register deflt past1
+    cur = register deflt (mux enable x cur)
+    past1 = register deflt (mux enable cur past1)
+    past2 = register deflt (mux enable past1 past2)
+-- clashi Test:
+-- let x = fromList [(1 :: Signed 32), 2,3,4,5,6,7,8]
+-- let en = fromList [True, True, True, True, True, True, True, True]
+-- sampleN @System 8 (window3 en x (-1))
+-- Note: in sampleN reset is True for first 2 samples
+
 
 
 streamA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data -> Signal dom Data
