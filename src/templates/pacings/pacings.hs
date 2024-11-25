@@ -67,6 +67,7 @@ window3 enable x deflt = bundle (cur, past1, past2)
 
 
 
+
 streamA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data -> Signal dom Data
 streamA enable x1 x2 = register 0 (mux enable (x1 + x2) oldVal)
     where oldVal = streamA enable x1 x2
