@@ -46,7 +46,7 @@ module topEntity
   wire signed [31:0] t_0;
   wire signed [31:0] result_32;
   reg signed [31:0] result_33 = 32'sd0;
-  // pacings/pacings.hs:130:1-9
+  // pacings/pacings.hs:137:1-9
   reg signed [31:0] holdA = -32'sd1;
   reg signed [31:0] c$app_arg = -32'sd1;
   // pacings/pacings.hs:7:1-73
@@ -79,12 +79,16 @@ module topEntity
   wire signed [31:0] t_5;
   wire signed [31:0] result_44;
   reg signed [31:0] result_45 = 32'sd0;
-  // pacings/pacings.hs:130:1-9
-  reg signed [31:0] c$a_app_arg = 32'sd0;
-  // pacings/pacings.hs:130:1-9
-  reg signed [31:0] c$a_app_arg_0 = 32'sd0;
-  // pacings/pacings.hs:130:1-9
-  wire  c$a_app_arg_1;
+  // pacings/pacings.hs:137:1-9
+  wire  c$a_app_arg;
+  // pacings/pacings.hs:137:1-9
+  wire signed [31:0] c$holdAx1_app_arg;
+  // pacings/pacings.hs:137:1-9
+  reg signed [31:0] holdAx1 = 32'sd0;
+  // pacings/pacings.hs:137:1-9
+  wire signed [31:0] c$holdAx2_app_arg;
+  // pacings/pacings.hs:137:1-9
+  reg signed [31:0] holdAx2 = 32'sd0;
   // pacings/pacings.hs:70:1-113
   wire  eta_1;
   // pacings/pacings.hs:70:1-113
@@ -119,10 +123,14 @@ module topEntity
   wire signed [31:0] t_9;
   wire signed [31:0] result_54;
   reg signed [31:0] result_55 = 32'sd0;
-  // pacings/pacings.hs:130:1-9
-  reg signed [31:0] holdBx2 = -32'sd1;
-  // pacings/pacings.hs:130:1-9
+  // pacings/pacings.hs:137:1-9
+  wire signed [31:0] c$holdBx1_app_arg;
+  // pacings/pacings.hs:137:1-9
   reg signed [31:0] holdBx1 = -32'sd1;
+  // pacings/pacings.hs:137:1-9
+  wire signed [31:0] c$holdBx2_app_arg;
+  // pacings/pacings.hs:137:1-9
+  reg signed [31:0] holdBx2 = -32'sd1;
   wire [383:0] result;
 
   assign result = {result_45,   result_47,
@@ -265,7 +273,7 @@ module topEntity
   end
   // register end
 
-  assign eta_0 = hasX1 | c$a_app_arg_1;
+  assign eta_0 = hasX1 | c$a_app_arg;
 
   assign t_3 = result_47 + result_55;
 
@@ -295,9 +303,9 @@ module topEntity
   end
   // register end
 
-  assign t_5 = c$a_app_arg_0 + c$a_app_arg;
+  assign t_5 = holdAx1 + holdAx2;
 
-  assign result_44 = c$a_app_arg_1 ? t_5 : result_45;
+  assign result_44 = c$a_app_arg ? t_5 : result_45;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_45_register
@@ -309,27 +317,31 @@ module topEntity
   end
   // register end
 
+  assign c$a_app_arg = hasX1 & hasX2;
+
+  assign c$holdAx1_app_arg = hasX1 ? x1 : holdAx1;
+
   // register begin
-  always @(posedge clk or  posedge  rst) begin : c$a_app_arg_register
+  always @(posedge clk or  posedge  rst) begin : holdAx1_register
     if ( rst) begin
-      c$a_app_arg <= 32'sd0;
+      holdAx1 <= 32'sd0;
     end else if (en) begin
-      c$a_app_arg <= x2;
+      holdAx1 <= c$holdAx1_app_arg;
     end
   end
   // register end
 
+  assign c$holdAx2_app_arg = hasX2 ? x2 : holdAx2;
+
   // register begin
-  always @(posedge clk or  posedge  rst) begin : c$a_app_arg_0_register
+  always @(posedge clk or  posedge  rst) begin : holdAx2_register
     if ( rst) begin
-      c$a_app_arg_0 <= 32'sd0;
+      holdAx2 <= 32'sd0;
     end else if (en) begin
-      c$a_app_arg_0 <= x1;
+      holdAx2 <= c$holdAx2_app_arg;
     end
   end
   // register end
-
-  assign c$a_app_arg_1 = hasX1 & hasX2;
 
   assign eta_1 = hasX1 | hasX2;
 
@@ -431,22 +443,26 @@ module topEntity
   end
   // register end
 
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : holdBx2_register
-    if ( rst) begin
-      holdBx2 <= -32'sd1;
-    end else if (en) begin
-      holdBx2 <= x2;
-    end
-  end
-  // register end
+  assign c$holdBx1_app_arg = hasX1 ? x1 : holdBx1;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : holdBx1_register
     if ( rst) begin
       holdBx1 <= -32'sd1;
     end else if (en) begin
-      holdBx1 <= x1;
+      holdBx1 <= c$holdBx1_app_arg;
+    end
+  end
+  // register end
+
+  assign c$holdBx2_app_arg = hasX2 ? x2 : holdBx2;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : holdBx2_register
+    if ( rst) begin
+      holdBx2 <= -32'sd1;
+    end else if (en) begin
+      holdBx2 <= c$holdBx2_app_arg;
     end
   end
   // register end

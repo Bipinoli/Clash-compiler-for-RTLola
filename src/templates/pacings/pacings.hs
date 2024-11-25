@@ -67,7 +67,6 @@ window3 enable x deflt = bundle (cur, past1, past2)
 
 
 
-
 streamA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data -> Signal dom Data
 streamA enable x1 x2 = register 0 (mux enable (x1 + x2) oldVal)
     where oldVal = streamA enable x1 x2
@@ -111,6 +110,13 @@ streamJ enable a = register 0 (mux enable a oldVal)
 streamK :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data
 streamK enable e = offsetVal
   where (_, _, offsetVal) = unbundle $ window3 enable e (-1)
+-- clashi Test:
+-- let x = fromList [(1 :: Signed 32), 2,3,4,5,6,7,8]
+-- let en = fromList [True, True, True, True, True, True, True, True]
+-- sampleN @System 8 (window3 en x (-1))
+-- sampleN @System 8 $ streamK en x
+-- Note: in sampleN reset is True for first 2 samples
+
 
 streamL :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data
 streamL enable k = register 0 (mux enable k oldVal)
@@ -158,10 +164,10 @@ topEntity clk rst en x1 x2 x3 hasX1 hasX2 hasX3 = bundle (a, b, c, d, e, f, g, h
     enableL = exposeClockResetEnable pacing5kHz clk rst en
     enableM = exposeClockResetEnable pacing5kHz clk rst en
 
-    holdAx1 = exposeClockResetEnable (register 0 x1) clk rst en
-    holdAx2 = exposeClockResetEnable (register 0 x2) clk rst en
-    holdBx1 = exposeClockResetEnable (register (-1) x1) clk rst en
-    holdBx2 = exposeClockResetEnable (register (-1) x2) clk rst en
+    holdAx1 = exposeClockResetEnable (register 0 (mux hasX1 x1 holdAx1)) clk rst en
+    holdAx2 = exposeClockResetEnable (register 0 (mux hasX2 x2 holdAx2)) clk rst en
+    holdBx1 = exposeClockResetEnable (register (-1) (mux hasX1 x1 holdBx1)) clk rst en
+    holdBx2 = exposeClockResetEnable (register (-1) (mux hasX2 x2 holdBx2)) clk rst en
     holdCx1 = holdBx1
     holdCx2 = holdBx2
     holdDx1 = holdBx1
