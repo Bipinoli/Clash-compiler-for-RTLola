@@ -111,7 +111,7 @@ streamL enable k = register 0 (mux enable k oldVal)
 
 streamM :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data -> Signal dom Data
 streamM enable j l = register 0 (mux enable (j + l) oldVal)
-    where oldVal = streamI enable j l
+    where oldVal = streamM enable j l
 
 
 ----------------------------------------
@@ -120,8 +120,8 @@ streamM enable j l = register 0 (mux enable (j + l) oldVal)
 topEntity :: Clock System -> Reset System -> Enable System ->
     Signal System Data -> Signal System Data -> Signal System Data ->
     Signal System Bool -> Signal System Bool -> Signal System Bool ->
-  Signal System (Data, Data, Data, Data, Data)
-topEntity clk rst en x1 x2 x3 hasX1 hasX2 hasX3 = bundle (a, b, c, d, e)
+  Signal System (Data, Data, Data, Data, Data, Data, Data, Data, Data, Data, Data, Data)
+topEntity clk rst en x1 x2 x3 hasX1 hasX2 hasX3 = bundle (a, b, c, d, e, f, g, h, i, j, k, l)
   where
     a = exposeClockResetEnable (streamA enableA holdAx1 holdAx2) clk rst en
     b = exposeClockResetEnable (streamB enableB holdBx1 holdBx2) clk rst en
