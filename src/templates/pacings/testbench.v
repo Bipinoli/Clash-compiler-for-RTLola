@@ -36,7 +36,7 @@ module testbench;
                        result_0, result_1, result_2,
                        result_3, result_4, result_5,
                        result_6, result_7, result_8,
-                       result_9, result_10_0, result_10_1, result_10_2
+                       result_9, result_10, result_11
                        );
 
     // clock must have 100 MHz (10 ns) frequency as that has been assumed to generate enable signals
@@ -67,7 +67,7 @@ module testbench;
         hasX2 = 0;
         hasX3 = 0;
         #49.99; // enough time for RTL data transfers
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
+        $display("time: %0t, (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
 
         #50; // 0.2 microseconds
         hasX1 = 1;
@@ -81,7 +81,7 @@ module testbench;
         hasX2 = 0;
         hasX3 = 0;
         #50;
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
+        $display("time: %0t, (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
 
         #50;
         hasX1 = 0;
@@ -95,7 +95,7 @@ module testbench;
         hasX2 = 0;
         hasX3 = 0;
         #50;
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
+        $display("time: %0t, (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
         
         #50;
         hasX1 = 0;
@@ -109,7 +109,7 @@ module testbench;
         hasX2 = 0;
         hasX3 = 0;
         #50;
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
+        $display("time: %0t, (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
 
         #50;
         hasX1 = 1;
@@ -123,7 +123,7 @@ module testbench;
         hasX2 = 0;
         hasX3 = 0;
         #50;
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
+        $display("time: %0t, (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
 
         #50;
         hasX1 = 1;
@@ -137,7 +137,7 @@ module testbench;
         hasX2 = 0;
         hasX3 = 0;
         #50;
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
+        $display("time: %0t, (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
 
         #50;
         $finish; 

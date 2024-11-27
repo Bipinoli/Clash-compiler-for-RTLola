@@ -101,6 +101,7 @@ module testbench;
         newX1 = 0;
         newX2 = 0;
         #50;
+        $display("time: %0t, new (x1,x2): (%b,%b), (x1,x2): (%0d,%0d), a = %0d, b = (%0d, %0d, %0d)", $time, newX1, newX2, x1, x2, result_0, result_1_0, result_1_1, result_1_2);
         $display("time: %0t, (x1,x2): (%0d,%0d), a = %0d, b = (%0d, %0d, %0d)", $time, x1, x2, result_0, result_1_0, result_1_1, result_1_2);
 
         #50;
