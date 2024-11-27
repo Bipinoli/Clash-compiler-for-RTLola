@@ -204,10 +204,10 @@ topEntity clk rst en x1 x2 x3 hasX1 hasX2 hasX3 = bundle (a, b, c, d, e, f, g, h
     enableL = exposeClockResetEnable pacing5kHz clk rst en
     enableM = exposeClockResetEnable pacing5kHz clk rst en
 
-    holdAx1 = exposeClockResetEnable (register 0 (mux hasX1 x1 holdAx1)) clk rst en
-    holdAx2 = exposeClockResetEnable (register 0 (mux hasX2 x2 holdAx2)) clk rst en
-    holdBx1 = exposeClockResetEnable (register (-1) (mux hasX1 x1 holdBx1)) clk rst en
-    holdBx2 = exposeClockResetEnable (register (-1) (mux hasX2 x2 holdBx2)) clk rst en
+    holdAx1 = exposeClockResetEnable (register 0 (mux pacingHoldX1 x1 holdAx1)) clk rst en
+    holdAx2 = exposeClockResetEnable (register 0 (mux pacingHoldX2 x2 holdAx2)) clk rst en
+    holdBx1 = exposeClockResetEnable (register (-1) (mux pacingHoldX1 x1 holdBx1)) clk rst en
+    holdBx2 = exposeClockResetEnable (register (-1) (mux pacingHoldX2 x2 holdBx2)) clk rst en
     holdCx1 = holdBx1
     holdCx2 = holdBx2
     holdDx1 = holdBx1
@@ -217,6 +217,8 @@ topEntity clk rst en x1 x2 x3 hasX1 hasX2 hasX3 = bundle (a, b, c, d, e, f, g, h
     holdA = exposeClockResetEnable (register (-1) a) clk rst en
     holdB = exposeClockResetEnable (register (-1) b) clk rst en
 
+    pacingHoldX1 = exposeClockResetEnable (sustainTrueFor1MoreCycle . sustainTrueFor1MoreCycle . sustainTrueFor1MoreCycle $ hasX1) clk rst en 
+    pacingHoldX2 = exposeClockResetEnable (sustainTrueFor1MoreCycle . sustainTrueFor1MoreCycle . sustainTrueFor1MoreCycle $ hasX2) clk rst en 
 
 
 

@@ -29,26 +29,26 @@ module topEntity
     , output wire signed [31:0] result_10_1
     , output wire signed [31:0] result_10_2
     );
-  // pacings/pacings.hs:56:1-116
+  // pacings/pacings.hs:95:1-116
   reg signed [31:0] cur = -32'sd1;
-  // pacings/pacings.hs:56:1-116
+  // pacings/pacings.hs:95:1-116
   reg signed [31:0] past1 = -32'sd1;
-  // pacings/pacings.hs:56:1-116
+  // pacings/pacings.hs:95:1-116
   reg signed [31:0] past2 = -32'sd1;
   wire [95:0] result_20;
-  // pacings/pacings.hs:56:1-116
+  // pacings/pacings.hs:95:1-116
   wire signed [31:0] c$past2_app_arg;
-  // pacings/pacings.hs:56:1-116
+  // pacings/pacings.hs:95:1-116
   wire signed [31:0] c$past1_app_arg;
-  // pacings/pacings.hs:56:1-116
+  // pacings/pacings.hs:95:1-116
   wire signed [31:0] c$cur_app_arg;
   wire signed [31:0] result_21;
   reg signed [31:0] result_22 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire signed [31:0] t;
   wire signed [31:0] result_23;
   reg signed [31:0] result_24 = 32'sd0;
-  // pacings/pacings.hs:138:1-9
+  // pacings/pacings.hs:177:1-9
   reg signed [31:0] holdA = -32'sd1;
   reg signed [31:0] c$app_arg = -32'sd1;
   // pacings/pacings.hs:7:1-73
@@ -61,64 +61,130 @@ module topEntity
   wire signed [63:0] result_26;
   reg signed [63:0] result_27 = 64'sd0;
   reg  result_28 = 1'b0;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire  eta;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire signed [31:0] t_1;
   wire signed [31:0] result_29;
   reg signed [31:0] result_30 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire  eta_0;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire signed [31:0] t_2;
   wire signed [31:0] result_31;
   reg signed [31:0] result_32 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire signed [31:0] t_3;
   wire signed [31:0] result_33;
   reg signed [31:0] result_34 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire signed [31:0] t_4;
   wire signed [31:0] result_35;
   reg signed [31:0] result_36 = 32'sd0;
-  // pacings/pacings.hs:138:1-9
+  // pacings/pacings.hs:177:1-9
   wire  c$a_app_arg;
-  // pacings/pacings.hs:138:1-9
+  // pacings/pacings.hs:177:1-9
   wire signed [31:0] c$holdAx1_app_arg;
-  // pacings/pacings.hs:138:1-9
+  // pacings/pacings.hs:177:1-9
   reg signed [31:0] holdAx1 = 32'sd0;
-  // pacings/pacings.hs:138:1-9
+  // pacings/pacings.hs:177:1-9
   wire signed [31:0] c$holdAx2_app_arg;
-  // pacings/pacings.hs:138:1-9
+  // pacings/pacings.hs:177:1-9
   reg signed [31:0] holdAx2 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire  eta_1;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire signed [31:0] t_5;
   wire signed [31:0] result_37;
   reg signed [31:0] result_38 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire signed [31:0] t_6;
   wire signed [31:0] result_39;
   reg signed [31:0] result_40 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire  eta_2;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire signed [31:0] t_7;
   wire signed [31:0] result_41;
   reg signed [31:0] result_42 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
+  // pacings/pacings.hs:109:1-113
   wire signed [31:0] t_8;
   wire signed [31:0] result_43;
   reg signed [31:0] result_44 = 32'sd0;
-  // pacings/pacings.hs:138:1-9
+  // pacings/pacings.hs:177:1-9
   wire signed [31:0] c$holdBx1_app_arg;
-  // pacings/pacings.hs:138:1-9
+  // pacings/pacings.hs:177:1-9
   reg signed [31:0] holdBx1 = -32'sd1;
-  // pacings/pacings.hs:138:1-9
+  reg  result_45 = 1'b0;
+  wire  result_46;
+  wire  result_47;
+  // pacings/pacings.hs:29:1-92
+  wire  b_1;
+  wire [1:0] result_48;
+  // pacings/pacings.hs:29:1-92
+  wire  b_2;
+  // pacings/pacings.hs:29:1-92
+  reg [1:0] curState = 2'd2;
+  wire [1:0] result_49;
+  reg  result_50 = 1'b0;
+  wire  result_51;
+  wire  result_52;
+  // pacings/pacings.hs:29:1-92
+  wire  b_3;
+  wire [1:0] result_53;
+  // pacings/pacings.hs:29:1-92
+  wire  b_4;
+  // pacings/pacings.hs:29:1-92
+  reg [1:0] curState_0 = 2'd2;
+  wire [1:0] result_54;
+  reg  result_55 = 1'b0;
+  wire  result_56;
+  wire  result_57;
+  // pacings/pacings.hs:29:1-92
+  wire  b_5;
+  wire [1:0] result_58;
+  // pacings/pacings.hs:29:1-92
+  wire  b_6;
+  // pacings/pacings.hs:29:1-92
+  reg [1:0] curState_1 = 2'd2;
+  wire [1:0] result_59;
+  // pacings/pacings.hs:177:1-9
   wire signed [31:0] c$holdBx2_app_arg;
-  // pacings/pacings.hs:138:1-9
+  // pacings/pacings.hs:177:1-9
   reg signed [31:0] holdBx2 = -32'sd1;
+  reg  result_60 = 1'b0;
+  wire  result_61;
+  wire  result_62;
+  // pacings/pacings.hs:29:1-92
+  wire  b_7;
+  wire [1:0] result_63;
+  // pacings/pacings.hs:29:1-92
+  wire  b_8;
+  // pacings/pacings.hs:29:1-92
+  reg [1:0] curState_2 = 2'd2;
+  wire [1:0] result_64;
+  reg  result_65 = 1'b0;
+  wire  result_66;
+  wire  result_67;
+  // pacings/pacings.hs:29:1-92
+  wire  b_9;
+  wire [1:0] result_68;
+  // pacings/pacings.hs:29:1-92
+  wire  b_10;
+  // pacings/pacings.hs:29:1-92
+  reg [1:0] curState_3 = 2'd2;
+  wire [1:0] result_69;
+  reg  result_70 = 1'b0;
+  wire  result_71;
+  wire  result_72;
+  // pacings/pacings.hs:29:1-92
+  wire  b_11;
+  wire [1:0] result_73;
+  // pacings/pacings.hs:29:1-92
+  wire  b_12;
+  // pacings/pacings.hs:29:1-92
+  reg [1:0] curState_4 = 2'd2;
+  wire [1:0] result_74;
   wire [415:0] result;
   wire [95:0] result_10_3;
 
@@ -303,7 +369,7 @@ module topEntity
 
   assign c$a_app_arg = hasX1 & hasX2;
 
-  assign c$holdAx1_app_arg = hasX1 ? x1 : holdAx1;
+  assign c$holdAx1_app_arg = result_45 ? x1 : holdAx1;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : holdAx1_register
@@ -315,7 +381,7 @@ module topEntity
   end
   // register end
 
-  assign c$holdAx2_app_arg = hasX2 ? x2 : holdAx2;
+  assign c$holdAx2_app_arg = result_60 ? x2 : holdAx2;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : holdAx2_register
@@ -387,7 +453,7 @@ module topEntity
   end
   // register end
 
-  assign c$holdBx1_app_arg = hasX1 ? x1 : holdBx1;
+  assign c$holdBx1_app_arg = result_45 ? x1 : holdBx1;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : holdBx1_register
@@ -399,7 +465,103 @@ module topEntity
   end
   // register end
 
-  assign c$holdBx2_app_arg = hasX2 ? x2 : holdBx2;
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_45_register
+    if ( rst) begin
+      result_45 <= 1'b0;
+    end else if (en) begin
+      result_45 <= result_46;
+    end
+  end
+  // register end
+
+  assign result_46 = b_2 ? 1'b1 : result_47;
+
+  assign result_47 = b_1 ? 1'b1 : 1'b0;
+
+  assign b_1 = curState == 2'd1;
+
+  assign result_48 = b_2 ? 2'd1 : 2'd2;
+
+  assign b_2 = curState == 2'd0;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : curState_register
+    if ( rst) begin
+      curState <= 2'd2;
+    end else if (en) begin
+      curState <= result_49;
+    end
+  end
+  // register end
+
+  assign result_49 = result_50 ? 2'd0 : result_48;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_50_register
+    if ( rst) begin
+      result_50 <= 1'b0;
+    end else if (en) begin
+      result_50 <= result_51;
+    end
+  end
+  // register end
+
+  assign result_51 = b_4 ? 1'b1 : result_52;
+
+  assign result_52 = b_3 ? 1'b1 : 1'b0;
+
+  assign b_3 = curState_0 == 2'd1;
+
+  assign result_53 = b_4 ? 2'd1 : 2'd2;
+
+  assign b_4 = curState_0 == 2'd0;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : curState_0_register
+    if ( rst) begin
+      curState_0 <= 2'd2;
+    end else if (en) begin
+      curState_0 <= result_54;
+    end
+  end
+  // register end
+
+  assign result_54 = result_55 ? 2'd0 : result_53;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_55_register
+    if ( rst) begin
+      result_55 <= 1'b0;
+    end else if (en) begin
+      result_55 <= result_56;
+    end
+  end
+  // register end
+
+  assign result_56 = b_6 ? 1'b1 : result_57;
+
+  assign result_57 = b_5 ? 1'b1 : 1'b0;
+
+  assign b_5 = curState_1 == 2'd1;
+
+  assign result_58 = b_6 ? 2'd1 : 2'd2;
+
+  assign b_6 = curState_1 == 2'd0;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : curState_1_register
+    if ( rst) begin
+      curState_1 <= 2'd2;
+    end else if (en) begin
+      curState_1 <= result_59;
+    end
+  end
+  // register end
+
+  assign result_59 = hasX1 ? 2'd0 : result_58;
+
+  assign c$holdBx2_app_arg = result_60 ? x2 : holdBx2;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : holdBx2_register
@@ -410,6 +572,102 @@ module topEntity
     end
   end
   // register end
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_60_register
+    if ( rst) begin
+      result_60 <= 1'b0;
+    end else if (en) begin
+      result_60 <= result_61;
+    end
+  end
+  // register end
+
+  assign result_61 = b_8 ? 1'b1 : result_62;
+
+  assign result_62 = b_7 ? 1'b1 : 1'b0;
+
+  assign b_7 = curState_2 == 2'd1;
+
+  assign result_63 = b_8 ? 2'd1 : 2'd2;
+
+  assign b_8 = curState_2 == 2'd0;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : curState_2_register
+    if ( rst) begin
+      curState_2 <= 2'd2;
+    end else if (en) begin
+      curState_2 <= result_64;
+    end
+  end
+  // register end
+
+  assign result_64 = result_65 ? 2'd0 : result_63;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_65_register
+    if ( rst) begin
+      result_65 <= 1'b0;
+    end else if (en) begin
+      result_65 <= result_66;
+    end
+  end
+  // register end
+
+  assign result_66 = b_10 ? 1'b1 : result_67;
+
+  assign result_67 = b_9 ? 1'b1 : 1'b0;
+
+  assign b_9 = curState_3 == 2'd1;
+
+  assign result_68 = b_10 ? 2'd1 : 2'd2;
+
+  assign b_10 = curState_3 == 2'd0;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : curState_3_register
+    if ( rst) begin
+      curState_3 <= 2'd2;
+    end else if (en) begin
+      curState_3 <= result_69;
+    end
+  end
+  // register end
+
+  assign result_69 = result_70 ? 2'd0 : result_68;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_70_register
+    if ( rst) begin
+      result_70 <= 1'b0;
+    end else if (en) begin
+      result_70 <= result_71;
+    end
+  end
+  // register end
+
+  assign result_71 = b_12 ? 1'b1 : result_72;
+
+  assign result_72 = b_11 ? 1'b1 : 1'b0;
+
+  assign b_11 = curState_4 == 2'd1;
+
+  assign result_73 = b_12 ? 2'd1 : 2'd2;
+
+  assign b_12 = curState_4 == 2'd0;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : curState_4_register
+    if ( rst) begin
+      curState_4 <= 2'd2;
+    end else if (en) begin
+      curState_4 <= result_74;
+    end
+  end
+  // register end
+
+  assign result_74 = hasX2 ? 2'd0 : result_73;
 
   assign result_0 = $signed(result[415:384]);
 
