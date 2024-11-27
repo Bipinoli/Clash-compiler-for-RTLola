@@ -26,6 +26,10 @@ pacingX1 x1 x2 = x1
 delay2Cycles :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
 delay2Cycles = register False . register False
 
+delay3Cycles :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
+delay3Cycles = register False . register False . register False
+
+
 
 ----------------------------------------
 
@@ -65,8 +69,10 @@ topEntity clk rst en x1 x2 newX1 newX2 = bundle (a, b)
         a = exposeClockResetEnable (streamA enableA holdX1 holdX2) clk rst en
         b = exposeClockResetEnable (streamB enableB a) clk rst en
 
+        -- Note: delaying enable signal for stream by 2 cycles for register transfer time
         enableA = exposeClockResetEnable (delay2Cycles $ pacingX1 newX1 newX2) clk rst en
-        enableB = enableA
+        -- Note: delaying by 3 cycles as there are 3 level of register in between
+        enableB = exposeClockResetEnable (delay3Cycles $ pacingX1 newX1 newX2) clk rst en
 
         holdX1 = exposeClockResetEnable (register (-1) (mux newX1 x1 holdX1)) clk rst en
         holdX2 = exposeClockResetEnable (register (-1) (mux newX2 x2 holdX2)) clk rst en

@@ -18,37 +18,40 @@ module topEntity
     , output wire signed [31:0] result_1_1
     , output wire signed [31:0] result_1_2
     );
-  // simple_event_based/simple_event_based.hs:35:1-116
+  // simple_event_based/simple_event_based.hs:39:1-116
   reg signed [31:0] cur = -32'sd1;
-  // simple_event_based/simple_event_based.hs:35:1-116
+  // simple_event_based/simple_event_based.hs:39:1-116
   reg signed [31:0] past1 = -32'sd1;
-  // simple_event_based/simple_event_based.hs:35:1-116
+  // simple_event_based/simple_event_based.hs:39:1-116
   reg signed [31:0] past2 = -32'sd1;
   wire [95:0] result_2;
-  // simple_event_based/simple_event_based.hs:35:1-116
+  // simple_event_based/simple_event_based.hs:39:1-116
   wire signed [31:0] c$past2_app_arg;
-  // simple_event_based/simple_event_based.hs:35:1-116
+  // simple_event_based/simple_event_based.hs:39:1-116
   wire signed [31:0] c$past1_app_arg;
-  // simple_event_based/simple_event_based.hs:35:1-116
+  // simple_event_based/simple_event_based.hs:39:1-116
   wire signed [31:0] c$cur_app_arg;
-  // simple_event_based/simple_event_based.hs:63:1-9
-  reg signed [31:0] holdX2 = -32'sd1;
-  // simple_event_based/simple_event_based.hs:63:1-9
-  reg signed [31:0] holdX1 = -32'sd1;
-  // simple_event_based/simple_event_based.hs:48:1-113
-  wire signed [31:0] t;
-  wire signed [31:0] result_3;
-  reg signed [31:0] result_4 = 32'sd0;
-  // simple_event_based/simple_event_based.hs:63:1-9
-  wire signed [31:0] c$holdX1_app_arg;
-  // simple_event_based/simple_event_based.hs:63:1-9
-  wire signed [31:0] c$holdX2_app_arg;
   reg  c$app_arg = 1'b0;
-  reg  result_5 = 1'b0;
+  reg  c$app_arg_0 = 1'b0;
+  reg  result_3 = 1'b0;
+  // simple_event_based/simple_event_based.hs:79:1-9
+  reg signed [31:0] holdX2 = -32'sd1;
+  // simple_event_based/simple_event_based.hs:79:1-9
+  reg signed [31:0] holdX1 = -32'sd1;
+  // simple_event_based/simple_event_based.hs:52:1-113
+  wire signed [31:0] t;
+  wire signed [31:0] result_4;
+  reg signed [31:0] result_5 = 32'sd0;
+  reg  c$app_arg_1 = 1'b0;
+  reg  result_6 = 1'b0;
+  // simple_event_based/simple_event_based.hs:79:1-9
+  wire signed [31:0] c$holdX1_app_arg;
+  // simple_event_based/simple_event_based.hs:79:1-9
+  wire signed [31:0] c$holdX2_app_arg;
   wire [127:0] result;
   wire [95:0] result_1_3;
 
-  assign result = {result_4,   result_2};
+  assign result = {result_5,   result_2};
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : cur_register
@@ -82,11 +85,41 @@ module topEntity
 
   assign result_2 = {cur,   past1,   past2};
 
-  assign c$past2_app_arg = result_5 ? past1 : past2;
+  assign c$past2_app_arg = result_3 ? past1 : past2;
 
-  assign c$past1_app_arg = result_5 ? cur : past1;
+  assign c$past1_app_arg = result_3 ? cur : past1;
 
-  assign c$cur_app_arg = result_5 ? result_4 : cur;
+  assign c$cur_app_arg = result_3 ? result_5 : cur;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : c$app_arg_register
+    if ( rst) begin
+      c$app_arg <= 1'b0;
+    end else if (en) begin
+      c$app_arg <= c$app_arg_0;
+    end
+  end
+  // register end
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : c$app_arg_0_register
+    if ( rst) begin
+      c$app_arg_0 <= 1'b0;
+    end else if (en) begin
+      c$app_arg_0 <= newX1;
+    end
+  end
+  // register end
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_3_register
+    if ( rst) begin
+      result_3 <= 1'b0;
+    end else if (en) begin
+      result_3 <= c$app_arg;
+    end
+  end
+  // register end
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : holdX2_register
@@ -110,14 +143,34 @@ module topEntity
 
   assign t = holdX1 + holdX2;
 
-  assign result_3 = result_5 ? t : result_4;
+  assign result_4 = result_6 ? t : result_5;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_4_register
+  always @(posedge clk or  posedge  rst) begin : result_5_register
     if ( rst) begin
-      result_4 <= 32'sd0;
+      result_5 <= 32'sd0;
     end else if (en) begin
-      result_4 <= result_3;
+      result_5 <= result_4;
+    end
+  end
+  // register end
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : c$app_arg_1_register
+    if ( rst) begin
+      c$app_arg_1 <= 1'b0;
+    end else if (en) begin
+      c$app_arg_1 <= newX1;
+    end
+  end
+  // register end
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_6_register
+    if ( rst) begin
+      result_6 <= 1'b0;
+    end else if (en) begin
+      result_6 <= c$app_arg_1;
     end
   end
   // register end
@@ -125,26 +178,6 @@ module topEntity
   assign c$holdX1_app_arg = newX1 ? x1 : holdX1;
 
   assign c$holdX2_app_arg = newX2 ? x2 : holdX2;
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : c$app_arg_register
-    if ( rst) begin
-      c$app_arg <= 1'b0;
-    end else if (en) begin
-      c$app_arg <= newX1;
-    end
-  end
-  // register end
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : result_5_register
-    if ( rst) begin
-      result_5 <= 1'b0;
-    end else if (en) begin
-      result_5 <= c$app_arg;
-    end
-  end
-  // register end
 
   assign result_0 = $signed(result[127:96]);
 
