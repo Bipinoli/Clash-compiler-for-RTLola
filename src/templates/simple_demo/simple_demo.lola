@@ -1,0 +1,14 @@
+input x1 : Int32
+input x2 : Int32
+
+output a @ x1 := x1.hold(or: -1) + x2.hold(or: -1)
+output b := a.offset(by: -2).defaults(to: -1) // @x1
+
+-------------- Simulation trace
+time, x1, x2
+0.0001, 1, 2
+0.0002, 4, #
+0.0003, #, 5
+0.0004, #, #, 1
+0.0005, 10, 10
+0.0006, 100, 100

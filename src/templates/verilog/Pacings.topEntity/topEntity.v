@@ -25,184 +25,168 @@ module topEntity
     , output wire signed [31:0] result_7
     , output wire signed [31:0] result_8
     , output wire signed [31:0] result_9
-    , output wire signed [31:0] result_10
-    , output wire signed [31:0] result_11
+    , output wire signed [31:0] result_10_0
+    , output wire signed [31:0] result_10_1
+    , output wire signed [31:0] result_10_2
     );
-  wire signed [31:0] result_24;
-  reg signed [31:0] result_25 = 32'sd0;
-  // pacings/pacings.hs:7:1-73
-  wire  b;
-  wire  result_26;
-  // pacings/pacings.hs:14:5-74
-  wire  b_0;
-  // pacings/pacings.hs:14:5-74
-  wire signed [63:0] t;
-  wire signed [63:0] result_27;
-  reg signed [63:0] result_28 = 64'sd0;
-  reg  result_29 = 1'b0;
-  wire signed [31:0] result_30;
-  reg signed [31:0] result_31 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
-  wire signed [31:0] t_0;
-  wire signed [31:0] result_32;
-  reg signed [31:0] result_33 = 32'sd0;
-  // pacings/pacings.hs:137:1-9
-  reg signed [31:0] holdA = -32'sd1;
-  reg signed [31:0] c$app_arg = -32'sd1;
-  // pacings/pacings.hs:7:1-73
-  wire  b_1;
-  wire  result_34;
-  // pacings/pacings.hs:14:5-74
-  wire  b_2;
-  // pacings/pacings.hs:14:5-74
-  wire signed [63:0] t_1;
-  wire signed [63:0] result_35;
-  reg signed [63:0] result_36 = 64'sd0;
-  reg  result_37 = 1'b0;
-  // pacings/pacings.hs:70:1-113
-  wire  eta;
-  // pacings/pacings.hs:70:1-113
-  wire signed [31:0] t_2;
-  wire signed [31:0] result_38;
-  reg signed [31:0] result_39 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
-  wire  eta_0;
-  // pacings/pacings.hs:70:1-113
-  wire signed [31:0] t_3;
-  wire signed [31:0] result_40;
-  reg signed [31:0] result_41 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
-  wire signed [31:0] t_4;
-  wire signed [31:0] result_42;
-  reg signed [31:0] result_43 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
-  wire signed [31:0] t_5;
-  wire signed [31:0] result_44;
-  reg signed [31:0] result_45 = 32'sd0;
-  // pacings/pacings.hs:137:1-9
-  wire  c$a_app_arg;
-  // pacings/pacings.hs:137:1-9
-  wire signed [31:0] c$holdAx1_app_arg;
-  // pacings/pacings.hs:137:1-9
-  reg signed [31:0] holdAx1 = 32'sd0;
-  // pacings/pacings.hs:137:1-9
-  wire signed [31:0] c$holdAx2_app_arg;
-  // pacings/pacings.hs:137:1-9
-  reg signed [31:0] holdAx2 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
-  wire  eta_1;
-  // pacings/pacings.hs:70:1-113
-  wire signed [31:0] t_6;
-  wire signed [31:0] result_46;
-  reg signed [31:0] result_47 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
-  wire signed [31:0] t_7;
-  wire signed [31:0] result_48;
-  reg signed [31:0] result_49 = 32'sd0;
-  // pacings/pacings.hs:70:1-113
-  wire  eta_2;
-  // pacings/pacings.hs:70:1-113
-  wire signed [31:0] t_8;
-  wire signed [31:0] result_50;
-  reg signed [31:0] result_51 = 32'sd0;
   // pacings/pacings.hs:56:1-116
   reg signed [31:0] cur = -32'sd1;
   // pacings/pacings.hs:56:1-116
   reg signed [31:0] past1 = -32'sd1;
   // pacings/pacings.hs:56:1-116
   reg signed [31:0] past2 = -32'sd1;
-  wire [95:0] result_52;
+  wire [95:0] result_20;
   // pacings/pacings.hs:56:1-116
   wire signed [31:0] c$past2_app_arg;
   // pacings/pacings.hs:56:1-116
   wire signed [31:0] c$past1_app_arg;
   // pacings/pacings.hs:56:1-116
   wire signed [31:0] c$cur_app_arg;
-  wire signed [31:0] result_53;
+  wire signed [31:0] result_21;
+  reg signed [31:0] result_22 = 32'sd0;
   // pacings/pacings.hs:70:1-113
-  wire signed [31:0] t_9;
-  wire signed [31:0] result_54;
-  reg signed [31:0] result_55 = 32'sd0;
-  // pacings/pacings.hs:137:1-9
+  wire signed [31:0] t;
+  wire signed [31:0] result_23;
+  reg signed [31:0] result_24 = 32'sd0;
+  // pacings/pacings.hs:138:1-9
+  reg signed [31:0] holdA = -32'sd1;
+  reg signed [31:0] c$app_arg = -32'sd1;
+  // pacings/pacings.hs:7:1-73
+  wire  b;
+  wire  result_25;
+  // pacings/pacings.hs:14:5-74
+  wire  b_0;
+  // pacings/pacings.hs:14:5-74
+  wire signed [63:0] t_0;
+  wire signed [63:0] result_26;
+  reg signed [63:0] result_27 = 64'sd0;
+  reg  result_28 = 1'b0;
+  // pacings/pacings.hs:70:1-113
+  wire  eta;
+  // pacings/pacings.hs:70:1-113
+  wire signed [31:0] t_1;
+  wire signed [31:0] result_29;
+  reg signed [31:0] result_30 = 32'sd0;
+  // pacings/pacings.hs:70:1-113
+  wire  eta_0;
+  // pacings/pacings.hs:70:1-113
+  wire signed [31:0] t_2;
+  wire signed [31:0] result_31;
+  reg signed [31:0] result_32 = 32'sd0;
+  // pacings/pacings.hs:70:1-113
+  wire signed [31:0] t_3;
+  wire signed [31:0] result_33;
+  reg signed [31:0] result_34 = 32'sd0;
+  // pacings/pacings.hs:70:1-113
+  wire signed [31:0] t_4;
+  wire signed [31:0] result_35;
+  reg signed [31:0] result_36 = 32'sd0;
+  // pacings/pacings.hs:138:1-9
+  wire  c$a_app_arg;
+  // pacings/pacings.hs:138:1-9
+  wire signed [31:0] c$holdAx1_app_arg;
+  // pacings/pacings.hs:138:1-9
+  reg signed [31:0] holdAx1 = 32'sd0;
+  // pacings/pacings.hs:138:1-9
+  wire signed [31:0] c$holdAx2_app_arg;
+  // pacings/pacings.hs:138:1-9
+  reg signed [31:0] holdAx2 = 32'sd0;
+  // pacings/pacings.hs:70:1-113
+  wire  eta_1;
+  // pacings/pacings.hs:70:1-113
+  wire signed [31:0] t_5;
+  wire signed [31:0] result_37;
+  reg signed [31:0] result_38 = 32'sd0;
+  // pacings/pacings.hs:70:1-113
+  wire signed [31:0] t_6;
+  wire signed [31:0] result_39;
+  reg signed [31:0] result_40 = 32'sd0;
+  // pacings/pacings.hs:70:1-113
+  wire  eta_2;
+  // pacings/pacings.hs:70:1-113
+  wire signed [31:0] t_7;
+  wire signed [31:0] result_41;
+  reg signed [31:0] result_42 = 32'sd0;
+  // pacings/pacings.hs:70:1-113
+  wire signed [31:0] t_8;
+  wire signed [31:0] result_43;
+  reg signed [31:0] result_44 = 32'sd0;
+  // pacings/pacings.hs:138:1-9
   wire signed [31:0] c$holdBx1_app_arg;
-  // pacings/pacings.hs:137:1-9
+  // pacings/pacings.hs:138:1-9
   reg signed [31:0] holdBx1 = -32'sd1;
-  // pacings/pacings.hs:137:1-9
+  // pacings/pacings.hs:138:1-9
   wire signed [31:0] c$holdBx2_app_arg;
-  // pacings/pacings.hs:137:1-9
+  // pacings/pacings.hs:138:1-9
   reg signed [31:0] holdBx2 = -32'sd1;
-  wire [383:0] result;
+  wire [415:0] result;
+  wire [95:0] result_10_3;
 
-  assign result = {result_45,   result_47,
-                   result_49,   result_51,   result_55,
-                   result_43,   result_41,   result_39,
-                   result_33,   result_31,   result_53,
-                   result_25};
-
-  assign result_24 = result_29 ? result_53 : result_25;
+  assign result = {result_36,   result_38,
+                   result_40,   result_42,   result_44,
+                   result_34,   result_32,   result_30,
+                   result_24,   result_22,   result_20};
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_25_register
+  always @(posedge clk or  posedge  rst) begin : cur_register
     if ( rst) begin
-      result_25 <= 32'sd0;
+      cur <= -32'sd1;
     end else if (en) begin
-      result_25 <= result_24;
-    end
-  end
-  // register end
-
-  assign b = result_28 < 64'sd10000;
-
-  assign result_26 = b ? 1'b1 : 1'b0;
-
-  assign b_0 = result_28 < 64'sd19999;
-
-  assign t = result_28 + 64'sd1;
-
-  assign result_27 = b_0 ? t : 64'sd0;
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : result_28_register
-    if ( rst) begin
-      result_28 <= 64'sd0;
-    end else if (en) begin
-      result_28 <= result_27;
+      cur <= c$cur_app_arg;
     end
   end
   // register end
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_29_register
+  always @(posedge clk or  posedge  rst) begin : past1_register
     if ( rst) begin
-      result_29 <= 1'b0;
+      past1 <= -32'sd1;
     end else if (en) begin
-      result_29 <= result_26;
+      past1 <= c$past1_app_arg;
     end
   end
   // register end
 
-  assign result_30 = result_37 ? holdA : result_31;
-
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_31_register
+  always @(posedge clk or  posedge  rst) begin : past2_register
     if ( rst) begin
-      result_31 <= 32'sd0;
+      past2 <= -32'sd1;
     end else if (en) begin
-      result_31 <= result_30;
+      past2 <= c$past2_app_arg;
     end
   end
   // register end
 
-  assign t_0 = holdA + c$app_arg;
+  assign result_20 = {cur,   past1,   past2};
 
-  assign result_32 = result_37 ? t_0 : result_33;
+  assign c$past2_app_arg = hasX1 ? past1 : past2;
+
+  assign c$past1_app_arg = hasX1 ? cur : past1;
+
+  assign c$cur_app_arg = hasX1 ? result_44 : cur;
+
+  assign result_21 = result_28 ? holdA : result_22;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_33_register
+  always @(posedge clk or  posedge  rst) begin : result_22_register
     if ( rst) begin
-      result_33 <= 32'sd0;
+      result_22 <= 32'sd0;
     end else if (en) begin
-      result_33 <= result_32;
+      result_22 <= result_21;
+    end
+  end
+  // register end
+
+  assign t = holdA + c$app_arg;
+
+  assign result_23 = result_28 ? t : result_24;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_24_register
+    if ( rst) begin
+      result_24 <= 32'sd0;
+    end else if (en) begin
+      result_24 <= result_23;
     end
   end
   // register end
@@ -212,7 +196,7 @@ module topEntity
     if ( rst) begin
       holdA <= -32'sd1;
     end else if (en) begin
-      holdA <= result_45;
+      holdA <= result_36;
     end
   end
   // register end
@@ -222,97 +206,97 @@ module topEntity
     if ( rst) begin
       c$app_arg <= -32'sd1;
     end else if (en) begin
-      c$app_arg <= result_47;
+      c$app_arg <= result_38;
     end
   end
   // register end
 
-  assign b_1 = result_36 < 64'sd5000;
+  assign b = result_27 < 64'sd5000;
 
-  assign result_34 = b_1 ? 1'b1 : 1'b0;
+  assign result_25 = b ? 1'b1 : 1'b0;
 
-  assign b_2 = result_36 < 64'sd9999;
+  assign b_0 = result_27 < 64'sd9999;
 
-  assign t_1 = result_36 + 64'sd1;
+  assign t_0 = result_27 + 64'sd1;
 
-  assign result_35 = b_2 ? t_1 : 64'sd0;
+  assign result_26 = b_0 ? t_0 : 64'sd0;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_36_register
+  always @(posedge clk or  posedge  rst) begin : result_27_register
     if ( rst) begin
-      result_36 <= 64'sd0;
+      result_27 <= 64'sd0;
     end else if (en) begin
-      result_36 <= result_35;
+      result_27 <= result_26;
     end
   end
   // register end
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_37_register
+  always @(posedge clk or  posedge  rst) begin : result_28_register
     if ( rst) begin
-      result_37 <= 1'b0;
+      result_28 <= 1'b0;
     end else if (en) begin
-      result_37 <= result_34;
+      result_28 <= result_25;
     end
   end
   // register end
 
   assign eta = hasX1 & (hasX2 & hasX3);
 
-  assign t_2 = result_45 + result_49;
+  assign t_1 = result_36 + result_40;
 
-  assign result_38 = eta ? t_2 : result_39;
+  assign result_29 = eta ? t_1 : result_30;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_39_register
+  always @(posedge clk or  posedge  rst) begin : result_30_register
     if ( rst) begin
-      result_39 <= 32'sd0;
+      result_30 <= 32'sd0;
     end else if (en) begin
-      result_39 <= result_38;
+      result_30 <= result_29;
     end
   end
   // register end
 
   assign eta_0 = hasX1 | c$a_app_arg;
 
-  assign t_3 = result_47 + result_55;
+  assign t_2 = result_38 + result_44;
 
-  assign result_40 = eta_0 ? t_3 : result_41;
+  assign result_31 = eta_0 ? t_2 : result_32;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_41_register
+  always @(posedge clk or  posedge  rst) begin : result_32_register
     if ( rst) begin
-      result_41 <= 32'sd0;
+      result_32 <= 32'sd0;
     end else if (en) begin
-      result_41 <= result_40;
+      result_32 <= result_31;
     end
   end
   // register end
 
-  assign t_4 = result_51 + result_55;
+  assign t_3 = result_42 + result_44;
 
-  assign result_42 = hasX1 ? t_4 : result_43;
+  assign result_33 = hasX1 ? t_3 : result_34;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_43_register
+  always @(posedge clk or  posedge  rst) begin : result_34_register
     if ( rst) begin
-      result_43 <= 32'sd0;
+      result_34 <= 32'sd0;
     end else if (en) begin
-      result_43 <= result_42;
+      result_34 <= result_33;
     end
   end
   // register end
 
-  assign t_5 = holdAx1 + holdAx2;
+  assign t_4 = holdAx1 + holdAx2;
 
-  assign result_44 = c$a_app_arg ? t_5 : result_45;
+  assign result_35 = c$a_app_arg ? t_4 : result_36;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_45_register
+  always @(posedge clk or  posedge  rst) begin : result_36_register
     if ( rst) begin
-      result_45 <= 32'sd0;
+      result_36 <= 32'sd0;
     end else if (en) begin
-      result_45 <= result_44;
+      result_36 <= result_35;
     end
   end
   // register end
@@ -345,100 +329,60 @@ module topEntity
 
   assign eta_1 = hasX1 | hasX2;
 
-  assign t_6 = holdBx1 + holdBx2;
+  assign t_5 = holdBx1 + holdBx2;
 
-  assign result_46 = eta_1 ? t_6 : result_47;
+  assign result_37 = eta_1 ? t_5 : result_38;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_47_register
+  always @(posedge clk or  posedge  rst) begin : result_38_register
     if ( rst) begin
-      result_47 <= 32'sd0;
+      result_38 <= 32'sd0;
     end else if (en) begin
-      result_47 <= result_46;
+      result_38 <= result_37;
     end
   end
   // register end
 
-  assign t_7 = holdBx1 + holdBx2;
+  assign t_6 = holdBx1 + holdBx2;
 
-  assign result_48 = hasX3 ? t_7 : result_49;
+  assign result_39 = hasX3 ? t_6 : result_40;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_49_register
+  always @(posedge clk or  posedge  rst) begin : result_40_register
     if ( rst) begin
-      result_49 <= 32'sd0;
+      result_40 <= 32'sd0;
     end else if (en) begin
-      result_49 <= result_48;
+      result_40 <= result_39;
     end
   end
   // register end
 
   assign eta_2 = hasX1 | (hasX2 | hasX3);
 
+  assign t_7 = holdBx1 + holdBx2;
+
+  assign result_41 = eta_2 ? t_7 : result_42;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_42_register
+    if ( rst) begin
+      result_42 <= 32'sd0;
+    end else if (en) begin
+      result_42 <= result_41;
+    end
+  end
+  // register end
+
   assign t_8 = holdBx1 + holdBx2;
 
-  assign result_50 = eta_2 ? t_8 : result_51;
+  assign result_43 = hasX1 ? t_8 : result_44;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_51_register
+  always @(posedge clk or  posedge  rst) begin : result_44_register
     if ( rst) begin
-      result_51 <= 32'sd0;
+      result_44 <= 32'sd0;
     end else if (en) begin
-      result_51 <= result_50;
-    end
-  end
-  // register end
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : cur_register
-    if ( rst) begin
-      cur <= -32'sd1;
-    end else if (en) begin
-      cur <= c$cur_app_arg;
-    end
-  end
-  // register end
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : past1_register
-    if ( rst) begin
-      past1 <= -32'sd1;
-    end else if (en) begin
-      past1 <= c$past1_app_arg;
-    end
-  end
-  // register end
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : past2_register
-    if ( rst) begin
-      past2 <= -32'sd1;
-    end else if (en) begin
-      past2 <= c$past2_app_arg;
-    end
-  end
-  // register end
-
-  assign result_52 = {cur,   past1,   past2};
-
-  assign c$past2_app_arg = hasX1 ? past1 : past2;
-
-  assign c$past1_app_arg = hasX1 ? cur : past1;
-
-  assign c$cur_app_arg = hasX1 ? result_55 : cur;
-
-  assign result_53 = $signed(result_52[31:0]);
-
-  assign t_9 = holdBx1 + holdBx2;
-
-  assign result_54 = hasX1 ? t_9 : result_55;
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : result_55_register
-    if ( rst) begin
-      result_55 <= 32'sd0;
-    end else if (en) begin
-      result_55 <= result_54;
+      result_44 <= result_43;
     end
   end
   // register end
@@ -467,29 +411,33 @@ module topEntity
   end
   // register end
 
-  assign result_0 = $signed(result[383:352]);
+  assign result_0 = $signed(result[415:384]);
 
-  assign result_1 = $signed(result[351:320]);
+  assign result_1 = $signed(result[383:352]);
 
-  assign result_2 = $signed(result[319:288]);
+  assign result_2 = $signed(result[351:320]);
 
-  assign result_3 = $signed(result[287:256]);
+  assign result_3 = $signed(result[319:288]);
 
-  assign result_4 = $signed(result[255:224]);
+  assign result_4 = $signed(result[287:256]);
 
-  assign result_5 = $signed(result[223:192]);
+  assign result_5 = $signed(result[255:224]);
 
-  assign result_6 = $signed(result[191:160]);
+  assign result_6 = $signed(result[223:192]);
 
-  assign result_7 = $signed(result[159:128]);
+  assign result_7 = $signed(result[191:160]);
 
-  assign result_8 = $signed(result[127:96]);
+  assign result_8 = $signed(result[159:128]);
 
-  assign result_9 = $signed(result[95:64]);
+  assign result_9 = $signed(result[127:96]);
 
-  assign result_10 = $signed(result[63:32]);
+  assign result_10_3 = result[95:0];
 
-  assign result_11 = $signed(result[31:0]);
+  assign result_10_0 = $signed(result_10_3[95:64]);
+
+  assign result_10_1 = $signed(result_10_3[63:32]);
+
+  assign result_10_2 = $signed(result_10_3[31:0]);
 
 
 endmodule

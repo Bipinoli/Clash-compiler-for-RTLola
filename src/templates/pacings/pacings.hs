@@ -22,6 +22,45 @@ clockDivider factor = generateClock $ systemClockPeriod * factor
 type Data = Signed 32
 type HasData = Bool
 
+
+
+
+
+sustainTrueFor1MoreCycle :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
+sustainTrueFor1MoreCycle enable = register False followingSignal
+    where 
+        followingSignal = 
+            mux (curState .==. 0) (pure True) $
+            mux (curState .==. 1) (pure True) $
+            pure False
+        curState = register 2 (nextState curState enable)
+
+        -- states
+        -- 0 -> just enabled
+        -- 1 -> was enabled in last cycle but didn't receive new enable signal
+        -- 2 -> not enabled now and neither in the last cycle
+        nextState :: Signal dom (Unsigned 2) -> Signal dom Bool -> Signal dom (Unsigned 2)
+        nextState state enable = mux enable nextStateWhenEnable nextStateNotEnabled
+            where
+                nextStateWhenEnable = 0
+                nextStateNotEnabled = 
+                    mux (state .==. 0) (pure 1) $
+                    mux (state .==. 1) (pure 2) $
+                    pure 2
+        -- clashi Test:
+        -- Note: in sampleN reset is True for first 2 samples 
+        -- let st = fromList [2 :: Unsigned 2, 2, 2, 2]
+        -- let en = fromList [True, True, True, True]
+        -- sampleN @System 4 (nextState st en)
+        -- let st = fromList [1 :: Unsigned 2, 1, 1, 1]
+        -- let en = fromList [False, False, False, False]
+        -- sampleN @System 4 (nextState st en)
+-- clashi Test:
+-- Note: in sampleN reset is True for first 2 samples 
+-- let enable = fromList [False, False, False, True, False, False, False, False, True, True, False, False, False, False, True, False, True, False, False, False, False]
+-- sampleN @System 21 (sustainTrueFor1MoreCycle enable)
+
+
 pacingX1 :: HiddenClockResetEnable dom => Signal dom HasData -> Signal dom HasData -> Signal dom HasData -> Signal dom Bool
 pacingX1 x1 x2 x3 = x1
 
@@ -107,9 +146,10 @@ streamJ :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> S
 streamJ enable a = register 0 (mux enable a oldVal)
     where oldVal = streamJ enable a
 
-streamK :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data
-streamK enable e = offsetVal
-  where (_, _, offsetVal) = unbundle $ window3 enable e (-1)
+streamK :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom (Data, Data, Data)
+streamK enable e = window3 enable e (-1)
+-- streamK enable e = (v1, v2, v3)
+--   where (v1, v2, v3) = unbundle $ window3 enable e (-1)
 -- clashi Test:
 -- let x = fromList [(1 :: Signed 32), 2,3,4,5,6,7,8]
 -- let en = fromList [True, True, True, True, True, True, True, True]
@@ -133,8 +173,8 @@ streamM enable j l = register 0 (mux enable (j + l) oldVal)
 topEntity :: Clock System -> Reset System -> Enable System ->
     Signal System Data -> Signal System Data -> Signal System Data ->
     Signal System Bool -> Signal System Bool -> Signal System Bool ->
-  Signal System (Data, Data, Data, Data, Data, Data, Data, Data, Data, Data, Data, Data)
-topEntity clk rst en x1 x2 x3 hasX1 hasX2 hasX3 = bundle (a, b, c, d, e, f, g, h, i, j, k, l)
+  Signal System (Data, Data, Data, Data, Data, Data, Data, Data, Data, Data, (Data, Data, Data))
+topEntity clk rst en x1 x2 x3 hasX1 hasX2 hasX3 = bundle (a, b, c, d, e, f, g, h, i, j, k)
   where
     a = exposeClockResetEnable (streamA enableA holdAx1 holdAx2) clk rst en
     b = exposeClockResetEnable (streamB enableB holdBx1 holdBx2) clk rst en
@@ -147,8 +187,8 @@ topEntity clk rst en x1 x2 x3 hasX1 hasX2 hasX3 = bundle (a, b, c, d, e, f, g, h
     i = exposeClockResetEnable (streamI enableI holdA holdB) clk rst en
     j = exposeClockResetEnable (streamJ enableJ holdA) clk rst en
     k = exposeClockResetEnable (streamK enableK e) clk rst en
-    l = exposeClockResetEnable (streamL enableL k) clk rst en
-    m = exposeClockResetEnable (streamM enableM j l) clk rst en
+    -- l = exposeClockResetEnable (streamL enableL k) clk rst en
+    -- m = exposeClockResetEnable (streamM enableM j l) clk rst en
 
     enableA = exposeClockResetEnable (pacingX1andX2 hasX1 hasX2 hasX3) clk rst en
     enableB = exposeClockResetEnable (pacingX1orX2 hasX1 hasX2 hasX3) clk rst en

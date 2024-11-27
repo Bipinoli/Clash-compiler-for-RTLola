@@ -21,7 +21,13 @@ module testbench;
     wire signed [31:0] result_7;
     wire signed [31:0] result_8;
     wire signed [31:0] result_9;
+
     wire signed [31:0] result_10;
+
+    wire signed [31:0] result_10_0;
+    wire signed [31:0] result_10_1;
+    wire signed [31:0] result_10_2;
+
     wire signed [31:0] result_11;
 
     topEntity monitor (clk, rst, en,
@@ -30,7 +36,7 @@ module testbench;
                        result_0, result_1, result_2,
                        result_3, result_4, result_5,
                        result_6, result_7, result_8,
-                       result_9, result_10, result_11
+                       result_9, result_10_0, result_10_1, result_10_2
                        );
 
     // clock must have 100 MHz (10 ns) frequency as that has been assumed to generate enable signals
@@ -56,8 +62,12 @@ module testbench;
         x1 = 1;
         x2 = 2;
         x3 = 0;
-        #50; // enough time for RTL data transfers
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
+        #0.01; // data is there only for an instant -> one clock 
+        hasX1 = 0;
+        hasX2 = 0;
+        hasX3 = 0;
+        #49.99; // enough time for RTL data transfers
+        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
 
         #50; // 0.2 microseconds
         hasX1 = 1;
@@ -66,8 +76,12 @@ module testbench;
         x1 = 4;
         x2 = 0;
         x3 = 0;
+        #0.01; // data available only for 1 clock cycle
+        hasX1 = 0;
+        hasX2 = 0;
+        hasX3 = 0;
         #50;
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
+        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
 
         #50;
         hasX1 = 0;
@@ -76,8 +90,12 @@ module testbench;
         x1 = 0;
         x2 = 5;
         x3 = 0;
+        #0.01; // data available only for 1 clock cycle
+        hasX1 = 0;
+        hasX2 = 0;
+        hasX3 = 0;
         #50;
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
+        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
         
         #50;
         hasX1 = 0;
@@ -86,8 +104,12 @@ module testbench;
         x1 = 0;
         x2 = 0;
         x3 = 1;
+        #0.01; // data available only for 1 clock cycle
+        hasX1 = 0;
+        hasX2 = 0;
+        hasX3 = 0;
         #50;
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
+        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
 
         #50;
         hasX1 = 1;
@@ -96,8 +118,12 @@ module testbench;
         x1 = 10;
         x2 = 10;
         x3 = 10;
+        #0.01; // data available only for 1 clock cycle
+        hasX1 = 0;
+        hasX2 = 0;
+        hasX3 = 0;
         #50;
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
+        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
 
         #50;
         hasX1 = 1;
@@ -106,8 +132,12 @@ module testbench;
         x1 = 100;
         x2 = 100;
         x3 = 100;
+        #0.01; // data available only for 1 clock cycle
+        hasX1 = 0;
+        hasX2 = 0;
+        hasX3 = 0;
         #50;
-        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11);
+        $display("time: %0t, new (x1,x2,x3): (%b,%b,%b), (x1,x2,x3): (%0d,%0d,%0d), a = %0d, b = %0d, c = %0d, d = %0d, e = %0d, f = %0d, g = %0d, h = %0d, i = %0d, j = %0d, k = %0d, l = %0d, k = (%0d, %0d, %0d)", $time, hasX1, hasX2, hasX3, x1, x2, x3, result_0, result_1, result_2, result_3, result_4, result_5, result_6, result_7, result_8, result_9, result_10, result_11, result_10_0, result_10_1, result_10_2);
 
         #50;
         $finish; 
