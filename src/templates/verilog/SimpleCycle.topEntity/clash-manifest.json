@@ -1,0 +1,129 @@
+{
+    "components": [
+        "topEntity"
+    ],
+    "dependencies": {
+        "transitive": []
+    },
+    "domains": {
+        "IntelSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "System": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "XilinxSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Synchronous",
+            "reset_polarity": "ActiveHigh"
+        }
+    },
+    "files": [
+        {
+            "name": "topEntity_shim.cpp",
+            "sha256": "460702d8afc7479b65dad3acb826f56baf7e34f11fea519fb6f597a0c8340150"
+        },
+        {
+            "name": "topEntity.sdc",
+            "sha256": "13d4c1aafcc09a84d81d3b60d513cb901384a10e27e5a5a16572a600f15895f3"
+        },
+        {
+            "name": "topEntity.v",
+            "sha256": "fceee603f8422e07080a28550c411a3e1f81665427d9906aca2c3fdf39c10285"
+        }
+    ],
+    "flags": [
+        20,
+        20
+    ],
+    "hash": "94e0a6fc909d47f53c60d66e7eded5adac92ed7d30b6b3bffa071cf3073c0c00",
+    "top_component": {
+        "name": "topEntity",
+        "ports_flat": [
+            {
+                "direction": "in",
+                "domain": "System",
+                "is_clock": true,
+                "name": "clk",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "System",
+                "is_clock": false,
+                "name": "rst",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "System",
+                "is_clock": false,
+                "name": "en",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "x",
+                "type_name": "signed [31:0]",
+                "width": 32
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "newX",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0",
+                "type_name": "signed [31:0]",
+                "width": 32
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1",
+                "type_name": "signed [31:0]",
+                "width": 32
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_2_0",
+                "type_name": "signed [31:0]",
+                "width": 32
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_2_1",
+                "type_name": "signed [31:0]",
+                "width": 32
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_2_2",
+                "type_name": "signed [31:0]",
+                "width": 32
+            }
+        ]
+    },
+    "version": "unstable"
+}
