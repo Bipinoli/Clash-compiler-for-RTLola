@@ -24,10 +24,6 @@ clockDivider factor = generateClock $ systemClockPeriod * factor
 ---------------------------------------------------------------
 
 type Data = Signed 32
-type MemoryData = (Data, Bool, Bool, Bool, Bool)
-
-memorySize :: Int
-memorySize = 4
 
 
 hlc :: HiddenClockResetEnable dom => Signal dom Data -> Signal dom Bool -> Signal dom (Data, Bool, Bool, Bool, Bool)
@@ -41,11 +37,28 @@ hlc x newX = bundle (x, newX, enableA, enableB, enableC)
         delay1Cycle = register False
 
 
+type MemorySize = 10
+type MemoryData = Data
+type Cursor = Int
+type Empty = Bool
+type Memory = Vec MemorySize MemoryData
+type MemoryState = (Memory, Cursor, Empty)
+type Push = Bool
+type Pop = Bool
+type MemoryInput = (Push, Pop, MemoryData)
+type ValidOutput = Bool
+type MemoryOutput = (Empty, ValidOutput, MemoryData)
+
+fifoFx :: MemoryState -> MemoryInput -> (MemoryState, MemoryOutput)
+fifoFx memoryState memoryInput = (nextMemoryState, output)
+        
+
+
 
 fifoQueue :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom Data -> Signal dom (Bool, Data, Data, Data, Data)
 fifoQueue push pop dataIn = bundle (empty, outputBuffer, buffer0, buffer1, buffer2)
     where 
-        empty = register True nextEmpty
+        empty = register True (front .==. 0)
         front = register (0 :: Int) nextFront
         buffer0 = register (0) nextBuffer0
         buffer1 = register (0) nextBuffer1
@@ -54,7 +67,6 @@ fifoQueue push pop dataIn = bundle (empty, outputBuffer, buffer0, buffer1, buffe
         outputBuffer = mux (front .==. 0) buffer0 $ mux (front .==. 1) buffer0 $ mux (front .==. 2) buffer1 $ mux (front .==. 3) buffer2 buffer0
 
         nextFront = mux (push .&&. (front .<. 3)) (front + 1) $ mux (pop .&&. (front .>. 0)) (front - 1) front
-        nextEmpty = mux (front .==. 0) (pure True) (pure False)
 
         nextBuffer0 = mux (push .&&. (front .<. 3)) dataIn buffer0
         nextBuffer1 = mux (push .&&. (front .<. 3)) buffer0 buffer1
