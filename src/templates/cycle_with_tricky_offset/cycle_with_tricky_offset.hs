@@ -69,8 +69,8 @@ queue = mealy fifoFx (repeat defaultVal :: Memory, 0 :: Cursor, True :: Empty)
 
 ---------------------------------------------------------------
 
-hlc :: HiddenClockResetEnable dom => Signal dom Data -> Signal dom Bool -> Signal dom (Bool, Data, Bool, Bool, Bool, Bool)
-hlc x newX = bundle (newData, x, newX, enableA, enableB, enableC)
+scheduler :: HiddenClockResetEnable dom => Signal dom Data -> Signal dom Bool -> Signal dom (Bool, Data, Bool, Bool, Bool, Bool)
+scheduler x newX = bundle (newData, x, newX, enableA, enableB, enableC)
     where
         enableA = newX
         enableB = delay1Cycle enableA
@@ -79,6 +79,17 @@ hlc x newX = bundle (newData, x, newX, enableA, enableB, enableC)
 
         delay1Cycle :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
         delay1Cycle = register False
+
+hlc :: HiddenClockResetEnable dom => (Signal dom MemoryInput -> Signal dom MemoryOutput) -> Signal dom Data -> Signal dom Bool -> (Signal dom MemoryInput -> Signal dom MemoryOutput) 
+hlc q x newX = q
+    where 
+        (newData, sX, sNewX, enableA, enableB, enableC) = unbundle (scheduler x newX)
+        -- push to queue if newData 
+        _ = mux newData (q pushInstr) (q placeholderInstr)
+        pushInstr = bundle (pure True, pure False, memData) :: Signal dom MemoryInput
+        placeholderInstr = bundle (pure False, pure False, memData) :: Signal dom MemoryInput
+        memData = bundle (sX, sNewX, enableA, enableB, enableC) :: Signal dom MemoryData
+
 
 
 ---------------------------------------------------------------
@@ -149,6 +160,7 @@ llc q = evalResult
 --     Signal System (Data, Data, (Data, Data))
 -- topEntity clk rst en x newX = streamOutputs
 --     where 
---         (newData, memData) = unbundle $ exposeClockResetEnable (hlc x newX) clk rst en
---         q = exposeClockResetEnable (mux newData (queue (True, False, memData) queue) clk rst en
+--         q = exposeClockResetEnable queue clk rst en
+
+        
 --         streamOutputs = exposeClockResetEnable (llc q) clk rst en
