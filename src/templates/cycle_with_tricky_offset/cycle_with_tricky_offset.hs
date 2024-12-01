@@ -25,19 +25,7 @@ clockDivider factor = generateClock $ systemClockPeriod * factor
 
 type Data = Signed 32
 
-
-hlc :: HiddenClockResetEnable dom => Signal dom Data -> Signal dom Bool -> Signal dom (Data, Bool, Bool, Bool, Bool)
-hlc x newX = bundle (x, newX, enableA, enableB, enableC)
-    where 
-        enableA = newX
-        enableB = delay1Cycle enableA
-        enableC = delay1Cycle enableB
-
-        delay1Cycle :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
-        delay1Cycle = register False
-
-
-type MemorySize = 10
+type MemorySize = 4
 type MemoryData = Data
 type Cursor = Int
 type Empty = Bool
@@ -51,32 +39,43 @@ type MemoryOutput = (Empty, ValidOutput, MemoryData)
 
 fifoFx :: MemoryState -> MemoryInput -> (MemoryState, MemoryOutput)
 fifoFx memoryState memoryInput = (nextMemoryState, output)
-        
-
-
-
-fifoQueue :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom Data -> Signal dom (Bool, Data, Data, Data, Data)
-fifoQueue push pop dataIn = bundle (empty, outputBuffer, buffer0, buffer1, buffer2)
     where 
-        empty = register True (front .==. 0)
-        front = register (0 :: Int) nextFront
-        buffer0 = register (0) nextBuffer0
-        buffer1 = register (0) nextBuffer1
-        buffer2 = register (0) nextBuffer2
+        (push, pop, memData) = memoryInput
+        (memory, cursor, isEmpty) = memoryState
+        nextMemoryState = (newMemory, newCursor, newIsEmpty)
+        output = (newIsEmpty, validOutput, outputData)
+        newMemory = case (push, pop) of
+            (True, False) -> memData +>> memory 
+            (_, _) -> memory
+        (newCursor, newIsEmpty, validOutput) = case (push, pop) of 
+            (True, False) -> if cursor == length memory then (cursor, False, False) else (cursor + 1, False, False)
+            (False, True) -> if cursor == 0 || isEmpty then (cursor, True, False) else if cursor == 1 then (cursor - 1, True, True) else (cursor - 1, False, True)
+            (_, _) -> (cursor, isEmpty, False)
+        outputData = case (push, pop) of
+            (False, True) -> if cursor > 0 then memory !! (cursor - 1) else head memory
+            (_, _) -> memData
 
-        outputBuffer = mux (front .==. 0) buffer0 $ mux (front .==. 1) buffer0 $ mux (front .==. 2) buffer1 $ mux (front .==. 3) buffer2 buffer0
-
-        nextFront = mux (push .&&. (front .<. 3)) (front + 1) $ mux (pop .&&. (front .>. 0)) (front - 1) front
-
-        nextBuffer0 = mux (push .&&. (front .<. 3)) dataIn buffer0
-        nextBuffer1 = mux (push .&&. (front .<. 3)) buffer0 buffer1
-        nextBuffer2 = mux (push .&&. (front .<. 3)) buffer1 buffer2
+queue :: HiddenClockResetEnable dom => Signal dom MemoryInput -> Signal dom MemoryOutput
+queue = mealy fifoFx (repeat 0 :: Memory, 0 :: Cursor, True :: Empty)
 -- clashi Test:
 -- Note: in sampleN reset is True for first 2 samples
--- let push = fromList [False, False, True, True, False, True, False]
--- let pop = fromList [False, False, False, False, True, False, True]
--- let dataIn = fromList [(0 :: Signed 32), 0,1,2,0,3,0]
--- sampleN @System 8 (fifoQueue push pop dataIn)
+-- let x = fromList [(False, False, 0) :: MemoryInput, (False, False, 0), (True, False, 1), (True, False, 2), (True, False, 3), (False, True, 0), (True, False, 4), (True, False, 5), (True, False, 6), (True, False, 7), (False, True, 0), (False, True, 0), (False, True, 0), (False, True, 0), (False, True, 0)]
+-- sampleN @System 15 (fifo x)
+        
+
+---------------------------------------------------------------
+
+
+hlc :: HiddenClockResetEnable dom => Signal dom Data -> Signal dom Bool -> Signal dom (Data, Bool, Bool, Bool, Bool)
+hlc x newX = bundle (x, newX, enableA, enableB, enableC)
+    where 
+        enableA = newX
+        enableB = delay1Cycle enableA
+        enableC = delay1Cycle enableB
+
+        delay1Cycle :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
+        delay1Cycle = register False
+
 
 
 -- topEntity :: Clock System -> Reset System -> Enable System ->
