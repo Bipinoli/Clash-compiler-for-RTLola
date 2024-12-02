@@ -4,3 +4,14 @@ input x : Int32 // layer 0
 output a := x + c.offset(by: -1).defaults(to: 0) // layer 1 - pacing @x
 output b := a + 1 // layer 2 - pacing @x
 output c := b + 1 // layer 3 - pacing @x
+
+--------- Simulation input -------
+
+-- TODO: change the simulation input to simualte two consecutive inputs in consecutive cycles
+time, x
+0.0001, 1
+0.0002, 2
+0.0003, 3
+0.0004, 4
+0.0005, 5
+0.0006, 6
