@@ -43,19 +43,25 @@ defaultVal = (0, False, False, False, False)
 fifoFx :: MemoryState -> MemoryInput -> (MemoryState, MemoryOutput)
 fifoFx memoryState memoryInput = (nextMemoryState, output)
     where
+        -- when we get new data the data may be available for only 1 cycle
+        -- we must immediately put the data to the queue 
+        -- so the queue must support push and pop at the same instant
         (push, pop, memData) = memoryInput
         (memory, cursor, isEmpty) = memoryState
         nextMemoryState = (newMemory, newCursor, newIsEmpty)
         output = (newIsEmpty, validOutput, outputData)
         newMemory = case (push, pop) of
             (True, False) -> memData +>> memory
+            (True, True) -> memData +>> memory
             (_, _) -> memory
         (newCursor, newIsEmpty, validOutput) = case (push, pop) of
             (True, False) -> if cursor == length memory then (cursor, False, False) else (cursor + 1, False, False)
             (False, True) -> if cursor == 0 || isEmpty then (cursor, True, False) else if cursor == 1 then (cursor - 1, True, True) else (cursor - 1, False, True)
+            (True, True) -> if cursor == 0 || isEmpty then (cursor + 1, False, False) else (cursor, False, True)
             (_, _) -> (cursor, isEmpty, False)
         outputData = case (push, pop) of
             (False, True) -> if cursor > 0 then memory !! (cursor - 1) else head memory
+            (True, True) -> if cursor > 0 then memory !! (cursor - 1) else head memory
             (_, _) -> memData
 
 queue :: HiddenClockResetEnable dom => Signal dom MemoryInput -> Signal dom MemoryOutput
@@ -80,17 +86,6 @@ scheduler x newX = bundle (newData, x, newX, enableA, enableB, enableC)
         delay1Cycle :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
         delay1Cycle = register False
 
-hlc :: HiddenClockResetEnable dom => (Signal dom MemoryInput -> Signal dom MemoryOutput) -> Signal dom Data -> Signal dom Bool -> (Signal dom MemoryInput -> Signal dom MemoryOutput) 
-hlc q x newX = q
-    where 
-        (newData, sX, sNewX, enableA, enableB, enableC) = unbundle (scheduler x newX)
-        -- push to queue if newData 
-        _ = mux newData (q pushInstr) (q placeholderInstr)
-        pushInstr = bundle (pure True, pure False, memData) :: Signal dom MemoryInput
-        placeholderInstr = bundle (pure False, pure False, memData) :: Signal dom MemoryInput
-        memData = bundle (sX, sNewX, enableA, enableB, enableC) :: Signal dom MemoryData
-
-
 
 ---------------------------------------------------------------
 
@@ -113,11 +108,13 @@ streamB enable a = register 0 (mux enable (a + 1) oldVal)
 streamC :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom (Data, Data)
 streamC enable b = window2 enable (b + 1) 0
 
-popSignal :: HiddenClockResetEnable dom => Int -> Signal dom Bool
-popSignal layers = sig
+newEvalCycle :: HiddenClockResetEnable dom => Int -> Signal dom Bool
+newEvalCycle layers = sig
     where
+        -- we should pop from the queue after all layers have been evaluated
+        -- layers are evaluated one after another as the higher layer depends on the result from the lower levels
         -- state machine (round robin through layers)
-        -- 0 -> layer 0 (pop)
+        -- 0 -> layer 0 (pop from queue)
         -- 1 -> layer 1 
         -- 2 -> layer 2 
         -- ...
@@ -139,28 +136,30 @@ evaluator memData = bundle (a, b, c)
         (x, newX, enableA, enableB, enableC) = unbundle memData
 
 
-llc :: HiddenClockResetEnable dom => (Signal dom MemoryInput -> Signal dom MemoryOutput) -> Signal dom (Data, Data, (Data, Data))
-llc q = evalResult
+---------------------------------------------------------------
+
+machine :: HiddenClockResetEnable dom => Signal dom Data -> Signal dom Bool -> Signal dom (Data, Data, (Data, Data))
+machine x newX = result
     where 
-        -- pop instruction at every pop signal
-        instr = mux (popSignal 4) (pure popInstr) (pure placeholderInstr)
-        popInstr = (False, True, defaultVal) :: MemoryInput
-        placeholderInstr = (False, False, defaultVal) :: MemoryInput
+        (newData, schX, schNewX, enableA, enableB, enableC) = unbundle (scheduler x newX)
+        (empty, validOutput, memData) = unbundle (queue qInstr)
+        result = evaluator (mux validOutput memData (pure defaultVal))
 
-        (qEmpty, validOutput, memData) = unbundle (q instr)
-        evalData = mux validOutput memData (pure defaultVal)
+        qInstr = bundle (toPush, toPop, inptData)
 
-        evalResult = evaluator evalData
+        toPush = mux pushToQ (pure True) (pure False)
+        toPop = mux popFromQ (pure True) (pure False)
+        inptData = mux pushToQ scheduledData (pure defaultVal)
+        scheduledData = bundle (schX, schNewX, enableA, enableB, enableC) 
 
+        pushToQ = newData
+        popFromQ = newEvalCycle 4
+
+        
 ---------------------------------------------------------------
 
 
--- topEntity :: Clock System -> Reset System -> Enable System ->
---     Signal System Data -> Signal System Bool -> 
---     Signal System (Data, Data, (Data, Data))
--- topEntity clk rst en x newX = streamOutputs
---     where 
---         q = exposeClockResetEnable queue clk rst en
-
-        
---         streamOutputs = exposeClockResetEnable (llc q) clk rst en
+topEntity :: Clock System -> Reset System -> Enable System ->
+    Signal System Data -> Signal System Bool -> 
+    Signal System (Data, Data, (Data, Data))
+topEntity clk rst en x newX = exposeClockResetEnable (machine x newX) clk rst en
