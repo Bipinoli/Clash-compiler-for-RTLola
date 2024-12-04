@@ -19,7 +19,7 @@ module topEntity
   wire [36:0] result_4;
   reg  result_5 = 1'b0;
   reg  result_6 = 1'b0;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:141:1-116
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:144:1-116
   wire  c$ds_app_arg;
   // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:111:1-68
   reg signed [63:0] state = 64'sd0;
@@ -29,25 +29,24 @@ module topEntity
   wire signed [63:0] x_0;
   reg  result_8 = 1'b1;
   wire  result_9;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:141:1-116
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:144:1-116
   wire [35:0] c$ds_app_arg_0;
   // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:67:1-88
-  reg [172:0] c$ds_app_arg_1 = {{{32'sd0,   1'b0,   1'b0,   1'b0,   1'b0},   {32'sd0,   1'b0,   1'b0,   1'b0,
+  reg [208:0] c$ds_app_arg_1 = {{{32'sd0,   1'b0,   1'b0,   1'b0,   1'b0},   {32'sd0,   1'b0,   1'b0,   1'b0,
                                                1'b0},   {32'sd0,   1'b0,
-                                                         1'b0,   1'b0,
-                                                         1'b0}},   64'sd0,
- 1'b1};
+                                                         1'b0,   1'b0,   1'b0},
+  {32'sd0,   1'b0,   1'b0,   1'b0,   1'b0}},   64'sd0,   1'b1};
   wire [37:0] result_10;
-  wire [210:0] result_11;
+  wire [246:0] result_11;
   wire [35:0] c$case_alt;
   wire [35:0] c$case_alt_0;
   wire [35:0] c$case_alt_1;
   wire  c$case_scrut;
   // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:44:1-6
   wire  newIsEmpty;
-  wire [107:0] c$case_alt_2;
+  wire [143:0] c$case_alt_2;
   // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:44:1-6
-  wire [107:0] memory;
+  wire [143:0] memory;
   // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:44:1-6
   wire [65:0] c$ds_case_alt;
   // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:44:1-6
@@ -90,10 +89,10 @@ module topEntity
   // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:98:1-121
   wire signed [31:0] t_0;
   reg signed [31:0] result_17 = 32'sd0;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:141:1-116
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:144:1-116
   wire  pushToQ;
   wire signed [63:0] c$tte_rhs;
-  wire [143:0] c$case_alt_sel_alt_t_2;
+  wire [179:0] c$case_alt_sel_alt_t_2;
   wire signed [63:0] c$tte_rhs_0;
   wire [127:0] result;
   wire [63:0] result_2_2;
@@ -161,11 +160,10 @@ module topEntity
     if ( rst) begin
       c$ds_app_arg_1 <= {{{32'sd0,   1'b0,   1'b0,   1'b0,   1'b0},   {32'sd0,   1'b0,   1'b0,   1'b0,
                                                  1'b0},   {32'sd0,   1'b0,
-                                                           1'b0,   1'b0,
-                                                           1'b0}},   64'sd0,
-   1'b1};
+                                                           1'b0,   1'b0,   1'b0},
+    {32'sd0,   1'b0,   1'b0,   1'b0,   1'b0}},   64'sd0,   1'b1};
     end else if (en) begin
-      c$ds_app_arg_1 <= result_11[210:38];
+      c$ds_app_arg_1 <= result_11[246:38];
     end
   end
   // register end
@@ -179,14 +177,14 @@ module topEntity
 
   assign c$case_alt = result_9 ? c$case_alt_0 : c$ds_app_arg_0;
 
-  assign c$case_alt_0 = c$case_scrut ? c$case_alt_1 : (memory[108-1 -: 36]);
+  assign c$case_alt_0 = c$case_scrut ? c$case_alt_1 : (memory[144-1 -: 36]);
 
   // index begin
-  wire [35:0] vecArray [0:3-1];
+  wire [35:0] vecArray [0:4-1];
   genvar i;
   generate
-  for (i=0; i < 3; i=i+1) begin : mk_array
-    assign vecArray[(3-1)-i] = memory[i*36+:36];
+  for (i=0; i < 4; i=i+1) begin : mk_array
+    assign vecArray[(4-1)-i] = memory[i*36+:36];
   end
   endgenerate
   assign c$case_alt_1 = vecArray[(x_1 - 64'sd1)];
@@ -200,9 +198,9 @@ module topEntity
 
   assign c$case_alt_sel_alt_t_2 = ({c$ds_app_arg_0,memory});
 
-  assign c$case_alt_2 = c$ds_app_arg ? c$case_alt_sel_alt_t_2[143:36] : memory;
+  assign c$case_alt_2 = c$ds_app_arg ? c$case_alt_sel_alt_t_2[179:36] : memory;
 
-  assign memory = c$ds_app_arg_1[172:65];
+  assign memory = c$ds_app_arg_1[208:65];
 
   assign c$ds_case_alt = c$ds_app_arg ? c$ds_case_alt_0 : c$ds_case_alt_1;
 
@@ -219,7 +217,7 @@ module topEntity
   assign c$ds_case_alt_3 = c$ds_case_scrut ? {$signed(c$ds_app_arg_1[64:1]),
                                               1'b0,   1'b0} : {x_1 + 64'sd1,   1'b0,   1'b0};
 
-  assign c$tte_rhs_0 = (x_1 == 64'sd3) ? 64'sd1 : 64'sd0;
+  assign c$tte_rhs_0 = (x_1 == 64'sd4) ? 64'sd1 : 64'sd0;
 
   assign c$ds_case_scrut = c$tte_rhs_0[0];
 

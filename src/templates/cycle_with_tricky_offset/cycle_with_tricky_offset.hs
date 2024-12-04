@@ -25,7 +25,7 @@ clockDivider factor = generateClock $ systemClockPeriod * factor
 
 type Data = Signed 32
 
-type MemorySize = 3
+type MemorySize = 4
 type MemoryData = (Data, Bool, Bool, Bool, Bool)
 type Cursor = Int
 type Empty = Bool
@@ -85,6 +85,9 @@ scheduler x newX = bundle (newData, x, newX, enableA, enableB, enableC)
 
         delay1Cycle :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
         delay1Cycle = register False
+-- let x = fromList [0 :: Data, 0,1,2,3,4,5,6,7,8,9]
+-- let newX = fromList [False,False,True,False,False,True,True,True,False,False,False]
+-- sampleN @System 11 (scheduler x newX)
 
 
 ---------------------------------------------------------------
@@ -134,6 +137,9 @@ evaluator memData = bundle (a, b, c)
         b = streamB enableB a
         c = streamC enableC b
         (x, newX, enableA, enableB, enableC) = unbundle memData
+-- clashi test
+-- let x = fromList [(0,False,False,False,False) :: MemoryData, (0,False,False,False,False), (1,True,True,False,False), (0,False,False,True,False), (0,False,False,False,True), (2,True,True,False,False)]
+-- sampleN @System 6 (evaluator x)
 
 
 ---------------------------------------------------------------
