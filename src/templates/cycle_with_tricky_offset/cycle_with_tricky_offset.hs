@@ -144,6 +144,13 @@ evaluator memData = bundle (a, b, c)
 
 ---------------------------------------------------------------
 
+-- Note: 
+-- Right now the implementation is not correct
+-- Right now only the first enable comes to the evaluator as we replace the signals with defaultValue
+-- This is how it should work (idea):
+--   HLC should provide the enable singals as per the pacings
+--   Evaluator goes through evaluaton layers and evaluate the layers
+--     Evaluaton happens when its time to evluate the evalution layer and the stream is enabled as per the pacing from the HLC 
 machine :: HiddenClockResetEnable dom => Signal dom Data -> Signal dom Bool -> Signal dom (Data, Data, (Data, Data))
 machine x newX = result
     where 
