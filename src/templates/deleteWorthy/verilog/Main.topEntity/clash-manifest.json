@@ -1,0 +1,87 @@
+{
+    "components": [
+        "topEntity"
+    ],
+    "dependencies": {
+        "transitive": []
+    },
+    "domains": {
+        "IntelSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "System": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "XilinxSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Synchronous",
+            "reset_polarity": "ActiveHigh"
+        }
+    },
+    "files": [
+        {
+            "name": "topEntity_shim.cpp",
+            "sha256": "460702d8afc7479b65dad3acb826f56baf7e34f11fea519fb6f597a0c8340150"
+        },
+        {
+            "name": "topEntity.sdc",
+            "sha256": "5af269adf35492f114e9563331a99a1a640bbe3af5454036609985662ecc96b0"
+        },
+        {
+            "name": "topEntity.v",
+            "sha256": "72abc1c5401db27914be253f85aa8d26d9592ed326e600814d711537b41801a3"
+        }
+    ],
+    "flags": [
+        20,
+        20
+    ],
+    "hash": "04ec28b96ed9554f35e557e56779bae7f3d477dabd11f374ee1e4afe2e1637d3",
+    "top_component": {
+        "name": "topEntity",
+        "ports_flat": [
+            {
+                "direction": "in",
+                "domain": "System",
+                "is_clock": true,
+                "name": "eta",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "System",
+                "is_clock": false,
+                "name": "eta1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "System",
+                "is_clock": false,
+                "name": "eta2",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result",
+                "type_name": "signed [63:0]",
+                "width": 64
+            }
+        ]
+    },
+    "version": "unstable"
+}
