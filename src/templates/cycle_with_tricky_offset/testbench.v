@@ -4,18 +4,23 @@ module testbench;
     reg rst;
     reg en;
 
-    reg signed [31:0] x;
+    reg signed [63:0] x;
     reg newX;
 
-    wire signed [31:0] result_0;
-    wire signed [31:0] result_1;
-    wire signed [31:0] result_2_0;
-    wire signed [31:0] result_2_1;
+    wire outputPhase;
+    wire signed [63:0] a;
+    wire signed [63:0] b;
+    wire signed [63:0] c;
+    wire enA;
+    wire enB;
+    wire enC;
 
     topEntity monitor (clk, rst, en,
                        x, newX,
-                       result_0, result_1,
-                       result_2_0, result_2_1
+                       outputPhase,
+                       a, enA,
+                       b, enB,
+                       c, enC
                        );
 
     // clock must have 100 MHz (10 ns) frequency as that has been assumed to generate enable signals
@@ -24,6 +29,14 @@ module testbench;
         #0.005 clk = ~clk;
     end
 
+    // show output when the machine is in output phase
+    always @(outputPhase) begin
+        $display("time: %0t, (x, newX): (%0d, %0d), ready: (%0d, %0d, %0d), a: %0d, b: %0d, c: %0d",
+         $time, x, newX, enA, enB, enC, a, b, c);
+    end
+
+    // LLC runs 4X faster than HLC so the whole machine runs at 1/4th of the clock frequency
+    // with timescale 1us/1ns, 1 clock cycle = #0.01
     initial begin
         clk = 0;
         rst = 0;
@@ -33,53 +46,47 @@ module testbench;
         $printtimescale(testbench);
 
         #100; // 0.1 microseconds (with timescale 1us/1ns)
-        newX = 1;
         x = 1;
-        #0.01; // data is there only for an instant -> one clock 
+        newX = 1;
+        #0.04; // 4 cycle
         newX = 0;
-        #49.99; // enough time for RTL data transfers
-        $display("time: %0t, x: %0d, a: %0d, b: %0d, c: (%0d, %0d)", $time, x, result_0, result_1, result_2_0, result_2_1);
+        #49.99;
 
-        #50; // 0.2 microseconds
+        #100; // 0.1 microseconds (with timescale 1us/1ns)
+        x = 1;
         newX = 1;
-        x = 2;
-        #0.01; // data available only for 1 clock cycle
+        #0.04; // 4 cycle
         newX = 0;
         #49.99;
-        $display("time: %0t, x: %0d, a: %0d, b: %0d, c: (%0d, %0d)", $time, x, result_0, result_1, result_2_0, result_2_1);
 
-        #50;
+        #100; // 0.1 microseconds (with timescale 1us/1ns)
+        x = 1;
         newX = 1;
-        x = 3;
-        #0.01; // data available only for 1 clock cycle
+        #0.04; // 4 cycle
         newX = 0;
         #49.99;
-        $display("time: %0t, x: %0d, a: %0d, b: %0d, c: (%0d, %0d)", $time, x, result_0, result_1, result_2_0, result_2_1);
-         
-        #50;
-        newX = 1;
-        x = 4;
-        #0.01; // data available only for 1 clock cycle
-        newX = 0;
-        #49.99;
-        $display("time: %0t, x: %0d, a: %0d, b: %0d, c: (%0d, %0d)", $time, x, result_0, result_1, result_2_0, result_2_1);
 
-        #50;
+        #100; // 0.1 microseconds (with timescale 1us/1ns)
+        x = 1;
         newX = 1;
-        x = 5;
-        #0.01; // data available only for 1 clock cycle
+        #0.04; // 4 cycle
         newX = 0;
         #49.99;
-        $display("time: %0t, x: %0d, a: %0d, b: %0d, c: (%0d, %0d)", $time, x, result_0, result_1, result_2_0, result_2_1);
-        
-        #50;
+
+        #100; // 0.1 microseconds (with timescale 1us/1ns)
+        x = 1;
         newX = 1;
-        x = 6;
-        #0.01; // data available only for 1 clock cycle
+        #0.04; // 4 cycle
         newX = 0;
         #49.99;
-        $display("time: %0t, x: %0d, a: %0d, b: %0d, c: (%0d, %0d)", $time, x, result_0, result_1, result_2_0, result_2_1);
-        
+
+        #100; // 0.1 microseconds (with timescale 1us/1ns)
+        x = 1;
+        newX = 1;
+        #0.04; // 4 cycle
+        newX = 0;
+        #49.99;
+
         #50;
         $finish; 
     end

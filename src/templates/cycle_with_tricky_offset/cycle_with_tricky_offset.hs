@@ -45,12 +45,13 @@ fastClock = clockDivider 1
 -- Hence, the LLC should run (n+1) times faster than HLC, where n = number of evaluation layers
 -- We evaluate all the layers and in the end output the values together, hence +1 in (n+1)
 -- By sustaining the HLC controls like this we also don't need any buffer or queue to interface them
-evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool) -> Signal dom ((Data, Bool), (Data, Bool), (Data, Bool))
-evaluator input0 = outputs
+evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool) -> Signal dom (Bool, ((Data, Bool), (Data, Bool), (Data, Bool)))
+evaluator input0 = bundle (outputStage, outputs)
     where
         outputs = llc fastClock controls stage
         controls = hlc slowClock input0
         stage = hotPotato 4
+        outputStage = stage .==. pure 0
 
 
 hlc :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Bool) -> Signal dom (Data, Bool, Bool, Bool)
@@ -100,3 +101,11 @@ window2 enable x deflt = bundle (past1, cur)
   where
     cur = register deflt (mux enable x cur)
     past1 = register deflt (mux enable cur past1)
+
+
+---------------------------------------------------------------
+
+
+topEntity :: Clock System -> Reset System -> Enable System -> 
+    Signal System (Data, Bool) -> Signal System (Bool, ((Data, Bool), (Data, Bool), (Data, Bool)))
+topEntity clk rst en input0 = exposeClockResetEnable (evaluator input0) clk rst en
