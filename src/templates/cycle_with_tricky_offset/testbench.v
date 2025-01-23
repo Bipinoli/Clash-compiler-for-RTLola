@@ -31,12 +31,12 @@ module testbench;
 
     // show output when the machine is in output phase
     always @(outputPhase) begin
-        $display("time: %0t, (x, newX): (%0d, %0d), ready: (%0d, %0d, %0d), a: %0d, b: %0d, c: %0d",
-         $time, x, newX, enA, enB, enC, a, b, c);
+        $display("time: %0t, output: %0d, (x, newX): (%0d, %0d), ready: (%0d, %0d, %0d), a: %0d, b: %0d, c: %0d",
+         $time, outputPhase, x, newX, enA, enB, enC, a, b, c);
     end
 
     // LLC runs 4X faster than HLC so the whole machine runs at 1/4th of the clock frequency
-    // with timescale 1us/1ns, 1 clock cycle = #0.01
+    // 1 clock cycle = #0.01
     initial begin
         clk = 0;
         rst = 0;
@@ -45,49 +45,26 @@ module testbench;
         
         $printtimescale(testbench);
 
-        #100; // 0.1 microseconds (with timescale 1us/1ns)
+        #0.04;
         x = 1;
         newX = 1;
-        #0.04; // 4 cycle
-        newX = 0;
-        #49.99;
+        
+        #0.04;
+        x = 2;
 
-        #100; // 0.1 microseconds (with timescale 1us/1ns)
-        x = 1;
-        newX = 1;
-        #0.04; // 4 cycle
-        newX = 0;
-        #49.99;
+        #0.04;
+        x = 3;
 
-        #100; // 0.1 microseconds (with timescale 1us/1ns)
-        x = 1;
-        newX = 1;
-        #0.04; // 4 cycle
-        newX = 0;
-        #49.99;
+        #0.04;
+        x = 4;
 
-        #100; // 0.1 microseconds (with timescale 1us/1ns)
-        x = 1;
-        newX = 1;
-        #0.04; // 4 cycle
-        newX = 0;
-        #49.99;
+        #0.04;
+        x = 5;
 
-        #100; // 0.1 microseconds (with timescale 1us/1ns)
-        x = 1;
-        newX = 1;
-        #0.04; // 4 cycle
-        newX = 0;
-        #49.99;
+        #0.04;
+        x = 6;
 
-        #100; // 0.1 microseconds (with timescale 1us/1ns)
-        x = 1;
-        newX = 1;
-        #0.04; // 4 cycle
-        newX = 0;
-        #49.99;
-
-        #50;
+        #0.04;
         $finish; 
     end
 
