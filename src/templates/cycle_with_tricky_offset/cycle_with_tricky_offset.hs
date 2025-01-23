@@ -65,39 +65,60 @@ hotPotato n = let s = register 0 (mux (s .==. pure (n-1)) 0 (s + 1)) in s
 
 ---------------------------------------------------------------
 
--- -- NOTE: How to handle pacing & step by step layerwise evaluation together
--- -- Idea 1: Run evalution at higher frequency than pacing (similar idea to existing compiler)
--- -- Idea 2: Predict when the stream will be evaluatated and provide the dealayed pacing matching that -> whole thing can be run in higher frequency
 -- evaluator :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Int, Bool), (Int, Bool), (Int, Bool))
 -- evaluator input0 = bundle (output0, output1, output2)
 --     where
---         output0 = (a, aktv_a)
---         output1 = (b, aktv_b)
---         output2 = (c, aktv_c)
---         (x, aktv_x) = input0
---         (a, aktv_a) = evaluateA enA (x, c)
---         (b, aktv_b) = evaluateB enb a
---         (c, aktv_c) = evaluateC enC b
---         enA = aktv_x
---         enB = delay False enA
---         enC = delay False enB
+--         output0 = bundle (a, aktv_a)
+--         output1 = bundle (b, aktv_b)
+--         output2 = bundle (c, aktv_c)
+--         (x, aktv_x) = unbundle input0
+--         (a, aktv_a) = unbundle $ evaluateA enA (bundle (x, c))
+--         (b, aktv_b) = unbundle $ evaluateB enB a
+--         (c, aktv_c) = unbundle $ evaluateC enC b
 
 
-evaluateA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Int, Int) -> Signal dom (Int, Bool)
-evaluateA en inpt = register (0, False) (mux en newResult oldResult)
+hlc :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Int, Bool) -> Signal dom (Int, Bool, Bool, Bool)
+hlc en input0 = register (0, False, False, False) (mux en newResult oldResult)
+    where
+        oldResult = hlc en input0
+        newResult = bundle (x, enA, enB, enC)
+        (x, aktv_x) = unbundle input0
+        enA = aktv_x
+        enB = aktv_x
+        enC = aktv_x
+
+-- We need to sustain control signals and data from HLC until all layers are completely evaluated and outputed
+-- Hence, the LLC should run (n+1) times faster than HLC, where n = number of evaluation layers
+-- We evaluate all the layers and in the end output the values together, hence +1 in (n+1)
+-- By sustaining the HLC controls like this we also don't need any buffer or queue to interface them
+llc :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Int, Bool, Bool, Bool) -> Signal dom Int -> Signal dom ((Int, Bool), (Int, Bool), (Int, Bool))
+llc en controls stage = bundle (resultA, resultB, resultC)
     where 
-        newResult = bundle (newVal, pure True)
-        oldResult = bundle (oldVal, pure False)
-        newVal = x + c
+        resultA = bundle (outA, aktvA)
+        resultB = bundle (outB, aktvB)
+        resultC = bundle (outC, aktvC)
+        outA = evaluateA ((stage .==. pure 1) .&&. enA) (bundle (x, outC))
+        outB = evaluateB ((stage .==. pure 2) .&&. enB) outA
+        outC = evaluateC ((stage .==. pure 3) .&&. enC) outB
+        (aktvA, aktvB, aktvC) = unbundle $ mux (stage .==. pure 0) (bundle (enA, enB, enC)) (bundle (pure False, pure False, pure False))
+        (x, enA, enB, enC) = unbundle controls
+
+
+
+evaluateA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Int, Int) -> Signal dom Int
+evaluateA en inpt = register 0  (mux en (x + c) oldVal)
+    where 
         (x, c) = unbundle inpt 
-        (oldVal, _) = unbundle $ evaluateA en inpt
+        oldVal = evaluateA en inpt
 
--- evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
--- evaluateB en inpt = register (0, False) (mux en newResult oldResult)
---     where
---         newResult = bundle (newVal, True)
---         oldResult = bundle (oldVal, False)
---         (oldVal, _) = evaluateB en inpt
---         (newVal, _) = bundle (inpt + 1, pure True)
+evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
+evaluateB en inpt = register 0 (mux en (a + 1) oldVal)
+    where 
+        oldVal = evaluateB en inpt
+        a = inpt
 
-
+evaluateC :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
+evaluateC en inpt = register 0 (mux en (b + 1) oldVal)
+    where 
+        oldVal = evaluateC en inpt
+        b = inpt
