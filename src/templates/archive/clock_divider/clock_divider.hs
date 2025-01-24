@@ -27,5 +27,14 @@ clk1 = generateClock 40_000 -- 25 Mhz = 40_000 ps period
 clk2 :: HiddenClockResetEnable dom => Signal dom Bool
 clk2 = clockDivider 2 
 
-topEntity :: Clock System -> Reset System -> Enable System -> Signal System (Bool, Bool)
-topEntity = exposeClockResetEnable $ bundle (clk1, clk2)
+clk3 :: HiddenClockResetEnable dom => Signal dom Bool
+clk3 = clockDivider 5 
+
+clk4 :: HiddenClockResetEnable dom => Signal dom Bool
+clk4 = clockDivider 6 
+
+clk5 :: HiddenClockResetEnable dom => Signal dom Bool
+clk5 = clockDivider 1 
+
+topEntity :: Clock System -> Reset System -> Enable System -> Signal System (Bool, Bool, Bool, Bool, Bool)
+topEntity = exposeClockResetEnable $ bundle (clk1, clk2, clk3, clk4, clk5)

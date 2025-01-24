@@ -12,109 +12,109 @@ module topEntity
 
       // Outputs
     , output wire  result_0
-    , output wire signed [63:0] result_1_0_0
-    , output wire  result_1_0_1
-    , output wire signed [63:0] result_1_1_0
-    , output wire  result_1_1_1
-    , output wire signed [63:0] result_1_2_0
-    , output wire  result_1_2_1
+    , output wire signed [63:0] result_1_0
+    , output wire  result_1_1
+    , output wire  result_1_2
+    , output wire  result_1_3
+    , output wire signed [63:0] result_2_0
+    , output wire signed [63:0] result_2_1_0
+    , output wire  result_2_1_1
+    , output wire signed [63:0] result_2_2_0
+    , output wire  result_2_2_1
+    , output wire signed [63:0] result_2_3_0
+    , output wire  result_2_3_1
     );
-  wire [2:0] result_2;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:88:1-96
+  wire [2:0] result_3;
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:90:1-96
   wire  eta;
-  wire signed [63:0] result_3;
+  wire signed [63:0] result_4;
   wire signed [63:0] x;
-  reg signed [63:0] result_4 = 64'sd0;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:94:1-104
+  reg signed [63:0] result_5 = 64'sd100;
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:96:1-104
   wire  eta_0;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:99:1-110
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:101:1-110
   wire signed [63:0] eta1;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:99:1-110
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:101:1-110
   reg signed [63:0] cur = 64'sd0;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:99:1-110
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:101:1-110
   reg signed [63:0] past1 = 64'sd0;
-  wire [127:0] result_5;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:99:1-110
+  wire [127:0] result_6;
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:101:1-110
   wire signed [63:0] c$past1_app_arg;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:99:1-110
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:101:1-110
   wire signed [63:0] c$cur_app_arg;
   wire signed [63:0] x_0;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:82:1-104
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:84:1-104
   wire  eta_1;
-  wire signed [63:0] result_6;
+  wire signed [63:0] result_7;
   wire signed [63:0] x_1;
   wire signed [63:0] y;
-  reg signed [63:0] result_7 = 64'sd0;
-  wire [194:0] result_8;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:68:1-167
+  reg signed [63:0] result_8 = 64'sd100;
+  wire [258:0] result_9;
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:66:1-153
   wire  b;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:68:1-167
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:66:1-153
+  wire signed [63:0] outC;
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:66:1-153
   wire  enC;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:68:1-167
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:66:1-153
   wire  enB;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:68:1-167
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:66:1-153
   wire  enA;
-  wire [66:0] result_9;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:57:1-118
-  wire  aktv_x;
-  reg [66:0] result_10 = {64'sd0,   1'b0,   1'b0,   1'b0};
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:10:1-73
-  wire  b_0;
-  wire  result_11;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:17:5-74
-  wire  b_1;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:17:5-74
-  wire signed [63:0] t;
-  wire signed [63:0] result_12;
-  reg signed [63:0] result_13 = 64'sd0;
-  reg  result_14 = 1'b0;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:10:1-73
-  wire  b_2;
-  wire  result_15;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:17:5-74
-  wire  b_3;
-  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:17:5-74
-  wire signed [63:0] t_0;
-  wire signed [63:0] result_16;
-  reg signed [63:0] result_17 = 64'sd0;
-  reg  result_18 = 1'b0;
+  reg signed [63:0] c$app_arg = 64'sd0;
   // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:27:1-64
   reg signed [63:0] s = 64'sd0;
   // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:27:1-64
-  wire  b_4;
-  wire signed [63:0] result_19;
+  wire  b_0;
+  wire signed [63:0] result_10;
   wire signed [63:0] x_2;
+  wire [66:0] result_11;
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:55:1-118
+  wire  aktv_x;
+  reg [66:0] result_12 = {64'sd0,   1'b0,   1'b0,   1'b0};
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:10:1-73
+  wire  b_1;
+  wire  result_13;
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:17:5-74
+  wire  b_2;
+  // cycle_with_tricky_offset/cycle_with_tricky_offset.hs:17:5-74
+  wire signed [63:0] t;
+  wire signed [63:0] result_14;
+  reg signed [63:0] result_15 = 64'sd0;
+  reg  result_16 = 1'b0;
   wire [64:0] input0;
-  wire [195:0] result;
-  wire [194:0] result_1_0;
-  wire [64:0] result_1_0_2;
-  wire [64:0] result_1_1;
-  wire [64:0] result_1_2;
+  wire [326:0] result;
+  wire [66:0] result_1_4;
+  wire [258:0] result_2;
+  wire [64:0] result_2_1;
+  wire [64:0] result_2_2;
+  wire [64:0] result_2_3;
 
   assign input0 = {input0_0,   input0_1};
 
-  assign result = {s == 64'sd0,   result_8};
+  assign result = {result_16,   result_12,
+                   result_9};
 
-  assign result_2 = b ? {enA,   enB,
+  assign result_3 = b ? {enA,   enB,
                          enC} : {1'b0,   1'b0,   1'b0};
 
-  assign eta = (s == 64'sd2) & enB;
+  assign eta = (c$app_arg == 64'sd2) & enB;
 
-  assign result_3 = eta ? (x + 64'sd1) : result_4;
+  assign result_4 = eta ? (x + 64'sd1) : result_5;
 
-  assign x = result_7;
+  assign x = result_8;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_4_register
+  always @(posedge clk or  posedge  rst) begin : result_5_register
     if ( rst) begin
-      result_4 <= 64'sd0;
+      result_5 <= 64'sd100;
     end else if (en) begin
-      result_4 <= result_3;
+      result_5 <= result_4;
     end
   end
   // register end
 
-  assign eta_0 = (s == 64'sd3) & enC;
+  assign eta_0 = (c$app_arg == 64'sd3) & enC;
 
   assign eta1 = x_0 + 64'sd1;
 
@@ -138,156 +138,148 @@ module topEntity
   end
   // register end
 
-  assign result_5 = {past1,   cur};
+  assign result_6 = {past1,   cur};
 
   assign c$past1_app_arg = eta_0 ? cur : past1;
 
   assign c$cur_app_arg = eta_0 ? eta1 : cur;
 
-  assign x_0 = result_4;
+  assign x_0 = result_5;
 
-  assign eta_1 = (s == 64'sd1) & enA;
+  assign eta_1 = (c$app_arg == 64'sd1) & enA;
 
-  assign result_6 = eta_1 ? (x_1 + y) : result_7;
+  assign result_7 = eta_1 ? (x_1 + y) : result_8;
 
-  assign x_1 = $signed(result_10[66:3]);
+  assign x_1 = $signed(result_12[66:3]);
 
-  assign y = $signed(result_5[127:64]);
+  assign y = outC;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_7_register
+  always @(posedge clk or  posedge  rst) begin : result_8_register
     if ( rst) begin
-      result_7 <= 64'sd0;
+      result_8 <= 64'sd100;
     end else if (en) begin
-      result_7 <= result_6;
+      result_8 <= result_7;
     end
   end
   // register end
 
-  assign result_8 = {{result_7,   result_2[2:2]},
-                     {result_4,   result_2[1:1]},
-                     {$signed(result_5[63:0]),   result_2[0:0]}};
+  assign result_9 = {c$app_arg,   {result_8,
+                                   result_3[2:2]},   {result_5,   result_3[1:1]},
+                     {outC,   result_3[0:0]}};
 
-  assign b = s == 64'sd0;
+  assign b = c$app_arg == 64'sd4;
 
-  assign enC = result_10[0:0];
+  assign outC = $signed(result_6[63:0]);
 
-  assign enB = result_10[1:1];
+  assign enC = result_12[0:0];
 
-  assign enA = result_10[2:2];
+  assign enB = result_12[1:1];
 
-  assign result_9 = result_14 ? {$signed(input0[64:1]),
-                                 aktv_x,   aktv_x,   aktv_x} : result_10;
+  assign enA = result_12[2:2];
 
-  assign aktv_x = input0[0:0];
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : result_10_register
-    if ( rst) begin
-      result_10 <= {64'sd0,   1'b0,   1'b0,   1'b0};
-    end else if (en) begin
-      result_10 <= result_9;
+  // delay begin
+  always @(posedge clk) begin : c$app_arg_delay
+    if (en) begin
+      c$app_arg <= s;
     end
   end
-  // register end
-
-  assign b_0 = result_13 < 64'sd2;
-
-  assign result_11 = b_0 ? 1'b1 : 1'b0;
-
-  assign b_1 = result_13 < 64'sd3;
-
-  assign t = result_13 + 64'sd1;
-
-  assign result_12 = b_1 ? t : 64'sd0;
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : result_13_register
-    if ( rst) begin
-      result_13 <= 64'sd0;
-    end else if (en) begin
-      result_13 <= result_12;
-    end
-  end
-  // register end
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : result_14_register
-    if ( rst) begin
-      result_14 <= 1'b0;
-    end else if (en) begin
-      result_14 <= result_11;
-    end
-  end
-  // register end
-
-  assign b_2 = result_17 < 64'sd0;
-
-  assign result_15 = b_2 ? 1'b1 : 1'b0;
-
-  assign b_3 = result_17 < 64'sd0;
-
-  assign t_0 = result_17 + 64'sd1;
-
-  assign result_16 = b_3 ? t_0 : 64'sd0;
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : result_17_register
-    if ( rst) begin
-      result_17 <= 64'sd0;
-    end else if (en) begin
-      result_17 <= result_16;
-    end
-  end
-  // register end
-
-  // register begin
-  always @(posedge clk or  posedge  rst) begin : result_18_register
-    if ( rst) begin
-      result_18 <= 1'b0;
-    end else if (en) begin
-      result_18 <= result_15;
-    end
-  end
-  // register end
+  // delay end
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : s_register
     if ( rst) begin
       s <= 64'sd0;
     end else if (en) begin
-      s <= result_19;
+      s <= result_10;
     end
   end
   // register end
 
-  assign b_4 = s == 64'sd3;
+  assign b_0 = s == 64'sd4;
 
-  assign result_19 = b_4 ? 64'sd0 : (x_2 + 64'sd1);
+  assign result_10 = b_0 ? 64'sd0 : (x_2 + 64'sd1);
 
   assign x_2 = s;
 
-  assign result_0 = result[195:195];
+  assign result_11 = result_16 ? {$signed(input0[64:1]),
+                                  aktv_x,   aktv_x,   aktv_x} : result_12;
 
-  assign result_1_0 = result[194:0];
+  assign aktv_x = input0[0:0];
 
-  assign result_1_0_2 = result_1_0[194:130];
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_12_register
+    if ( rst) begin
+      result_12 <= {64'sd0,   1'b0,   1'b0,   1'b0};
+    end else if (en) begin
+      result_12 <= result_11;
+    end
+  end
+  // register end
 
-  assign result_1_1 = result_1_0[129:65];
+  assign b_1 = result_15 < 64'sd2;
 
-  assign result_1_2 = result_1_0[64:0];
+  assign result_13 = b_1 ? 1'b1 : 1'b0;
 
-  assign result_1_0_0 = $signed(result_1_0_2[64:1]);
+  assign b_2 = result_15 < 64'sd4;
 
-  assign result_1_0_1 = result_1_0_2[0:0];
+  assign t = result_15 + 64'sd1;
 
-  assign result_1_1_0 = $signed(result_1_1[64:1]);
+  assign result_14 = b_2 ? t : 64'sd0;
 
-  assign result_1_1_1 = result_1_1[0:0];
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_15_register
+    if ( rst) begin
+      result_15 <= 64'sd0;
+    end else if (en) begin
+      result_15 <= result_14;
+    end
+  end
+  // register end
 
-  assign result_1_2_0 = $signed(result_1_2[64:1]);
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_16_register
+    if ( rst) begin
+      result_16 <= 1'b0;
+    end else if (en) begin
+      result_16 <= result_13;
+    end
+  end
+  // register end
 
-  assign result_1_2_1 = result_1_2[0:0];
+  assign result_0 = result[326:326];
+
+  assign result_1_4 = result[325:259];
+
+  assign result_2 = result[258:0];
+
+  assign result_1_0 = $signed(result_1_4[66:3]);
+
+  assign result_1_1 = result_1_4[2:2];
+
+  assign result_1_2 = result_1_4[1:1];
+
+  assign result_1_3 = result_1_4[0:0];
+
+  assign result_2_0 = $signed(result_2[258:195]);
+
+  assign result_2_1 = result_2[194:130];
+
+  assign result_2_2 = result_2[129:65];
+
+  assign result_2_3 = result_2[64:0];
+
+  assign result_2_1_0 = $signed(result_2_1[64:1]);
+
+  assign result_2_1_1 = result_2_1[0:0];
+
+  assign result_2_2_0 = $signed(result_2_2[64:1]);
+
+  assign result_2_2_1 = result_2_2[0:0];
+
+  assign result_2_3_0 = $signed(result_2_3[64:1]);
+
+  assign result_2_3_1 = result_2_3[0:0];
 
 
 endmodule

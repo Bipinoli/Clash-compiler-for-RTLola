@@ -36,22 +36,20 @@ hotPotato n = let s = register 0 (mux (s .==. pure (n-1)) 0 (s + 1)) in s
 type Data = Int
 
 slowClock :: HiddenClockResetEnable dom => Signal dom Bool
-slowClock = clockDivider 4
-
-fastClock :: HiddenClockResetEnable dom => Signal dom Bool
-fastClock = clockDivider 1
+slowClock = clockDivider 5
 
 -- We need to sustain control signals and data from HLC until all layers are completely evaluated and outputed
--- Hence, the LLC should run (n+1) times faster than HLC, where n = number of evaluation layers
--- We evaluate all the layers and in the end output the values together, hence +1 in (n+1)
+-- It talke one cycle for RTL to HLC and we want one cycle in the end to output the evaluated streams
+-- Hence, the LLC should run (n+2) times faster than HLC, where n = number of evaluation layers
 -- By sustaining the HLC controls like this we also don't need any buffer or queue to interface them
-evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool) -> Signal dom (Bool, ((Data, Bool), (Data, Bool), (Data, Bool)))
-evaluator input0 = bundle (outputStage, outputs)
+
+-- It is important to note that the input data must be proided by stage = 0 to work with new data on the current LLC loop
+evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool) -> Signal dom (Bool, (Data, Bool, Bool, Bool), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
+evaluator input0 = bundle(slowClock, controls, outputs)
     where
-        outputs = llc fastClock controls stage
+        outputs = llc controls stage
         controls = hlc slowClock input0
-        stage = hotPotato 4
-        outputStage = stage .==. pure 0
+        stage = delay 0 (hotPotato 5)
 
 
 hlc :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Bool) -> Signal dom (Data, Bool, Bool, Bool)
@@ -65,28 +63,32 @@ hlc en input0 = register (0, False, False, False) (mux en newResult oldResult)
         enC = aktv_x
 
 
-llc :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Bool, Bool, Bool) -> Signal dom Data -> Signal dom ((Data, Bool), (Data, Bool), (Data, Bool))
-llc en controls stage = bundle (resultA, resultB, resultC)
+llc :: HiddenClockResetEnable dom => Signal dom (Data, Bool, Bool, Bool) -> Signal dom Data -> Signal dom (Int, (Data, Bool), (Data, Bool), (Data, Bool))
+llc controls stage = bundle (outputPhase, resultA, resultB, resultC)
     where 
         resultA = bundle (outA, aktvA)
         resultB = bundle (outB, aktvB)
         resultC = bundle (outC, aktvC)
-        outA = evaluateA ((stage .==. pure 1) .&&. enA) (bundle (x, outC'))
+        outA = evaluateA ((stage .==. pure 1) .&&. enA) (bundle (x, outC))
         outB = evaluateB ((stage .==. pure 2) .&&. enB) outA
+        -- Since c will be only calculated in the end we need to only keep the latest value from past
+        -- no need to keep the window of 2
         (outC', outC) = unbundle $ evaluateC ((stage .==. pure 3) .&&. enC) outB
-        (aktvA, aktvB, aktvC) = unbundle $ mux (stage .==. pure 0) (bundle (enA, enB, enC)) (bundle (pure False, pure False, pure False))
+        (aktvA, aktvB, aktvC) = unbundle $ mux (stage .==. pure 4) (bundle (enA, enB, enC)) (bundle (pure False, pure False, pure False))
+        -- outputPhase  = mux (stage .==. pure 3) (pure True) (pure False)
+        outputPhase = stage
         (x, enA, enB, enC) = unbundle controls
 
 
 
 evaluateA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Data) -> Signal dom Data
-evaluateA en inpt = register 0  (mux en (x + c) oldVal)
+evaluateA en inpt = register 100  (mux en (x + c) oldVal)
     where 
         (x, c) = unbundle inpt 
         oldVal = evaluateA en inpt
 
 evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data
-evaluateB en inpt = register 0 (mux en (a + 1) oldVal)
+evaluateB en inpt = register 100 (mux en (a + 1) oldVal)
     where 
         oldVal = evaluateB en inpt
         a = inpt
@@ -107,5 +109,5 @@ window2 enable x deflt = bundle (past1, cur)
 
 
 topEntity :: Clock System -> Reset System -> Enable System -> 
-    Signal System (Data, Bool) -> Signal System (Bool, ((Data, Bool), (Data, Bool), (Data, Bool)))
+    Signal System (Data, Bool) -> Signal System (Bool, (Data, Bool, Bool, Bool), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
 topEntity clk rst en input0 = exposeClockResetEnable (evaluator input0) clk rst en
