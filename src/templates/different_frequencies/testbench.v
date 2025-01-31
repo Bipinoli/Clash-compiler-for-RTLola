@@ -11,7 +11,9 @@ module testbench;
     wire hlc_enB;
     wire hlc_enC;
     wire hlc_enD;
+
     wire hlc_clock;
+    wire signed [63:0] hlc_clock_cnt;
 
     wire signed [63:0] llc_stage;
     wire signed [63:0] output_b;
@@ -23,13 +25,11 @@ module testbench;
     wire signed [63:0] b_timer;
     wire signed [63:0] c_timer;
     wire signed [63:0] d_timer;
-    wire b_timer_rst;
-    wire c_timer_rst;
-    wire d_timer_rst;
 
     topEntity monitor (clk, rst, en,
                        input_a, new_input,
-                       hlc_clock, hlc_a, hlc_enB, hlc_enC, hlc_enD, b_timer, c_timer, d_timer, b_timer_rst, c_timer_rst, d_timer_rst,
+                       hlc_clock, hlc_clock_cnt,
+                       hlc_a, hlc_enB, hlc_enC, hlc_enD, b_timer, c_timer, d_timer,
                        llc_stage,
                        output_b, output_b_aktv,
                        output_c, output_c_aktv,

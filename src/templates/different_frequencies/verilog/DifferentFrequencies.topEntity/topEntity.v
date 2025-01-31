@@ -11,7 +11,8 @@ module topEntity
     , input  input0_1
 
       // Outputs
-    , output wire  result_0
+    , output wire  result_0_0
+    , output wire signed [63:0] result_0_1
     , output wire signed [63:0] result_1_0
     , output wire  result_1_1
     , output wire  result_1_2
@@ -19,9 +20,6 @@ module topEntity
     , output wire signed [63:0] result_1_4
     , output wire signed [63:0] result_1_5
     , output wire signed [63:0] result_1_6
-    , output wire  result_1_7
-    , output wire  result_1_8
-    , output wire  result_1_9
     , output wire signed [63:0] result_2_0
     , output wire signed [63:0] result_2_1_0
     , output wire  result_2_1_1
@@ -31,115 +29,120 @@ module topEntity
     , output wire  result_2_3_1
     );
   wire [258:0] result_3;
-  // different_frequencies/different_frequencies.hs:137:1-104
+  // different_frequencies/different_frequencies.hs:142:1-104
   wire  eta;
   wire signed [63:0] result_4;
   wire signed [63:0] x;
   wire signed [63:0] y;
   reg signed [63:0] result_5 = 64'sd10;
-  // different_frequencies/different_frequencies.hs:125:1-96
+  // different_frequencies/different_frequencies.hs:130:1-96
   wire  eta_0;
   wire signed [63:0] result_6;
   reg signed [63:0] result_7 = 64'sd10;
-  // different_frequencies/different_frequencies.hs:131:1-96
+  // different_frequencies/different_frequencies.hs:136:1-96
   wire  eta_1;
   wire signed [63:0] result_8;
   wire signed [63:0] result_9;
   reg signed [63:0] result_10 = 64'sd10;
   reg signed [63:0] result_11 = 64'sd10;
-  // different_frequencies/different_frequencies.hs:108:1-186
+  // different_frequencies/different_frequencies.hs:113:1-168
   wire signed [63:0] a;
-  // different_frequencies/different_frequencies.hs:108:1-186
+  // different_frequencies/different_frequencies.hs:113:1-168
   wire  c$outC_app_arg;
   wire [2:0] result_12;
-  // different_frequencies/different_frequencies.hs:108:1-186
+  // different_frequencies/different_frequencies.hs:113:1-168
   wire  b;
-  // different_frequencies/different_frequencies.hs:108:1-186
+  // different_frequencies/different_frequencies.hs:113:1-168
   wire  enB;
-  // different_frequencies/different_frequencies.hs:108:1-186
+  // different_frequencies/different_frequencies.hs:113:1-168
   wire  enC;
-  // different_frequencies/different_frequencies.hs:108:1-186
+  // different_frequencies/different_frequencies.hs:113:1-168
   wire  \enD ;
   reg signed [63:0] c$app_arg = 64'sd0;
-  // different_frequencies/different_frequencies.hs:46:1-64
+  // different_frequencies/different_frequencies.hs:45:1-64
   reg signed [63:0] s = 64'sd0;
-  // different_frequencies/different_frequencies.hs:46:1-64
+  // different_frequencies/different_frequencies.hs:45:1-64
   wire  b_0;
   wire signed [63:0] result_13;
   wire signed [63:0] x_0;
-  reg [65:0] result_14 = {1'b0,   64'sd0,   1'b0};
-  wire [65:0] result_15;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire [65:0] t;
+  reg [64:0] result_14 = {1'b0,   64'sd0};
+  wire [64:0] result_15;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  b_1;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire [64:0] f1;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire [64:0] t;
   wire  result_16;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  c$b_app_arg;
   wire signed [63:0] result_17;
   wire signed [63:0] x_1;
   reg signed [63:0] result_18 = 64'sd2000;
   wire  result_19;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire  b_1;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire  c$b_app_arg;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire signed [63:0] curTime;
-  reg [65:0] result_20 = {1'b0,   64'sd0,   1'b0};
-  wire [65:0] result_21;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire [65:0] t_0;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  b_2;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  en_0;
+  reg [64:0] result_20 = {1'b0,   64'sd0};
+  wire [64:0] result_21;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  b_3;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire [64:0] f1_0;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire [64:0] t_0;
   wire  result_22;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  c$b_app_arg_0;
   wire signed [63:0] result_23;
   wire signed [63:0] x_2;
   reg signed [63:0] result_24 = 64'sd2000;
   wire  result_25;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire  b_2;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire  c$b_app_arg_0;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire signed [63:0] curTime_0;
-  reg [65:0] result_26 = {1'b0,   64'sd0,   1'b0};
-  wire [65:0] result_27;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire [65:0] t_1;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  b_4;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  en_1;
+  reg [64:0] result_26 = {1'b0,   64'sd0};
+  wire [64:0] result_27;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  b_5;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire [64:0] f1_1;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire [64:0] t_1;
   wire  result_28;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  c$b_app_arg_1;
   wire signed [63:0] result_29;
   wire signed [63:0] x_3;
   reg signed [63:0] result_30 = 64'sd2000;
   wire  result_31;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire  b_3;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire  c$b_app_arg_1;
-  // different_frequencies/different_frequencies.hs:92:1-113
-  wire signed [63:0] curTime_1;
-  wire [261:0] result_32;
-  // different_frequencies/different_frequencies.hs:75:1-151
-  wire  bTimerRst;
-  // different_frequencies/different_frequencies.hs:75:1-151
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  b_6;
+  // different_frequencies/different_frequencies.hs:96:1-114
+  wire  en_2;
+  wire [258:0] result_32;
+  // different_frequencies/different_frequencies.hs:75:1-140
   wire signed [63:0] bTimer;
-  // different_frequencies/different_frequencies.hs:75:1-151
-  wire  cTimerRst;
-  // different_frequencies/different_frequencies.hs:75:1-151
+  // different_frequencies/different_frequencies.hs:75:1-140
   wire signed [63:0] cTimer;
-  // different_frequencies/different_frequencies.hs:75:1-151
-  wire  dTimerRst;
-  // different_frequencies/different_frequencies.hs:75:1-151
+  // different_frequencies/different_frequencies.hs:75:1-140
   wire signed [63:0] dTimer;
-  reg [261:0] result_33 = {64'sd0,   1'b0,   1'b0,   1'b0,   64'sd0,   64'sd0,   64'sd0,   1'b0,   1'b0,
- 1'b0};
-  // different_frequencies/different_frequencies.hs:14:1-73
-  wire  b_4;
-  wire  result_34;
-  // different_frequencies/different_frequencies.hs:21:5-74
-  wire  b_5;
-  // different_frequencies/different_frequencies.hs:21:5-74
-  wire signed [63:0] t_2;
+  reg [258:0] result_33 = {64'sd0,   1'b0,   1'b0,   1'b0,   64'sd0,   64'sd0,   64'sd0};
+  // different_frequencies/different_frequencies.hs:15:1-76
+  wire  b_7;
+  wire [64:0] result_34;
+  // different_frequencies/different_frequencies.hs:26:5-66
+  wire  b_8;
   wire signed [63:0] result_35;
+  wire signed [63:0] x_4;
   reg signed [63:0] result_36 = 64'sd0;
-  reg  result_37 = 1'b0;
+  reg [64:0] result_37 = {1'b0,   64'sd0};
   wire [64:0] input0;
-  wire [521:0] result;
-  wire [261:0] result_1_10;
+  wire [582:0] result;
+  wire [64:0] result_0;
+  wire [258:0] result_1;
   wire [258:0] result_2;
   wire [64:0] result_2_1;
   wire [64:0] result_2_2;
@@ -213,7 +216,7 @@ module topEntity
   end
   // register end
 
-  assign a = $signed(result_33[261:198]);
+  assign a = $signed(result_33[258:195]);
 
   assign c$outC_app_arg = c$app_arg == 64'sd2;
 
@@ -222,11 +225,11 @@ module topEntity
 
   assign b = c$app_arg == 64'sd4;
 
-  assign enB = result_33[197:197];
+  assign enB = result_33[194:194];
 
-  assign enC = result_33[196:196];
+  assign enC = result_33[193:193];
 
-  assign \enD  = result_33[195:195];
+  assign \enD  = result_33[192:192];
 
   // delay begin
   always @(posedge clk) begin : c$app_arg_delay
@@ -255,20 +258,24 @@ module topEntity
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_14_register
     if ( rst) begin
-      result_14 <= {1'b0,   64'sd0,   1'b0};
+      result_14 <= {1'b0,   64'sd0};
     end else if (en) begin
       result_14 <= result_15;
     end
   end
   // register end
 
-  assign result_15 = result_37 ? t : {result_14[65:65],
-                                      result_18,   result_14[0:0]};
+  assign result_15 = b_1 ? t : f1;
 
-  assign t = {result_16,   result_18,
-              result_19};
+  assign b_1 = en_0 & ($signed(result_37[63:0]) == 64'sd0);
+
+  assign f1 = {result_14[64:64],   result_18};
+
+  assign t = {result_16,   result_18};
 
   assign result_16 = c$b_app_arg ? 1'b1 : 1'b0;
+
+  assign c$b_app_arg = result_18 >= 64'sd400000;
 
   assign result_17 = result_19 ? 64'sd2000 : (x_1 + 64'sd2000);
 
@@ -284,31 +291,33 @@ module topEntity
   end
   // register end
 
-  assign result_19 = b_1 ? 1'b1 : 1'b0;
+  assign result_19 = b_2 ? 1'b1 : 1'b0;
 
-  assign b_1 = result_37 & c$b_app_arg;
+  assign b_2 = en_0 & c$b_app_arg;
 
-  assign c$b_app_arg = curTime >= 64'sd400000;
-
-  assign curTime = $signed(result_14[64:1]);
+  assign en_0 = result_37[64:64];
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_20_register
     if ( rst) begin
-      result_20 <= {1'b0,   64'sd0,   1'b0};
+      result_20 <= {1'b0,   64'sd0};
     end else if (en) begin
       result_20 <= result_21;
     end
   end
   // register end
 
-  assign result_21 = result_37 ? t_0 : {result_20[65:65],
-                                        result_24,   result_20[0:0]};
+  assign result_21 = b_3 ? t_0 : f1_0;
 
-  assign t_0 = {result_22,   result_24,
-                result_25};
+  assign b_3 = en_1 & ($signed(result_37[63:0]) == 64'sd0);
+
+  assign f1_0 = {result_20[64:64],   result_24};
+
+  assign t_0 = {result_22,   result_24};
 
   assign result_22 = c$b_app_arg_0 ? 1'b1 : 1'b0;
+
+  assign c$b_app_arg_0 = result_24 >= 64'sd200000;
 
   assign result_23 = result_25 ? 64'sd2000 : (x_2 + 64'sd2000);
 
@@ -324,31 +333,33 @@ module topEntity
   end
   // register end
 
-  assign result_25 = b_2 ? 1'b1 : 1'b0;
+  assign result_25 = b_4 ? 1'b1 : 1'b0;
 
-  assign b_2 = result_37 & c$b_app_arg_0;
+  assign b_4 = en_1 & c$b_app_arg_0;
 
-  assign c$b_app_arg_0 = curTime_0 >= 64'sd200000;
-
-  assign curTime_0 = $signed(result_20[64:1]);
+  assign en_1 = result_37[64:64];
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_26_register
     if ( rst) begin
-      result_26 <= {1'b0,   64'sd0,   1'b0};
+      result_26 <= {1'b0,   64'sd0};
     end else if (en) begin
       result_26 <= result_27;
     end
   end
   // register end
 
-  assign result_27 = result_37 ? t_1 : {result_26[65:65],
-                                        result_30,   result_26[0:0]};
+  assign result_27 = b_5 ? t_1 : f1_1;
 
-  assign t_1 = {result_28,   result_30,
-                result_31};
+  assign b_5 = en_2 & ($signed(result_37[63:0]) == 64'sd0);
+
+  assign f1_1 = {result_26[64:64],   result_30};
+
+  assign t_1 = {result_28,   result_30};
 
   assign result_28 = c$b_app_arg_1 ? 1'b1 : 1'b0;
+
+  assign c$b_app_arg_1 = result_30 >= 64'sd100000;
 
   assign result_29 = result_31 ? 64'sd2000 : (x_3 + 64'sd2000);
 
@@ -364,55 +375,46 @@ module topEntity
   end
   // register end
 
-  assign result_31 = b_3 ? 1'b1 : 1'b0;
+  assign result_31 = b_6 ? 1'b1 : 1'b0;
 
-  assign b_3 = result_37 & c$b_app_arg_1;
+  assign b_6 = en_2 & c$b_app_arg_1;
 
-  assign c$b_app_arg_1 = curTime_1 >= 64'sd100000;
+  assign en_2 = result_37[64:64];
 
-  assign curTime_1 = $signed(result_26[64:1]);
+  assign result_32 = result_37[64:64] ? {$signed(input0[64:1]),
+                                         result_26[64:64],   result_20[64:64],
+                                         result_14[64:64],   bTimer,   cTimer,
+                                         dTimer} : {$signed(result_33[258:195]),
+                                                    result_33[194:194],   result_33[193:193],
+                                                    result_33[192:192],   bTimer,   cTimer,
+                                                    dTimer};
 
-  assign result_32 = result_37 ? {$signed(input0[64:1]),
-                                  result_26[65:65],   result_20[65:65],
-                                  result_14[65:65],   bTimer,   cTimer,
-                                  dTimer,   bTimerRst,   cTimerRst,
-                                  dTimerRst} : {$signed(result_33[261:198]),
-                                                result_33[197:197],   result_33[196:196],
-                                                result_33[195:195],   bTimer,   cTimer,
-                                                dTimer,   bTimerRst,   cTimerRst,   dTimerRst};
+  assign bTimer = $signed(result_26[63:0]);
 
-  assign bTimerRst = result_26[0:0];
+  assign cTimer = $signed(result_20[63:0]);
 
-  assign bTimer = $signed(result_26[64:1]);
-
-  assign cTimerRst = result_20[0:0];
-
-  assign cTimer = $signed(result_20[64:1]);
-
-  assign dTimerRst = result_14[0:0];
-
-  assign dTimer = $signed(result_14[64:1]);
+  assign dTimer = $signed(result_14[63:0]);
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_33_register
     if ( rst) begin
-      result_33 <= {64'sd0,   1'b0,   1'b0,   1'b0,   64'sd0,   64'sd0,   64'sd0,   1'b0,   1'b0,
-   1'b0};
+      result_33 <= {64'sd0,   1'b0,   1'b0,   1'b0,   64'sd0,   64'sd0,   64'sd0};
     end else if (en) begin
       result_33 <= result_32;
     end
   end
   // register end
 
-  assign b_4 = result_36 < 64'sd2;
+  assign b_7 = result_36 < 64'sd2;
 
-  assign result_34 = b_4 ? 1'b1 : 1'b0;
+  assign result_34 = b_7 ? {1'b1,
+                            result_36} : {1'b0,   result_36};
 
-  assign b_5 = result_36 < 64'sd4;
+  assign b_8 = result_36 < 64'sd4;
 
-  assign t_2 = result_36 + 64'sd1;
+  assign result_35 = b_8 ? (x_4 + 64'sd1) : 64'sd0;
 
-  assign result_35 = b_5 ? t_2 : 64'sd0;
+  assign x_4 = result_36;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_36_register
@@ -427,38 +429,36 @@ module topEntity
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_37_register
     if ( rst) begin
-      result_37 <= 1'b0;
+      result_37 <= {1'b0,   64'sd0};
     end else if (en) begin
       result_37 <= result_34;
     end
   end
   // register end
 
-  assign result_0 = result[521:521];
+  assign result_0 = result[582:518];
 
-  assign result_1_10 = result[520:259];
+  assign result_1 = result[517:259];
 
   assign result_2 = result[258:0];
 
-  assign result_1_0 = $signed(result_1_10[261:198]);
+  assign result_0_0 = result_0[64:64];
 
-  assign result_1_1 = result_1_10[197:197];
+  assign result_0_1 = $signed(result_0[63:0]);
 
-  assign result_1_2 = result_1_10[196:196];
+  assign result_1_0 = $signed(result_1[258:195]);
 
-  assign result_1_3 = result_1_10[195:195];
+  assign result_1_1 = result_1[194:194];
 
-  assign result_1_4 = $signed(result_1_10[194:131]);
+  assign result_1_2 = result_1[193:193];
 
-  assign result_1_5 = $signed(result_1_10[130:67]);
+  assign result_1_3 = result_1[192:192];
 
-  assign result_1_6 = $signed(result_1_10[66:3]);
+  assign result_1_4 = $signed(result_1[191:128]);
 
-  assign result_1_7 = result_1_10[2:2];
+  assign result_1_5 = $signed(result_1[127:64]);
 
-  assign result_1_8 = result_1_10[1:1];
-
-  assign result_1_9 = result_1_10[0:0];
+  assign result_1_6 = $signed(result_1[63:0]);
 
   assign result_2_0 = $signed(result_2[258:195]);
 
