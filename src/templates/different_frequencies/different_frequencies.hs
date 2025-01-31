@@ -52,7 +52,7 @@ slowClock = clockDivider 5
 -- By sustaining the HLC controls like this we also don't need any buffer or queue to interface them
 
 -- It is important to note that the input data must be proided by stage = 0 to work with new data on the current LLC loop
-evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool) -> Signal dom (Bool, (Data, Bool, Bool, Bool), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
+evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool) -> Signal dom (Bool, (Data, Bool, Bool, Bool, Int), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
 evaluator input0 = bundle(slowClock, controls, outputs)
     where
         outputs = llc controls stage
@@ -60,13 +60,15 @@ evaluator input0 = bundle(slowClock, controls, outputs)
         stage = delay 0 (hotPotato 4)
 
 
-hlc :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Bool) -> Signal dom (Data, Bool, Bool, Bool)
-hlc en input0 = register (0, False, False, False) (mux en newResult oldResult)
+hlc :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Bool) -> Signal dom (Data, Bool, Bool, Bool, Int)
+hlc en input0 = register (0, False, False, False, 0) (mux en newResult oldResult)
     where
         oldResult = hlc en input0
-        newResult = bundle (a, enB, enC, enD)
+        newResult = bundle (a, enB, enC, enD, bTimer)
         (a, aktv_x) = unbundle input0
 
+        -- TODO: why are the enable singals not working as expected???
+        -- Why does enable signal not sustain until the hlc clock?
         enB = mux (bTimer .>=. bPeriodNs) (pure True) (pure False)
         bTimer = timer bTimerRst
         bTimerRst = mux (bTimer .>=. bPeriodNs) (pure True) (pure False)
@@ -92,7 +94,7 @@ enableCheck = timerResult
         thold = 200000000000
 
 
-llc :: HiddenClockResetEnable dom => Signal dom (Data, Bool, Bool, Bool) -> Signal dom Data -> Signal dom (Int, (Data, Bool), (Data, Bool), (Data, Bool))
+llc :: HiddenClockResetEnable dom => Signal dom (Data, Bool, Bool, Bool, Int) -> Signal dom Data -> Signal dom (Int, (Data, Bool), (Data, Bool), (Data, Bool))
 llc controls stage = bundle (stage, resultB, resultC, resultD)
     where 
         resultB = bundle (outB, aktvB)
@@ -105,7 +107,7 @@ llc controls stage = bundle (stage, resultB, resultC, resultD)
         outD = evaluateD ((stage .==. pure 2) .&&. enD) (bundle (outB, outC))
         -- output stage
         (aktvB, aktvC, aktvD) = unbundle $ mux (stage .==. pure 3) (bundle (enB, enC, enD)) (bundle (pure False, pure False, pure False)) 
-        (a, enB, enC, enD) = unbundle controls
+        (a, enB, enC, enD, _) = unbundle controls
 
 
 evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data
@@ -131,5 +133,5 @@ evaluateD en inpt = register 10 (mux en (b + c) oldVal)
 
 
 topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
-    Signal MyDomain (Data, Bool) -> Signal MyDomain (Bool, (Data, Bool, Bool, Bool), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
+    Signal MyDomain (Data, Bool) -> Signal MyDomain (Bool, (Data, Bool, Bool, Bool, Int), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
 topEntity clk rst en input0 = exposeClockResetEnable (evaluator input0) clk rst en

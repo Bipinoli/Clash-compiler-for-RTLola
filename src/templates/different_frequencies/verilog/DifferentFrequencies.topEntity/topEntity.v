@@ -16,6 +16,7 @@ module topEntity
     , output wire  result_1_1
     , output wire  result_1_2
     , output wire  result_1_3
+    , output wire signed [63:0] result_1_4
     , output wire signed [63:0] result_2_0
     , output wire signed [63:0] result_2_1_0
     , output wire  result_2_1_1
@@ -25,34 +26,34 @@ module topEntity
     , output wire  result_2_3_1
     );
   wire [258:0] result_3;
-  // different_frequencies/different_frequencies.hs:123:1-104
+  // different_frequencies/different_frequencies.hs:124:1-104
   wire  eta;
   wire signed [63:0] result_4;
   wire signed [63:0] x;
   wire signed [63:0] y;
   reg signed [63:0] result_5 = 64'sd10;
-  // different_frequencies/different_frequencies.hs:111:1-96
+  // different_frequencies/different_frequencies.hs:112:1-96
   wire  eta_0;
   wire signed [63:0] result_6;
   reg signed [63:0] result_7 = 64'sd10;
-  // different_frequencies/different_frequencies.hs:117:1-96
+  // different_frequencies/different_frequencies.hs:118:1-96
   wire  eta_1;
   wire signed [63:0] result_8;
   wire signed [63:0] result_9;
   reg signed [63:0] result_10 = 64'sd10;
   reg signed [63:0] result_11 = 64'sd10;
-  // different_frequencies/different_frequencies.hs:95:1-153
+  // different_frequencies/different_frequencies.hs:96:1-158
   wire signed [63:0] a;
-  // different_frequencies/different_frequencies.hs:95:1-153
+  // different_frequencies/different_frequencies.hs:96:1-158
   wire  c$outC_app_arg;
   wire [2:0] result_12;
-  // different_frequencies/different_frequencies.hs:95:1-153
+  // different_frequencies/different_frequencies.hs:96:1-158
   wire  b;
-  // different_frequencies/different_frequencies.hs:95:1-153
+  // different_frequencies/different_frequencies.hs:96:1-158
   wire  enB;
-  // different_frequencies/different_frequencies.hs:95:1-153
+  // different_frequencies/different_frequencies.hs:96:1-158
   wire  enC;
-  // different_frequencies/different_frequencies.hs:95:1-153
+  // different_frequencies/different_frequencies.hs:96:1-158
   wire  \enD ;
   reg signed [63:0] c$app_arg = 64'sd0;
   // different_frequencies/different_frequencies.hs:38:1-64
@@ -61,22 +62,22 @@ module topEntity
   wire  b_0;
   wire signed [63:0] result_13;
   wire signed [63:0] x_0;
-  reg [66:0] result_14 = {64'sd0,   1'b0,   1'b0,   1'b0};
-  wire [66:0] result_15;
+  reg [130:0] result_14 = {64'sd0,   1'b0,   1'b0,   1'b0,   64'sd0};
+  wire [130:0] result_15;
   wire  result_16;
-  // different_frequencies/different_frequencies.hs:63:1-118
+  // different_frequencies/different_frequencies.hs:63:1-123
   wire  b_1;
   wire signed [63:0] result_17;
   wire signed [63:0] x_1;
   reg signed [63:0] result_18 = 64'sd0;
   wire  result_19;
-  // different_frequencies/different_frequencies.hs:63:1-118
+  // different_frequencies/different_frequencies.hs:63:1-123
   wire  b_2;
   wire signed [63:0] result_20;
   wire signed [63:0] x_2;
   reg signed [63:0] result_21 = 64'sd0;
   wire  result_22;
-  // different_frequencies/different_frequencies.hs:63:1-118
+  // different_frequencies/different_frequencies.hs:63:1-123
   wire  b_3;
   wire signed [63:0] result_23;
   wire signed [63:0] x_3;
@@ -92,8 +93,8 @@ module topEntity
   reg signed [63:0] result_27 = 64'sd0;
   reg  result_28 = 1'b0;
   wire [64:0] input0;
-  wire [326:0] result;
-  wire [66:0] result_1_4;
+  wire [390:0] result;
+  wire [130:0] result_1_5;
   wire [258:0] result_2;
   wire [64:0] result_2_1;
   wire [64:0] result_2_2;
@@ -167,7 +168,7 @@ module topEntity
   end
   // register end
 
-  assign a = $signed(result_14[66:3]);
+  assign a = $signed(result_14[130:67]);
 
   assign c$outC_app_arg = c$app_arg == 64'sd1;
 
@@ -176,11 +177,11 @@ module topEntity
 
   assign b = c$app_arg == 64'sd3;
 
-  assign enB = result_14[2:2];
+  assign enB = result_14[66:66];
 
-  assign enC = result_14[1:1];
+  assign enC = result_14[65:65];
 
-  assign \enD  = result_14[0:0];
+  assign \enD  = result_14[64:64];
 
   // delay begin
   always @(posedge clk) begin : c$app_arg_delay
@@ -209,7 +210,7 @@ module topEntity
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_14_register
     if ( rst) begin
-      result_14 <= {64'sd0,   1'b0,   1'b0,   1'b0};
+      result_14 <= {64'sd0,   1'b0,   1'b0,   1'b0,   64'sd0};
     end else if (en) begin
       result_14 <= result_15;
     end
@@ -217,8 +218,8 @@ module topEntity
   // register end
 
   assign result_15 = result_28 ? {$signed(input0[64:1]),
-                                  result_16,   result_19,
-                                  result_22} : result_14;
+                                  result_16,   result_19,   result_22,
+                                  result_18} : result_14;
 
   assign result_16 = b_1 ? 1'b1 : 1'b0;
 
@@ -304,19 +305,21 @@ module topEntity
   end
   // register end
 
-  assign result_0 = result[326:326];
+  assign result_0 = result[390:390];
 
-  assign result_1_4 = result[325:259];
+  assign result_1_5 = result[389:259];
 
   assign result_2 = result[258:0];
 
-  assign result_1_0 = $signed(result_1_4[66:3]);
+  assign result_1_0 = $signed(result_1_5[130:67]);
 
-  assign result_1_1 = result_1_4[2:2];
+  assign result_1_1 = result_1_5[66:66];
 
-  assign result_1_2 = result_1_4[1:1];
+  assign result_1_2 = result_1_5[65:65];
 
-  assign result_1_3 = result_1_4[0:0];
+  assign result_1_3 = result_1_5[64:64];
+
+  assign result_1_4 = $signed(result_1_5[63:0]);
 
   assign result_2_0 = $signed(result_2[258:195]);
 

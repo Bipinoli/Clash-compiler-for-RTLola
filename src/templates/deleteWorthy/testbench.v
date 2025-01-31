@@ -7,39 +7,17 @@ module testbench;
     reg signed [63:0] input_a;
     reg new_input;
 
-    wire signed [63:0] hlc_a;
-    wire hlc_enB;
-    wire hlc_enC;
-    wire hlc_enD;
     wire hlc_clock;
-
-    wire signed [63:0] llc_stage;
-    wire signed [63:0] output_b;
-    wire signed [63:0] output_c;
-    wire signed [63:0] output_d;
-    wire output_b_aktv;
-    wire output_c_aktv;
-    wire output_d_aktv;
-    wire signed [63:0] b_timer;
+    wire signed [63:0] bTimer;
+    wire bEn;
 
     topEntity monitor (clk, rst, en,
                        input_a, new_input,
-                       hlc_clock, hlc_a, hlc_enB, hlc_enC, hlc_enD, b_timer,
-                       llc_stage,
-                       output_b, output_b_aktv,
-                       output_c, output_c_aktv,
-                       output_d, output_d_aktv
+                       hlc_clock, bEn, bTimer
                        );
 
     always begin
         #1 clk = ~clk;
-    end
-
-    always @(llc_stage) begin
-        $display("time: %0t, llc_stage: %0d, (a, newA): (%0d, %0d), output_aktv: (%0d, %0d, %0d), b: %0d, c: %0d, d: %0d",
-         $time, llc_stage, input_a, new_input, 
-         output_b_aktv, output_c_aktv, output_d_aktv, 
-         output_b, output_c, output_d);
     end
 
     // LLC runs 4X faster than HLC so the whole monitor runs at 1/4th of the clock frequency
