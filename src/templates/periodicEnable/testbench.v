@@ -8,14 +8,17 @@ module testbench;
     reg new_input;
 
     wire hlc_clock;
+    wire signed [63:0] hlc_clock_cnt;
     wire signed [63:0] bTimer;
     wire bEn;
     wire bTimerRst;
     wire signed [63:0] bTimerCurTime;
+    wire curEn;
 
     topEntity monitor (clk, rst, en,
                        input_a, new_input,
-                       hlc_clock, bEn, bTimer, bTimerRst, bTimerCurTime
+                       hlc_clock, hlc_clock_cnt,
+                       bEn, bTimer, bTimerRst, bTimerCurTime, curEn
                        );
 
     always begin

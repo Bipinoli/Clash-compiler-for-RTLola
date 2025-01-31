@@ -11,41 +11,49 @@ module topEntity
     , input  input0_1
 
       // Outputs
-    , output wire  result_0
+    , output wire  result_0_0
+    , output wire signed [63:0] result_0_1
     , output wire  result_1_0
     , output wire signed [63:0] result_1_1
     , output wire  result_1_2
     , output wire signed [63:0] result_1_3
+    , output wire  result_1_4
     );
-  reg [129:0] result_2 = {1'b0,   64'sd0,   1'b0,   64'sd0};
-  wire [129:0] result_3;
-  // periodicEnable/periodicEnable.hs:61:1-118
-  wire [129:0] t;
-  // periodicEnable/periodicEnable.hs:61:1-118
+  reg [130:0] result_2 = {1'b0,   64'sd0,   1'b0,   64'sd0,   1'b0};
+  wire [130:0] result_3;
+  // periodicEnable/periodicEnable.hs:70:1-131
+  wire  b;
+  // periodicEnable/periodicEnable.hs:70:1-131
+  wire [130:0] t;
+  // periodicEnable/periodicEnable.hs:70:1-131
+  wire  curEn;
+  // periodicEnable/periodicEnable.hs:70:1-131
   wire signed [63:0] curTime;
   wire  result_4;
   wire signed [63:0] result_5;
   wire signed [63:0] x;
   reg signed [63:0] result_6 = 64'sd2000;
   wire  result_7;
-  // periodicEnable/periodicEnable.hs:61:1-118
-  wire  b;
-  // periodicEnable/periodicEnable.hs:61:1-118
-  wire  c$b_app_arg;
-  wire [129:0] result_8;
-  // periodicEnable/periodicEnable.hs:12:1-73
+  // periodicEnable/periodicEnable.hs:70:1-131
   wire  b_0;
-  wire  result_9;
-  // periodicEnable/periodicEnable.hs:19:5-74
+  // periodicEnable/periodicEnable.hs:70:1-131
+  wire  en_0;
+  // periodicEnable/periodicEnable.hs:70:1-131
+  wire  c$b_app_arg;
+  wire [130:0] result_8;
+  // periodicEnable/periodicEnable.hs:13:1-76
   wire  b_1;
-  // periodicEnable/periodicEnable.hs:19:5-74
-  wire signed [63:0] t_0;
+  wire [64:0] result_9;
+  // periodicEnable/periodicEnable.hs:24:5-66
+  wire  b_2;
   wire signed [63:0] result_10;
+  wire signed [63:0] x_0;
   reg signed [63:0] result_11 = 64'sd0;
-  reg  result_12 = 1'b0;
+  reg [64:0] result_12 = {1'b0,   64'sd0};
   wire [64:0] input0;
-  wire [130:0] result;
-  wire [129:0] result_1_4;
+  wire [195:0] result;
+  wire [64:0] result_0;
+  wire [130:0] result_1;
 
   assign input0 = {input0_0,   input0_1};
 
@@ -54,20 +62,24 @@ module topEntity
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_2_register
     if ( rst) begin
-      result_2 <= {1'b0,   64'sd0,   1'b0,   64'sd0};
+      result_2 <= {1'b0,   64'sd0,   1'b0,   64'sd0,   1'b0};
     end else if (en) begin
       result_2 <= result_3;
     end
   end
   // register end
 
-  assign result_3 = result_12 ? t : {result_2[129:129],
-                                     result_6,   result_7,   curTime};
+  assign result_3 = b ? t : {curEn,   result_6,
+                             result_7,   curTime,   curEn};
+
+  assign b = en_0 & ($signed(result_12[63:0]) == 64'sd0);
 
   assign t = {result_4,   result_6,   result_7,
-              curTime};
+              curTime,   curEn};
 
-  assign curTime = $signed(result_2[128:65]);
+  assign curEn = result_2[130:130];
+
+  assign curTime = $signed(result_2[129:66]);
 
   assign result_4 = c$b_app_arg ? 1'b1 : 1'b0;
 
@@ -85,25 +97,28 @@ module topEntity
   end
   // register end
 
-  assign result_7 = b ? 1'b1 : 1'b0;
+  assign result_7 = b_0 ? 1'b1 : 1'b0;
 
-  assign b = result_12 & c$b_app_arg;
+  assign b_0 = en_0 & c$b_app_arg;
+
+  assign en_0 = result_12[64:64];
 
   assign c$b_app_arg = result_6 >= 64'sd100000;
 
-  assign result_8 = {result_2[129:129],
-                     $signed(result_2[128:65]),   result_2[64:64],
-                     $signed(result_2[63:0])};
+  assign result_8 = {result_2[130:130],
+                     $signed(result_2[129:66]),   result_2[65:65],
+                     $signed(result_2[64:1]),   result_2[0:0]};
 
-  assign b_0 = result_11 < 64'sd2;
+  assign b_1 = result_11 < 64'sd6;
 
-  assign result_9 = b_0 ? 1'b1 : 1'b0;
+  assign result_9 = b_1 ? {1'b1,
+                           result_11} : {1'b0,   result_11};
 
-  assign b_1 = result_11 < 64'sd4;
+  assign b_2 = result_11 < 64'sd12;
 
-  assign t_0 = result_11 + 64'sd1;
+  assign result_10 = b_2 ? (x_0 + 64'sd1) : 64'sd0;
 
-  assign result_10 = b_1 ? t_0 : 64'sd0;
+  assign x_0 = result_11;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_11_register
@@ -118,24 +133,30 @@ module topEntity
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_12_register
     if ( rst) begin
-      result_12 <= 1'b0;
+      result_12 <= {1'b0,   64'sd0};
     end else if (en) begin
       result_12 <= result_9;
     end
   end
   // register end
 
-  assign result_0 = result[130:130];
+  assign result_0 = result[195:131];
 
-  assign result_1_4 = result[129:0];
+  assign result_1 = result[130:0];
 
-  assign result_1_0 = result_1_4[129:129];
+  assign result_0_0 = result_0[64:64];
 
-  assign result_1_1 = $signed(result_1_4[128:65]);
+  assign result_0_1 = $signed(result_0[63:0]);
 
-  assign result_1_2 = result_1_4[64:64];
+  assign result_1_0 = result_1[130:130];
 
-  assign result_1_3 = $signed(result_1_4[63:0]);
+  assign result_1_1 = $signed(result_1[129:66]);
+
+  assign result_1_2 = result_1[65:65];
+
+  assign result_1_3 = $signed(result_1[64:1]);
+
+  assign result_1_4 = result_1[0:0];
 
 
 endmodule
