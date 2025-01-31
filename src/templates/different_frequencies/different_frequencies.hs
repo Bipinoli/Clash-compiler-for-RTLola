@@ -27,10 +27,12 @@ clockDivider factor = generateClock $ systemClockPeriod * factor
 
 
 timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
-timer reset = register 0 (mux reset 0 nextTime)
+timer reset = register deltaTime (mux reset (pure deltaTime) nextTime)
     where 
         nextTime = timer reset + pure deltaTime
         deltaTime = fromInteger systemClockPeriod :: Int
+
+
 
 
 ---------------------------------------------------------------
@@ -50,64 +52,68 @@ slowClock = clockDivider 5
 -- It talke one cycle for RTL to HLC and we want one cycle in the end to output the evaluated streams
 -- Hence, the LLC should run (n+2) times faster than HLC, where n = number of evaluation layers
 -- By sustaining the HLC controls like this we also don't need any buffer or queue to interface them
+-- Note: due to periodEnable singals in HLC we need one more RTL in HLC so (n+3)
 
 -- It is important to note that the input data must be proided by stage = 0 to work with new data on the current LLC loop
-evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool) -> Signal dom (Bool, (Data, Bool, Bool, Bool, Int), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
+evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool) -> Signal dom (Bool, (Data, Bool, Bool, Bool, Int, Int, Int, Bool, Bool, Bool), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
 evaluator input0 = bundle(slowClock, controls, outputs)
     where
         outputs = llc controls stage
         controls = hlc slowClock input0
-        stage = delay 0 (hotPotato 4)
+        stage = delay 0 (hotPotato 5)
 
 
-hlc :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Bool) -> Signal dom (Data, Bool, Bool, Bool, Int)
-hlc en input0 = register (0, False, False, False, 0) (mux en newResult oldResult)
+---------------------------------------------------------------
+
+-- since there is one more RTL for periodicEnable in HLC we should wait 1 more cycle until data consumtion in LLC
+hlc :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Bool) -> Signal dom (Data, Bool, Bool, Bool, Int, Int, Int, Bool, Bool, Bool)
+hlc en input0 = register (0, False, False, False, 0, 0, 0, False, False, False) (mux en newResult oldResult)
     where
-        oldResult = hlc en input0
-        newResult = bundle (a, enB, enC, enD, bTimer)
+        oldResult = bundle (oldA, oldEnB, oldEnC, oldEnD, bTimer, cTimer, dTimer, bTimerRst, cTimerRst, dTimerRst)
+        (oldA, oldEnB, oldEnC, oldEnD, oldBTimer, oldCTimer, oldDTimer, _, _, _) = unbundle (hlc en input0)
+        newResult = bundle (a, enB, enC, enD, bTimer, cTimer, dTimer, bTimerRst, cTimerRst, dTimerRst)
         (a, aktv_x) = unbundle input0
 
-        -- TODO: why are the enable singals not working as expected???
-        -- Why does enable signal not sustain until the hlc clock?
-        enB = mux (bTimer .>=. bPeriodNs) (pure True) (pure False)
-        bTimer = timer bTimerRst
-        bTimerRst = mux (bTimer .>=. bPeriodNs) (pure True) (pure False)
-
-        enC = mux (cTimer .>=. cPeriodNs) (pure True) (pure False)
-        cTimer = timer cTimerRst
-        cTimerRst = mux (cTimer .>=. cPeriodNs) (pure True) (pure False)
-
-        enD = mux (dTimer .>=. dPeriodNs) (pure True) (pure False)
-        dTimer = timer dTimerRst
-        dTimerRst = mux (dTimer .>=. dPeriodNs) (pure True) (pure False)
+        (enB, bTimer ) = unbundle (periodicEnable en bPeriodNs)
+        (enC, cTimer) = unbundle (periodicEnable en cPeriodNs)
+        (enD, dTimer, dTimerRst) = unbundle (periodicEnable en dPeriodNs)
 
         bPeriodNs = 100000 -- 10Hz in ns
         cPeriodNs = 200000 -- 5Hz in ns
         dPeriodNs = 400000 -- 2.5Hz in ns
 
 
-enableCheck :: HiddenClockResetEnable dom => Signal dom Int
-enableCheck = timerResult
-    where 
-        timerResult = timer timerRst
-        timerRst = mux (timerResult .>=. thold) (pure True) (pure False)
-        thold = 200000000000
+periodicEnable :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom (Bool, Int)
+periodicEnable en period = register initState (mux en nextState curState)
+        where
+            initState = (False, 0)
+            nextState = bundle (nextEn, nextTime)
+            curState = bundle (curEn, nextTime)
+
+            (curEn, curTime) = unbundle (periodicEnable en period)
+            nextEn = mux (curTime .>=. period) (pure True) (pure False)
+            reset = mux (en .&&. (curTime .>=. period)) (pure True) (pure False)
+            nextTime = timer reset
 
 
-llc :: HiddenClockResetEnable dom => Signal dom (Data, Bool, Bool, Bool, Int) -> Signal dom Data -> Signal dom (Int, (Data, Bool), (Data, Bool), (Data, Bool))
+---------------------------------------------------------------
+
+
+llc :: HiddenClockResetEnable dom => Signal dom (Data, Bool, Bool, Bool, Int, Int, Int, Bool, Bool, Bool) -> Signal dom Data -> Signal dom (Int, (Data, Bool), (Data, Bool), (Data, Bool))
 llc controls stage = bundle (stage, resultB, resultC, resultD)
     where 
         resultB = bundle (outB, aktvB)
         resultC = bundle (outC, aktvC)
         resultD = bundle (outD, aktvD)
-        -- b & c are in the evaluation layer 1
-        outB = evaluateB ((stage .==. pure 1) .&&. enB) a
-        outC = evaluateC ((stage .==. pure 1) .&&. enC) a
-        -- d is in evaluation layer 2
-        outD = evaluateD ((stage .==. pure 2) .&&. enD) (bundle (outB, outC))
-        -- output stage
-        (aktvB, aktvC, aktvD) = unbundle $ mux (stage .==. pure 3) (bundle (enB, enC, enD)) (bundle (pure False, pure False, pure False)) 
-        (a, enB, enC, enD, _) = unbundle controls
+        -- 2 cycles for RTL in HLC i.e stage = 0 & stage = 1
+        -- b & c are in the evaluation layer 1 -> stage = 2
+        outB = evaluateB ((stage .==. pure 2) .&&. enB) a
+        outC = evaluateC ((stage .==. pure 2) .&&. enC) a
+        -- d is in evaluation layer 2 -> stage = 3
+        outD = evaluateD ((stage .==. pure 3) .&&. enD) (bundle (outB, outC))
+        -- output stage -> stage = 4
+        (aktvB, aktvC, aktvD) = unbundle $ mux (stage .==. pure 4) (bundle (enB, enC, enD)) (bundle (pure False, pure False, pure False)) 
+        (a, enB, enC, enD, _, _, _, _, _, _) = unbundle controls
 
 
 evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data
@@ -133,5 +139,5 @@ evaluateD en inpt = register 10 (mux en (b + c) oldVal)
 
 
 topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
-    Signal MyDomain (Data, Bool) -> Signal MyDomain (Bool, (Data, Bool, Bool, Bool, Int), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
+    Signal MyDomain (Data, Bool) -> Signal MyDomain (Bool, (Data, Bool, Bool, Bool, Int, Int, Int, Bool, Bool, Bool), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
 topEntity clk rst en input0 = exposeClockResetEnable (evaluator input0) clk rst en

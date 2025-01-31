@@ -10,10 +10,12 @@ module testbench;
     wire hlc_clock;
     wire signed [63:0] bTimer;
     wire bEn;
+    wire bTimerRst;
+    wire signed [63:0] bTimerCurTime;
 
     topEntity monitor (clk, rst, en,
                        input_a, new_input,
-                       hlc_clock, bEn, bTimer
+                       hlc_clock, bEn, bTimer, bTimerRst, bTimerCurTime
                        );
 
     always begin

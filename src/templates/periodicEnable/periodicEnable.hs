@@ -1,4 +1,4 @@
-module Delete where
+module PeriodicEnable where
 
 import Clash.Prelude
 
@@ -25,10 +25,18 @@ clockDivider factor = generateClock $ systemClockPeriod * factor
 
 
 timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
-timer reset = register 0 (mux reset 0 nextTime)
+timer reset = register deltaTime (mux reset (pure deltaTime) nextTime)
     where 
         nextTime = timer reset + pure deltaTime
         deltaTime = fromInteger systemClockPeriod :: Int
+
+timerTest :: HiddenClockResetEnable dom => Signal dom Int
+timerTest = timerVal
+    where 
+        timerVal = timer reset
+        reset = mux (timerVal .>=. thold) (pure True) (pure False)
+        thold = 100000
+-- Clashi Test: sampleN @System 300 timerTest
 
 
 type Data = Int
@@ -37,32 +45,35 @@ slowClock :: HiddenClockResetEnable dom => Signal dom Bool
 slowClock = clockDivider 5
 
 
-evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool) -> Signal dom (Bool, (Bool, Int))
+evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool) -> Signal dom (Bool, (Bool, Int, Bool, Int))
 evaluator input0 = bundle(slowClock, controls)
     where
         controls = hlc slowClock input0
 
 
-hlc :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Bool) -> Signal dom (Bool, Int)
-hlc en input0 = bundle (bEn, bTimer)
+hlc :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Bool) -> Signal dom (Bool, Int, Bool, Int)
+hlc en input0 = bundle (bEn, bTimer, bTimerRst, bCurTime)
     where
-        (bEn, bTimer, _) = unbundle (periodicEnable en bPeriodNs)
+        (bEn, bTimer, bTimerRst, bCurTime) = unbundle (periodicEnable en bPeriodNs)
         bPeriodNs = 100000 -- 10Hz in ns
 
 
-periodicEnable :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom (Bool, Int, Bool)
+-- NOTE:
+-- Output periodic enable singal must sustain until next enable input
+-- Timer should immediately restart without being sustained
+periodicEnable :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom (Bool, Int, Bool, Int)
 periodicEnable en period = register initState (mux en nextState curState)
         where
-            initState = (False, 0, False)
-            nextState = bundle (nextEn, nextTime, nextRst)
-            curState = bundle (curEn, nextTime, curRst)
+            initState = (False, 0, False, 0)
+            nextState = bundle (nextEn, nextTime, reset, curTime)
+            curState = bundle (curEn, nextTime, reset, curTime)
 
-            (curEn, curTime, curRst) = unbundle (periodicEnable en period)
-            nextEn = mux (curTime .>=. period) (pure True) (pure False)
-            nextRst = mux (en .&&. (curTime .>=. period)) (pure True) (pure False)
-            nextTime = timer nextRst
+            (curEn, curTime, _, _) = unbundle (periodicEnable en period)
+            nextEn = mux (nextTime .>=. period) (pure True) (pure False)
+            reset = mux (en .&&. (nextTime .>=. period)) (pure True) (pure False)
+            nextTime = timer reset
 
 
 topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
-    Signal MyDomain (Data, Bool) -> Signal MyDomain (Bool, (Bool, Int))
+    Signal MyDomain (Data, Bool) -> Signal MyDomain (Bool, (Bool, Int, Bool, Int))
 topEntity clk rst en input0 = exposeClockResetEnable (evaluator input0) clk rst en

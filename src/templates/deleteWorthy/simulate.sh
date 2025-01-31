@@ -1,5 +1,0 @@
-#!/bin/bash
-
-rm -f a.out &&
-iverilog -o a.out ./verilog/Delete.topEntity/topEntity.v testbench.v &&
-vvp a.out
