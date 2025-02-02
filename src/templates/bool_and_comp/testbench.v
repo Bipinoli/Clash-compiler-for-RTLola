@@ -8,7 +8,7 @@ module testbench;
     reg new_input_a;
     reg input_b;
     reg new_input_b;
-    reg signed [63:0] input_id;
+    reg signed [7:0] input_id;
     reg new_input_id;
 
     wire output_lt;
@@ -16,7 +16,7 @@ module testbench;
     wire output_neq;
     wire output_not_a;
     wire output_a_impl_b;
-    wire signed [63:0] output_time_stream;
+    wire signed [7:0] output_time_stream;
  
     wire output_lt_aktv;
     wire output_gt_aktv;
@@ -29,7 +29,7 @@ module testbench;
     wire signed [63:0] hlc_clock_cnt;
     wire hlc_a;
     wire hlc_b;
-    wire signed [63:0] hlc_id;
+    wire signed [7:0] hlc_id;
     wire hlc_en_lt;
     wire hlc_en_gt;
     wire hlc_en_neq;

@@ -2,7 +2,10 @@ module BoolAndComp where
 
 import Clash.Prelude
 
+
+
 ---------------------------------------------------------------
+
 
 -- Create a clock domain with 2 microseconds period (500 kHz) to match the testbench
 createDomain vSystem{vName="MyDomain", vPeriod=2000} -- period in nanoseconds
@@ -46,23 +49,28 @@ slowClock = clockDivider 5
 
 ---------------------------------------------------------------
 
+type DataAB = Bool
+type DataId = Signed 8
+
+---------------------------------------------------------------
+
 
 evaluator :: HiddenClockResetEnable dom => 
-    Signal dom ((Bool, Bool), (Bool, Bool), (Int, Bool)) -> 
+    Signal dom ((DataAB, Bool), (DataAB, Bool), (DataId, Bool)) -> 
     Signal dom (
         (Bool, Int),
         (
-            Bool, Bool, Int, 
+            DataAB, DataAB, DataId, 
             Bool, Bool, Bool, Bool, Bool, Bool
         ),
         (
             Int,
-            (Bool, Bool), 
-            (Bool, Bool),
-            (Bool, Bool),
-            (Bool, Bool),
-            (Bool, Bool),
-            (Int, Bool)
+            (DataAB, Bool), 
+            (DataAB, Bool),
+            (DataAB, Bool),
+            (DataAB, Bool),
+            (DataAB, Bool),
+            (DataId, Bool)
         )
     )
 evaluator input0 = bundle(hlcClk, controls, outputs)
@@ -77,8 +85,8 @@ evaluator input0 = bundle(hlcClk, controls, outputs)
 
 hlc :: HiddenClockResetEnable dom => 
     Signal dom (Bool, Int) -> 
-    Signal dom ((Bool, Bool), (Bool, Bool), (Int, Bool)) ->
-    Signal dom (Bool, Bool, Int, 
+    Signal dom ((DataAB, Bool), (DataAB, Bool), (DataId, Bool)) ->
+    Signal dom (DataAB, DataAB, DataId, 
                 Bool, Bool, Bool, Bool, Bool, Bool)
 hlc hlcClk input0 = register (False, False, 0, False, False, False, False, False, False) (mux en newResult oldResult)
     where
@@ -119,17 +127,20 @@ periodicEnable hlcClk period = register initState (mux (en .&&. (cnt .==. pure 0
 ---------------------------------------------------------------
 
 llc :: HiddenClockResetEnable dom => 
-    Signal dom (Bool, Bool, Int, 
-                Bool, Bool, Bool, Bool, Bool, Bool) -> 
+    Signal dom (
+        DataAB, DataAB, DataId, 
+        Bool, Bool, Bool, Bool, Bool, Bool
+    ) -> 
     Signal dom Int -> 
-    Signal dom (Int,
-                (Bool, Bool), 
-                (Bool, Bool),
-                (Bool, Bool),
-                (Bool, Bool),
-                (Bool, Bool),
-                (Int, Bool)
-                )
+    Signal dom (
+        Int,
+        (DataAB, Bool), 
+        (DataAB, Bool),
+        (DataAB, Bool),
+        (DataAB, Bool),
+        (DataAB, Bool),
+        (DataId, Bool)
+    )
 llc controls stage = bundle (stage, resultLt, resultGt, resultNeq, resultNotA, resultAImplB, resultTimeStream)
     where 
         resultLt = bundle (outLt, aktvLt)
@@ -154,37 +165,37 @@ llc controls stage = bundle (stage, resultLt, resultGt, resultNeq, resultNotA, r
         (a, b, id, enLt, enGt, enNeq, enNotA, enAImplB, enTimeStream) = unbundle controls
 
 
-evaluateAImplB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Bool, Bool) -> Signal dom Bool
+evaluateAImplB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (DataAB, DataAB) -> Signal dom DataAB
 evaluateAImplB en inpt = register False (mux en (fmap not a .||. b) oldVal)
     where 
         oldVal = evaluateAImplB en inpt
         (a, b) = unbundle inpt
 
-evaluateNotA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom Bool
+evaluateNotA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataAB -> Signal dom DataAB
 evaluateNotA en inpt = register False (mux en (fmap not a) oldVal)
     where 
         oldVal = evaluateNotA en inpt
         a = inpt
 
-evaluateTimeStream :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
+evaluateTimeStream :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataId -> Signal dom DataId
 evaluateTimeStream en inpt = register 0 (mux en id oldVal)
     where 
         oldVal = evaluateTimeStream en inpt
         id = inpt
 
-evaluateGt :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Bool
+evaluateGt :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataId -> Signal dom DataAB
 evaluateGt en inpt = register False (mux en (id .>. pure 5) oldVal)
     where 
         oldVal = evaluateGt en inpt
         id = inpt
 
-evaluateLt :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Bool
+evaluateLt :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataId -> Signal dom DataAB
 evaluateLt en inpt = register False (mux en (id .<. pure 5) oldVal)
     where 
         oldVal = evaluateLt en inpt
         id = inpt
 
-evaluateNeq :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Bool, Bool) -> Signal dom Bool
+evaluateNeq :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (DataAB, DataAB) -> Signal dom DataAB
 evaluateNeq en inpt = register False (mux en (lt .||. gt) oldVal)
     where 
         oldVal = evaluateNeq en inpt
@@ -195,21 +206,21 @@ evaluateNeq en inpt = register False (mux en (lt .||. gt) oldVal)
 
 
 topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
-    Signal MyDomain ((Bool, Bool), (Bool, Bool), (Int, Bool)) -> 
+    Signal MyDomain ((DataAB, Bool), (DataAB, Bool), (DataId, Bool)) -> 
     Signal MyDomain (
         (Bool, Int),
         (
-            Bool, Bool, Int, 
+            DataAB, DataAB, DataId, 
             Bool, Bool, Bool, Bool, Bool, Bool
         ),
         (
             Int,
-            (Bool, Bool), 
-            (Bool, Bool),
-            (Bool, Bool),
-            (Bool, Bool),
-            (Bool, Bool),
-            (Int, Bool)
+            (DataAB, Bool), 
+            (DataAB, Bool),
+            (DataAB, Bool),
+            (DataAB, Bool),
+            (DataAB, Bool),
+            (DataId, Bool)
         )
     )
 topEntity clk rst en input0 = exposeClockResetEnable (evaluator input0) clk rst en
