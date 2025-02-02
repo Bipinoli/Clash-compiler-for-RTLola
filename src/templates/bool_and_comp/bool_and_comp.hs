@@ -47,14 +47,24 @@ slowClock = clockDivider 5
 ---------------------------------------------------------------
 
 
-evaluator :: HiddenClockResetEnable dom => Signal dom ((Bool, Bool), (Bool, Bool), (Int, Bool)) -> 
-    Signal dom ((Bool, Bool), 
-                (Bool, Bool),
-                (Bool, Bool),
-                (Bool, Bool),
-                (Bool, Bool),
-                (Int, Bool)
-                )
+evaluator :: HiddenClockResetEnable dom => 
+    Signal dom ((Bool, Bool), (Bool, Bool), (Int, Bool)) -> 
+    Signal dom (
+        (Bool, Int),
+        (
+            Bool, Bool, Int, 
+            Bool, Bool, Bool, Bool, Bool, Bool
+        ),
+        (
+            Int,
+            (Bool, Bool), 
+            (Bool, Bool),
+            (Bool, Bool),
+            (Bool, Bool),
+            (Bool, Bool),
+            (Int, Bool)
+        )
+    )
 evaluator input0 = bundle(hlcClk, controls, outputs)
     where
         outputs = llc controls stage
@@ -66,14 +76,15 @@ evaluator input0 = bundle(hlcClk, controls, outputs)
 ---------------------------------------------------------------
 
 hlc :: HiddenClockResetEnable dom => 
-    Signal dom Bool -> 
+    Signal dom (Bool, Int) -> 
     Signal dom ((Bool, Bool), (Bool, Bool), (Int, Bool)) ->
     Signal dom (Bool, Bool, Int, 
                 Bool, Bool, Bool, Bool, Bool, Bool)
 hlc hlcClk input0 = register (False, False, 0, False, False, False, False, False, False) (mux en newResult oldResult)
     where
-        oldResult = hlc en input0
-        newResult = bundle (a, b, id, enLt, enGt, enNeq,  enA, enB, enC)
+        oldResult = hlc hlcClk input0
+        (en, _) = unbundle hlcClk
+        newResult = bundle (a, b, id, enLt, enGt, enNeq, enNotA, enAImplB, enTimeStream)
         (aa, bb, idd) = unbundle input0
         (a, aktvA) = unbundle aa
         (b, aktvB) = unbundle bb
@@ -111,49 +122,94 @@ llc :: HiddenClockResetEnable dom =>
     Signal dom (Bool, Bool, Int, 
                 Bool, Bool, Bool, Bool, Bool, Bool) -> 
     Signal dom Int -> 
-    Signal dom ((Bool, Bool), 
+    Signal dom (Int,
+                (Bool, Bool), 
                 (Bool, Bool),
                 (Bool, Bool),
                 (Bool, Bool),
                 (Bool, Bool),
                 (Int, Bool)
                 )
-llc controls stage = bundle (stage, resultB, resultC, resultD)
+llc controls stage = bundle (stage, resultLt, resultGt, resultNeq, resultNotA, resultAImplB, resultTimeStream)
     where 
-        resultB = bundle (outB, aktvB)
-        resultC = bundle (outC, aktvC)
-        resultD = bundle (outD, aktvD)
+        resultLt = bundle (outLt, aktvLt)
+        resultGt = bundle (outGt, aktvGt)
+        resultNeq = bundle (outNeq, aktvNeq)
+        resultNotA = bundle (outNotA, aktvNotA)
+        resultAImplB = bundle (outAImplB, aktvAImplB)
+        resultTimeStream = bundle (outTimeStream, aktvTimeStream)
         -- stage 0 & stage 1: HLC RTL tranfers (2 cycles)
         -- stage 2 : layer 1 -> aImplB, notA, timeStream, gt, lt
-
--- TODO: continue from here -> 
-        outAImplB = evaluateAImplB (())   
-
-        outB = evaluateB ((stage .==. pure 2) .&&. enB) a
-        outC = evaluateC ((stage .==. pure 2) .&&. enC) a
+        outAImplB = evaluateAImplB ((stage .==. pure 2) .&&. enAImplB) (bundle (a, b))
+        outNotA = evaluateNotA ((stage .==. pure 2) .&&. enNotA) a
+        outTimeStream = evaluateTimeStream ((stage .==. pure 2) .&&. enTimeStream) id
+        outGt = evaluateGt ((stage .==. pure 2) .&&. enGt) id
+        outLt = evaluateLt ((stage .==. pure 2) .&&. enLt) id
         -- stage 3: layer 2 -> neq
-        outD = evaluateD ((stage .==. pure 3) .&&. enD) (bundle (outB, outC))
+        outNeq = evaluateNeq ((stage .==. pure 3) .&&. enNeq) (bundle (outLt, outGt))
         -- stage 4: output
-        (aktvB, aktvC, aktvD) = unbundle $ mux (stage .==. pure 4) (bundle (enB, enC, enD)) (bundle (pure False, pure False, pure False)) 
-        (a, enB, enC, enD, _, _, _) = unbundle controls
+        (aktvLt, aktvGt, aktvNeq, aktvNotA, aktvAImplB, aktvTimeStream) = unbundle $ mux (stage .==. pure 4) 
+            (bundle (enLt, enGt, enNeq, enNotA, enAImplB, enTimeStream)) 
+            (bundle (pure False, pure False, pure False, pure False, pure False, pure False))  
+        (a, b, id, enLt, enGt, enNeq, enNotA, enAImplB, enTimeStream) = unbundle controls
 
 
-evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data
-evaluateB en inpt = register 10 (mux en a oldVal)
+evaluateAImplB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Bool, Bool) -> Signal dom Bool
+evaluateAImplB en inpt = register False (mux en (fmap not a .||. b) oldVal)
     where 
-        oldVal = evaluateB en inpt
+        oldVal = evaluateAImplB en inpt
+        (a, b) = unbundle inpt
+
+evaluateNotA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom Bool
+evaluateNotA en inpt = register False (mux en (fmap not a) oldVal)
+    where 
+        oldVal = evaluateNotA en inpt
         a = inpt
 
-evaluateC :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data
-evaluateC en inpt = register 10 (mux en a oldVal)
+evaluateTimeStream :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
+evaluateTimeStream en inpt = register 0 (mux en id oldVal)
     where 
-        oldVal = evaluateB en inpt
-        a = inpt
+        oldVal = evaluateTimeStream en inpt
+        id = inpt
 
-evaluateD :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Data) -> Signal dom Data
-evaluateD en inpt = register 10 (mux en (b + c) oldVal)
+evaluateGt :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Bool
+evaluateGt en inpt = register False (mux en (id .>. pure 5) oldVal)
     where 
-        oldVal = evaluateD en inpt
-        (b, c) = unbundle inpt
+        oldVal = evaluateGt en inpt
+        id = inpt
+
+evaluateLt :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Bool
+evaluateLt en inpt = register False (mux en (id .<. pure 5) oldVal)
+    where 
+        oldVal = evaluateLt en inpt
+        id = inpt
+
+evaluateNeq :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Bool, Bool) -> Signal dom Bool
+evaluateNeq en inpt = register False (mux en (lt .||. gt) oldVal)
+    where 
+        oldVal = evaluateNeq en inpt
+        (lt, gt) = unbundle inpt
 
 
+---------------------------------------------------------------
+
+
+topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
+    Signal MyDomain ((Bool, Bool), (Bool, Bool), (Int, Bool)) -> 
+    Signal MyDomain (
+        (Bool, Int),
+        (
+            Bool, Bool, Int, 
+            Bool, Bool, Bool, Bool, Bool, Bool
+        ),
+        (
+            Int,
+            (Bool, Bool), 
+            (Bool, Bool),
+            (Bool, Bool),
+            (Bool, Bool),
+            (Bool, Bool),
+            (Int, Bool)
+        )
+    )
+topEntity clk rst en input0 = exposeClockResetEnable (evaluator input0) clk rst en
