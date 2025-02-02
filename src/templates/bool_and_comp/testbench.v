@@ -54,7 +54,7 @@ module testbench;
                        output_neq, output_neq_aktv,
                        output_not_a, output_not_a_aktv,
                        output_a_impl_b, output_a_impl_b_aktv,
-                       output_time_stream, output_time_stream_aktv,
+                       output_time_stream, output_time_stream_aktv
                        );
 
     always begin
@@ -67,7 +67,9 @@ module testbench;
         clk = 0;
         rst = 0;
         en = 0;
-        new_input = 0;
+        new_input_a = 0;
+        new_input_b = 0;
+        new_input_id = 0;
         
         $printtimescale(testbench);
         $dumpvars(0, testbench);
@@ -76,16 +78,59 @@ module testbench;
         #10;
         input_a = 1;
         input_b = 1;
-        input_id = 1;
+        input_id = 2;
         new_input_a = 1;
         new_input_b = 1;
+        new_input_id = 1;
         en = 1;
         #1; 
+        input_a = 0;
+        input_b = 0;
+        input_id = 0;
         new_input_a = 0;
         new_input_b = 0;
         new_input_id = 0;
 
-        #100; // 0.1 seconds
+        #500; // 0.5 ms
+
+        // 5 cycles = 5 * #2;
+        #10;
+        input_a = 1;
+        input_b = 0;
+        input_id = 3;
+        new_input_a = 1;
+        new_input_b = 1;
+        new_input_id = 1;
+        en = 1;
+        #1; 
+        input_a = 0;
+        input_b = 0;
+        input_id = 0;
+        new_input_a = 0;
+        new_input_b = 0;
+        new_input_id = 0;
+
+        #500; // 0.5 ms
+        
+        // 5 cycles = 5 * #2;
+        #10;
+        input_a = 0;
+        input_b = 0;
+        input_id = 4;
+        new_input_a = 1;
+        new_input_b = 0;
+        new_input_id = 1;
+        en = 1;
+        #1; 
+        input_a = 0;
+        input_b = 0;
+        input_id = 0;
+        new_input_a = 0;
+        new_input_b = 0;
+        new_input_id = 0;
+
+        #500; // 0.5 ms
+
         
         #12;
         $finish; 

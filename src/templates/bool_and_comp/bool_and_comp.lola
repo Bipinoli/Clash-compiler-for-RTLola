@@ -12,7 +12,7 @@ output neq := lt || gt // pacing @ID
 output not_a := !a // pacing @a
 output a_impl_b := !a || b // pacing @(a && b)
 
-output time_stream @1Hz := ID.hold().defaults(to: 0)
+output time_stream @1kHz := ID.hold().defaults(to: 0)
 
 
 // -----------------------------------
