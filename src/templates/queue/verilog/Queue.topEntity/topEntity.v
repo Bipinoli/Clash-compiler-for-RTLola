@@ -15,38 +15,50 @@ module topEntity
     , output wire  result_0
     , output wire  result_1
     , output wire signed [63:0] result_2
+    , output wire signed [63:0] result_3_0_0
+    , output wire signed [63:0] result_3_0_1
+    , output wire signed [63:0] result_3_0_2
+    , output wire signed [63:0] result_3_0_3
+    , output wire signed [63:0] result_3_0_4
+    , output wire signed [63:0] result_3_1
     );
   // queue/queue.hs:57:1-78
   reg [383:0] c$ds_app_arg = {{64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0},   64'sd0};
-  wire [449:0] result_6;
+  wire [833:0] result_6;
+  // queue/queue.hs:33:1-7
+  wire [383:0] nextState;
   wire signed [63:0] c$case_alt;
-  reg signed [63:0] c$case_alt_0;
-  wire signed [63:0] c$case_alt_1;
-  wire  c$case_alt_2;
-  reg  c$case_alt_3;
+  wire signed [63:0] c$case_alt_0;
+  wire  c$case_alt_1;
+  reg  c$case_alt_2;
+  wire  c$case_alt_3;
   wire  c$case_alt_4;
-  wire  c$case_alt_5;
-  wire signed [63:0] c$case_alt_6;
-  wire signed [63:0] c$case_alt_7;
-  wire signed [63:0] c$case_alt_8;
   // queue/queue.hs:33:1-7
-  wire  pop;
-  reg signed [63:0] c$case_alt_9;
-  // queue/queue.hs:33:1-7
-  wire signed [63:0] x;
-  // queue/queue.hs:33:1-7
-  wire signed [63:0] cursor;
-  wire [319:0] c$case_alt_10;
-  // queue/queue.hs:33:1-7
-  wire  qMem1;
+  wire [319:0] c$nextMem_case_alt;
   // queue/queue.hs:33:1-7
   wire [319:0] qMem;
   // queue/queue.hs:33:1-7
   wire signed [63:0] qData;
+  // queue/queue.hs:33:1-7
+  wire signed [63:0] c$nextCursor_case_alt;
+  // queue/queue.hs:33:1-7
+  wire  push;
+  // queue/queue.hs:33:1-7
+  wire signed [63:0] c$nextCursor_case_alt_0;
+  // queue/queue.hs:33:1-7
+  wire signed [63:0] c$nextCursor_case_alt_1;
+  // queue/queue.hs:33:1-7
+  wire  pop;
+  // queue/queue.hs:33:1-7
+  wire signed [63:0] x;
+  // queue/queue.hs:33:1-7
+  wire signed [63:0] cursor;
   wire [65:0] c$arg;
   wire signed [63:0] c$tte_rhs;
-  wire [383:0] c$case_alt_sel_alt_t_6;
-  wire [65:0] result;
+  wire [383:0] c$nextMem_case_alt_sel_alt_t_0;
+  wire [449:0] result;
+  wire [383:0] result_3_2;
+  wire [319:0] result_3_0;
 
   assign c$arg = {c$arg_0,   c$arg_1,
                   c$arg_2};
@@ -56,25 +68,20 @@ module topEntity
     if ( eta1) begin
       c$ds_app_arg <= {{64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0},   64'sd0};
     end else if (eta2) begin
-      c$ds_app_arg <= result_6[449:66];
+      c$ds_app_arg <= result_6[833:450];
     end
   end
   // register end
 
-  assign result = result_6[65:0];
+  assign result = result_6[449:0];
 
-  assign result_6 = {{c$case_alt_10,
-                      c$case_alt_6},   {c$case_alt_4,
-                                        c$case_alt_2,   c$case_alt}};
+  assign result_6 = {nextState,   {c$case_alt_3,
+                                   c$case_alt_1,   c$case_alt,   nextState}};
+
+  assign nextState = {c$nextMem_case_alt,
+                      c$nextCursor_case_alt};
 
   assign c$case_alt = pop ? c$case_alt_0 : 64'sd0;
-
-  always @(*) begin
-    case(x)
-      64'sd0 : c$case_alt_0 = 64'sd0;
-      default : c$case_alt_0 = c$case_alt_1;
-    endcase
-  end
 
   // index begin
   wire signed [63:0] vecArray [0:5-1];
@@ -84,58 +91,67 @@ module topEntity
     assign vecArray[(5-1)-i] = qMem[i*64+:64];
   end
   endgenerate
-  assign c$case_alt_1 = vecArray[(x - 64'sd1)];
+  assign c$case_alt_0 = vecArray[(x - 64'sd1)];
   // index end
 
-  assign c$case_alt_2 = pop ? c$case_alt_3 : 1'b0;
+  assign c$case_alt_1 = pop ? c$case_alt_2 : 1'b0;
 
   always @(*) begin
     case(x)
-      64'sd0 : c$case_alt_3 = 1'b0;
-      default : c$case_alt_3 = 1'b1;
+      64'sd0 : c$case_alt_2 = 1'b0;
+      default : c$case_alt_2 = 1'b1;
     endcase
   end
 
-  assign c$case_alt_4 = qMem1 ? c$case_alt_5 : 1'b0;
+  assign c$case_alt_3 = push ? c$case_alt_4 : 1'b0;
 
   assign c$tte_rhs = (x != 64'sd5) ? 64'sd1 : 64'sd0;
 
-  assign c$case_alt_5 = c$tte_rhs[0];
+  assign c$case_alt_4 = c$tte_rhs[0];
 
-  assign c$case_alt_6 = qMem1 ? c$case_alt_7 : c$case_alt_8;
+  assign c$nextMem_case_alt_sel_alt_t_0 = ({qData,qMem});
 
-  assign c$case_alt_7 = pop ? cursor : (x + 64'sd1);
-
-  assign c$case_alt_8 = pop ? c$case_alt_9 : cursor;
-
-  assign pop = c$arg[64:64];
-
-  always @(*) begin
-    case(x)
-      64'sd0 : c$case_alt_9 = 64'sd0;
-      default : c$case_alt_9 = x - 64'sd1;
-    endcase
-  end
-
-  assign x = cursor;
-
-  assign cursor = $signed(c$ds_app_arg[63:0]);
-
-  assign c$case_alt_sel_alt_t_6 = ({qData,qMem});
-
-  assign c$case_alt_10 = qMem1 ? c$case_alt_sel_alt_t_6[383:64] : qMem;
-
-  assign qMem1 = c$arg[65:65];
+  assign c$nextMem_case_alt = push ? c$nextMem_case_alt_sel_alt_t_0[383:64] : qMem;
 
   assign qMem = c$ds_app_arg[383:64];
 
   assign qData = $signed(c$arg[63:0]);
 
-  assign result_0 = result[65:65];
+  assign c$nextCursor_case_alt = push ? c$nextCursor_case_alt_0 : c$nextCursor_case_alt_1;
 
-  assign result_1 = result[64:64];
+  assign push = c$arg[65:65];
 
-  assign result_2 = $signed(result[63:0]);
+  assign c$nextCursor_case_alt_0 = pop ? cursor : (x + 64'sd1);
+
+  assign c$nextCursor_case_alt_1 = pop ? (x - 64'sd1) : cursor;
+
+  assign pop = c$arg[64:64];
+
+  assign x = cursor;
+
+  assign cursor = $signed(c$ds_app_arg[63:0]);
+
+  assign result_0 = result[449:449];
+
+  assign result_1 = result[448:448];
+
+  assign result_2 = $signed(result[447:384]);
+
+  assign result_3_2 = result[383:0];
+
+  assign result_3_0 = result_3_2[383:64];
+
+  assign result_3_1 = $signed(result_3_2[63:0]);
+
+  assign result_3_0_0 = $signed(result_3_0[319:256]);
+
+  assign result_3_0_1 = $signed(result_3_0[255:192]);
+
+  assign result_3_0_2 = $signed(result_3_0[191:128]);
+
+  assign result_3_0_3 = $signed(result_3_0[127:64]);
+
+  assign result_3_0_4 = $signed(result_3_0[63:0]);
 
 
 endmodule

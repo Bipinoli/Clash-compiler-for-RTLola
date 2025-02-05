@@ -39,14 +39,14 @@
         },
         {
             "name": "topEntity.v",
-            "sha256": "9c22eacd55d731f4eb1914bd76884a8de3416c4061bd8e2cebff40845700ae60"
+            "sha256": "73e73e5d9b5fa10603ec212a5bb98f301b38825480feb7ca6428c89f8ece7542"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "591bd437838185f9cd7a1e1ab1c39bd3e8c7fc9a849719e60e3302e187bca845",
+    "hash": "45f82195f631b61ccf79d8c7c7f99f83da2d1c6a4395f0c3051c40bd0043ee9c",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -113,6 +113,48 @@
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_2",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_3_0_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_3_0_1",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_3_0_2",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_3_0_3",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_3_0_4",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_3_1",
                 "type_name": "signed [63:0]",
                 "width": 64
             }

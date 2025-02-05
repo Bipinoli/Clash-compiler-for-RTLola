@@ -11,10 +11,17 @@ module testbench;
     wire push_valid;
     wire pop_valid;
     wire signed [63:0] out;
+    wire signed [63:0] mem0;
+    wire signed [63:0] mem1;
+    wire signed [63:0] mem2;
+    wire signed [63:0] mem3;
+    wire signed [63:0] mem4;
+    wire signed [63:0] cursor;
 
     topEntity monitor (clk, rst, en,
                        push, pop, data,
-                       push_valid, pop_valid, out
+                       push_valid, pop_valid, out,
+                       mem0, mem1, mem2, mem3, mem4, cursor
                     );
 
     always begin
