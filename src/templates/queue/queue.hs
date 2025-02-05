@@ -53,42 +53,29 @@ queueFx state input = (nextState, output)
         (qMem, cursor) = state
         (push, pop, qData) = input
 
-------- TEST -------
-
-state0 :: (QMem, QCursor)
-state0 = (repeat qNullData :: QMem, 0 :: QCursor)
-
-input1 :: QInput
-input1 = (True, False, 10)
-(state1, output1) = queueFx state0 input1
-
-input2 = (False, False, 0) :: QInput
-(state2, output2) = queueFx state1 input2
-
-input3 = (True, False, 20) :: QInput
-(state3, output3) = queueFx state2 input3
-
-input4 = (True, True, 30) :: QInput
-(state4, output4) = queueFx state3 input4
-
-input5 = (False, True, 0) :: QInput
-(state5, output5) = queueFx state4 input5
-
-input6 = (False, True, 0) :: QInput
-(state6, output6) = queueFx state5 input6
-
-input7 = (False, True, 0) :: QInput
-(state7, output7) = queueFx state6 input7
-
-
---------------------
-
 
 queue :: HiddenClockResetEnable dom => Signal dom QInput -> Signal dom QOutput
 queue = mealy queueFx (repeat qNullData :: QMem, 0 :: QCursor)
 
 
--------------------------------------------------------------------------
-
 topEntity :: Clock System -> Reset System -> Enable System -> Signal System QInput -> Signal System QOutput
 topEntity = exposeClockResetEnable queue
+
+---------------------------------- TEST -----------------------------------
+
+nullInput = (False, False, 0) :: QInput
+input1 = (True, False, 10) :: QInput -- push 10
+input2 = (True, False, 20) :: QInput -- push 20
+input3 = (True, False, 30) :: QInput -- push 30
+input4 = (True, True, 40) :: QInput -- push 40 & pop
+input5 = (False, True, 0) :: QInput -- pop
+input6 = (False, True, 0) :: QInput -- pop
+input7 = (False, True, 0) :: QInput -- pop
+input8 = (False, True, 0) :: QInput -- pop
+input9 = (False, True, 0) :: QInput -- pop
+
+-- sampleN sends reset signals for first 2 cycles so null inputs
+inputs :: HiddenClockResetEnable dom => Signal dom QInput
+inputs = fromList [nullInput, nullInput, input1, input2, input3, input4, nullInput, input5, input6, input7, input8, input9] 
+
+outputs = sampleN @System 12 (queue inputs)

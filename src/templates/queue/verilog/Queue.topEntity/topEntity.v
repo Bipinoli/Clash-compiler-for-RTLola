@@ -28,11 +28,12 @@ module topEntity
   // queue/queue.hs:33:1-7
   wire [383:0] nextState;
   wire signed [63:0] c$case_alt;
-  wire signed [63:0] c$case_alt_0;
-  wire  c$case_alt_1;
-  reg  c$case_alt_2;
-  wire  c$case_alt_3;
+  reg signed [63:0] c$case_alt_0;
+  wire signed [63:0] c$case_alt_1;
+  wire  c$case_alt_2;
+  reg  c$case_alt_3;
   wire  c$case_alt_4;
+  wire  c$case_alt_5;
   // queue/queue.hs:33:1-7
   wire [319:0] c$nextMem_case_alt;
   // queue/queue.hs:33:1-7
@@ -49,6 +50,8 @@ module topEntity
   wire signed [63:0] c$nextCursor_case_alt_1;
   // queue/queue.hs:33:1-7
   wire  pop;
+  // queue/queue.hs:33:1-7
+  reg signed [63:0] c$nextCursor_case_alt_2;
   // queue/queue.hs:33:1-7
   wire signed [63:0] x;
   // queue/queue.hs:33:1-7
@@ -75,13 +78,20 @@ module topEntity
 
   assign result = result_6[449:0];
 
-  assign result_6 = {nextState,   {c$case_alt_3,
-                                   c$case_alt_1,   c$case_alt,   nextState}};
+  assign result_6 = {nextState,   {c$case_alt_4,
+                                   c$case_alt_2,   c$case_alt,   nextState}};
 
   assign nextState = {c$nextMem_case_alt,
                       c$nextCursor_case_alt};
 
   assign c$case_alt = pop ? c$case_alt_0 : 64'sd0;
+
+  always @(*) begin
+    case(x)
+      64'sd0 : c$case_alt_0 = 64'sd0;
+      default : c$case_alt_0 = c$case_alt_1;
+    endcase
+  end
 
   // index begin
   wire signed [63:0] vecArray [0:5-1];
@@ -91,23 +101,23 @@ module topEntity
     assign vecArray[(5-1)-i] = qMem[i*64+:64];
   end
   endgenerate
-  assign c$case_alt_0 = vecArray[(x - 64'sd1)];
+  assign c$case_alt_1 = vecArray[(x - 64'sd1)];
   // index end
 
-  assign c$case_alt_1 = pop ? c$case_alt_2 : 1'b0;
+  assign c$case_alt_2 = pop ? c$case_alt_3 : 1'b0;
 
   always @(*) begin
     case(x)
-      64'sd0 : c$case_alt_2 = 1'b0;
-      default : c$case_alt_2 = 1'b1;
+      64'sd0 : c$case_alt_3 = 1'b0;
+      default : c$case_alt_3 = 1'b1;
     endcase
   end
 
-  assign c$case_alt_3 = push ? c$case_alt_4 : 1'b0;
+  assign c$case_alt_4 = push ? c$case_alt_5 : 1'b0;
 
   assign c$tte_rhs = (x != 64'sd5) ? 64'sd1 : 64'sd0;
 
-  assign c$case_alt_4 = c$tte_rhs[0];
+  assign c$case_alt_5 = c$tte_rhs[0];
 
   assign c$nextMem_case_alt_sel_alt_t_0 = ({qData,qMem});
 
@@ -123,9 +133,16 @@ module topEntity
 
   assign c$nextCursor_case_alt_0 = pop ? cursor : (x + 64'sd1);
 
-  assign c$nextCursor_case_alt_1 = pop ? (x - 64'sd1) : cursor;
+  assign c$nextCursor_case_alt_1 = pop ? c$nextCursor_case_alt_2 : cursor;
 
   assign pop = c$arg[64:64];
+
+  always @(*) begin
+    case(x)
+      64'sd0 : c$nextCursor_case_alt_2 = 64'sd0;
+      default : c$nextCursor_case_alt_2 = x - 64'sd1;
+    endcase
+  end
 
   assign x = cursor;
 
