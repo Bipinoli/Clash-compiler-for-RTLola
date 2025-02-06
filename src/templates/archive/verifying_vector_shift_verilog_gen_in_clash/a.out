@@ -1,0 +1,142 @@
+#! /usr/local/Cellar/icarus-verilog/12.0/bin/vvp
+:ivl_version "12.0 (stable)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 13;
+:vpi_module "/usr/local/Cellar/icarus-verilog/12.0/lib/ivl/system.vpi";
+:vpi_module "/usr/local/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_sys.vpi";
+:vpi_module "/usr/local/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_textio.vpi";
+:vpi_module "/usr/local/Cellar/icarus-verilog/12.0/lib/ivl/v2005_math.vpi";
+:vpi_module "/usr/local/Cellar/icarus-verilog/12.0/lib/ivl/va_math.vpi";
+S_0x7faf66f15710 .scope module, "testbench" "testbench" 2 2;
+ .timescale -6 -9;
+v0x7faf66f28110_0 .var "clk", 0 0;
+v0x7faf66f281a0_0 .var/s "data", 63 0;
+v0x7faf66f28230_0 .var "en", 0 0;
+v0x7faf66f282e0_0 .net/s "mem0", 63 0, L_0x7faf66f28b80;  1 drivers
+v0x7faf66f28390_0 .net/s "mem1", 63 0, L_0x7faf66f28cd0;  1 drivers
+v0x7faf66f28460_0 .net/s "mem2", 63 0, L_0x7faf66f28db0;  1 drivers
+v0x7faf66f28510_0 .net/s "mem3", 63 0, L_0x7faf66f28f10;  1 drivers
+v0x7faf66f285c0_0 .net/s "mem4", 63 0, L_0x7faf66f28fb0;  1 drivers
+v0x7faf66f28670_0 .var "rst", 0 0;
+S_0x7faf66f15b20 .scope module, "monitor" "topEntity" 2 15, 3 5 0, S_0x7faf66f15710;
+ .timescale -13 -13;
+    .port_info 0 /INPUT 1 "eta";
+    .port_info 1 /INPUT 1 "eta1";
+    .port_info 2 /INPUT 1 "eta2";
+    .port_info 3 /INPUT 64 "c$arg";
+    .port_info 4 /OUTPUT 64 "result_0";
+    .port_info 5 /OUTPUT 64 "result_1";
+    .port_info 6 /OUTPUT 64 "result_2";
+    .port_info 7 /OUTPUT 64 "result_3";
+    .port_info 8 /OUTPUT 64 "result_4";
+v0x7faf66f15fa0_0 .net/s "c$arg", 63 0, v0x7faf66f281a0_0;  1 drivers
+v0x7faf66f276e0_0 .var "c$ds_app_arg", 319 0;
+v0x7faf66f27780_0 .net "eta", 0 0, v0x7faf66f28110_0;  1 drivers
+v0x7faf66f27830_0 .net "eta1", 0 0, v0x7faf66f28670_0;  1 drivers
+v0x7faf66f278c0_0 .net "eta2", 0 0, v0x7faf66f28230_0;  1 drivers
+v0x7faf66f279a0_0 .net "nextState", 319 0, L_0x7faf66f28aa0;  1 drivers
+v0x7faf66f27a50_0 .net "nextState_projection", 383 0, L_0x7faf66f28980;  1 drivers
+v0x7faf66f27b00_0 .net "result", 319 0, L_0x7faf66f287a0;  1 drivers
+v0x7faf66f27bb0_0 .net/s "result_0", 63 0, L_0x7faf66f28b80;  alias, 1 drivers
+v0x7faf66f27cc0_0 .net/s "result_1", 63 0, L_0x7faf66f28cd0;  alias, 1 drivers
+v0x7faf66f27d70_0 .net "result_10", 639 0, L_0x7faf66f28840;  1 drivers
+v0x7faf66f27e20_0 .net/s "result_2", 63 0, L_0x7faf66f28db0;  alias, 1 drivers
+v0x7faf66f27ed0_0 .net/s "result_3", 63 0, L_0x7faf66f28f10;  alias, 1 drivers
+v0x7faf66f27f80_0 .net/s "result_4", 63 0, L_0x7faf66f28fb0;  alias, 1 drivers
+E_0x7faf66f082d0 .event posedge, v0x7faf66f27830_0, v0x7faf66f27780_0;
+L_0x7faf66f287a0 .part L_0x7faf66f28840, 0, 320;
+L_0x7faf66f28840 .concat [ 320 320 0 0], L_0x7faf66f28aa0, L_0x7faf66f28aa0;
+L_0x7faf66f28980 .concat [ 320 64 0 0], v0x7faf66f276e0_0, v0x7faf66f281a0_0;
+L_0x7faf66f28aa0 .part L_0x7faf66f28980, 64, 320;
+L_0x7faf66f28b80 .part L_0x7faf66f287a0, 256, 64;
+L_0x7faf66f28cd0 .part L_0x7faf66f287a0, 192, 64;
+L_0x7faf66f28db0 .part L_0x7faf66f287a0, 128, 64;
+L_0x7faf66f28f10 .part L_0x7faf66f287a0, 64, 64;
+L_0x7faf66f28fb0 .part L_0x7faf66f287a0, 0, 64;
+S_0x7faf66f07360 .scope begin, "c$ds_app_arg_register" "c$ds_app_arg_register" 3 28, 3 28 0, S_0x7faf66f15b20;
+ .timescale -13 -13;
+    .scope S_0x7faf66f15b20;
+T_0 ;
+    %pushi/vec4 0, 0, 320;
+    %store/vec4 v0x7faf66f276e0_0, 0, 320;
+    %end;
+    .thread T_0;
+    .scope S_0x7faf66f15b20;
+T_1 ;
+    %wait E_0x7faf66f082d0;
+    %fork t_1, S_0x7faf66f07360;
+    %jmp t_0;
+    .scope S_0x7faf66f07360;
+t_1 ;
+    %load/vec4 v0x7faf66f27830_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.0, 8;
+    %pushi/vec4 0, 0, 320;
+    %assign/vec4 v0x7faf66f276e0_0, 0;
+    %jmp T_1.1;
+T_1.0 ;
+    %load/vec4 v0x7faf66f278c0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.2, 8;
+    %load/vec4 v0x7faf66f27d70_0;
+    %parti/s 320, 320, 10;
+    %assign/vec4 v0x7faf66f276e0_0, 0;
+T_1.2 ;
+T_1.1 ;
+    %end;
+    .scope S_0x7faf66f15b20;
+t_0 %join;
+    %jmp T_1;
+    .thread T_1;
+    .scope S_0x7faf66f15710;
+T_2 ;
+    %delay 10000000, 0;
+    %load/vec4 v0x7faf66f28110_0;
+    %inv;
+    %store/vec4 v0x7faf66f28110_0, 0, 1;
+    %jmp T_2;
+    .thread T_2;
+    .scope S_0x7faf66f15710;
+T_3 ;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf66f28110_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf66f28670_0, 0, 1;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x7faf66f28230_0, 0, 1;
+    %vpi_call 2 29 "$printtimescale", S_0x7faf66f15710 {0 0 0};
+    %vpi_call 2 30 "$dumpvars", 32'sb00000000000000000000000000000000, S_0x7faf66f15710 {0 0 0};
+    %delay 10000000, 0;
+    %pushi/vec4 1, 0, 64;
+    %store/vec4 v0x7faf66f281a0_0, 0, 64;
+    %delay 20000000, 0;
+    %pushi/vec4 2, 0, 64;
+    %store/vec4 v0x7faf66f281a0_0, 0, 64;
+    %delay 20000000, 0;
+    %pushi/vec4 3, 0, 64;
+    %store/vec4 v0x7faf66f281a0_0, 0, 64;
+    %delay 20000000, 0;
+    %pushi/vec4 4, 0, 64;
+    %store/vec4 v0x7faf66f281a0_0, 0, 64;
+    %delay 20000000, 0;
+    %pushi/vec4 5, 0, 64;
+    %store/vec4 v0x7faf66f281a0_0, 0, 64;
+    %delay 20000000, 0;
+    %pushi/vec4 6, 0, 64;
+    %store/vec4 v0x7faf66f281a0_0, 0, 64;
+    %delay 20000000, 0;
+    %pushi/vec4 7, 0, 64;
+    %store/vec4 v0x7faf66f281a0_0, 0, 64;
+    %delay 20000000, 0;
+    %pushi/vec4 8, 0, 64;
+    %store/vec4 v0x7faf66f281a0_0, 0, 64;
+    %delay 20000000, 0;
+    %vpi_call 2 49 "$finish" {0 0 0};
+    %end;
+    .thread T_3;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "testbench.v";
+    "./verilog/Rough.topEntity/topEntity.v";

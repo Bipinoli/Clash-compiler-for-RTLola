@@ -31,7 +31,7 @@ module testbench;
     initial begin
         clk = 0;
         rst = 0;
-        en = 0;
+        en = 1;
         push = 0;
         pop = 0;
         data = 0;

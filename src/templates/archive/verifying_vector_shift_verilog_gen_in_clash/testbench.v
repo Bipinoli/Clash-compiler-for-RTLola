@@ -31,15 +31,21 @@ module testbench;
 
         #1;
         data = 1;
-        #1;
+        #2;
         data = 2;
-        #1;
+        #2;
         data = 3;
-        #1;
+        #2;
         data = 4;
-        #1
+        #2
         data = 5;
-        #1;
+        #2
+        data = 6;
+        #2
+        data = 7;
+        #2
+        data = 8;
+        #2;
         $finish;
     end
 

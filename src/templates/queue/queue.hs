@@ -76,6 +76,6 @@ input9 = (False, True, 0) :: QInput -- pop
 
 -- sampleN sends reset signals for first 2 cycles so null inputs
 inputs :: HiddenClockResetEnable dom => Signal dom QInput
-inputs = fromList [nullInput, nullInput, input1, input2, input3, input4, nullInput, input5, input6, input7, input8, input9] 
+inputs = fromList [nullInput, nullInput, input1, input2, nullInput, nullInput, input3, input4, nullInput, input5, input6, input7, input8, input9] 
 
-outputs = sampleN @System 12 (queue inputs)
+outputs = sampleN @System 14 (queue inputs)
