@@ -16,10 +16,10 @@ module topEntity
     , output wire signed [63:0] result_3
     , output wire signed [63:0] result_4
     );
-  // rough/rough.hs:14:1-78
+  // verifying_vector_shift_verilog_gen_in_clash/rough.hs:14:1-78
   reg [319:0] c$ds_app_arg = {64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0};
   wire [639:0] result_10;
-  // rough/rough.hs:10:1-2
+  // verifying_vector_shift_verilog_gen_in_clash/rough.hs:10:1-2
   wire [319:0] nextState;
   wire [383:0] nextState_projection;
   wire [319:0] result;

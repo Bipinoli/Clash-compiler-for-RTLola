@@ -24,7 +24,7 @@ module testbench;
     initial begin
         clk = 0;
         rst = 0;
-        en = 0;
+        en = 1;
         
         $printtimescale(testbench);
         $dumpvars(0, testbench);
