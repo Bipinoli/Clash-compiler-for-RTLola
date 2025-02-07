@@ -2,7 +2,7 @@ module Rough where
 
 import Clash.Prelude
 
-type State = Vec 5 Int
+type State = Vec 6 Int
 type Input = Int
 type Output = State
 

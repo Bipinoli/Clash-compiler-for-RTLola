@@ -25,7 +25,7 @@ module testbench;
                     );
 
     always begin
-        #1 clk = ~clk;
+        #2 clk = ~clk;
     end
 
     initial begin
@@ -39,145 +39,159 @@ module testbench;
         $printtimescale(testbench);
         $dumpvars(0, testbench);
 
-        #10;
+        #1.8;
+        data = 1;
         push = 1;
         pop = 0;
-        data = 1;
         // 1 _ _ _ _ 
         // (push_valid, pop_valid, output) = (1, 0, 0)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #4;
+
+        #1.8;
+        data = 2;
         push = 1;
         pop = 0;
-        data = 2;
         // 2 1 _ _ _ 
         // (push_valid, pop_valid, output) = (1, 0, 0)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #8;
+
+        #1.8;
+        data = 3;
         push = 1;
         pop = 0;
-        data = 3;
         // 3 2 1 _ _ 
         // (push_valid, pop_valid, output) = (1, 0, 0)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #4;
+
+        #1.8;
+        data = 0;
         push = 0;
         pop = 1;
-        data = 0;
         // 3 2 _ _ _ 
         // (push_valid, pop_valid, output) = (0, 1, 1)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #8;
+
+        #1.8;
+        data = 4;
         push = 1;
         pop = 1;
-        data = 4;
         // 4 3 _ _ _ 
         // (push_valid, pop_valid, output) = (1, 1, 2)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #1.8;
+        data = 5;
         push = 1;
         pop = 1;
-        data = 5;
         // 5 4 _ _ _ 
         // (push_valid, pop_valid, output) = (1, 1, 3)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #1.8;
+        data = 0;
         push = 0;
         pop = 1;
-        data = 0;
         // 5 _ _ _ _ 
         // (push_valid, pop_valid, output) = (0, 1, 4)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #4;
+
+        #1.8;
+        data = 6;
         push = 1;
         pop = 1;
-        data = 6;
         // 6 _ _ _ _ 
         // (push_valid, pop_valid, output) = (1, 1, 5)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #1.8;
+        data = 0;
         push = 0;
         pop = 1;
-        data = 0;
         // _ _ _ _ _ 
         // (push_valid, pop_valid, output) = (0, 1, 6)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #1.8;
+        data = 7;
         push = 1;
         pop = 1;
-        data = 7;
         // 7 _ _ _ _ 
         // (push_valid, pop_valid, output) = (1, 0, 0)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #4;
+
+        #1.8;
+        data = 0;
         push = 0;
         pop = 1;
-        data = 0;
         // _ _ _ _ _ 
         // (push_valid, pop_valid, output) = (0, 1, 7)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #8;
+
+        #1.8;
+        data = 0;
         push = 0;
         pop = 1;
-        data = 0;
         // _ _ _ _ _ 
         // (push_valid, pop_valid, output) = (0, 0, 0)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
 
-        #10;
+        #1.8;
+        data = 0;
         push = 0;
         pop = 1;
-        data = 0;
         // _ _ _ _ _ 
         // (push_valid, pop_valid, output) = (0, 0, 0)
-        #1;
+        #2.2;
         push = 0;
         pop = 0;
         data = 0;
