@@ -46,12 +46,12 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
-bindir     = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/2ddffa28b1fbace304f4c52a11858e248f5e84ba5279964fc4ce81040525d7e0/9.6.6/bin"
-libdir     = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/2ddffa28b1fbace304f4c52a11858e248f5e84ba5279964fc4ce81040525d7e0/9.6.6/lib/x86_64-osx-ghc-9.6.6/lola2Clash-0.1-ET267U31ZbbDkc8KspOsMH"
-dynlibdir  = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/2ddffa28b1fbace304f4c52a11858e248f5e84ba5279964fc4ce81040525d7e0/9.6.6/lib/x86_64-osx-ghc-9.6.6"
-datadir    = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/2ddffa28b1fbace304f4c52a11858e248f5e84ba5279964fc4ce81040525d7e0/9.6.6/share/x86_64-osx-ghc-9.6.6/lola2Clash-0.1"
-libexecdir = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/2ddffa28b1fbace304f4c52a11858e248f5e84ba5279964fc4ce81040525d7e0/9.6.6/libexec/x86_64-osx-ghc-9.6.6/lola2Clash-0.1"
-sysconfdir = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/2ddffa28b1fbace304f4c52a11858e248f5e84ba5279964fc4ce81040525d7e0/9.6.6/etc"
+bindir     = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/e2698bdf79c3f82631689e22695797357bb927742cf03fedfaeae7bcad9a4fae/9.6.6/bin"
+libdir     = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/e2698bdf79c3f82631689e22695797357bb927742cf03fedfaeae7bcad9a4fae/9.6.6/lib/x86_64-osx-ghc-9.6.6/lola2Clash-0.1-ET267U31ZbbDkc8KspOsMH"
+dynlibdir  = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/e2698bdf79c3f82631689e22695797357bb927742cf03fedfaeae7bcad9a4fae/9.6.6/lib/x86_64-osx-ghc-9.6.6"
+datadir    = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/e2698bdf79c3f82631689e22695797357bb927742cf03fedfaeae7bcad9a4fae/9.6.6/share/x86_64-osx-ghc-9.6.6/lola2Clash-0.1"
+libexecdir = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/e2698bdf79c3f82631689e22695797357bb927742cf03fedfaeae7bcad9a4fae/9.6.6/libexec/x86_64-osx-ghc-9.6.6/lola2Clash-0.1"
+sysconfdir = "/Users/boli/university/thesis/Lola2Clash/.stack-work/install/x86_64-osx/e2698bdf79c3f82631689e22695797357bb927742cf03fedfaeae7bcad9a4fae/9.6.6/etc"
 
 getBinDir     = catchIO (getEnv "lola2Clash_bindir")     (\_ -> return bindir)
 getLibDir     = catchIO (getEnv "lola2Clash_libdir")     (\_ -> return libdir)
