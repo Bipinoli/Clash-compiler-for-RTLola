@@ -128,26 +128,13 @@ llc controls stage = bundle (stage, resultB, resultC, resultD)
 
 
 evaluateA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
-evaluateA 
+evaluateA en inpt = register 0 ()
 
 evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data
 evaluateB en inpt = register 10 (mux en a oldVal)
     where 
         oldVal = evaluateB en inpt
         a = inpt
-
-evaluateC :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data
-evaluateC en inpt = register 10 (mux en a oldVal)
-    where 
-        oldVal = evaluateB en inpt
-        a = inpt
-
-evaluateD :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Data, Data) -> Signal dom Data
-evaluateD en inpt = register 10 (mux en (b + c) oldVal)
-    where 
-        oldVal = evaluateD en inpt
-        (b, c) = unbundle inpt
-
 
 ---------------------------------------------------------------
 
