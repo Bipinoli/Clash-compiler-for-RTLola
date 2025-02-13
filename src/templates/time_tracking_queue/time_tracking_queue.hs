@@ -15,8 +15,6 @@ import Clash.Prelude
 -- qNullData = ((False, False), (False, False), (0, False)) :: QData
 
 
-
-
 type QData = Int
 qNullData = 0 :: QData
 

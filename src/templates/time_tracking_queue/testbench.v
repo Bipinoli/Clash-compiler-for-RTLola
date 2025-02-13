@@ -16,12 +16,19 @@ module testbench;
     wire signed [63:0] mem2;
     wire signed [63:0] mem3;
     wire signed [63:0] mem4;
+    wire signed [63:0] wait0;
+    wire signed [63:0] wait1;
+    wire signed [63:0] wait2;
+    wire signed [63:0] wait3;
+    wire signed [63:0] wait4;
     wire signed [63:0] cursor;
 
     topEntity monitor (clk, rst, en,
                        push, pop, data,
                        push_valid, pop_valid, out,
-                       mem0, mem1, mem2, mem3, mem4, cursor
+                       mem0, mem1, mem2, mem3, mem4, 
+                       wait0, wait1, wait2, wait3, wait4, 
+                       cursor
                     );
 
     always begin
