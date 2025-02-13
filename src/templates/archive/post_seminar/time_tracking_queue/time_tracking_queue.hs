@@ -30,17 +30,17 @@ type QPopValid = Bool
 
 type QState = (QMem, QMem, QCursor)
 type QInput = (QPush, QPop, QData)
-type QOutput = (QPushValid, QPopValid, QData, QState)
+type QOutput = (QPushValid, QPopValid, QData)
 
 -- Note: assumed that queue never overflows
 queue :: HiddenClockResetEnable dom => Signal dom QInput -> Signal dom QOutput
 queue input = output
     where 
         -- keeping in registers to avoid any combinational output
-        output = bundle (pushValid, popValid, outData, state)
+        output = bundle (pushValid, popValid, outData)
         state = bundle (buffer, wait, cursor)
-        buffer = register (repeat 0 :: QMem) nextBufferSignal
-        wait = register (repeat 0 :: QMem) nextWaitSignal
+        buffer = register (repeat qNullData :: QMem) nextBufferSignal
+        wait = register (repeat 0 :: QWait) nextWaitSignal
         cursor = register 0 nextCursorSignal
         outData = register qNullData nextOutDataSignal
         pushValid = register False nextPushValidSignal
@@ -81,11 +81,11 @@ queue input = output
                 prepForUpdate :: QWait -> (QInput, QCursor) -> Vec QMemSize (Int, Int, Int, QCursor, QPush, QPop)
                 prepForUpdate curWait ((push, pop, _), cur) = out
                     where 
-                        indices = (iterateI (+1) 0) :: Vec QMemSize Int
+                        indices = iterateI (+1) 0 :: Vec QMemSize Int
                         shiftedRight = (0 :> Nil) ++ init curWait
-                        out = zipWith (\(psh, pp, c) (i, (valToLeft, val)) -> (valToLeft, val, i, c, psh, pp))
+                        out = zipWith (\(psh, pp, c) (i, valToLeft, val) -> (valToLeft, val, i, c, psh, pp))
                                 (repeat (push, pop, cur))
-                                (zip indices (zip shiftedRight curWait))
+                                (zip3 indices shiftedRight curWait)
 
 
         nextCursor :: QCursor -> (QInput, QMem) -> QCursor
