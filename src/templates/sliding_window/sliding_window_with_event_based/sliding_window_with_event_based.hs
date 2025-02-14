@@ -47,9 +47,7 @@ hotPotato n = let s = register 0 (mux (s .==. pure (n-1)) 0 (s + 1)) in s
 
 ---------------------------------------------------------------
 
-type InputXTyp = Int
-
-type QData = (InputXTyp, Bool)
+type QData = (Int, Bool)
 qNullData = (0, False) :: QData
 
 type QMemSize = 5
@@ -156,10 +154,23 @@ queue input = output
 ---------------------------------------------------------------
 
 
--- monitor :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Int, Bool), (Int, Bool))
--- monitor input0 = bundle (outputA, outputB)
---     where 
---         inputBuffer = queue (bundle (qPush, qPop, qData))
+monitor :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Bool, Bool, Int, Bool, Bool, Int, Int), ((Int, Bool), (Int, Bool)))
+monitor input0 = bundle (debugSignals, outputs)
+    where 
+        inputBuffer = queue (bundle (qPush, qPop, qData))
+        (qPop, outputs) = unbundle (evaluator inputBuffer) 
+        (x, qPush) = unbundle input0
+        qData = input0
+
+        -- extra debug signals
+        debugSignals = bundle (qPush, qPop, x, qPushValid, qPopValid, qOutX, qWait)
+        (qPushValid, qPopValid, qOut, qWait) = unbundle inputBuffer
+        (qOutX, _) = unbundle qOut
+
+
+
+
+---------------------------------------------------------------
 
 
 pacer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom QOutput -> Signal dom ((Bool, Bool), (Int, Bool, Int), (Bool, Bool))
@@ -194,3 +205,83 @@ pacer en inputBuffer = bundle (status, inputData, enables)
             where 
                 nxtStg = if not enb || stg == 1 then 0 else 1
 
+
+---------------------------------------------------------------
+
+
+evaluator :: HiddenClockResetEnable dom => Signal dom QOutput -> Signal dom (Bool, ((Int, Bool), (Int, Bool)))
+evaluator inputBuffer = bundle (toPop, outputs)
+    where 
+        -- stage 0 - 1 -> pacing stage
+        -- stage 2 -> eval a & winX4B -- different than the concept of layers provided by RTLola
+        -- stage 3 -> eval b
+        -- stage 4 -> output
+        stage = hotPotato 5
+
+        outputs = bundle (outputA, outputB)
+        outputA = bundle (outA, aktvA)
+        outputB = bundle (outB, aktvB)
+
+        (pacingStatus, inputData, enables) = unbundle (pacer (stage .==. (pure 0) .||. stage .==. (pure 1)) inputBuffer)
+        (toPop, _) = unbundle pacingStatus
+
+        outA = evaluateA (stage .==. (pure 2) .&&. enA) x
+        winX4B = windowXForB (stage .==. (pure 2)) inputData
+
+        outB = evaluateB (stage .==. (pure 3) .&&. enB) winX4B
+
+        aktvA = (stage .==. (pure 4)) .&&. enA
+        aktvB = (stage .==. (pure 4)) .&&. enB
+
+        (x, newX, waitedX) = unbundle inputData
+        (enA, enB) = unbundle enables
+
+
+
+
+evaluateA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
+evaluateA en x = out 
+    where out = register 0 (mux en (x * 10) out)
+
+
+-- evaluation freq of a = 1kHz = 0.001s
+-- aggregate over = 0.002s
+-- buckets required = 2
+-- bucket span = 0.001s
+windowXForB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Int, Bool, Int) -> Signal dom (Vec 2 Int)
+windowXForB en timedInput = window
+    where 
+        window = register winDflt (mux en nextWindowSignal window)
+        winDflt = repeat 0 :: Vec 2 Int
+        nextWindowSignal = nextWindow <$> window <*> timedInput
+
+        nextWindow :: Vec 2 Int -> (Int, Bool, Int) -> Vec 2 Int 
+        nextWindow win inpt = out
+            where 
+                out = if not newX || bucketsBefore >= length win then win
+                      else updateBucket win (length win - 1 - bucketsBefore) x
+                bucketsBefore = (cyclesBefore * systemClockPeriodNs) `div` bucketSpanNs 
+                (x, newX, cyclesBefore) = inpt
+                bucketSpanNs = 1_000_000 -- 0.001s in nanoseconds
+
+        updateBucket :: Vec 2 Int -> Int -> Int -> Vec 2 Int
+        updateBucket win index value = map (\(indx, v) -> if indx == index then bBucketFx v value else v) (zip indices win)
+            where indices = iterateI (+1) 0 :: Vec 2 Int
+
+bBucketFx :: Int -> Int -> Int
+bBucketFx accum new = accum + new
+
+evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec 2 Int) -> Signal dom Int
+evaluateB en winX = register 0 (mux en newVal oldVal)
+    where 
+        oldVal = evaluateB en winX
+        newVal = (fold bBucketFx) <$> winX
+
+
+
+---------------------------------------------------------------
+
+
+topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
+    Signal MyDomain (Int, Bool) -> Signal MyDomain ((Bool, Bool, Int, Bool, Bool, Int, Int), ((Int, Bool), (Int, Bool)))
+topEntity clk rst en input0 = exposeClockResetEnable (monitor input0) clk rst en
