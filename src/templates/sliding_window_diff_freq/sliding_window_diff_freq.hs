@@ -156,76 +156,73 @@ queue input = output
 ---------------------------------------------------------------
 
 
+slowClock :: HiddenClockResetEnable dom => Signal dom (Bool, Int)
+slowClock = clockDivider 5
 
--- type Data = Int
+-- We need to sustain control signals and data from controller until all layers are completely evaluated and outputed
+-- It talke one cycle for RTL to controller and we want one cycle in the end to output the evaluated streams
+-- Hence, the evaluator should run (n+2) times faster than controller, where n = number of evaluation layers
+-- By sustaining the controller controls like this we also don't need any buffer or queue to interface them
+-- Note: due to periodEnable singals in controller we need one more RTL in controller so (n+3)
 
--- slowClock :: HiddenClockResetEnable dom => Signal dom (Bool, Int)
--- slowClock = clockDivider 5
+-- It is important to note that the input data must be proided by stage = 0 to work with new data on the current evaluator loop
+monitor :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Bool, Int), (Data, Bool, Bool, Bool, Int, Int, Int), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
+monitor input0 = bundle(cntrlClk, controls, outputs)
+    where
+        (qPushValid, qPopValid, qPoppedData) = unbundle (queue (bundle (qPush, qPop, qData)))
+        (_, newInput) = unbundle input0
+        qData = input0
+        qPush = newInput
+        qPop = ?? 
 
--- -- We need to sustain control signals and data from HLC until all layers are completely evaluated and outputed
--- -- It talke one cycle for RTL to HLC and we want one cycle in the end to output the evaluated streams
--- -- Hence, the LLC should run (n+2) times faster than HLC, where n = number of evaluation layers
--- -- By sustaining the HLC controls like this we also don't need any buffer or queue to interface them
--- -- Note: due to periodEnable singals in HLC we need one more RTL in HLC so (n+3)
-
--- -- It is important to note that the input data must be proided by stage = 0 to work with new data on the current LLC loop
--- evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool) -> Signal dom ((Bool, Int), (Data, Bool, Bool, Bool, Int, Int, Int), (Int, (Data, Bool), (Data, Bool), (Data, Bool)))
--- evaluator input0 = bundle(hlcClk, controls, outputs)
---     where
---         outputs = llc controls stage
---         controls = hlc hlcClk input0
---         hlcClk = slowClock
---         stage = delay 0 (hotPotato 5)
-
-
--- ---------------------------------------------------------------
-
--- -- since there is one more RTL for periodicEnable in HLC we should wait 1 more cycle until data consumtion in LLC
--- hlc :: HiddenClockResetEnable dom => Signal dom (Bool, Int) -> Signal dom (Data, Bool) -> Signal dom (Data, Bool, Bool, Bool, Int, Int, Int)
--- hlc hlcClk input0 = register (0, False, False, False, 0, 0, 0) (mux en newResult oldResult)
---     where
---         (en, enCnt) = unbundle hlcClk
---         oldResult = bundle (oldA, oldEnB, oldEnC, oldEnD, bTimer, cTimer, dTimer)
---         (oldA, oldEnB, oldEnC, oldEnD, oldBTimer, oldCTimer, oldDTimer) = unbundle (hlc hlcClk input0)
---         newResult = bundle (a, enB, enC, enD, bTimer, cTimer, dTimer)
---         (a, aktv_x) = unbundle input0
-
---         (enB, bTimer) = unbundle (periodicEnable hlcClk bPeriodNs)
---         (enC, cTimer) = unbundle (periodicEnable hlcClk cPeriodNs)
---         (enD, dTimer) = unbundle (periodicEnable hlcClk dPeriodNs)
-
---         bPeriodNs = 100000 -- 10Hz in ns
---         cPeriodNs = 200000 -- 5Hz in ns
---         dPeriodNs = 400000 -- 2.5Hz in ns
+        outputs = evaluator controls stage
+        controls = controller cntrlClk input0
+        cntrlClk = slowClock
+        stage = delay 0 (hotPotato 5)
 
 
--- -- NOTE:
--- -- Once output enable is high, it must sustain until the next cycle
--- -- Timer should immediately restart without being sustained
--- periodicEnable :: HiddenClockResetEnable dom => Signal dom (Bool, Int) -> Signal dom Int -> Signal dom (Bool, Int)
--- periodicEnable hlcClk period = register initState (mux (en .&&. (cnt .==. pure 0)) nextState curState) -- cnt .==.0 to sustain for a cycle
---         where
---             (en, cnt) = unbundle hlcClk 
---             initState = (False, 0)
---             nextState = bundle (nextEn, nextTime)
---             curState = bundle (curEn, nextTime)
+---------------------------------------------------------------
 
---             (curEn, curTime) = unbundle (periodicEnable hlcClk period)
---             nextEn = mux (nextTime .>=. period) (pure True) (pure False)
---             reset = mux (en .&&. (nextTime .>=. period)) (pure True) (pure False)
---             nextTime = timer reset
+-- since there is one more RTL for periodicEnable in controller we should wait 1 more cycle until data consumtion in evaluator
+controller :: HiddenClockResetEnable dom => Signal dom (Bool, Int) -> Signal dom (Int, Bool) -> Signal dom (Int, Bool)
+controller cntrlClk input0 = register (0, False) (mux en newResult oldResult)
+    where
+        (en, _) = unbundle cntrlClk
+        oldResult = bundle (oldX, oldEnA)
+        (oldX, oldEnA) = unbundle (hlc cntrlClk input0)
+        newResult = bundle (x, enA)
+        (x, _) = unbundle input0
+        (enA, _) = unbundle (periodicEnable cntrlClk aPeriodNs)
+        aPeriodNs = 1000000 -- 1kHz in ns
+
+
+-- NOTE:
+-- Once output enable is high, it must sustain until the next cycle
+-- Timer should immediately restart without being sustained
+periodicEnable :: HiddenClockResetEnable dom => Signal dom (Bool, Int) -> Signal dom Int -> Signal dom (Bool, Int)
+periodicEnable cntrlClk period = register initState (mux (en .&&. (cnt .==. pure 0)) nextState curState) -- cnt .==.0 to sustain for a cycle
+        where
+            (en, cnt) = unbundle cntrlClk 
+            initState = (False, 0)
+            nextState = bundle (nextEn, nextTime)
+            curState = bundle (curEn, nextTime)
+
+            (curEn, curTime) = unbundle (periodicEnable cntrlClk period)
+            nextEn = mux (nextTime .>=. period) (pure True) (pure False)
+            reset = mux (en .&&. (nextTime .>=. period)) (pure True) (pure False)
+            nextTime = timer reset
 
 
 -- ---------------------------------------------------------------
 
 
--- llc :: HiddenClockResetEnable dom => Signal dom (Data, Bool, Bool, Bool, Int, Int, Int) -> Signal dom Data -> Signal dom (Int, (Data, Bool), (Data, Bool), (Data, Bool))
--- llc controls stage = bundle (stage, resultB, resultC, resultD)
+-- evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool, Bool, Bool, Int, Int, Int) -> Signal dom Data -> Signal dom (Int, (Data, Bool), (Data, Bool), (Data, Bool))
+-- evaluator controls stage = bundle (stage, resultB, resultC, resultD)
 --     where 
 --         resultB = bundle (outB, aktvB)
 --         resultC = bundle (outC, aktvC)
 --         resultD = bundle (outD, aktvD)
---         -- 2 cycles for RTL in HLC i.e stage = 0 & stage = 1
+--         -- 2 cycles for RTL in controller i.e stage = 0 & stage = 1
 --         -- b & c are in the evaluation layer 1 -> stage = 2
 --         outB = evaluateB ((stage .==. pure 2) .&&. enB) a
 --         -- d is in evaluation layer 2 -> stage = 3
@@ -258,17 +255,18 @@ windowXForA timedInput = window
                 bucketSpanNs = 1_000_000 -- 0.001s in nanoseconds
 
         updateBucket :: Vec 2 Int -> Int -> Int -> Vec 2 Int
-        updateBucket win index value = map (\(indx, v) -> if indx == index then bucketFx v value else v) (zip indices win)
+        updateBucket win index value = map (\(indx, v) -> if indx == index then aBucketFx v value else v) (zip indices win)
             where indices = iterateI (+1) 0 :: Vec 2 Int
 
-        bucketFx :: Int -> Int -> Int
-        bucketFx accum new = accum + new
+aBucketFx :: Int -> Int -> Int
+aBucketFx accum new = accum + new
 
+evaluateA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec 2 Int) -> Signal dom Int
+evaluateA en winX = register 0 (mux en newVal oldVal)
+    where 
+        oldVal = evaluateA en winX
+        newVal = (fold aBucketFx) <$> winX
 
-
-
--- evaluateA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
--- evaluateA en inpt = register 0 ()
 
 
 -- ---------------------------------------------------------------
