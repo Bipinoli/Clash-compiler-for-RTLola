@@ -64,19 +64,19 @@ type QPopValid = Bool
 
 type QState = (QMem, QMem, QCursor)
 type QInput = (QPush, QPop, QData)
-type QOutput = (QPushValid, QPopValid, QData)
+type QOutput = (QPushValid, QPopValid, QData, Int)
 
 -- Note: assumed that queue never overflows
 queue :: HiddenClockResetEnable dom => Signal dom QInput -> Signal dom QOutput
 queue input = output
     where 
         -- keeping in registers to avoid any combinational output
-        output = bundle (pushValid, popValid, outData)
+        output = bundle (pushValid, popValid, outData, waited)
         state = bundle (buffer, wait, cursor)
         buffer = register (repeat qNullData :: QMem) nextBufferSignal
         wait = register (repeat 0 :: QWait) nextWaitSignal
         cursor = register 0 nextCursorSignal
-        outData = register qNullData nextOutDataSignal
+        (outData, waited) = unbundle (register (qNullData, -1) nextOutDataSignal)
         pushValid = register False nextPushValidSignal
         popValid = register False nextPopValidSignal
 
@@ -87,7 +87,7 @@ queue input = output
         nextBufferSignal = nextBuffer <$> buffer <*> bundle (input, cursor)
         nextWaitSignal = nextWait <$> wait <*> bundle (input, cursor)
         nextCursorSignal = nextCursor <$> cursor <*> bundle (input, buffer)
-        nextOutDataSignal = nextOutData <$> bundle (input, cursor, buffer)
+        nextOutDataSignal = nextOutData <$> bundle (input, cursor, buffer, wait)
         nextPushValidSignal = nextPushValid <$> bundle (input, cursor, buffer)
         nextPopValidSignal = nextPopValid <$> bundle (input, cursor)
         
@@ -131,12 +131,12 @@ queue input = output
                     (True, True) -> if cur == 0 then cur + 1 else cur 
                     (_, _) -> cur
 
-        nextOutData :: (QInput, QCursor, QMem) -> QData
-        nextOutData ((push, pop, _), cur, buf) = out
+        nextOutData :: (QInput, QCursor, QMem, QWait) -> (QData, Int)
+        nextOutData ((push, pop, _), cur, buf, _wait) = out
             where 
                 out = case (push, pop) of
-                    (_, True) -> if cur == 0 then qNullData else buf !! (cur - 1)
-                    (_, _) -> qNullData 
+                    (_, True) -> if cur == 0 then (qNullData, -1) else (buf !! (cur - 1), (_wait !! (cur - 1)) + 1)
+                    (_, _) -> (qNullData, -1)
 
         nextPushValid :: (QInput, QCursor, QMem) -> QPush
         nextPushValid ((push, pop, _), cur, buf) = out
@@ -176,8 +176,7 @@ monitor input0 = bundle(cntrlClk, controls, outputs)
         qPop = ?? 
 
         outputs = evaluator controls stage
-        controls = controller cntrlClk input0
-        cntrlClk = slowClock
+        controls = controller slowClock input0
         stage = delay 0 (hotPotato 5)
 
 
@@ -213,23 +212,22 @@ periodicEnable cntrlClk period = register initState (mux (en .&&. (cnt .==. pure
             nextTime = timer reset
 
 
--- ---------------------------------------------------------------
+---------------------------------------------------------------
 
 
--- evaluator :: HiddenClockResetEnable dom => Signal dom (Data, Bool, Bool, Bool, Int, Int, Int) -> Signal dom Data -> Signal dom (Int, (Data, Bool), (Data, Bool), (Data, Bool))
--- evaluator controls stage = bundle (stage, resultB, resultC, resultD)
---     where 
---         resultB = bundle (outB, aktvB)
---         resultC = bundle (outC, aktvC)
---         resultD = bundle (outD, aktvD)
---         -- 2 cycles for RTL in controller i.e stage = 0 & stage = 1
---         -- b & c are in the evaluation layer 1 -> stage = 2
---         outB = evaluateB ((stage .==. pure 2) .&&. enB) a
---         -- d is in evaluation layer 2 -> stage = 3
---         outD = evaluateD ((stage .==. pure 3) .&&. enD) (bundle (outB, outC))
---         -- output stage -> stage = 4
---         (aktvB, aktvC, aktvD) = unbundle $ mux (stage .==. pure 4) (bundle (enB, enC, enD)) (bundle (pure False, pure False, pure False)) 
---         (a, enB, enC, enD, _, _, _) = unbundle controls
+evaluator :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom Int -> Signal dom (Int, (Int, Bool))
+evaluator controls stage = bundle (stage, resultA)
+    where 
+        resultA = bundle (outA, aktvA)
+        -- 2 cycles for RTL in controller i.e stage = 0 & stage = 1
+        -- sliding window in evaluation layer 1 -> stage = 2
+        winXForA = windowXForA 
+        outB = evaluateB ((stage .==. pure 2) .&&. enB) a
+        -- d is in evaluation layer 2 -> stage = 3
+        outD = evaluateD ((stage .==. pure 3) .&&. enD) (bundle (outB, outC))
+        -- output stage -> stage = 4
+        (aktvB, aktvC, aktvD) = unbundle $ mux (stage .==. pure 4) (bundle (enB, enC, enD)) (bundle (pure False, pure False, pure False)) 
+        (a, enB, enC, enD, _, _, _) = unbundle controls
 
 
 -- TODO: handle the time difference due to data transfer properly

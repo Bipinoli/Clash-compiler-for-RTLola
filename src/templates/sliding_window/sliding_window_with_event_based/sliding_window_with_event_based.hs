@@ -1,22 +1,56 @@
---- Main idea:
---- It is a queue that allows for regular push, pop functions allowing push and pop to happen at the same time
---- In addition to that it also tracks how long the item stays in the queue before being popped
---- This way we can buffer the item in the queue and also calculate the actual time of arrival when we consume the item by popping
-module TimeTrackingQueue where
-    
+module SlidingWindowWithEventBased where
+
 import Clash.Prelude
 
 
--- type InputATyp = Bool
--- type InputBTyp = Bool
--- type InputCTyp = Signed 8
+---------------------------------------------------------------
 
--- type QData = ((InputATyp, Bool), (InputBTyp, Bool), (InputCTyp, Bool))
--- qNullData = ((False, False), (False, False), (0, False)) :: QData
+-- Create a clock domain with 2 microseconds period (500 kHz) to match the testbench
+createDomain vSystem{vName="MyDomain", vPeriod=2000} -- period in nanoseconds
+
+systemClockPeriodNs :: Int
+systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @MyDomain)
 
 
-type QData = Int
-qNullData = 0 :: QData
+generateClock :: HiddenClockResetEnable dom => Int -> Signal dom (Bool, Int)
+generateClock desiredPeriodInNs = register initClk (mux (countSignal .<. halfToCount) hiClk loClk)
+  where
+    initClk = (False, 0)
+    hiClk = bundle (pure True, countSignal)
+    loClk = bundle (pure False, countSignal)
+
+    countSignal = counter toCount
+    toCount = desiredPeriodInNs `div` systemClockPeriodNs
+    halfToCount = pure $ toCount `div` 2
+
+    counter :: HiddenClockResetEnable dom => Int -> Signal dom Int
+    counter toCount = register 0 (mux (prevVal .<. pure (toCount - 1)) (prevVal + 1) 0)
+        where prevVal = counter toCount
+
+clockDivider :: HiddenClockResetEnable dom => Int -> Signal dom (Bool, Int)
+clockDivider factor = generateClock $ systemClockPeriodNs * factor
+
+
+timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
+timer reset = register deltaTime (mux reset (pure deltaTime) nextTime)
+    where 
+        nextTime = timer reset + pure deltaTime
+        deltaTime = systemClockPeriodNs
+
+
+
+---------------------------------------------------------------
+
+hotPotato :: HiddenClockResetEnable dom => Int -> Signal dom Int
+hotPotato n = let s = register 0 (mux (s .==. pure (n-1)) 0 (s + 1)) in s
+
+
+---------------------------------------------------------------
+
+type InputXTyp = Int
+
+type QData = (InputXTyp, Bool)
+qNullData = (0, False) :: QData
 
 type QMemSize = 5
 
@@ -119,27 +153,44 @@ queue input = output
                     (_, _) -> False
 
 
-topEntity :: Clock System -> Reset System -> Enable System -> Signal System QInput -> Signal System QOutput
-topEntity = exposeClockResetEnable queue
+---------------------------------------------------------------
 
 
+-- monitor :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Int, Bool), (Int, Bool))
+-- monitor input0 = bundle (outputA, outputB)
+--     where 
+--         inputBuffer = queue (bundle (qPush, qPop, qData))
 
 
----------------------------------- TEST -----------------------------------
+pacer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom QOutput -> Signal dom ((Bool, Bool), (Int, Bool, Int), (Bool, Bool))
+pacer en inputBuffer = bundle (status, inputData, enables)
+    where 
+        status = bundle (toPop, pacerStable) 
+        inputData = bundle (x, newX .&&. qPopValid, waitedX)
+        enables = bundle (enA, enB)
 
-nullInput = (False, False, 0) :: QInput
-input1 = (True, False, 10) :: QInput -- push 10
-input2 = (True, False, 20) :: QInput -- push 20
-input3 = (True, False, 30) :: QInput -- push 30
-input4 = (True, True, 40) :: QInput -- push 40 & pop
-input5 = (False, True, 0) :: QInput -- pop
-input6 = (False, True, 0) :: QInput -- pop
-input7 = (False, True, 0) :: QInput -- pop
-input8 = (False, True, 0) :: QInput -- pop
-input9 = (False, True, 0) :: QInput -- pop
+        toPop = mux (en .&&. (stage .==. (pure 0))) (pure True) (pure False)
+        pacerStable = mux (en .&&. (stage .==. (pure 1))) (pure True) (pure False)
 
--- sampleN sends reset signals for first 2 cycles so null inputs
-inputs :: HiddenClockResetEnable dom => Signal dom QInput
-inputs = fromList [nullInput, nullInput, input1, input2, nullInput, nullInput, input3, input4, nullInput, input5, input6, input7, input8, input9] 
+        (x, newX) = unbundle xData
+        (_, qPopValid, xData, waitedX) = unbundle inputBuffer
 
-outputs = sampleN @System 14 (queue inputs)
+        enA = register False (mux (en .&&. stage .==. (pure 1)) newEnA enA)
+        enB = register False (mux (en .&&. stage .==. (pure 1)) newEnB enB)
+
+        newEnA = qPopValid .&&. newX
+        newEnB = timerB .>=. periodBns
+
+        timerB = timer resetBTimer
+        resetBTimer = en .&&. stage .==. (pure 1) .&&. timerB .>=. periodBns
+        periodBns = 1000000 :: Signal dom Int -- 1kHz in ns
+
+        stage = register 0 (nextStage <$> en <*> stage)
+
+        -- stage 0 -> inactive / active with queue pop
+        -- stage 1 -> active & provide proper enable signals as output
+        nextStage :: Bool -> Int -> Int
+        nextStage enb stg = nxtStg
+            where 
+                nxtStg = if not enb || stg == 1 then 0 else 1
+
