@@ -46,14 +46,14 @@
         },
         {
             "name": "topEntity.v",
-            "sha256": "46216107cf5fc44aca497a105eff03167759216e33cffeefb9d1cb386b131ff5"
+            "sha256": "c1f7222f00b9d6b78e82302838414d00bffa2827d60df7edccf9df150532b0f3"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "488ac86d9d30e4c5f5b7d88b216da6705fc7c918eb59eba5b90e620d1028b83d",
+    "hash": "3c4b64d90d8248067dd6b10448617a3570002088d5c5fbf277496ec8aa51e9e5",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -141,6 +141,48 @@
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_0_6",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_7",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_8",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_9",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_10",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_11_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_11_1",
                 "type_name": "signed [63:0]",
                 "width": 64
             },

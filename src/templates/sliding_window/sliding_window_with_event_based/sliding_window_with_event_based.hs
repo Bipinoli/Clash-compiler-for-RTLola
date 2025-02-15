@@ -154,18 +154,19 @@ queue input = output
 ---------------------------------------------------------------
 
 
-monitor :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Bool, Bool, Int, Bool, Bool, Int, Int), ((Int, Bool), (Int, Bool)))
+monitor :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Bool, Bool, Int, Bool, Bool, Int, Int, Bool, Bool, Int, Int, Vec 2 Int), ((Int, Bool), (Int, Bool)))
 monitor input0 = bundle (debugSignals, outputs)
     where 
         inputBuffer = queue (bundle (qPush, qPop, qData))
-        (qPop, outputs) = unbundle (evaluator inputBuffer) 
+        (evalDebugSignals, qPop, outputs) = unbundle (evaluator inputBuffer) 
         (x, qPush) = unbundle input0
         qData = input0
 
         -- extra debug signals
-        debugSignals = bundle (qPush, qPop, x, qPushValid, qPopValid, qOutX, qWait)
+        debugSignals = bundle (qPush, qPop, x, qPushValid, qPopValid, qOutX, qWait, enA, enB, stage, timerB, winX)
         (qPushValid, qPopValid, qOut, qWait) = unbundle inputBuffer
         (qOutX, _) = unbundle qOut
+        (enA, enB, stage, timerB, winX) = unbundle evalDebugSignals
 
 
 
@@ -173,8 +174,8 @@ monitor input0 = bundle (debugSignals, outputs)
 ---------------------------------------------------------------
 
 
-pacer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom QOutput -> Signal dom ((Bool, Bool), (Int, Bool, Int), (Bool, Bool))
-pacer en inputBuffer = bundle (status, inputData, enables)
+pacer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom QOutput -> Signal dom (Int, (Bool, Bool), (Int, Bool, Int), (Bool, Bool))
+pacer en inputBuffer = bundle (debugSignals, status, inputData, enables)
     where 
         status = bundle (toPop, pacerStable) 
         inputData = bundle (x, newX .&&. qPopValid, waitedX)
@@ -205,12 +206,15 @@ pacer en inputBuffer = bundle (status, inputData, enables)
             where 
                 nxtStg = if not enb || stg == 1 then 0 else 1
 
+        -- debug signals
+        debugSignals = timerB
+
 
 ---------------------------------------------------------------
 
 
-evaluator :: HiddenClockResetEnable dom => Signal dom QOutput -> Signal dom (Bool, ((Int, Bool), (Int, Bool)))
-evaluator inputBuffer = bundle (toPop, outputs)
+evaluator :: HiddenClockResetEnable dom => Signal dom QOutput -> Signal dom ((Bool, Bool, Int, Int, Vec 2 Int), Bool, ((Int, Bool), (Int, Bool)))
+evaluator inputBuffer = bundle (debugSignals, toPop, outputs)
     where 
         -- stage 0 - 1 -> pacing stage
         -- stage 2 -> eval a & winX4B -- different than the concept of layers provided by RTLola
@@ -222,7 +226,7 @@ evaluator inputBuffer = bundle (toPop, outputs)
         outputA = bundle (outA, aktvA)
         outputB = bundle (outB, aktvB)
 
-        (pacingStatus, inputData, enables) = unbundle (pacer (stage .==. (pure 0) .||. stage .==. (pure 1)) inputBuffer)
+        (pacingDebugSignals, pacingStatus, inputData, enables) = unbundle (pacer (stage .==. (pure 0) .||. stage .==. (pure 1)) inputBuffer)
         (toPop, _) = unbundle pacingStatus
 
         outA = evaluateA (stage .==. (pure 2) .&&. enA) x
@@ -235,6 +239,10 @@ evaluator inputBuffer = bundle (toPop, outputs)
 
         (x, newX, waitedX) = unbundle inputData
         (enA, enB) = unbundle enables
+
+        --- debug signals
+        debugSignals = bundle (enA, enB, stage, timerB, winX4B)
+        timerB = pacingDebugSignals
 
 
 
@@ -283,5 +291,5 @@ evaluateB en winX = register 0 (mux en newVal oldVal)
 
 
 topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
-    Signal MyDomain (Int, Bool) -> Signal MyDomain ((Bool, Bool, Int, Bool, Bool, Int, Int), ((Int, Bool), (Int, Bool)))
+    Signal MyDomain (Int, Bool) -> Signal MyDomain ((Bool, Bool, Int, Bool, Bool, Int, Int, Bool, Bool, Int, Int, Vec 2 Int), ((Int, Bool), (Int, Bool)))
 topEntity clk rst en input0 = exposeClockResetEnable (monitor input0) clk rst en

@@ -4,51 +4,38 @@ module testbench;
     reg rst;
     reg en;
 
-    reg signed [63:0] input_a;
+    reg signed [63:0] input_x;
     reg new_input;
 
-    wire signed [63:0] hlc_a;
-    wire hlc_enB;
-    wire hlc_enC;
-    wire hlc_enD;
+    wire qPush;
+    wire qPop;
+    wire signed [63:0] qInX;
+    wire qPushValid;
+    wire qPopValid;
+    wire signed [63:0] qOutX;
+    wire signed [63:0] qWaitX;
+    wire enA;
+    wire enB;
+    wire signed [63:0] stage;
+    wire signed [63:0] timerB;
+    wire signed [63:0] winX_0;
+    wire signed [63:0] winX_1;
 
-    wire hlc_clock;
-    wire signed [63:0] hlc_clock_cnt;
-
-    wire signed [63:0] llc_stage;
-    wire signed [63:0] output_b;
-    wire signed [63:0] output_c;
-    wire signed [63:0] output_d;
-    wire output_b_aktv;
-    wire output_c_aktv;
-    wire output_d_aktv;
-    wire signed [63:0] b_timer;
-    wire signed [63:0] c_timer;
-    wire signed [63:0] d_timer;
+    wire signed [63:0] outA;
+    wire aktvOutA;
+    wire signed [63:0] outB;
+    wire aktvOutB;
 
     topEntity monitor (clk, rst, en,
-                       input_a, new_input,
-                       hlc_clock, hlc_clock_cnt,
-                       hlc_a, hlc_enB, hlc_enC, hlc_enD, b_timer, c_timer, d_timer,
-                       llc_stage,
-                       output_b, output_b_aktv,
-                       output_c, output_c_aktv,
-                       output_d, output_d_aktv
+                       input_x, new_input,
+                       qPush, qPop, qInX, qPushValid, qPopValid, qOutX, qWaitX, enA, enB, stage, timerB, winX_0, winX_1,
+                       outA, aktvOutA, outB, aktvOutB
                        );
 
     always begin
         #1 clk = ~clk;
     end
 
-    always @(llc_stage) begin
-        $display("time: %0t, llc_stage: %0d, (a, newA): (%0d, %0d), output_aktv: (%0d, %0d, %0d), b: %0d, c: %0d, d: %0d",
-         $time, llc_stage, input_a, new_input, 
-         output_b_aktv, output_c_aktv, output_d_aktv, 
-         output_b, output_c, output_d);
-    end
-
-    // LLC runs 4X faster than HLC so the whole monitor runs at 1/4th of the clock frequency
-    // Note: It is important that the new data is provided at stage = 0
     initial begin
         clk = 0;
         rst = 0;
@@ -58,79 +45,38 @@ module testbench;
         $printtimescale(testbench);
         $dumpvars(0, testbench);
 
-        // 4 cycles = 4 * #2;
-        #8;
-        input_a = 1;
+        // 5 cycles = 5 * #2;
+        #10;
+        input_x = 1;
         new_input = 1;
         en = 1;
         #1; new_input = 0;
 
-        #100; // 0.1 seconds
+        #1; // 0.001 seconds
         
-        #8;
-        input_a = 2;
+        input_x = 2;
         new_input = 1;
         #1; new_input = 0;
 
-        #100; // 0.1 seconds
+        #1; // 0.001 seconds
 
-        #8;
-        input_a = 3;
+        input_x = 3;
         new_input = 1;
         #1; new_input = 0;
         
-        #100; // 0.1 seconds
+        #1; // 0.001 seconds
 
-        #8;
-        input_a = 4;
+        input_x = 4;
         new_input = 1;
         #1; new_input = 0;
         
-        #100; // 0.1 seconds
+        #10; // 0.001 seconds
 
-        #8;
-        input_a = 5;
+        input_x = 5;
         new_input = 1;
         #1; new_input = 0;
         
-        #100; // 0.1 seconds
-
-        #8;
-        input_a = 6;
-        new_input = 1;
-        #1; new_input = 0;
-        
-        #100; // 0.1 seconds
-
-        #8;
-        input_a = 7;
-        new_input = 1;
-        #1; new_input = 0;
-        
-        #100; // 0.1 seconds
-
-        #8;
-        input_a = 8;
-        new_input = 1;
-        #1; new_input = 0;
-        
-        #100; // 0.1 seconds
-
-        #8;
-        input_a = 9;
-        new_input = 1;
-        #1; new_input = 0;
-        
-        #100; // 0.1 seconds
-
-        #8;
-        input_a = 10;
-        new_input = 1;
-        #1; new_input = 0;
-        
-        #100; // 0.1 seconds
-
-        #12;
+        #40;
         $finish; 
     end
 
