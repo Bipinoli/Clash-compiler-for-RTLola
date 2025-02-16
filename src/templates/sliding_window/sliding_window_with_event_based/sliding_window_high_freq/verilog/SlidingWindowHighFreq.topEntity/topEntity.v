@@ -32,159 +32,159 @@ module topEntity
     , output wire  result_1_1_1
     );
   wire [388:0] result_2;
-  // sliding_window_with_event_based.hs:287:1-102
+  // sliding_window_high_freq.hs:293:1-102
   wire  eta;
-  // sliding_window_with_event_based.hs:287:1-102
+  // sliding_window_high_freq.hs:293:1-102
   wire signed [63:0] t;
   wire signed [63:0] result_3;
   reg signed [63:0] result_4 = (64'sd0);
   wire  c$app_arg;
-  // sliding_window_with_event_based.hs:255:1-94
+  // sliding_window_high_freq.hs:261:1-94
   wire  eta_0;
-  // sliding_window_with_event_based.hs:255:1-94
+  // sliding_window_high_freq.hs:261:1-94
   reg signed [63:0] out = (64'sd0);
   wire signed [63:0] result_5;
   wire signed [63:0] x;
-  // sliding_window_with_event_based.hs:221:1-145
+  // sliding_window_high_freq.hs:221:1-145
   wire  enB;
-  // sliding_window_with_event_based.hs:221:1-145
+  // sliding_window_high_freq.hs:221:1-145
   wire  enA;
-  // sliding_window_with_event_based.hs:264:1-117
+  // sliding_window_high_freq.hs:270:1-117
   wire [255:0] c$t_app_arg;
-  // sliding_window_with_event_based.hs:264:1-117
+  // sliding_window_high_freq.hs:270:1-117
   reg [127:0] window = {64'sd0,   64'sd0};
   wire [127:0] result_6;
   wire [127:0] result_7;
   wire [127:0] result_8;
-  // sliding_window_with_event_based.hs:264:1-117
+  // sliding_window_high_freq.hs:270:1-117
   wire signed [63:0] value;
-  // sliding_window_with_event_based.hs:264:1-117
+  // sliding_window_high_freq.hs:270:1-117
   wire  c$t_case_alt;
-  // sliding_window_with_event_based.hs:264:1-117
+  // sliding_window_high_freq.hs:270:1-117
   wire signed [63:0] x_0;
-  // sliding_window_with_event_based.hs:264:1-117
+  // sliding_window_high_freq.hs:270:1-117
   wire signed [63:0] \c0# ;
-  // sliding_window_with_event_based.hs:264:1-117
+  // sliding_window_high_freq.hs:270:1-117
   wire signed [63:0] x1;
-  // sliding_window_with_event_based.hs:264:1-117
+  // sliding_window_high_freq.hs:270:1-117
   wire signed [63:0] x1_0;
-  // sliding_window_with_event_based.hs:264:1-117
+  // sliding_window_high_freq.hs:270:1-117
   wire signed [63:0] cyclesBefore;
-  // sliding_window_with_event_based.hs:221:1-145
+  // sliding_window_high_freq.hs:221:1-145
   wire [128:0] inputData;
-  // sliding_window_with_event_based.hs:221:1-145
+  // sliding_window_high_freq.hs:221:1-145
   wire  c$winX4B_app_arg;
-  // sliding_window_with_event_based.hs:203:9-45
+  // sliding_window_high_freq.hs:203:9-44
   wire  eta_1;
   wire [196:0] result_9;
   wire  result_10;
   wire  result_11;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire  b;
   wire [128:0] result_12;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire [128:0] t_0;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   reg [128:0] sustainedInput = {64'sd0,   1'b0,   64'sd0};
   wire  result_13;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire  t_1;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire  newX;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   reg  enA_0 = 1'b0;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire signed [63:0] waitedX;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire [64:0] xData;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire  qPopValid;
   wire  result_14;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire  b_0;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   reg  enB_0 = 1'b0;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire  c$timerB_app_arg;
-  // sliding_window_with_event_based.hs:34:1-72
+  // sliding_window_high_freq.hs:34:1-72
   wire  eta_2;
   wire signed [63:0] result_15;
   wire signed [63:0] x_1;
   reg signed [63:0] result_16 = (64'sd2000);
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire  c$timerB_app_arg_0;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   reg  c$stage_case_alt;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire signed [63:0] x_2;
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   reg signed [63:0] stage = (64'sd0);
-  // sliding_window_with_event_based.hs:179:1-142
+  // sliding_window_high_freq.hs:179:1-142
   wire signed [63:0] c$stage_app_arg;
-  // sliding_window_with_event_based.hs:44:1-64
+  // sliding_window_high_freq.hs:44:1-64
   reg signed [63:0] s = (64'sd0);
-  // sliding_window_with_event_based.hs:44:1-64
+  // sliding_window_high_freq.hs:44:1-64
   wire  b_1;
   wire signed [63:0] result_17;
   wire signed [63:0] x_3;
   wire [130:0] result_18;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   reg [128:0] ds = {{64'sd0,   1'b0},   -64'sd1};
   reg  c$app_arg_0 = 1'b0;
   wire  c$case_alt;
   reg  c$case_alt_0;
   reg  c$app_arg_1 = 1'b0;
   wire  c$case_alt_1;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire [128:0] c$ds_case_alt;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   reg [128:0] c$ds_case_alt_0;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] x1_1;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] c$ds_case_scrut;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire [64:0] c$ds_app_arg;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   reg [383:0] \wait  = {64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0};
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire [383:0] c$wait_case_alt;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire [1547:0] c$wait_app_arg;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire [1151:0] c$wait_app_arg_0;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire [767:0] c$wait_app_arg_1;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   reg [389:0] buffer = {{64'sd0,   1'b0},   {64'sd0,   1'b0},   {64'sd0,   1'b0},   {64'sd0,   1'b0},
  {64'sd0,   1'b0},   {64'sd0,   1'b0}};
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire [389:0] c$buffer_case_alt;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire [389:0] c$buffer_case_alt_0;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   reg signed [63:0] cursor = (64'sd0);
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] c$cursor_case_alt;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] c$cursor_case_alt_0;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   reg signed [63:0] c$cursor_case_alt_1;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] c$cursor_case_alt_2;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire  c$cursor_case_scrut;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] x_4;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] c$cursor_case_alt_3;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   reg signed [63:0] c$cursor_case_alt_4;
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] c$cursor_case_alt_5;
-  // sliding_window_with_event_based.hs:157:1-188
+  // sliding_window_high_freq.hs:157:1-188
   wire  qPop;
-  // sliding_window_with_event_based.hs:157:1-188
+  // sliding_window_high_freq.hs:157:1-188
   wire  qPush;
   wire [64:0] input0;
   wire [127:0] c$t_app_arg_res;
@@ -278,7 +278,7 @@ module topEntity
   wire signed [63:0] iterateI_ho1_0_res;
   assign iterateI_ho1_0_arg0 = (64'sd0);
 
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] x1_2;
   wire signed [63:0] c$case_alt_3;
   assign iterateI_ho1_0_res = c$case_alt_3;
@@ -332,13 +332,13 @@ module topEntity
     wire [127:0] map_in;
     assign map_in = c$t_app_arg[i_0*128+:128];
     wire signed [63:0] map_out;
-    // sliding_window_with_event_based.hs:264:1-117
+    // sliding_window_high_freq.hs:270:1-117
     wire signed [63:0] indx;
-    // sliding_window_with_event_based.hs:264:1-117
+    // sliding_window_high_freq.hs:270:1-117
     wire signed [63:0] v;
-    // sliding_window_with_event_based.hs:264:1-117
+    // sliding_window_high_freq.hs:270:1-117
     wire signed [63:0] x_7;
-    // sliding_window_with_event_based.hs:264:1-117
+    // sliding_window_high_freq.hs:270:1-117
     wire signed [63:0] y_1;
     wire signed [63:0] c$case_alt_4;
     wire  c$case_scrut;
@@ -380,7 +380,7 @@ module topEntity
 
   assign c$t_case_alt = c$tte_rhs_0[0];
 
-  assign x_projection_4 = (((x1 + \c0# ) / 64'sd1000000) - \c0# );
+  assign x_projection_4 = (((x1 + \c0# ) / 64'sd25000) - \c0# );
 
   assign x_0 = x_projection_4;
 
@@ -459,7 +459,7 @@ module topEntity
   end
   // register end
 
-  assign c$timerB_app_arg = result_16 >= (64'sd1000000);
+  assign c$timerB_app_arg = result_16 >= (64'sd25000);
 
   assign eta_2 = eta_1 & (c$timerB_app_arg_0 & c$timerB_app_arg);
 
@@ -614,11 +614,11 @@ module topEntity
     assign map_in_0 = c$wait_app_arg[i_3*258+:258];
     wire signed [63:0] map_out_0;
     wire signed [63:0] c$case_alt_8;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire  push1;
     wire signed [63:0] c$case_alt_9;
     wire signed [63:0] c$case_alt_10;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire  pop1;
     reg signed [63:0] c$case_alt_11;
     wire signed [63:0] c$case_alt_12;
@@ -626,26 +626,26 @@ module topEntity
     wire signed [63:0] c$case_alt_14;
     wire  c$case_scrut_0;
     wire signed [63:0] c$case_alt_15;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] x1_3;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] valToLeft;
     wire signed [63:0] c$case_alt_16;
     wire  c$case_scrut_1;
     wire signed [63:0] c$case_alt_17;
     wire  c$case_scrut_2;
     wire signed [63:0] c$case_alt_18;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] x1_4;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] val;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] y_3;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] cur1;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] x_9;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] index;
     wire signed [63:0] c$tte_rhs_1;
     wire signed [63:0] c$tte_rhs_2;
@@ -733,17 +733,17 @@ module topEntity
     wire [191:0] zipWith_in2_0;
     assign zipWith_in2_0 = c$wait_app_arg_0[i_5*192+:192];
     wire [257:0] c$n_0;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire  psh;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire  pp;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] c;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] i_4;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] valToLeft_1;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] val_1;
     wire [257:0] c$case_alt_19;
     assign c$n_0 = c$case_alt_19;
@@ -777,7 +777,7 @@ module topEntity
   wire signed [63:0] iterateI_ho1_4_res;
   assign iterateI_ho1_0_arg0_0 = (64'sd0);
 
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] x1_5;
   wire signed [63:0] c$case_alt_20;
   assign iterateI_ho1_0_res_0 = c$case_alt_20;
@@ -788,7 +788,7 @@ module topEntity
 
 
 
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] x1_6;
   wire signed [63:0] c$case_alt_21;
   assign iterateI_ho1_1_res = c$case_alt_21;
@@ -799,7 +799,7 @@ module topEntity
 
 
 
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] x1_7;
   wire signed [63:0] c$case_alt_22;
   assign iterateI_ho1_2_res = c$case_alt_22;
@@ -810,7 +810,7 @@ module topEntity
 
 
 
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] x1_8;
   wire signed [63:0] c$case_alt_23;
   assign iterateI_ho1_3_res = c$case_alt_23;
@@ -821,7 +821,7 @@ module topEntity
 
 
 
-  // sliding_window_with_event_based.hs:68:1-78
+  // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] x1_9;
   wire signed [63:0] c$case_alt_24;
   assign iterateI_ho1_4_res = c$case_alt_24;
@@ -848,9 +848,9 @@ module topEntity
     wire [127:0] zipWith_in2_1;
     assign zipWith_in2_1 = c$wait_app_arg_1[i_6*128+:128];
     wire [191:0] c$n_1;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] b1;
-    // sliding_window_with_event_based.hs:68:1-78
+    // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] c1;
     wire [191:0] c$case_alt_25;
     assign c$n_1 = c$case_alt_25;

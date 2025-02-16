@@ -1,4 +1,4 @@
-module SlidingWindowWithEventBased where
+module SlidingWindowHighFreq where
 
 import Clash.Prelude
 
@@ -200,7 +200,7 @@ pacer en inputBuffer = bundle (debugSignals, status, sustainedInput, enables)
 
         timerB = timer resetBTimer
         resetBTimer = en .&&. stage .==. (pure 1) .&&. timerB .>=. periodBns
-        periodBns = 1000000 :: Signal dom Int -- 1kHz in ns
+        periodBns = 25_000 :: Signal dom Int -- 40kHz in ns
 
         stage = register 0 (nextStage <$> en <*> stage)
 
@@ -225,6 +225,11 @@ evaluator inputBuffer = bundle (debugSignals, toPop, outputs)
         -- stage 2 -> eval a & winX4B -- different than the concept of layers provided by RTLola
         -- stage 3 -> eval b
         -- stage 4 -> output
+        -- Note: 
+        -- Even though a & b are in the same RTLola layers 
+        -- due to b depending on the sliding window, b must be evaluated 1 cycle later
+        -- thus making the b effectively in a different layer
+        -- i.e with sliding window => effective layer = layer + 1
         stage = hotPotato 5
 
         outputs = bundle (outputA, outputB)
@@ -235,6 +240,7 @@ evaluator inputBuffer = bundle (debugSignals, toPop, outputs)
         (toPop, _) = unbundle pacingStatus
 
         outA = evaluateA (stage .==. (pure 2) .&&. enA) x
+        -- window must be evaluated irrespective of pacing
         winX4B = windowXForB (stage .==. (pure 2)) inputData
 
         outB = evaluateB (stage .==. (pure 3) .&&. enB) winX4B
@@ -257,10 +263,10 @@ evaluateA en x = out
     where out = register 0 (mux en (x * 10) out)
 
 
--- evaluation freq of a = 1kHz = 0.001s
--- aggregate over = 0.002s
+-- evaluation freq of a = 40kHz = 0.000025s
+-- aggregate over = 0.000050s
 -- buckets required = 2
--- bucket span = 0.001s
+-- bucket span = 0.000025s
 windowXForB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Int, Bool, Int) -> Signal dom (Vec 2 Int)
 windowXForB en timedInput = window
     where 
@@ -275,7 +281,7 @@ windowXForB en timedInput = window
                       else updateBucket win (length win - 1 - bucketsBefore) x
                 bucketsBefore = (cyclesBefore * systemClockPeriodNs) `div` bucketSpanNs 
                 (x, newX, cyclesBefore) = inpt
-                bucketSpanNs = 1_000_000 -- 0.001s in nanoseconds
+                bucketSpanNs = 25_000 -- 0.000025s in nanoseconds
 
         updateBucket :: Vec 2 Int -> Int -> Int -> Vec 2 Int
         updateBucket win index value = map (\(indx, v) -> if indx == index then bBucketFx v value else v) (zip indices win)

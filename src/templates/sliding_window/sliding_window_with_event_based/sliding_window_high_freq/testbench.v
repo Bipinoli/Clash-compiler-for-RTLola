@@ -52,29 +52,47 @@ module testbench;
         new_input = 1;
         en = 1;
 
-        #2; // 0.001 seconds
+        #2; // 2us
         input_x = 2;
         new_input = 1;
 
-        #2; // 0.001 seconds
+        #2;
         input_x = 3;
         new_input = 1;
         
-        #2; // 0.001 seconds
+        #2;
         input_x = 4;
         new_input = 1;
 
-        #2; 
-        new_input = 0;
-        
-        #10;
+        #2;
         input_x = 5;
         new_input = 1;
 
         #2; 
         new_input = 0;
+        input_x = 0;
+
+        #43;
+        input_x = 6;
+        new_input = 1;
+
+        #2; 
+        input_x = 7;
+        new_input = 1;
         
-        #40;
+        #2; 
+        input_x = 8;
+        new_input = 1;
+
+        #2; 
+        input_x = 9;
+        new_input = 1;
+
+        #2; 
+        new_input = 0;
+        input_x = 0;
+
+        #60;
         $finish; 
     end
 
