@@ -19,7 +19,7 @@ module testbench;
                     );
 
     always begin
-        #2 clk = ~clk;
+        #1 clk = ~clk;
     end
 
     initial begin
@@ -33,162 +33,65 @@ module testbench;
         $printtimescale(testbench);
         $dumpvars(0, testbench);
 
-        #1.8;
+        #10;
+        push = 1;
+        pop = 0;
         data = 1;
-        push = 1;
-        pop = 0;
-        // 1 _ _ _ _ 
-        // (push_valid, pop_valid, output) = (1, 0, 0)
-        #2.2;
+        #1; 
         push = 0;
         pop = 0;
-        data = 0;
 
-        #4;
-
-        #1.8;
+        #1;
+        push = 1;
+        pop = 0;
         data = 2;
-        push = 1;
-        pop = 0;
-        // 2 1 _ _ _ 
-        // (push_valid, pop_valid, output) = (1, 0, 0)
-        #2.2;
+        #1;
         push = 0;
         pop = 0;
-        data = 0;
 
-        #8;
-
-        #1.8;
+        #1;
+        push = 1;
+        pop = 0;
         data = 3;
+        #1;
+        push = 0;
+        pop = 0;
+
+        #1;
         push = 1;
         pop = 0;
-        // 3 2 1 _ _ 
-        // (push_valid, pop_valid, output) = (1, 0, 0)
-        #2.2;
-        push = 0;
-        pop = 0;
-        data = 0;
-
-        #4;
-
-        #1.8;
-        data = 0;
-        push = 0;
-        pop = 1;
-        // 3 2 _ _ _ 
-        // (push_valid, pop_valid, output) = (0, 1, 1)
-        #2.2;
-        push = 0;
-        pop = 0;
-        data = 0;
-
-        #8;
-
-        #1.8;
         data = 4;
-        push = 1;
-        pop = 1;
-        // 4 3 _ _ _ 
-        // (push_valid, pop_valid, output) = (1, 1, 2)
-        #2.2;
+        #1;
         push = 0;
         pop = 0;
-        data = 0;
 
-        #1.8;
+        #1;
+        push = 0;
+        pop = 1;
+        data = 0;
+        #1;
+        push = 0;
+        pop = 0;
+
+        // Note: 
+        // #4 is not enough because the data is not available when the clock raises to high
+        // It is important that the input is sustained for a single clock cycle for things to work correctly
+        #4;
+        push = 1;
+        pop = 0;
         data = 5;
-        push = 1;
-        pop = 1;
-        // 5 4 _ _ _ 
-        // (push_valid, pop_valid, output) = (1, 1, 3)
-        #2.2;
+        #1;
         push = 0;
         pop = 0;
-        data = 0;
 
-        #1.8;
-        data = 0;
+        #1;
         push = 0;
         pop = 1;
-        // 5 _ _ _ _ 
-        // (push_valid, pop_valid, output) = (0, 1, 4)
-        #2.2;
+        data = 0;
+        #1;
         push = 0;
         pop = 0;
-        data = 0;
 
-        #4;
-
-        #1.8;
-        data = 6;
-        push = 1;
-        pop = 1;
-        // 6 _ _ _ _ 
-        // (push_valid, pop_valid, output) = (1, 1, 5)
-        #2.2;
-        push = 0;
-        pop = 0;
-        data = 0;
-
-        #1.8;
-        data = 0;
-        push = 0;
-        pop = 1;
-        // _ _ _ _ _ 
-        // (push_valid, pop_valid, output) = (0, 1, 6)
-        #2.2;
-        push = 0;
-        pop = 0;
-        data = 0;
-
-        #1.8;
-        data = 7;
-        push = 1;
-        pop = 1;
-        // 7 _ _ _ _ 
-        // (push_valid, pop_valid, output) = (1, 0, 0)
-        #2.2;
-        push = 0;
-        pop = 0;
-        data = 0;
-
-        #4;
-
-        #1.8;
-        data = 0;
-        push = 0;
-        pop = 1;
-        // _ _ _ _ _ 
-        // (push_valid, pop_valid, output) = (0, 1, 7)
-        #2.2;
-        push = 0;
-        pop = 0;
-        data = 0;
-
-        #8;
-
-        #1.8;
-        data = 0;
-        push = 0;
-        pop = 1;
-        // _ _ _ _ _ 
-        // (push_valid, pop_valid, output) = (0, 0, 0)
-        #2.2;
-        push = 0;
-        pop = 0;
-        data = 0;
-
-        #1.8;
-        data = 0;
-        push = 0;
-        pop = 1;
-        // _ _ _ _ _ 
-        // (push_valid, pop_valid, output) = (0, 0, 0)
-        #2.2;
-        push = 0;
-        pop = 0;
-        data = 0;
 
         #10;
         $finish; 

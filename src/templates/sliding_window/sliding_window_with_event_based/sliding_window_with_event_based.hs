@@ -50,7 +50,7 @@ hotPotato n = let s = register 0 (mux (s .==. pure (n-1)) 0 (s + 1)) in s
 type QData = (Int, Bool)
 qNullData = (0, False) :: QData
 
-type QMemSize = 5
+type QMemSize = 6
 
 type QMem = Vec QMemSize QData
 type QWait = Vec QMemSize Int
@@ -154,18 +154,20 @@ queue input = output
 ---------------------------------------------------------------
 
 
-monitor :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Bool, Bool, Int, Bool, Bool, Int, Int, Bool, Bool, Int, Int, Vec 2 Int), ((Int, Bool), (Int, Bool)))
+monitor :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Bool, Bool, Int, Bool, Bool, (Int, Bool), Int, Bool, Bool, Int, Int, Vec 2 Int), ((Int, Bool), (Int, Bool)))
 monitor input0 = bundle (debugSignals, outputs)
     where 
+        -- Note:
+        -- As the input will only be picked on the rising edge of the clock
+        -- It is assumed that the pushed input is sustained until the rising edge
         inputBuffer = queue (bundle (qPush, qPop, qData))
         (evalDebugSignals, qPop, outputs) = unbundle (evaluator inputBuffer) 
         (x, qPush) = unbundle input0
         qData = input0
 
         -- extra debug signals
-        debugSignals = bundle (qPush, qPop, x, qPushValid, qPopValid, qOutX, qWait, enA, enB, stage, timerB, winX)
+        debugSignals = bundle (qPush, qPop, x, qPushValid, qPopValid, qOut, qWait, enA, enB, stage, timerB, winX)
         (qPushValid, qPopValid, qOut, qWait) = unbundle inputBuffer
-        (qOutX, _) = unbundle qOut
         (enA, enB, stage, timerB, winX) = unbundle evalDebugSignals
 
 
@@ -175,14 +177,17 @@ monitor input0 = bundle (debugSignals, outputs)
 
 
 pacer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom QOutput -> Signal dom (Int, (Bool, Bool), (Int, Bool, Int), (Bool, Bool))
-pacer en inputBuffer = bundle (debugSignals, status, inputData, enables)
+pacer en inputBuffer = bundle (debugSignals, status, sustainedInput, enables)
     where 
+        -- inputData & enables must be sustained until next pacer phase
+        -- status must not be sustained
         status = bundle (toPop, pacerStable) 
-        inputData = bundle (x, newX .&&. qPopValid, waitedX)
         enables = bundle (enA, enB)
 
         toPop = mux (en .&&. (stage .==. (pure 0))) (pure True) (pure False)
         pacerStable = mux (en .&&. (stage .==. (pure 1))) (pure True) (pure False)
+
+        sustainedInput = register (0, False, 0) (mux (en .&&. stage .==. (pure 1)) (bundle (x, newX .&&. qPopValid, waitedX)) sustainedInput)
 
         (x, newX) = unbundle xData
         (_, qPopValid, xData, waitedX) = unbundle inputBuffer
@@ -291,5 +296,5 @@ evaluateB en winX = register 0 (mux en newVal oldVal)
 
 
 topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
-    Signal MyDomain (Int, Bool) -> Signal MyDomain ((Bool, Bool, Int, Bool, Bool, Int, Int, Bool, Bool, Int, Int, Vec 2 Int), ((Int, Bool), (Int, Bool)))
+    Signal MyDomain (Int, Bool) -> Signal MyDomain ((Bool, Bool, Int, Bool, Bool, (Int, Bool), Int, Bool, Bool, Int, Int, Vec 2 Int), ((Int, Bool), (Int, Bool)))
 topEntity clk rst en input0 = exposeClockResetEnable (monitor input0) clk rst en

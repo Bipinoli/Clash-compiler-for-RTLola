@@ -13,6 +13,7 @@ module testbench;
     wire qPushValid;
     wire qPopValid;
     wire signed [63:0] qOutX;
+    wire qOutNewX;
     wire signed [63:0] qWaitX;
     wire enA;
     wire enB;
@@ -28,7 +29,7 @@ module testbench;
 
     topEntity monitor (clk, rst, en,
                        input_x, new_input,
-                       qPush, qPop, qInX, qPushValid, qPopValid, qOutX, qWaitX, enA, enB, stage, timerB, winX_0, winX_1,
+                       qPush, qPop, qInX, qPushValid, qPopValid, qOutX, qOutNewX, qWaitX, enA, enB, stage, timerB, winX_0, winX_1,
                        outA, aktvOutA, outB, aktvOutB
                        );
 
@@ -50,31 +51,28 @@ module testbench;
         input_x = 1;
         new_input = 1;
         en = 1;
-        #1; new_input = 0;
 
-        #1; // 0.001 seconds
-        
+        #2; // 0.001 seconds
         input_x = 2;
         new_input = 1;
-        #1; new_input = 0;
 
-        #1; // 0.001 seconds
-
+        #2; // 0.001 seconds
         input_x = 3;
         new_input = 1;
-        #1; new_input = 0;
         
-        #1; // 0.001 seconds
-
+        #2; // 0.001 seconds
         input_x = 4;
         new_input = 1;
-        #1; new_input = 0;
-        
-        #10; // 0.001 seconds
 
+        #2; 
+        new_input = 0;
+        
+        #10;
         input_x = 5;
         new_input = 1;
-        #1; new_input = 0;
+
+        #2; 
+        new_input = 0;
         
         #40;
         $finish; 

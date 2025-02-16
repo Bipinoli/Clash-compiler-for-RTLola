@@ -17,7 +17,8 @@ module topEntity
     , output wire signed [63:0] result_0_2
     , output wire  result_0_3
     , output wire  result_0_4
-    , output wire signed [63:0] result_0_5
+    , output wire signed [63:0] result_0_5_0
+    , output wire  result_0_5_1
     , output wire signed [63:0] result_0_6
     , output wire  result_0_7
     , output wire  result_0_8
@@ -31,97 +32,102 @@ module topEntity
     , output wire  result_1_1_1
     );
   wire [388:0] result_2;
-  // sliding_window_with_event_based.hs:282:1-102
+  // sliding_window_with_event_based.hs:287:1-102
   wire  eta;
-  // sliding_window_with_event_based.hs:282:1-102
+  // sliding_window_with_event_based.hs:287:1-102
   wire signed [63:0] t;
   wire signed [63:0] result_3;
   reg signed [63:0] result_4 = (64'sd0);
   wire  c$app_arg;
-  // sliding_window_with_event_based.hs:250:1-94
+  // sliding_window_with_event_based.hs:255:1-94
   wire  eta_0;
-  // sliding_window_with_event_based.hs:250:1-94
+  // sliding_window_with_event_based.hs:255:1-94
   reg signed [63:0] out = (64'sd0);
   wire signed [63:0] result_5;
   wire signed [63:0] x;
-  // sliding_window_with_event_based.hs:216:1-145
+  // sliding_window_with_event_based.hs:221:1-145
   wire  enB;
-  // sliding_window_with_event_based.hs:216:1-145
+  // sliding_window_with_event_based.hs:221:1-145
   wire  enA;
-  // sliding_window_with_event_based.hs:259:1-117
+  // sliding_window_with_event_based.hs:264:1-117
   wire [255:0] c$t_app_arg;
-  // sliding_window_with_event_based.hs:259:1-117
+  // sliding_window_with_event_based.hs:264:1-117
   reg [127:0] window = {64'sd0,   64'sd0};
   wire [127:0] result_6;
   wire [127:0] result_7;
   wire [127:0] result_8;
-  // sliding_window_with_event_based.hs:259:1-117
+  // sliding_window_with_event_based.hs:264:1-117
   wire signed [63:0] value;
-  // sliding_window_with_event_based.hs:259:1-117
+  // sliding_window_with_event_based.hs:264:1-117
   wire  c$t_case_alt;
-  // sliding_window_with_event_based.hs:259:1-117
+  // sliding_window_with_event_based.hs:264:1-117
   wire signed [63:0] x_0;
-  // sliding_window_with_event_based.hs:259:1-117
+  // sliding_window_with_event_based.hs:264:1-117
   wire signed [63:0] \c0# ;
-  // sliding_window_with_event_based.hs:259:1-117
+  // sliding_window_with_event_based.hs:264:1-117
   wire signed [63:0] x1;
-  // sliding_window_with_event_based.hs:259:1-117
+  // sliding_window_with_event_based.hs:264:1-117
   wire signed [63:0] x1_0;
-  // sliding_window_with_event_based.hs:259:1-117
+  // sliding_window_with_event_based.hs:264:1-117
   wire signed [63:0] cyclesBefore;
-  // sliding_window_with_event_based.hs:216:1-145
+  // sliding_window_with_event_based.hs:221:1-145
   wire [128:0] inputData;
-  // sliding_window_with_event_based.hs:216:1-145
+  // sliding_window_with_event_based.hs:221:1-145
   wire  c$winX4B_app_arg;
-  // sliding_window_with_event_based.hs:198:9-45
+  // sliding_window_with_event_based.hs:203:9-45
   wire  eta_1;
   wire [196:0] result_9;
   wire  result_10;
   wire  result_11;
-  // sliding_window_with_event_based.hs:177:1-142
+  // sliding_window_with_event_based.hs:179:1-142
   wire  b;
-  wire  result_12;
-  // sliding_window_with_event_based.hs:177:1-142
-  wire  t_0;
-  // sliding_window_with_event_based.hs:177:1-142
-  wire  newX;
-  // sliding_window_with_event_based.hs:177:1-142
-  reg  enA_0 = 1'b0;
-  // sliding_window_with_event_based.hs:177:1-142
-  wire signed [63:0] waitedX;
-  // sliding_window_with_event_based.hs:177:1-142
-  wire [64:0] xData;
-  // sliding_window_with_event_based.hs:177:1-142
-  wire  qPopValid;
+  wire [128:0] result_12;
+  // sliding_window_with_event_based.hs:179:1-142
+  wire [128:0] t_0;
+  // sliding_window_with_event_based.hs:179:1-142
+  reg [128:0] sustainedInput = {64'sd0,   1'b0,   64'sd0};
   wire  result_13;
-  // sliding_window_with_event_based.hs:177:1-142
+  // sliding_window_with_event_based.hs:179:1-142
+  wire  t_1;
+  // sliding_window_with_event_based.hs:179:1-142
+  wire  newX;
+  // sliding_window_with_event_based.hs:179:1-142
+  reg  enA_0 = 1'b0;
+  // sliding_window_with_event_based.hs:179:1-142
+  wire signed [63:0] waitedX;
+  // sliding_window_with_event_based.hs:179:1-142
+  wire [64:0] xData;
+  // sliding_window_with_event_based.hs:179:1-142
+  wire  qPopValid;
+  wire  result_14;
+  // sliding_window_with_event_based.hs:179:1-142
   wire  b_0;
-  // sliding_window_with_event_based.hs:177:1-142
+  // sliding_window_with_event_based.hs:179:1-142
   reg  enB_0 = 1'b0;
-  // sliding_window_with_event_based.hs:177:1-142
+  // sliding_window_with_event_based.hs:179:1-142
   wire  c$timerB_app_arg;
   // sliding_window_with_event_based.hs:34:1-72
   wire  eta_2;
-  wire signed [63:0] result_14;
+  wire signed [63:0] result_15;
   wire signed [63:0] x_1;
-  reg signed [63:0] result_15 = (64'sd2000);
-  // sliding_window_with_event_based.hs:177:1-142
+  reg signed [63:0] result_16 = (64'sd2000);
+  // sliding_window_with_event_based.hs:179:1-142
   wire  c$timerB_app_arg_0;
-  // sliding_window_with_event_based.hs:177:1-142
+  // sliding_window_with_event_based.hs:179:1-142
   reg  c$stage_case_alt;
-  // sliding_window_with_event_based.hs:177:1-142
+  // sliding_window_with_event_based.hs:179:1-142
   wire signed [63:0] x_2;
-  // sliding_window_with_event_based.hs:177:1-142
+  // sliding_window_with_event_based.hs:179:1-142
   reg signed [63:0] stage = (64'sd0);
-  // sliding_window_with_event_based.hs:177:1-142
+  // sliding_window_with_event_based.hs:179:1-142
   wire signed [63:0] c$stage_app_arg;
   // sliding_window_with_event_based.hs:44:1-64
   reg signed [63:0] s = (64'sd0);
   // sliding_window_with_event_based.hs:44:1-64
   wire  b_1;
-  wire signed [63:0] result_16;
+  wire signed [63:0] result_17;
   wire signed [63:0] x_3;
-  wire [130:0] result_17;
+  wire [130:0] result_18;
   // sliding_window_with_event_based.hs:68:1-78
   reg [128:0] ds = {{64'sd0,   1'b0},   -64'sd1};
   reg  c$app_arg_0 = 1'b0;
@@ -140,22 +146,22 @@ module topEntity
   // sliding_window_with_event_based.hs:68:1-78
   wire [64:0] c$ds_app_arg;
   // sliding_window_with_event_based.hs:68:1-78
-  reg [319:0] \wait  = {64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0};
+  reg [383:0] \wait  = {64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0};
   // sliding_window_with_event_based.hs:68:1-78
-  wire [319:0] c$wait_case_alt;
+  wire [383:0] c$wait_case_alt;
   // sliding_window_with_event_based.hs:68:1-78
-  wire [1289:0] c$wait_app_arg;
+  wire [1547:0] c$wait_app_arg;
   // sliding_window_with_event_based.hs:68:1-78
-  wire [959:0] c$wait_app_arg_0;
+  wire [1151:0] c$wait_app_arg_0;
   // sliding_window_with_event_based.hs:68:1-78
-  wire [639:0] c$wait_app_arg_1;
+  wire [767:0] c$wait_app_arg_1;
   // sliding_window_with_event_based.hs:68:1-78
-  reg [324:0] buffer = {{64'sd0,   1'b0},   {64'sd0,   1'b0},   {64'sd0,   1'b0},   {64'sd0,   1'b0},
- {64'sd0,   1'b0}};
+  reg [389:0] buffer = {{64'sd0,   1'b0},   {64'sd0,   1'b0},   {64'sd0,   1'b0},   {64'sd0,   1'b0},
+ {64'sd0,   1'b0},   {64'sd0,   1'b0}};
   // sliding_window_with_event_based.hs:68:1-78
-  wire [324:0] c$buffer_case_alt;
+  wire [389:0] c$buffer_case_alt;
   // sliding_window_with_event_based.hs:68:1-78
-  wire [324:0] c$buffer_case_alt_0;
+  wire [389:0] c$buffer_case_alt_0;
   // sliding_window_with_event_based.hs:68:1-78
   reg signed [63:0] cursor = (64'sd0);
   // sliding_window_with_event_based.hs:68:1-78
@@ -176,22 +182,23 @@ module topEntity
   reg signed [63:0] c$cursor_case_alt_4;
   // sliding_window_with_event_based.hs:68:1-78
   wire signed [63:0] c$cursor_case_alt_5;
-  // sliding_window_with_event_based.hs:157:1-180
+  // sliding_window_with_event_based.hs:157:1-188
   wire  qPop;
-  // sliding_window_with_event_based.hs:157:1-180
+  // sliding_window_with_event_based.hs:157:1-188
   wire  qPush;
   wire [64:0] input0;
   wire [127:0] c$t_app_arg_res;
   wire signed [63:0] c$tte_rhs_0;
   wire signed [63:0] x_projection_4;
-  wire [329:0] c$vec1;
-  wire [319:0] c$wait_app_arg_res;
-  wire [319:0] c$vec1_0;
-  wire [389:0] c$buffer_case_alt_sel_alt_t_1;
+  wire [395:0] c$vec1;
+  wire [383:0] c$wait_app_arg_res;
+  wire [383:0] c$vec1_0;
+  wire [454:0] c$buffer_case_alt_sel_alt_t_1;
   wire signed [63:0] c$tte_rhs_4;
-  wire [583:0] result;
-  wire [453:0] result_0;
-  wire [127:0] result_0_11_2;
+  wire [584:0] result;
+  wire [454:0] result_0;
+  wire [64:0] result_0_5;
+  wire [127:0] result_0_11_4;
   wire [129:0] result_1;
   wire [64:0] result_1_0;
   wire [64:0] result_1_1;
@@ -325,13 +332,13 @@ module topEntity
     wire [127:0] map_in;
     assign map_in = c$t_app_arg[i_0*128+:128];
     wire signed [63:0] map_out;
-    // sliding_window_with_event_based.hs:259:1-117
+    // sliding_window_with_event_based.hs:264:1-117
     wire signed [63:0] indx;
-    // sliding_window_with_event_based.hs:259:1-117
+    // sliding_window_with_event_based.hs:264:1-117
     wire signed [63:0] v;
-    // sliding_window_with_event_based.hs:259:1-117
+    // sliding_window_with_event_based.hs:264:1-117
     wire signed [63:0] x_7;
-    // sliding_window_with_event_based.hs:259:1-117
+    // sliding_window_with_event_based.hs:264:1-117
     wire signed [63:0] y_1;
     wire signed [63:0] c$case_alt_4;
     wire  c$case_scrut;
@@ -391,10 +398,9 @@ module topEntity
 
   assign eta_1 = (s == (64'sd0)) | (s == (64'sd1));
 
-  assign result_9 = {result_15,   {result_11,
-                                   result_10},   {$signed(xData[64:1]),
-                                                  newX & qPopValid,   waitedX},   {enA_0,
-                                                                                   enB_0}};
+  assign result_9 = {result_16,   {result_11,
+                                   result_10},   sustainedInput,   {enA_0,
+                                                                    enB_0}};
 
   assign result_10 = b_0 ? 1'b1 : 1'b0;
 
@@ -402,9 +408,24 @@ module topEntity
 
   assign b = eta_1 & (stage == (64'sd0));
 
-  assign result_12 = b_0 ? t_0 : enA_0;
+  assign result_12 = b_0 ? t_0 : sustainedInput;
 
-  assign t_0 = qPopValid & newX;
+  assign t_0 = {$signed(xData[64:1]),
+                newX & qPopValid,   waitedX};
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : sustainedInput_register
+    if ( rst) begin
+      sustainedInput <= {64'sd0,   1'b0,   64'sd0};
+    end else if (en) begin
+      sustainedInput <= result_12;
+    end
+  end
+  // register end
+
+  assign result_13 = b_0 ? t_1 : enA_0;
+
+  assign t_1 = qPopValid & newX;
 
   assign newX = xData[0:0];
 
@@ -413,18 +434,18 @@ module topEntity
     if ( rst) begin
       enA_0 <= 1'b0;
     end else if (en) begin
-      enA_0 <= result_12;
+      enA_0 <= result_13;
     end
   end
   // register end
 
-  assign waitedX = $signed(result_17[63:0]);
+  assign waitedX = $signed(result_18[63:0]);
 
-  assign xData = result_17[128:64];
+  assign xData = result_18[128:64];
 
-  assign qPopValid = result_17[129:129];
+  assign qPopValid = result_18[129:129];
 
-  assign result_13 = b_0 ? c$timerB_app_arg : enB_0;
+  assign result_14 = b_0 ? c$timerB_app_arg : enB_0;
 
   assign b_0 = eta_1 & c$timerB_app_arg_0;
 
@@ -433,25 +454,25 @@ module topEntity
     if ( rst) begin
       enB_0 <= 1'b0;
     end else if (en) begin
-      enB_0 <= result_13;
+      enB_0 <= result_14;
     end
   end
   // register end
 
-  assign c$timerB_app_arg = result_15 >= (64'sd1000000);
+  assign c$timerB_app_arg = result_16 >= (64'sd1000000);
 
   assign eta_2 = eta_1 & (c$timerB_app_arg_0 & c$timerB_app_arg);
 
-  assign result_14 = eta_2 ? (64'sd2000) : ((x_1 + 64'sd2000));
+  assign result_15 = eta_2 ? (64'sd2000) : ((x_1 + 64'sd2000));
 
-  assign x_1 = result_15;
+  assign x_1 = result_16;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_15_register
+  always @(posedge clk or  posedge  rst) begin : result_16_register
     if ( rst) begin
-      result_15 <= (64'sd2000);
+      result_16 <= (64'sd2000);
     end else if (en) begin
-      result_15 <= result_14;
+      result_16 <= result_15;
     end
   end
   // register end
@@ -484,18 +505,18 @@ module topEntity
     if ( rst) begin
       s <= (64'sd0);
     end else if (en) begin
-      s <= result_16;
+      s <= result_17;
     end
   end
   // register end
 
   assign b_1 = s == (64'sd4);
 
-  assign result_16 = b_1 ? (64'sd0) : ((x_3 + 64'sd1));
+  assign result_17 = b_1 ? (64'sd0) : ((x_3 + 64'sd1));
 
   assign x_3 = s;
 
-  assign result_17 = {c$app_arg_1,   c$app_arg_0,
+  assign result_18 = {c$app_arg_1,   c$app_arg_0,
                       ds[128:64],   $signed(ds[63:0])};
 
   // register begin
@@ -554,22 +575,22 @@ module topEntity
   assign x1_1 = c$ds_case_scrut;
 
   // index begin
-  wire signed [63:0] vecArray [0:5-1];
+  wire signed [63:0] vecArray [0:6-1];
   genvar i_1;
   generate
-  for (i_1=0; i_1 < 5; i_1=i_1+1) begin : mk_array
-    assign vecArray[(5-1)-i_1] = \wait [i_1*64+:64];
+  for (i_1=0; i_1 < 6; i_1=i_1+1) begin : mk_array
+    assign vecArray[(6-1)-i_1] = \wait [i_1*64+:64];
   end
   endgenerate
   assign c$ds_case_scrut = vecArray[c$cursor_case_alt_5];
   // index end
 
   // index begin
-  wire [64:0] vecArray_0 [0:5-1];
+  wire [64:0] vecArray_0 [0:6-1];
   genvar i_2;
   generate
-  for (i_2=0; i_2 < 5; i_2=i_2+1) begin : mk_array_0
-    assign vecArray_0[(5-1)-i_2] = buffer[i_2*65+:65];
+  for (i_2=0; i_2 < 6; i_2=i_2+1) begin : mk_array_0
+    assign vecArray_0[(6-1)-i_2] = buffer[i_2*65+:65];
   end
   endgenerate
   assign c$ds_app_arg = vecArray_0[c$cursor_case_alt_5];
@@ -578,7 +599,7 @@ module topEntity
   // register begin
   always @(posedge clk or  posedge  rst) begin : wait_register
     if ( rst) begin
-      \wait  <= {64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0};
+      \wait  <= {64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0};
     end else if (en) begin
       \wait  <= c$wait_case_alt;
     end
@@ -588,7 +609,7 @@ module topEntity
   // map begin
   genvar i_3;
   generate
-  for (i_3=0; i_3 < 5; i_3 = i_3 + 1) begin : map_0
+  for (i_3=0; i_3 < 6; i_3 = i_3 + 1) begin : map_0
     wire [257:0] map_in_0;
     assign map_in_0 = c$wait_app_arg[i_3*258+:258];
     wire signed [63:0] map_out_0;
@@ -701,12 +722,12 @@ module topEntity
   endgenerate
   // map end
 
-  assign c$vec1 = ({5 {{qPush,   qPop,   cursor}}});
+  assign c$vec1 = ({6 {{qPush,   qPop,   cursor}}});
 
   // zipWith start
   genvar i_5;
   generate
-  for (i_5 = 0; i_5 < 5; i_5 = i_5 + 1) begin : zipWith_0
+  for (i_5 = 0; i_5 < 6; i_5 = i_5 + 1) begin : zipWith_0
     wire [65:0] zipWith_in1_0;
     assign zipWith_in1_0 = c$vec1[i_5*66+:66];
     wire [191:0] zipWith_in2_0;
@@ -753,6 +774,7 @@ module topEntity
   wire signed [63:0] iterateI_ho1_1_res;
   wire signed [63:0] iterateI_ho1_2_res;
   wire signed [63:0] iterateI_ho1_3_res;
+  wire signed [63:0] iterateI_ho1_4_res;
   assign iterateI_ho1_0_arg0_0 = (64'sd0);
 
   // sliding_window_with_event_based.hs:68:1-78
@@ -799,16 +821,28 @@ module topEntity
 
 
 
+  // sliding_window_with_event_based.hs:68:1-78
+  wire signed [63:0] x1_9;
+  wire signed [63:0] c$case_alt_24;
+  assign iterateI_ho1_4_res = c$case_alt_24;
+
+  assign x1_9 = iterateI_ho1_3_res;
+
+  assign c$case_alt_24 = (x1_9 + 64'sd1);
+
+
+
   assign c$wait_app_arg_res = {(64'sd0),
                                iterateI_ho1_0_res_0,   iterateI_ho1_1_res,
-                               iterateI_ho1_2_res,   iterateI_ho1_3_res};
+                               iterateI_ho1_2_res,   iterateI_ho1_3_res,
+                               iterateI_ho1_4_res};
 
 
 
   // zipWith start
   genvar i_6;
   generate
-  for (i_6 = 0; i_6 < 5; i_6 = i_6 + 1) begin : zipWith_1
+  for (i_6 = 0; i_6 < 6; i_6 = i_6 + 1) begin : zipWith_1
     wire signed [63:0] zipWith_in1_1;
     assign zipWith_in1_1 = c$wait_app_arg_res[i_6*64+:64];
     wire [127:0] zipWith_in2_1;
@@ -818,14 +852,14 @@ module topEntity
     wire signed [63:0] b1;
     // sliding_window_with_event_based.hs:68:1-78
     wire signed [63:0] c1;
-    wire [191:0] c$case_alt_24;
-    assign c$n_1 = c$case_alt_24;
+    wire [191:0] c$case_alt_25;
+    assign c$n_1 = c$case_alt_25;
 
     assign b1 = $signed(zipWith_in2_1[127:64]);
 
     assign c1 = $signed(zipWith_in2_1[63:0]);
 
-    assign c$case_alt_24 = {zipWith_in1_1,   b1,
+    assign c$case_alt_25 = {zipWith_in1_1,   b1,
                             c1};
 
 
@@ -834,12 +868,12 @@ module topEntity
   endgenerate
   // zipWith end
 
-  assign c$vec1_0 = ({64'sd0,(\wait [320-1 : 64])});
+  assign c$vec1_0 = ({64'sd0,(\wait [384-1 : 64])});
 
   // zipWith start
   genvar i_7;
   generate
-  for (i_7 = 0; i_7 < 5; i_7 = i_7 + 1) begin : zipWith_2
+  for (i_7 = 0; i_7 < 6; i_7 = i_7 + 1) begin : zipWith_2
     wire signed [63:0] zipWith_in1_2;
     assign zipWith_in1_2 = c$vec1_0[i_7*64+:64];
     wire signed [63:0] zipWith_in2_2;
@@ -857,7 +891,7 @@ module topEntity
   always @(posedge clk or  posedge  rst) begin : buffer_register
     if ( rst) begin
       buffer <= {{64'sd0,   1'b0},   {64'sd0,   1'b0},   {64'sd0,   1'b0},   {64'sd0,   1'b0},
-   {64'sd0,   1'b0}};
+   {64'sd0,   1'b0},   {64'sd0,   1'b0}};
     end else if (en) begin
       buffer <= c$buffer_case_alt;
     end
@@ -868,7 +902,7 @@ module topEntity
 
   assign c$buffer_case_alt_sel_alt_t_1 = ({input0,buffer});
 
-  assign c$buffer_case_alt_0 = c$cursor_case_scrut ? c$buffer_case_alt_sel_alt_t_1[389:65] : buffer;
+  assign c$buffer_case_alt_0 = c$cursor_case_scrut ? c$buffer_case_alt_sel_alt_t_1[454:65] : buffer;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : cursor_register
@@ -893,7 +927,7 @@ module topEntity
 
   assign c$cursor_case_alt_2 = c$cursor_case_scrut ? ((x_4 + 64'sd1)) : cursor;
 
-  assign c$tte_rhs_4 = (x_4 != 64'sd5) ? 64'sd1 : 64'sd0;
+  assign c$tte_rhs_4 = (x_4 != 64'sd6) ? 64'sd1 : 64'sd0;
 
   assign c$cursor_case_scrut = c$tte_rhs_4[0];
 
@@ -911,10 +945,9 @@ module topEntity
   assign c$cursor_case_alt_5 = (x_4 - 64'sd1);
 
   assign result = {{qPush,   qPop,
-                    $signed(input0[64:1]),   result_17[130:130],
-                    result_17[129:129],
-                    $signed(result_17[128:65]),
-                    $signed(result_17[63:0]),   result_2[388:388],
+                    $signed(input0[64:1]),   result_18[130:130],
+                    result_18[129:129],   result_18[128:64],
+                    $signed(result_18[63:0]),   result_2[388:388],
                     result_2[387:387],
                     $signed(result_2[386:323]),
                     $signed(result_2[322:259]),
@@ -924,21 +957,21 @@ module topEntity
 
   assign qPush = input0[0:0];
 
-  assign result_0 = result[583:130];
+  assign result_0 = result[584:130];
 
   assign result_1 = result[129:0];
 
-  assign result_0_0 = result_0[453:453];
+  assign result_0_0 = result_0[454:454];
 
-  assign result_0_1 = result_0[452:452];
+  assign result_0_1 = result_0[453:453];
 
-  assign result_0_2 = $signed(result_0[451:388]);
+  assign result_0_2 = $signed(result_0[452:389]);
 
-  assign result_0_3 = result_0[387:387];
+  assign result_0_3 = result_0[388:388];
 
-  assign result_0_4 = result_0[386:386];
+  assign result_0_4 = result_0[387:387];
 
-  assign result_0_5 = $signed(result_0[385:322]);
+  assign result_0_5 = result_0[386:322];
 
   assign result_0_6 = $signed(result_0[321:258]);
 
@@ -950,11 +983,15 @@ module topEntity
 
   assign result_0_10 = $signed(result_0[191:128]);
 
-  assign result_0_11_2 = result_0[127:0];
+  assign result_0_11_4 = result_0[127:0];
 
-  assign result_0_11_0 = $signed(result_0_11_2[127:64]);
+  assign result_0_5_0 = $signed(result_0_5[64:1]);
 
-  assign result_0_11_1 = $signed(result_0_11_2[63:0]);
+  assign result_0_5_1 = result_0_5[0:0];
+
+  assign result_0_11_0 = $signed(result_0_11_4[127:64]);
+
+  assign result_0_11_1 = $signed(result_0_11_4[63:0]);
 
   assign result_1_0 = result_1[129:65];
 
