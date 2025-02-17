@@ -187,7 +187,7 @@ pacer en inputBuffer = bundle (debugSignals, status, sustainedInput, enables, sl
         -- status must not be sustained
         status = bundle (toPop, pacerStable) 
         enables = bundle (enA, enB)
-        slides = slideWinB
+        slides = slideB
 
         toPop = mux (en .&&. (stage .==. (pure 0))) (pure True) (pure False)
         pacerStable = mux (en .&&. (stage .==. (pure 1))) (pure True) (pure False)
@@ -199,10 +199,11 @@ pacer en inputBuffer = bundle (debugSignals, status, sustainedInput, enables, sl
 
         enA = register False (mux (en .&&. stage .==. (pure 1)) newEnA enA)
         enB = register False (mux (en .&&. stage .==. (pure 1)) newEnB enB)
+        slideB = register False (mux (en .&&. stage .==. (pure 1)) newSlideB slideB)
 
         newEnA = qPopValid .&&. newX
         newEnB = timerB .>=. periodBns
-        slideWinB = slideTimerB .>=. pure bucketBSpanNs
+        newSlideB = slideTimerB .>=. pure bucketBSpanNs
 
         timerB = timer resetBTimer
         resetBTimer = en .&&. stage .==. (pure 1) .&&. timerB .>=. periodBns

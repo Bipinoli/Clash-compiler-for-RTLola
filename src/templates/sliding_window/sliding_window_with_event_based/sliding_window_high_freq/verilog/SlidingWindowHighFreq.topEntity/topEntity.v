@@ -31,60 +31,60 @@ module topEntity
     , output wire  result_1_1_1
     );
   wire [389:0] result_2;
-  // sliding_window_high_freq.hs:307:1-102
+  // sliding_window_high_freq.hs:308:1-102
   wire  eta;
-  // sliding_window_high_freq.hs:307:1-102
+  // sliding_window_high_freq.hs:308:1-102
   wire signed [63:0] t;
   wire signed [63:0] result_3;
   reg signed [63:0] result_4 = (64'sd0);
   wire  c$app_arg;
-  // sliding_window_high_freq.hs:270:1-94
+  // sliding_window_high_freq.hs:271:1-94
   wire  eta_0;
-  // sliding_window_high_freq.hs:270:1-94
+  // sliding_window_high_freq.hs:271:1-94
   reg signed [63:0] out = (64'sd0);
   wire signed [63:0] result_5;
   wire signed [63:0] x;
-  // sliding_window_high_freq.hs:229:1-151
+  // sliding_window_high_freq.hs:230:1-151
   wire  enB;
-  // sliding_window_high_freq.hs:229:1-151
+  // sliding_window_high_freq.hs:230:1-151
   wire  enA;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   reg [127:0] window = {64'sd0,   64'sd0};
   wire [127:0] result_6;
   wire [127:0] result_7;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire [127:0] c$t_case_alt;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire  c$t_case_alt_0;
   wire [127:0] result_8;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire [255:0] c$t_app_arg;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire [127:0] c$t_case_alt_1;
   wire [127:0] result_9;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire [255:0] c$t_app_arg_0;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire signed [63:0] c$index_case_alt;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire  c$t_case_alt_2;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire signed [63:0] x1;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire  c$t_app_arg_1;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire signed [63:0] \c0# ;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire signed [63:0] x1_0;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire signed [63:0] x1_1;
-  // sliding_window_high_freq.hs:279:1-138
+  // sliding_window_high_freq.hs:280:1-138
   wire signed [63:0] cyclesBefore;
-  // sliding_window_high_freq.hs:229:1-151
+  // sliding_window_high_freq.hs:230:1-151
   wire  slideB;
-  // sliding_window_high_freq.hs:229:1-151
+  // sliding_window_high_freq.hs:230:1-151
   wire [128:0] inputData;
-  // sliding_window_high_freq.hs:229:1-151
+  // sliding_window_high_freq.hs:230:1-151
   wire  c$winX4B_app_arg;
   // sliding_window_high_freq.hs:183:1-148
   wire  eta_1;
@@ -113,23 +113,26 @@ module topEntity
   wire  qPopValid;
   wire  result_15;
   // sliding_window_high_freq.hs:183:1-148
+  reg  enB_0 = 1'b0;
+  wire  result_16;
+  // sliding_window_high_freq.hs:183:1-148
   wire  b_0;
   // sliding_window_high_freq.hs:183:1-148
-  reg  enB_0 = 1'b0;
+  reg  slideB_0 = 1'b0;
   // sliding_window_high_freq.hs:183:1-148
   wire  c$timerB_app_arg;
   // sliding_window_high_freq.hs:34:1-72
   wire  eta_2;
-  wire signed [63:0] result_16;
+  wire signed [63:0] result_17;
   wire signed [63:0] x_0;
-  reg signed [63:0] result_17 = (64'sd2000);
+  reg signed [63:0] result_18 = (64'sd2000);
   // sliding_window_high_freq.hs:183:1-148
   wire  c$slideTimerB_app_arg;
   // sliding_window_high_freq.hs:34:1-72
   wire  eta_3;
-  wire signed [63:0] result_18;
+  wire signed [63:0] result_19;
   wire signed [63:0] x_1;
-  reg signed [63:0] result_19 = (64'sd2000);
+  reg signed [63:0] result_20 = (64'sd2000);
   // sliding_window_high_freq.hs:183:1-148
   wire  c$slideTimerB_app_arg_0;
   // sliding_window_high_freq.hs:183:1-148
@@ -144,9 +147,9 @@ module topEntity
   reg signed [63:0] s = (64'sd0);
   // sliding_window_high_freq.hs:44:1-64
   wire  b_1;
-  wire signed [63:0] result_20;
+  wire signed [63:0] result_21;
   wire signed [63:0] x_3;
-  wire [130:0] result_21;
+  wire [130:0] result_22;
   // sliding_window_high_freq.hs:68:1-78
   reg [128:0] ds = {{64'sd0,   1'b0},   -64'sd1};
   reg  c$app_arg_0 = 1'b0;
@@ -326,13 +329,13 @@ module topEntity
     wire signed [63:0] map_out;
     wire  c$case_scrut;
     wire signed [63:0] c$case_alt_3;
-    // sliding_window_high_freq.hs:279:1-138
+    // sliding_window_high_freq.hs:280:1-138
     wire signed [63:0] indx;
-    // sliding_window_high_freq.hs:279:1-138
+    // sliding_window_high_freq.hs:280:1-138
     wire signed [63:0] v;
-    // sliding_window_high_freq.hs:279:1-138
+    // sliding_window_high_freq.hs:280:1-138
     wire signed [63:0] x_7;
-    // sliding_window_high_freq.hs:279:1-138
+    // sliding_window_high_freq.hs:280:1-138
     wire signed [63:0] y_1;
     wire signed [63:0] x_8;
     wire signed [63:0] y_2;
@@ -413,13 +416,13 @@ module topEntity
     wire signed [63:0] map_out_0;
     wire  c$case_scrut_0;
     wire signed [63:0] c$case_alt_5;
-    // sliding_window_high_freq.hs:279:1-138
+    // sliding_window_high_freq.hs:280:1-138
     wire signed [63:0] indx_1;
-    // sliding_window_high_freq.hs:279:1-138
+    // sliding_window_high_freq.hs:280:1-138
     wire signed [63:0] v_1;
-    // sliding_window_high_freq.hs:279:1-138
+    // sliding_window_high_freq.hs:280:1-138
     wire signed [63:0] x_9;
-    // sliding_window_high_freq.hs:279:1-138
+    // sliding_window_high_freq.hs:280:1-138
     wire signed [63:0] y_3;
     wire signed [63:0] x_10;
     wire signed [63:0] y_4;
@@ -519,9 +522,9 @@ module topEntity
 
   assign eta_1 = (s == (64'sd0)) | (s == (64'sd1));
 
-  assign result_10 = {result_17,   {result_12,
+  assign result_10 = {result_18,   {result_12,
                                     result_11},   sustainedInput,   {enA_0,
-                                                                     enB_0},   c$slideTimerB_app_arg};
+                                                                     enB_0},   slideB_0};
 
   assign result_11 = b_0 ? 1'b1 : 1'b0;
 
@@ -560,15 +563,13 @@ module topEntity
   end
   // register end
 
-  assign waitedX = $signed(result_21[63:0]);
+  assign waitedX = $signed(result_22[63:0]);
 
-  assign xData = result_21[128:64];
+  assign xData = result_22[128:64];
 
-  assign qPopValid = result_21[129:129];
+  assign qPopValid = result_22[129:129];
 
   assign result_15 = b_0 ? c$timerB_app_arg : enB_0;
-
-  assign b_0 = eta_1 & c$slideTimerB_app_arg_0;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : enB_0_register
@@ -580,38 +581,52 @@ module topEntity
   end
   // register end
 
-  assign c$timerB_app_arg = result_17 >= (64'sd25000);
+  assign result_16 = b_0 ? c$slideTimerB_app_arg : slideB_0;
 
-  assign eta_2 = eta_1 & (c$slideTimerB_app_arg_0 & c$timerB_app_arg);
-
-  assign result_16 = eta_2 ? (64'sd2000) : ((x_0 + 64'sd2000));
-
-  assign x_0 = result_17;
+  assign b_0 = eta_1 & c$slideTimerB_app_arg_0;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_17_register
+  always @(posedge clk or  posedge  rst) begin : slideB_0_register
     if ( rst) begin
-      result_17 <= (64'sd2000);
+      slideB_0 <= 1'b0;
     end else if (en) begin
-      result_17 <= result_16;
+      slideB_0 <= result_16;
     end
   end
   // register end
 
-  assign c$slideTimerB_app_arg = result_19 >= (64'sd25000);
+  assign c$timerB_app_arg = result_18 >= (64'sd25000);
+
+  assign eta_2 = eta_1 & (c$slideTimerB_app_arg_0 & c$timerB_app_arg);
+
+  assign result_17 = eta_2 ? (64'sd2000) : ((x_0 + 64'sd2000));
+
+  assign x_0 = result_18;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_18_register
+    if ( rst) begin
+      result_18 <= (64'sd2000);
+    end else if (en) begin
+      result_18 <= result_17;
+    end
+  end
+  // register end
+
+  assign c$slideTimerB_app_arg = result_20 >= (64'sd25000);
 
   assign eta_3 = eta_1 & (c$slideTimerB_app_arg_0 & c$slideTimerB_app_arg);
 
-  assign result_18 = eta_3 ? (64'sd2000) : ((x_1 + 64'sd2000));
+  assign result_19 = eta_3 ? (64'sd2000) : ((x_1 + 64'sd2000));
 
-  assign x_1 = result_19;
+  assign x_1 = result_20;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_19_register
+  always @(posedge clk or  posedge  rst) begin : result_20_register
     if ( rst) begin
-      result_19 <= (64'sd2000);
+      result_20 <= (64'sd2000);
     end else if (en) begin
-      result_19 <= result_18;
+      result_20 <= result_19;
     end
   end
   // register end
@@ -644,18 +659,18 @@ module topEntity
     if ( rst) begin
       s <= (64'sd0);
     end else if (en) begin
-      s <= result_20;
+      s <= result_21;
     end
   end
   // register end
 
   assign b_1 = s == (64'sd4);
 
-  assign result_20 = b_1 ? (64'sd0) : ((x_3 + 64'sd1));
+  assign result_21 = b_1 ? (64'sd0) : ((x_3 + 64'sd1));
 
   assign x_3 = s;
 
-  assign result_21 = {c$app_arg_1,   c$app_arg_0,
+  assign result_22 = {c$app_arg_1,   c$app_arg_0,
                       ds[128:64],   $signed(ds[63:0])};
 
   // register begin
@@ -1084,9 +1099,9 @@ module topEntity
   assign c$cursor_case_alt_5 = (x_4 - 64'sd1);
 
   assign result = {{qPush,   qPop,
-                    $signed(input0[64:1]),   result_21[129:129],
-                    $signed(result_21[128:65]),
-                    $signed(result_21[63:0]),   result_2[389:389],
+                    $signed(input0[64:1]),   result_22[129:129],
+                    $signed(result_22[128:65]),
+                    $signed(result_22[63:0]),   result_2[389:389],
                     result_2[388:388],
                     $signed(result_2[387:324]),
                     $signed(result_2[323:260]),
