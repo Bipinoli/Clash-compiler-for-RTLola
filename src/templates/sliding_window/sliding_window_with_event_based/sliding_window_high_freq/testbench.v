@@ -21,6 +21,7 @@ module testbench;
     wire signed [63:0] timerB;
     wire signed [63:0] winX_0;
     wire signed [63:0] winX_1;
+    wire slideB;
 
     wire signed [63:0] outA;
     wire aktvOutA;
@@ -29,7 +30,7 @@ module testbench;
 
     topEntity monitor (clk, rst, en,
                        input_x, new_input,
-                       qPush, qPop, qInX, qPushValid, qPopValid, qOutX, qOutNewX, qWaitX, enA, enB, stage, timerB, winX_0, winX_1,
+                       qPush, qPop, qInX, qPopValid, qOutX, qWaitX, enA, enB, stage, timerB, winX_0, winX_1, slideB,
                        outA, aktvOutA, outB, aktvOutB
                        );
 

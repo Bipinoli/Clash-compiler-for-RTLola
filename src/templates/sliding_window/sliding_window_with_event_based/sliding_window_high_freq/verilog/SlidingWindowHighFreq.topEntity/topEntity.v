@@ -16,118 +16,137 @@ module topEntity
     , output wire  result_0_1
     , output wire signed [63:0] result_0_2
     , output wire  result_0_3
-    , output wire  result_0_4
-    , output wire signed [63:0] result_0_5_0
-    , output wire  result_0_5_1
-    , output wire signed [63:0] result_0_6
+    , output wire signed [63:0] result_0_4
+    , output wire signed [63:0] result_0_5
+    , output wire  result_0_6
     , output wire  result_0_7
-    , output wire  result_0_8
+    , output wire signed [63:0] result_0_8
     , output wire signed [63:0] result_0_9
-    , output wire signed [63:0] result_0_10
-    , output wire signed [63:0] result_0_11_0
-    , output wire signed [63:0] result_0_11_1
+    , output wire signed [63:0] result_0_10_0
+    , output wire signed [63:0] result_0_10_1
+    , output wire  result_0_11
     , output wire signed [63:0] result_1_0_0
     , output wire  result_1_0_1
     , output wire signed [63:0] result_1_1_0
     , output wire  result_1_1_1
     );
-  wire [388:0] result_2;
-  // sliding_window_high_freq.hs:293:1-102
+  wire [389:0] result_2;
+  // sliding_window_high_freq.hs:307:1-102
   wire  eta;
-  // sliding_window_high_freq.hs:293:1-102
+  // sliding_window_high_freq.hs:307:1-102
   wire signed [63:0] t;
   wire signed [63:0] result_3;
   reg signed [63:0] result_4 = (64'sd0);
   wire  c$app_arg;
-  // sliding_window_high_freq.hs:261:1-94
+  // sliding_window_high_freq.hs:270:1-94
   wire  eta_0;
-  // sliding_window_high_freq.hs:261:1-94
+  // sliding_window_high_freq.hs:270:1-94
   reg signed [63:0] out = (64'sd0);
   wire signed [63:0] result_5;
   wire signed [63:0] x;
-  // sliding_window_high_freq.hs:221:1-145
+  // sliding_window_high_freq.hs:229:1-151
   wire  enB;
-  // sliding_window_high_freq.hs:221:1-145
+  // sliding_window_high_freq.hs:229:1-151
   wire  enA;
-  // sliding_window_high_freq.hs:270:1-117
-  wire [255:0] c$t_app_arg;
-  // sliding_window_high_freq.hs:270:1-117
+  // sliding_window_high_freq.hs:279:1-138
   reg [127:0] window = {64'sd0,   64'sd0};
   wire [127:0] result_6;
   wire [127:0] result_7;
+  // sliding_window_high_freq.hs:279:1-138
+  wire [127:0] c$t_case_alt;
+  // sliding_window_high_freq.hs:279:1-138
+  wire  c$t_case_alt_0;
   wire [127:0] result_8;
-  // sliding_window_high_freq.hs:270:1-117
-  wire signed [63:0] value;
-  // sliding_window_high_freq.hs:270:1-117
-  wire  c$t_case_alt;
-  // sliding_window_high_freq.hs:270:1-117
-  wire signed [63:0] x_0;
-  // sliding_window_high_freq.hs:270:1-117
-  wire signed [63:0] \c0# ;
-  // sliding_window_high_freq.hs:270:1-117
+  // sliding_window_high_freq.hs:279:1-138
+  wire [255:0] c$t_app_arg;
+  // sliding_window_high_freq.hs:279:1-138
+  wire [127:0] c$t_case_alt_1;
+  wire [127:0] result_9;
+  // sliding_window_high_freq.hs:279:1-138
+  wire [255:0] c$t_app_arg_0;
+  // sliding_window_high_freq.hs:279:1-138
+  wire signed [63:0] c$index_case_alt;
+  // sliding_window_high_freq.hs:279:1-138
+  wire  c$t_case_alt_2;
+  // sliding_window_high_freq.hs:279:1-138
   wire signed [63:0] x1;
-  // sliding_window_high_freq.hs:270:1-117
+  // sliding_window_high_freq.hs:279:1-138
+  wire  c$t_app_arg_1;
+  // sliding_window_high_freq.hs:279:1-138
+  wire signed [63:0] \c0# ;
+  // sliding_window_high_freq.hs:279:1-138
   wire signed [63:0] x1_0;
-  // sliding_window_high_freq.hs:270:1-117
+  // sliding_window_high_freq.hs:279:1-138
+  wire signed [63:0] x1_1;
+  // sliding_window_high_freq.hs:279:1-138
   wire signed [63:0] cyclesBefore;
-  // sliding_window_high_freq.hs:221:1-145
+  // sliding_window_high_freq.hs:229:1-151
+  wire  slideB;
+  // sliding_window_high_freq.hs:229:1-151
   wire [128:0] inputData;
-  // sliding_window_high_freq.hs:221:1-145
+  // sliding_window_high_freq.hs:229:1-151
   wire  c$winX4B_app_arg;
-  // sliding_window_high_freq.hs:203:9-44
+  // sliding_window_high_freq.hs:183:1-148
   wire  eta_1;
-  wire [196:0] result_9;
-  wire  result_10;
+  wire [197:0] result_10;
   wire  result_11;
-  // sliding_window_high_freq.hs:179:1-142
+  wire  result_12;
+  // sliding_window_high_freq.hs:183:1-148
   wire  b;
-  wire [128:0] result_12;
-  // sliding_window_high_freq.hs:179:1-142
+  wire [128:0] result_13;
+  // sliding_window_high_freq.hs:183:1-148
   wire [128:0] t_0;
-  // sliding_window_high_freq.hs:179:1-142
+  // sliding_window_high_freq.hs:183:1-148
   reg [128:0] sustainedInput = {64'sd0,   1'b0,   64'sd0};
-  wire  result_13;
-  // sliding_window_high_freq.hs:179:1-142
-  wire  t_1;
-  // sliding_window_high_freq.hs:179:1-142
-  wire  newX;
-  // sliding_window_high_freq.hs:179:1-142
-  reg  enA_0 = 1'b0;
-  // sliding_window_high_freq.hs:179:1-142
-  wire signed [63:0] waitedX;
-  // sliding_window_high_freq.hs:179:1-142
-  wire [64:0] xData;
-  // sliding_window_high_freq.hs:179:1-142
-  wire  qPopValid;
   wire  result_14;
-  // sliding_window_high_freq.hs:179:1-142
+  // sliding_window_high_freq.hs:183:1-148
+  wire  t_1;
+  // sliding_window_high_freq.hs:183:1-148
+  wire  newX;
+  // sliding_window_high_freq.hs:183:1-148
+  reg  enA_0 = 1'b0;
+  // sliding_window_high_freq.hs:183:1-148
+  wire signed [63:0] waitedX;
+  // sliding_window_high_freq.hs:183:1-148
+  wire [64:0] xData;
+  // sliding_window_high_freq.hs:183:1-148
+  wire  qPopValid;
+  wire  result_15;
+  // sliding_window_high_freq.hs:183:1-148
   wire  b_0;
-  // sliding_window_high_freq.hs:179:1-142
+  // sliding_window_high_freq.hs:183:1-148
   reg  enB_0 = 1'b0;
-  // sliding_window_high_freq.hs:179:1-142
+  // sliding_window_high_freq.hs:183:1-148
   wire  c$timerB_app_arg;
   // sliding_window_high_freq.hs:34:1-72
   wire  eta_2;
-  wire signed [63:0] result_15;
+  wire signed [63:0] result_16;
+  wire signed [63:0] x_0;
+  reg signed [63:0] result_17 = (64'sd2000);
+  // sliding_window_high_freq.hs:183:1-148
+  wire  c$slideTimerB_app_arg;
+  // sliding_window_high_freq.hs:34:1-72
+  wire  eta_3;
+  wire signed [63:0] result_18;
   wire signed [63:0] x_1;
-  reg signed [63:0] result_16 = (64'sd2000);
-  // sliding_window_high_freq.hs:179:1-142
-  wire  c$timerB_app_arg_0;
-  // sliding_window_high_freq.hs:179:1-142
+  reg signed [63:0] result_19 = (64'sd2000);
+  // sliding_window_high_freq.hs:183:1-148
+  wire  c$slideTimerB_app_arg_0;
+  // sliding_window_high_freq.hs:183:1-148
   reg  c$stage_case_alt;
-  // sliding_window_high_freq.hs:179:1-142
+  // sliding_window_high_freq.hs:183:1-148
   wire signed [63:0] x_2;
-  // sliding_window_high_freq.hs:179:1-142
+  // sliding_window_high_freq.hs:183:1-148
   reg signed [63:0] stage = (64'sd0);
-  // sliding_window_high_freq.hs:179:1-142
+  // sliding_window_high_freq.hs:183:1-148
   wire signed [63:0] c$stage_app_arg;
   // sliding_window_high_freq.hs:44:1-64
   reg signed [63:0] s = (64'sd0);
   // sliding_window_high_freq.hs:44:1-64
   wire  b_1;
-  wire signed [63:0] result_17;
+  wire signed [63:0] result_20;
   wire signed [63:0] x_3;
-  wire [130:0] result_18;
+  wire [130:0] result_21;
   // sliding_window_high_freq.hs:68:1-78
   reg [128:0] ds = {{64'sd0,   1'b0},   -64'sd1};
   reg  c$app_arg_0 = 1'b0;
@@ -140,7 +159,7 @@ module topEntity
   // sliding_window_high_freq.hs:68:1-78
   reg [128:0] c$ds_case_alt_0;
   // sliding_window_high_freq.hs:68:1-78
-  wire signed [63:0] x1_1;
+  wire signed [63:0] x1_2;
   // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] c$ds_case_scrut;
   // sliding_window_high_freq.hs:68:1-78
@@ -182,23 +201,27 @@ module topEntity
   reg signed [63:0] c$cursor_case_alt_4;
   // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] c$cursor_case_alt_5;
-  // sliding_window_high_freq.hs:157:1-188
+  // sliding_window_high_freq.hs:160:1-180
   wire  qPop;
-  // sliding_window_high_freq.hs:157:1-188
+  // sliding_window_high_freq.hs:160:1-180
   wire  qPush;
   wire [64:0] input0;
+  wire signed [63:0] c$tte_rhs;
   wire [127:0] c$t_app_arg_res;
-  wire signed [63:0] c$tte_rhs_0;
-  wire signed [63:0] x_projection_4;
+  wire [191:0] c$t_case_alt_sel_alt_t_1;
+  wire [127:0] c$t_app_arg_res_0;
+  wire [191:0] c$t_app_arg_0_2;
+  wire [127:0] c$vec2;
+  wire signed [63:0] c$tte_rhs_2;
+  wire signed [63:0] x1_projection_1;
   wire [395:0] c$vec1;
   wire [383:0] c$wait_app_arg_res;
   wire [383:0] c$vec1_0;
   wire [454:0] c$buffer_case_alt_sel_alt_t_1;
-  wire signed [63:0] c$tte_rhs_4;
-  wire [584:0] result;
-  wire [454:0] result_0;
-  wire [64:0] result_0_5;
-  wire [127:0] result_0_11_4;
+  wire signed [63:0] c$tte_rhs_6;
+  wire [583:0] result;
+  wire [453:0] result_0;
+  wire [127:0] result_0_10;
   wire [129:0] result_1;
   wire [64:0] result_1_0;
   wire [64:0] result_1_1;
@@ -206,10 +229,10 @@ module topEntity
   assign input0 = {input0_0,   input0_1};
 
   assign result_2 = {{enA,   enB,   s,
-                      $signed(result_9[196:133]),   window},
-                     result_9[132:132],   {{out,
-                                            c$app_arg & enA},   {result_4,
-                                                                 c$app_arg & enB}}};
+                      $signed(result_10[197:134]),   window,
+                      slideB},   result_10[133:133],   {{out,
+                                                         c$app_arg & enA},   {result_4,
+                                                                              c$app_arg & enB}}};
 
   assign eta = (s == (64'sd3)) & enB;
 
@@ -270,46 +293,9 @@ module topEntity
 
   assign x = $signed(inputData[128:65]);
 
-  assign enB = result_9[0:0];
+  assign enB = result_10[1:1];
 
-  assign enA = result_9[1:1];
-
-  wire signed [63:0] iterateI_ho1_0_arg0;
-  wire signed [63:0] iterateI_ho1_0_res;
-  assign iterateI_ho1_0_arg0 = (64'sd0);
-
-  // sliding_window_high_freq.hs:68:1-78
-  wire signed [63:0] x1_2;
-  wire signed [63:0] c$case_alt_3;
-  assign iterateI_ho1_0_res = c$case_alt_3;
-
-  assign x1_2 = iterateI_ho1_0_arg0;
-
-  assign c$case_alt_3 = (x1_2 + 64'sd1);
-
-
-
-  assign c$t_app_arg_res = {(64'sd0),
-                            iterateI_ho1_0_res};
-
-
-
-  // zipWith start
-  genvar i;
-  generate
-  for (i = 0; i < 2; i = i + 1) begin : zipWith
-    wire signed [63:0] zipWith_in1;
-    assign zipWith_in1 = c$t_app_arg_res[i*64+:64];
-    wire signed [63:0] zipWith_in2;
-    assign zipWith_in2 = window[i*64+:64];
-    wire [127:0] c$n;
-    assign c$n = {zipWith_in1,   zipWith_in2};
-
-
-    assign c$t_app_arg[i*128+:128] = c$n;
-  end
-  endgenerate
-  // zipWith end
+  assign enA = result_10[2:2];
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : window_register
@@ -323,30 +309,41 @@ module topEntity
 
   assign result_6 = c$winX4B_app_arg ? result_7 : window;
 
-  assign result_7 = ((~ inputData[64:64]) | c$t_case_alt) ? window : result_8;
+  assign result_7 = (~ slideB) ? c$t_case_alt : c$t_case_alt_1;
+
+  assign c$t_case_alt = (c$t_app_arg_1 | c$t_case_alt_0) ? window : result_8;
+
+  assign c$tte_rhs = (x1 >= 64'sd2) ? 64'sd1 : 64'sd0;
+
+  assign c$t_case_alt_0 = c$tte_rhs[0];
 
   // map begin
-  genvar i_0;
+  genvar i;
   generate
-  for (i_0=0; i_0 < 2; i_0 = i_0 + 1) begin : map
+  for (i=0; i < 2; i = i + 1) begin : map
     wire [127:0] map_in;
-    assign map_in = c$t_app_arg[i_0*128+:128];
+    assign map_in = c$t_app_arg[i*128+:128];
     wire signed [63:0] map_out;
-    // sliding_window_high_freq.hs:270:1-117
-    wire signed [63:0] indx;
-    // sliding_window_high_freq.hs:270:1-117
-    wire signed [63:0] v;
-    // sliding_window_high_freq.hs:270:1-117
-    wire signed [63:0] x_7;
-    // sliding_window_high_freq.hs:270:1-117
-    wire signed [63:0] y_1;
-    wire signed [63:0] c$case_alt_4;
     wire  c$case_scrut;
+    wire signed [63:0] c$case_alt_3;
+    // sliding_window_high_freq.hs:279:1-138
+    wire signed [63:0] indx;
+    // sliding_window_high_freq.hs:279:1-138
+    wire signed [63:0] v;
+    // sliding_window_high_freq.hs:279:1-138
+    wire signed [63:0] x_7;
+    // sliding_window_high_freq.hs:279:1-138
+    wire signed [63:0] y_1;
     wire signed [63:0] x_8;
     wire signed [63:0] y_2;
-    wire signed [63:0] y_projection_0;
-    wire signed [63:0] c$tte_rhs;
-    assign map_out = c$case_alt_4;
+    wire signed [63:0] c$tte_rhs_0;
+    assign map_out = c$case_alt_3;
+
+    assign c$tte_rhs_0 = (x_7 == y_1) ? 64'sd1 : 64'sd0;
+
+    assign c$case_scrut = c$tte_rhs_0[0];
+
+    assign c$case_alt_3 = c$case_scrut ? ((x_8 + y_2)) : v;
 
     assign indx = $signed(map_in[127:64]);
 
@@ -354,61 +351,185 @@ module topEntity
 
     assign x_7 = indx;
 
-    assign y_projection_0 = (64'sd1 - x_0);
-
-    assign y_1 = y_projection_0;
-
-    assign c$case_alt_4 = c$case_scrut ? ((x_8 + y_2)) : v;
-
-    assign c$tte_rhs = (x_7 == y_1) ? 64'sd1 : 64'sd0;
-
-    assign c$case_scrut = c$tte_rhs[0];
+    assign y_1 = c$index_case_alt;
 
     assign x_8 = v;
 
-    assign y_2 = value;
+    assign y_2 = $signed(inputData[128:65]);
 
 
-    assign result_8[i_0*64+:64] = map_out;
+    assign result_8[i*64+:64] = map_out;
   end
   endgenerate
   // map end
 
-  assign value = $signed(inputData[128:65]);
+  wire signed [63:0] iterateI_ho1_0_arg0;
+  wire signed [63:0] iterateI_ho1_0_res;
+  assign iterateI_ho1_0_arg0 = (64'sd0);
 
-  assign c$tte_rhs_0 = (x_0 >= 64'sd2) ? 64'sd1 : 64'sd0;
+  // sliding_window_high_freq.hs:68:1-78
+  wire signed [63:0] x1_3;
+  wire signed [63:0] c$case_alt_4;
+  assign iterateI_ho1_0_res = c$case_alt_4;
 
-  assign c$t_case_alt = c$tte_rhs_0[0];
+  assign x1_3 = iterateI_ho1_0_arg0;
 
-  assign x_projection_4 = (((x1 + \c0# ) / 64'sd25000) - \c0# );
+  assign c$case_alt_4 = (x1_3 + 64'sd1);
 
-  assign x_0 = x_projection_4;
 
-  assign \c0#  = (x1 < 64'sd0) ? 64'sd1 : 64'sd0;
 
-  assign x1 = x1_0 * 64'sd2000;
+  assign c$t_app_arg_res = {(64'sd0),
+                            iterateI_ho1_0_res};
 
-  assign x1_0 = cyclesBefore;
+
+
+  // zipWith start
+  genvar i_0;
+  generate
+  for (i_0 = 0; i_0 < 2; i_0 = i_0 + 1) begin : zipWith
+    wire signed [63:0] zipWith_in1;
+    assign zipWith_in1 = c$t_app_arg_res[i_0*64+:64];
+    wire signed [63:0] zipWith_in2;
+    assign zipWith_in2 = window[i_0*64+:64];
+    wire [127:0] c$n;
+    assign c$n = {zipWith_in1,   zipWith_in2};
+
+
+    assign c$t_app_arg[i_0*128+:128] = c$n;
+  end
+  endgenerate
+  // zipWith end
+
+  assign c$t_case_alt_sel_alt_t_1 = ({window,64'sd0});
+
+  assign c$t_case_alt_1 = (c$t_app_arg_1 | c$t_case_alt_2) ? c$t_case_alt_sel_alt_t_1[127:0] : result_9;
+
+  // map begin
+  genvar i_1;
+  generate
+  for (i_1=0; i_1 < 2; i_1 = i_1 + 1) begin : map_0
+    wire [127:0] map_in_0;
+    assign map_in_0 = c$t_app_arg_0[i_1*128+:128];
+    wire signed [63:0] map_out_0;
+    wire  c$case_scrut_0;
+    wire signed [63:0] c$case_alt_5;
+    // sliding_window_high_freq.hs:279:1-138
+    wire signed [63:0] indx_1;
+    // sliding_window_high_freq.hs:279:1-138
+    wire signed [63:0] v_1;
+    // sliding_window_high_freq.hs:279:1-138
+    wire signed [63:0] x_9;
+    // sliding_window_high_freq.hs:279:1-138
+    wire signed [63:0] y_3;
+    wire signed [63:0] x_10;
+    wire signed [63:0] y_4;
+    wire signed [63:0] c$tte_rhs_1;
+    assign map_out_0 = c$case_alt_5;
+
+    assign c$tte_rhs_1 = (x_9 == y_3) ? 64'sd1 : 64'sd0;
+
+    assign c$case_scrut_0 = c$tte_rhs_1[0];
+
+    assign c$case_alt_5 = c$case_scrut_0 ? ((x_10 + y_4)) : v_1;
+
+    assign indx_1 = $signed(map_in_0[127:64]);
+
+    assign v_1 = $signed(map_in_0[63:0]);
+
+    assign x_9 = indx_1;
+
+    assign y_3 = c$index_case_alt;
+
+    assign x_10 = v_1;
+
+    assign y_4 = $signed(inputData[128:65]);
+
+
+    assign result_9[i_1*64+:64] = map_out_0;
+  end
+  endgenerate
+  // map end
+
+  wire signed [63:0] iterateI_ho1_0_arg0_0;
+  wire signed [63:0] iterateI_ho1_0_res_0;
+  assign iterateI_ho1_0_arg0_0 = (64'sd0);
+
+  // sliding_window_high_freq.hs:68:1-78
+  wire signed [63:0] x1_4;
+  wire signed [63:0] c$case_alt_6;
+  assign iterateI_ho1_0_res_0 = c$case_alt_6;
+
+  assign x1_4 = iterateI_ho1_0_arg0_0;
+
+  assign c$case_alt_6 = (x1_4 + 64'sd1);
+
+
+
+  assign c$t_app_arg_res_0 = {(64'sd0),
+                              iterateI_ho1_0_res_0};
+
+
+
+  assign c$t_app_arg_0_2 = ({window,64'sd0});
+
+  assign c$vec2 = c$t_app_arg_0_2[127:0];
+
+  // zipWith start
+  genvar i_2;
+  generate
+  for (i_2 = 0; i_2 < 2; i_2 = i_2 + 1) begin : zipWith_0
+    wire signed [63:0] zipWith_in1_0;
+    assign zipWith_in1_0 = c$t_app_arg_res_0[i_2*64+:64];
+    wire signed [63:0] zipWith_in2_0;
+    assign zipWith_in2_0 = c$vec2[i_2*64+:64];
+    wire [127:0] c$n_0;
+    assign c$n_0 = {zipWith_in1_0,   zipWith_in2_0};
+
+
+    assign c$t_app_arg_0[i_2*128+:128] = c$n_0;
+  end
+  endgenerate
+  // zipWith end
+
+  assign c$index_case_alt = (64'sd1 - x1);
+
+  assign c$tte_rhs_2 = (x1 >= 64'sd1) ? 64'sd1 : 64'sd0;
+
+  assign c$t_case_alt_2 = c$tte_rhs_2[0];
+
+  assign x1_projection_1 = (((x1_0 + \c0# ) / 64'sd25000) - \c0# );
+
+  assign x1 = x1_projection_1;
+
+  assign c$t_app_arg_1 = ~ inputData[64:64];
+
+  assign \c0#  = (x1_0 < 64'sd0) ? 64'sd1 : 64'sd0;
+
+  assign x1_0 = x1_1 * 64'sd2000;
+
+  assign x1_1 = cyclesBefore;
 
   assign cyclesBefore = $signed(inputData[63:0]);
 
-  assign inputData = result_9[130:2];
+  assign slideB = result_10[0:0];
+
+  assign inputData = result_10[131:3];
 
   assign c$winX4B_app_arg = s == (64'sd2);
 
   assign eta_1 = (s == (64'sd0)) | (s == (64'sd1));
 
-  assign result_9 = {result_16,   {result_11,
-                                   result_10},   sustainedInput,   {enA_0,
-                                                                    enB_0}};
+  assign result_10 = {result_17,   {result_12,
+                                    result_11},   sustainedInput,   {enA_0,
+                                                                     enB_0},   c$slideTimerB_app_arg};
 
-  assign result_10 = b_0 ? 1'b1 : 1'b0;
+  assign result_11 = b_0 ? 1'b1 : 1'b0;
 
-  assign result_11 = b ? 1'b1 : 1'b0;
+  assign result_12 = b ? 1'b1 : 1'b0;
 
   assign b = eta_1 & (stage == (64'sd0));
 
-  assign result_12 = b_0 ? t_0 : sustainedInput;
+  assign result_13 = b_0 ? t_0 : sustainedInput;
 
   assign t_0 = {$signed(xData[64:1]),
                 newX & qPopValid,   waitedX};
@@ -418,12 +539,12 @@ module topEntity
     if ( rst) begin
       sustainedInput <= {64'sd0,   1'b0,   64'sd0};
     end else if (en) begin
-      sustainedInput <= result_12;
+      sustainedInput <= result_13;
     end
   end
   // register end
 
-  assign result_13 = b_0 ? t_1 : enA_0;
+  assign result_14 = b_0 ? t_1 : enA_0;
 
   assign t_1 = qPopValid & newX;
 
@@ -434,50 +555,68 @@ module topEntity
     if ( rst) begin
       enA_0 <= 1'b0;
     end else if (en) begin
-      enA_0 <= result_13;
+      enA_0 <= result_14;
     end
   end
   // register end
 
-  assign waitedX = $signed(result_18[63:0]);
+  assign waitedX = $signed(result_21[63:0]);
 
-  assign xData = result_18[128:64];
+  assign xData = result_21[128:64];
 
-  assign qPopValid = result_18[129:129];
+  assign qPopValid = result_21[129:129];
 
-  assign result_14 = b_0 ? c$timerB_app_arg : enB_0;
+  assign result_15 = b_0 ? c$timerB_app_arg : enB_0;
 
-  assign b_0 = eta_1 & c$timerB_app_arg_0;
+  assign b_0 = eta_1 & c$slideTimerB_app_arg_0;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : enB_0_register
     if ( rst) begin
       enB_0 <= 1'b0;
     end else if (en) begin
-      enB_0 <= result_14;
+      enB_0 <= result_15;
     end
   end
   // register end
 
-  assign c$timerB_app_arg = result_16 >= (64'sd25000);
+  assign c$timerB_app_arg = result_17 >= (64'sd25000);
 
-  assign eta_2 = eta_1 & (c$timerB_app_arg_0 & c$timerB_app_arg);
+  assign eta_2 = eta_1 & (c$slideTimerB_app_arg_0 & c$timerB_app_arg);
 
-  assign result_15 = eta_2 ? (64'sd2000) : ((x_1 + 64'sd2000));
+  assign result_16 = eta_2 ? (64'sd2000) : ((x_0 + 64'sd2000));
 
-  assign x_1 = result_16;
+  assign x_0 = result_17;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_16_register
+  always @(posedge clk or  posedge  rst) begin : result_17_register
     if ( rst) begin
-      result_16 <= (64'sd2000);
+      result_17 <= (64'sd2000);
     end else if (en) begin
-      result_16 <= result_15;
+      result_17 <= result_16;
     end
   end
   // register end
 
-  assign c$timerB_app_arg_0 = stage == (64'sd1);
+  assign c$slideTimerB_app_arg = result_19 >= (64'sd25000);
+
+  assign eta_3 = eta_1 & (c$slideTimerB_app_arg_0 & c$slideTimerB_app_arg);
+
+  assign result_18 = eta_3 ? (64'sd2000) : ((x_1 + 64'sd2000));
+
+  assign x_1 = result_19;
+
+  // register begin
+  always @(posedge clk or  posedge  rst) begin : result_19_register
+    if ( rst) begin
+      result_19 <= (64'sd2000);
+    end else if (en) begin
+      result_19 <= result_18;
+    end
+  end
+  // register end
+
+  assign c$slideTimerB_app_arg_0 = stage == (64'sd1);
 
   always @(*) begin
     case(x_2)
@@ -505,18 +644,18 @@ module topEntity
     if ( rst) begin
       s <= (64'sd0);
     end else if (en) begin
-      s <= result_17;
+      s <= result_20;
     end
   end
   // register end
 
   assign b_1 = s == (64'sd4);
 
-  assign result_17 = b_1 ? (64'sd0) : ((x_3 + 64'sd1));
+  assign result_20 = b_1 ? (64'sd0) : ((x_3 + 64'sd1));
 
   assign x_3 = s;
 
-  assign result_18 = {c$app_arg_1,   c$app_arg_0,
+  assign result_21 = {c$app_arg_1,   c$app_arg_0,
                       ds[128:64],   $signed(ds[63:0])};
 
   // register begin
@@ -568,18 +707,18 @@ module topEntity
       64'sd0 : c$ds_case_alt_0 = {{64'sd0,   1'b0},
                                   -64'sd1};
       default : c$ds_case_alt_0 = {c$ds_app_arg,
-                                   (x1_1 + 64'sd1)};
+                                   (x1_2 + 64'sd1)};
     endcase
   end
 
-  assign x1_1 = c$ds_case_scrut;
+  assign x1_2 = c$ds_case_scrut;
 
   // index begin
   wire signed [63:0] vecArray [0:6-1];
-  genvar i_1;
+  genvar i_3;
   generate
-  for (i_1=0; i_1 < 6; i_1=i_1+1) begin : mk_array
-    assign vecArray[(6-1)-i_1] = \wait [i_1*64+:64];
+  for (i_3=0; i_3 < 6; i_3=i_3+1) begin : mk_array
+    assign vecArray[(6-1)-i_3] = \wait [i_3*64+:64];
   end
   endgenerate
   assign c$ds_case_scrut = vecArray[c$cursor_case_alt_5];
@@ -587,10 +726,10 @@ module topEntity
 
   // index begin
   wire [64:0] vecArray_0 [0:6-1];
-  genvar i_2;
+  genvar i_4;
   generate
-  for (i_2=0; i_2 < 6; i_2=i_2+1) begin : mk_array_0
-    assign vecArray_0[(6-1)-i_2] = buffer[i_2*65+:65];
+  for (i_4=0; i_4 < 6; i_4=i_4+1) begin : mk_array_0
+    assign vecArray_0[(6-1)-i_4] = buffer[i_4*65+:65];
   end
   endgenerate
   assign c$ds_app_arg = vecArray_0[c$cursor_case_alt_5];
@@ -607,117 +746,117 @@ module topEntity
   // register end
 
   // map begin
-  genvar i_3;
+  genvar i_5;
   generate
-  for (i_3=0; i_3 < 6; i_3 = i_3 + 1) begin : map_0
-    wire [257:0] map_in_0;
-    assign map_in_0 = c$wait_app_arg[i_3*258+:258];
-    wire signed [63:0] map_out_0;
-    wire signed [63:0] c$case_alt_8;
-    // sliding_window_high_freq.hs:68:1-78
-    wire  push1;
-    wire signed [63:0] c$case_alt_9;
+  for (i_5=0; i_5 < 6; i_5 = i_5 + 1) begin : map_1
+    wire [257:0] map_in_1;
+    assign map_in_1 = c$wait_app_arg[i_5*258+:258];
+    wire signed [63:0] map_out_1;
     wire signed [63:0] c$case_alt_10;
     // sliding_window_high_freq.hs:68:1-78
-    wire  pop1;
-    reg signed [63:0] c$case_alt_11;
+    wire  push1;
+    wire signed [63:0] c$case_alt_11;
     wire signed [63:0] c$case_alt_12;
+    // sliding_window_high_freq.hs:68:1-78
+    wire  pop1;
     reg signed [63:0] c$case_alt_13;
     wire signed [63:0] c$case_alt_14;
-    wire  c$case_scrut_0;
-    wire signed [63:0] c$case_alt_15;
-    // sliding_window_high_freq.hs:68:1-78
-    wire signed [63:0] x1_3;
-    // sliding_window_high_freq.hs:68:1-78
-    wire signed [63:0] valToLeft;
+    reg signed [63:0] c$case_alt_15;
     wire signed [63:0] c$case_alt_16;
     wire  c$case_scrut_1;
     wire signed [63:0] c$case_alt_17;
-    wire  c$case_scrut_2;
-    wire signed [63:0] c$case_alt_18;
     // sliding_window_high_freq.hs:68:1-78
-    wire signed [63:0] x1_4;
+    wire signed [63:0] x1_6;
+    // sliding_window_high_freq.hs:68:1-78
+    wire signed [63:0] valToLeft;
+    wire signed [63:0] c$case_alt_18;
+    wire  c$case_scrut_2;
+    wire signed [63:0] c$case_alt_19;
+    wire  c$case_scrut_3;
+    wire signed [63:0] c$case_alt_20;
+    // sliding_window_high_freq.hs:68:1-78
+    wire signed [63:0] x1_7;
     // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] val;
     // sliding_window_high_freq.hs:68:1-78
-    wire signed [63:0] y_3;
+    wire signed [63:0] y_5;
     // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] cur1;
     // sliding_window_high_freq.hs:68:1-78
-    wire signed [63:0] x_9;
+    wire signed [63:0] x_11;
     // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] index;
-    wire signed [63:0] c$tte_rhs_1;
-    wire signed [63:0] c$tte_rhs_2;
     wire signed [63:0] c$tte_rhs_3;
-    assign map_out_0 = c$case_alt_8;
+    wire signed [63:0] c$tte_rhs_4;
+    wire signed [63:0] c$tte_rhs_5;
+    assign map_out_1 = c$case_alt_10;
 
-    assign c$case_alt_8 = push1 ? c$case_alt_9 : c$case_alt_10;
+    assign c$case_alt_10 = push1 ? c$case_alt_11 : c$case_alt_12;
 
-    assign push1 = map_in_0[1:1];
+    assign push1 = map_in_1[1:1];
 
-    assign c$case_alt_9 = pop1 ? c$case_alt_11 : c$case_alt_13;
+    assign c$case_alt_11 = pop1 ? c$case_alt_13 : c$case_alt_15;
 
-    assign c$case_alt_10 = pop1 ? c$case_alt_16 : c$case_alt_17;
+    assign c$case_alt_12 = pop1 ? c$case_alt_18 : c$case_alt_19;
 
-    assign pop1 = map_in_0[0:0];
-
-    always @(*) begin
-      case(x_9)
-        64'sd0 : c$case_alt_11 = 64'sd0;
-        default : c$case_alt_11 = c$case_alt_12;
-      endcase
-    end
-
-    assign c$case_alt_12 = c$case_scrut_2 ? c$case_alt_15 : (-64'sd1);
+    assign pop1 = map_in_1[0:0];
 
     always @(*) begin
-      case(x_9)
+      case(x_11)
         64'sd0 : c$case_alt_13 = 64'sd0;
         default : c$case_alt_13 = c$case_alt_14;
       endcase
     end
 
-    assign c$case_alt_14 = c$case_scrut_0 ? c$case_alt_15 : (-64'sd1);
+    assign c$case_alt_14 = c$case_scrut_3 ? c$case_alt_17 : (-64'sd1);
 
-    assign c$tte_rhs_1 = (x_9 <= y_3) ? 64'sd1 : 64'sd0;
+    always @(*) begin
+      case(x_11)
+        64'sd0 : c$case_alt_15 = 64'sd0;
+        default : c$case_alt_15 = c$case_alt_16;
+      endcase
+    end
 
-    assign c$case_scrut_0 = c$tte_rhs_1[0];
+    assign c$case_alt_16 = c$case_scrut_1 ? c$case_alt_17 : (-64'sd1);
 
-    assign c$case_alt_15 = (x1_3 + 64'sd1);
+    assign c$tte_rhs_3 = (x_11 <= y_5) ? 64'sd1 : 64'sd0;
 
-    assign x1_3 = valToLeft;
+    assign c$case_scrut_1 = c$tte_rhs_3[0];
 
-    assign valToLeft = $signed(map_in_0[257:194]);
+    assign c$case_alt_17 = (x1_6 + 64'sd1);
 
-    assign c$case_alt_16 = c$case_scrut_1 ? c$case_alt_18 : (-64'sd1);
+    assign x1_6 = valToLeft;
 
-    assign c$tte_rhs_2 = (x_9 < (y_3 - 64'sd1)) ? 64'sd1 : 64'sd0;
+    assign valToLeft = $signed(map_in_1[257:194]);
 
-    assign c$case_scrut_1 = c$tte_rhs_2[0];
+    assign c$case_alt_18 = c$case_scrut_2 ? c$case_alt_20 : (-64'sd1);
 
-    assign c$case_alt_17 = c$case_scrut_2 ? c$case_alt_18 : (-64'sd1);
+    assign c$tte_rhs_4 = (x_11 < (y_5 - 64'sd1)) ? 64'sd1 : 64'sd0;
 
-    assign c$tte_rhs_3 = (x_9 < y_3) ? 64'sd1 : 64'sd0;
+    assign c$case_scrut_2 = c$tte_rhs_4[0];
 
-    assign c$case_scrut_2 = c$tte_rhs_3[0];
+    assign c$case_alt_19 = c$case_scrut_3 ? c$case_alt_20 : (-64'sd1);
 
-    assign c$case_alt_18 = (x1_4 + 64'sd1);
+    assign c$tte_rhs_5 = (x_11 < y_5) ? 64'sd1 : 64'sd0;
 
-    assign x1_4 = val;
+    assign c$case_scrut_3 = c$tte_rhs_5[0];
 
-    assign val = $signed(map_in_0[193:130]);
+    assign c$case_alt_20 = (x1_7 + 64'sd1);
 
-    assign y_3 = cur1;
+    assign x1_7 = val;
 
-    assign cur1 = $signed(map_in_0[65:2]);
+    assign val = $signed(map_in_1[193:130]);
 
-    assign x_9 = index;
+    assign y_5 = cur1;
 
-    assign index = $signed(map_in_0[129:66]);
+    assign cur1 = $signed(map_in_1[65:2]);
+
+    assign x_11 = index;
+
+    assign index = $signed(map_in_1[129:66]);
 
 
-    assign c$wait_case_alt[i_3*64+:64] = map_out_0;
+    assign c$wait_case_alt[i_5*64+:64] = map_out_1;
   end
   endgenerate
   // map end
@@ -725,14 +864,14 @@ module topEntity
   assign c$vec1 = ({6 {{qPush,   qPop,   cursor}}});
 
   // zipWith start
-  genvar i_5;
+  genvar i_7;
   generate
-  for (i_5 = 0; i_5 < 6; i_5 = i_5 + 1) begin : zipWith_0
-    wire [65:0] zipWith_in1_0;
-    assign zipWith_in1_0 = c$vec1[i_5*66+:66];
-    wire [191:0] zipWith_in2_0;
-    assign zipWith_in2_0 = c$wait_app_arg_0[i_5*192+:192];
-    wire [257:0] c$n_0;
+  for (i_7 = 0; i_7 < 6; i_7 = i_7 + 1) begin : zipWith_1
+    wire [65:0] zipWith_in1_1;
+    assign zipWith_in1_1 = c$vec1[i_7*66+:66];
+    wire [191:0] zipWith_in2_1;
+    assign zipWith_in2_1 = c$wait_app_arg_0[i_7*192+:192];
+    wire [257:0] c$n_1;
     // sliding_window_high_freq.hs:68:1-78
     wire  psh;
     // sliding_window_high_freq.hs:68:1-78
@@ -740,130 +879,130 @@ module topEntity
     // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] c;
     // sliding_window_high_freq.hs:68:1-78
-    wire signed [63:0] i_4;
+    wire signed [63:0] i_6;
     // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] valToLeft_1;
     // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] val_1;
-    wire [257:0] c$case_alt_19;
-    assign c$n_0 = c$case_alt_19;
+    wire [257:0] c$case_alt_21;
+    assign c$n_1 = c$case_alt_21;
 
-    assign psh = zipWith_in1_0[65:65];
+    assign psh = zipWith_in1_1[65:65];
 
-    assign pp = zipWith_in1_0[64:64];
+    assign pp = zipWith_in1_1[64:64];
 
-    assign c = $signed(zipWith_in1_0[63:0]);
+    assign c = $signed(zipWith_in1_1[63:0]);
 
-    assign i_4 = $signed(zipWith_in2_0[191:128]);
+    assign i_6 = $signed(zipWith_in2_1[191:128]);
 
-    assign valToLeft_1 = $signed(zipWith_in2_0[127:64]);
+    assign valToLeft_1 = $signed(zipWith_in2_1[127:64]);
 
-    assign val_1 = $signed(zipWith_in2_0[63:0]);
+    assign val_1 = $signed(zipWith_in2_1[63:0]);
 
-    assign c$case_alt_19 = {valToLeft_1,   val_1,
-                            i_4,   c,   psh,   pp};
+    assign c$case_alt_21 = {valToLeft_1,   val_1,
+                            i_6,   c,   psh,   pp};
 
 
-    assign c$wait_app_arg[i_5*258+:258] = c$n_0;
+    assign c$wait_app_arg[i_7*258+:258] = c$n_1;
   end
   endgenerate
   // zipWith end
 
-  wire signed [63:0] iterateI_ho1_0_arg0_0;
-  wire signed [63:0] iterateI_ho1_0_res_0;
+  wire signed [63:0] iterateI_ho1_0_arg0_1;
+  wire signed [63:0] iterateI_ho1_0_res_1;
   wire signed [63:0] iterateI_ho1_1_res;
   wire signed [63:0] iterateI_ho1_2_res;
   wire signed [63:0] iterateI_ho1_3_res;
   wire signed [63:0] iterateI_ho1_4_res;
-  assign iterateI_ho1_0_arg0_0 = (64'sd0);
-
-  // sliding_window_high_freq.hs:68:1-78
-  wire signed [63:0] x1_5;
-  wire signed [63:0] c$case_alt_20;
-  assign iterateI_ho1_0_res_0 = c$case_alt_20;
-
-  assign x1_5 = iterateI_ho1_0_arg0_0;
-
-  assign c$case_alt_20 = (x1_5 + 64'sd1);
-
-
-
-  // sliding_window_high_freq.hs:68:1-78
-  wire signed [63:0] x1_6;
-  wire signed [63:0] c$case_alt_21;
-  assign iterateI_ho1_1_res = c$case_alt_21;
-
-  assign x1_6 = iterateI_ho1_0_res_0;
-
-  assign c$case_alt_21 = (x1_6 + 64'sd1);
-
-
-
-  // sliding_window_high_freq.hs:68:1-78
-  wire signed [63:0] x1_7;
-  wire signed [63:0] c$case_alt_22;
-  assign iterateI_ho1_2_res = c$case_alt_22;
-
-  assign x1_7 = iterateI_ho1_1_res;
-
-  assign c$case_alt_22 = (x1_7 + 64'sd1);
-
-
+  assign iterateI_ho1_0_arg0_1 = (64'sd0);
 
   // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] x1_8;
-  wire signed [63:0] c$case_alt_23;
-  assign iterateI_ho1_3_res = c$case_alt_23;
+  wire signed [63:0] c$case_alt_22;
+  assign iterateI_ho1_0_res_1 = c$case_alt_22;
 
-  assign x1_8 = iterateI_ho1_2_res;
+  assign x1_8 = iterateI_ho1_0_arg0_1;
 
-  assign c$case_alt_23 = (x1_8 + 64'sd1);
+  assign c$case_alt_22 = (x1_8 + 64'sd1);
 
 
 
   // sliding_window_high_freq.hs:68:1-78
   wire signed [63:0] x1_9;
+  wire signed [63:0] c$case_alt_23;
+  assign iterateI_ho1_1_res = c$case_alt_23;
+
+  assign x1_9 = iterateI_ho1_0_res_1;
+
+  assign c$case_alt_23 = (x1_9 + 64'sd1);
+
+
+
+  // sliding_window_high_freq.hs:68:1-78
+  wire signed [63:0] x1_10;
   wire signed [63:0] c$case_alt_24;
-  assign iterateI_ho1_4_res = c$case_alt_24;
+  assign iterateI_ho1_2_res = c$case_alt_24;
 
-  assign x1_9 = iterateI_ho1_3_res;
+  assign x1_10 = iterateI_ho1_1_res;
 
-  assign c$case_alt_24 = (x1_9 + 64'sd1);
+  assign c$case_alt_24 = (x1_10 + 64'sd1);
+
+
+
+  // sliding_window_high_freq.hs:68:1-78
+  wire signed [63:0] x1_11;
+  wire signed [63:0] c$case_alt_25;
+  assign iterateI_ho1_3_res = c$case_alt_25;
+
+  assign x1_11 = iterateI_ho1_2_res;
+
+  assign c$case_alt_25 = (x1_11 + 64'sd1);
+
+
+
+  // sliding_window_high_freq.hs:68:1-78
+  wire signed [63:0] x1_12;
+  wire signed [63:0] c$case_alt_26;
+  assign iterateI_ho1_4_res = c$case_alt_26;
+
+  assign x1_12 = iterateI_ho1_3_res;
+
+  assign c$case_alt_26 = (x1_12 + 64'sd1);
 
 
 
   assign c$wait_app_arg_res = {(64'sd0),
-                               iterateI_ho1_0_res_0,   iterateI_ho1_1_res,
+                               iterateI_ho1_0_res_1,   iterateI_ho1_1_res,
                                iterateI_ho1_2_res,   iterateI_ho1_3_res,
                                iterateI_ho1_4_res};
 
 
 
   // zipWith start
-  genvar i_6;
+  genvar i_8;
   generate
-  for (i_6 = 0; i_6 < 6; i_6 = i_6 + 1) begin : zipWith_1
-    wire signed [63:0] zipWith_in1_1;
-    assign zipWith_in1_1 = c$wait_app_arg_res[i_6*64+:64];
-    wire [127:0] zipWith_in2_1;
-    assign zipWith_in2_1 = c$wait_app_arg_1[i_6*128+:128];
-    wire [191:0] c$n_1;
+  for (i_8 = 0; i_8 < 6; i_8 = i_8 + 1) begin : zipWith_2
+    wire signed [63:0] zipWith_in1_2;
+    assign zipWith_in1_2 = c$wait_app_arg_res[i_8*64+:64];
+    wire [127:0] zipWith_in2_2;
+    assign zipWith_in2_2 = c$wait_app_arg_1[i_8*128+:128];
+    wire [191:0] c$n_2;
     // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] b1;
     // sliding_window_high_freq.hs:68:1-78
     wire signed [63:0] c1;
-    wire [191:0] c$case_alt_25;
-    assign c$n_1 = c$case_alt_25;
+    wire [191:0] c$case_alt_27;
+    assign c$n_2 = c$case_alt_27;
 
-    assign b1 = $signed(zipWith_in2_1[127:64]);
+    assign b1 = $signed(zipWith_in2_2[127:64]);
 
-    assign c1 = $signed(zipWith_in2_1[63:0]);
+    assign c1 = $signed(zipWith_in2_2[63:0]);
 
-    assign c$case_alt_25 = {zipWith_in1_1,   b1,
+    assign c$case_alt_27 = {zipWith_in1_2,   b1,
                             c1};
 
 
-    assign c$wait_app_arg_0[i_6*192+:192] = c$n_1;
+    assign c$wait_app_arg_0[i_8*192+:192] = c$n_2;
   end
   endgenerate
   // zipWith end
@@ -871,18 +1010,18 @@ module topEntity
   assign c$vec1_0 = ({64'sd0,(\wait [384-1 : 64])});
 
   // zipWith start
-  genvar i_7;
+  genvar i_9;
   generate
-  for (i_7 = 0; i_7 < 6; i_7 = i_7 + 1) begin : zipWith_2
-    wire signed [63:0] zipWith_in1_2;
-    assign zipWith_in1_2 = c$vec1_0[i_7*64+:64];
-    wire signed [63:0] zipWith_in2_2;
-    assign zipWith_in2_2 = \wait [i_7*64+:64];
-    wire [127:0] c$n_2;
-    assign c$n_2 = {zipWith_in1_2,   zipWith_in2_2};
+  for (i_9 = 0; i_9 < 6; i_9 = i_9 + 1) begin : zipWith_3
+    wire signed [63:0] zipWith_in1_3;
+    assign zipWith_in1_3 = c$vec1_0[i_9*64+:64];
+    wire signed [63:0] zipWith_in2_3;
+    assign zipWith_in2_3 = \wait [i_9*64+:64];
+    wire [127:0] c$n_3;
+    assign c$n_3 = {zipWith_in1_3,   zipWith_in2_3};
 
 
-    assign c$wait_app_arg_1[i_7*128+:128] = c$n_2;
+    assign c$wait_app_arg_1[i_9*128+:128] = c$n_3;
   end
   endgenerate
   // zipWith end
@@ -927,9 +1066,9 @@ module topEntity
 
   assign c$cursor_case_alt_2 = c$cursor_case_scrut ? ((x_4 + 64'sd1)) : cursor;
 
-  assign c$tte_rhs_4 = (x_4 != 64'sd6) ? 64'sd1 : 64'sd0;
+  assign c$tte_rhs_6 = (x_4 != 64'sd6) ? 64'sd1 : 64'sd0;
 
-  assign c$cursor_case_scrut = c$tte_rhs_4[0];
+  assign c$cursor_case_scrut = c$tte_rhs_6[0];
 
   assign x_4 = cursor;
 
@@ -945,53 +1084,50 @@ module topEntity
   assign c$cursor_case_alt_5 = (x_4 - 64'sd1);
 
   assign result = {{qPush,   qPop,
-                    $signed(input0[64:1]),   result_18[130:130],
-                    result_18[129:129],   result_18[128:64],
-                    $signed(result_18[63:0]),   result_2[388:388],
-                    result_2[387:387],
-                    $signed(result_2[386:323]),
-                    $signed(result_2[322:259]),
-                    result_2[258:131]},   result_2[129:0]};
+                    $signed(input0[64:1]),   result_21[129:129],
+                    $signed(result_21[128:65]),
+                    $signed(result_21[63:0]),   result_2[389:389],
+                    result_2[388:388],
+                    $signed(result_2[387:324]),
+                    $signed(result_2[323:260]),
+                    result_2[259:132],   result_2[131:131]},
+                   result_2[129:0]};
 
   assign qPop = result_2[130:130];
 
   assign qPush = input0[0:0];
 
-  assign result_0 = result[584:130];
+  assign result_0 = result[583:130];
 
   assign result_1 = result[129:0];
 
-  assign result_0_0 = result_0[454:454];
+  assign result_0_0 = result_0[453:453];
 
-  assign result_0_1 = result_0[453:453];
+  assign result_0_1 = result_0[452:452];
 
-  assign result_0_2 = $signed(result_0[452:389]);
+  assign result_0_2 = $signed(result_0[451:388]);
 
-  assign result_0_3 = result_0[388:388];
+  assign result_0_3 = result_0[387:387];
 
-  assign result_0_4 = result_0[387:387];
+  assign result_0_4 = $signed(result_0[386:323]);
 
-  assign result_0_5 = result_0[386:322];
+  assign result_0_5 = $signed(result_0[322:259]);
 
-  assign result_0_6 = $signed(result_0[321:258]);
+  assign result_0_6 = result_0[258:258];
 
   assign result_0_7 = result_0[257:257];
 
-  assign result_0_8 = result_0[256:256];
+  assign result_0_8 = $signed(result_0[256:193]);
 
-  assign result_0_9 = $signed(result_0[255:192]);
+  assign result_0_9 = $signed(result_0[192:129]);
 
-  assign result_0_10 = $signed(result_0[191:128]);
+  assign result_0_10 = result_0[128:1];
 
-  assign result_0_11_4 = result_0[127:0];
+  assign result_0_11 = result_0[0:0];
 
-  assign result_0_5_0 = $signed(result_0_5[64:1]);
+  assign result_0_10_0 = $signed(result_0_10[127:64]);
 
-  assign result_0_5_1 = result_0_5[0:0];
-
-  assign result_0_11_0 = $signed(result_0_11_4[127:64]);
-
-  assign result_0_11_1 = $signed(result_0_11_4[63:0]);
+  assign result_0_10_1 = $signed(result_0_10[63:0]);
 
   assign result_1_0 = result_1[129:65];
 
