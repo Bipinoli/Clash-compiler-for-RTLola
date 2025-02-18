@@ -1,0 +1,227 @@
+{
+    "components": [
+        "topEntity"
+    ],
+    "dependencies": {
+        "transitive": []
+    },
+    "domains": {
+        "IntelSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "MyDomain": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 2000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "System": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "XilinxSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Synchronous",
+            "reset_polarity": "ActiveHigh"
+        }
+    },
+    "files": [
+        {
+            "name": "topEntity_shim.cpp",
+            "sha256": "460702d8afc7479b65dad3acb826f56baf7e34f11fea519fb6f597a0c8340150"
+        },
+        {
+            "name": "topEntity.sdc",
+            "sha256": "5931af56eff7648c501fd106363fb26420b398eeea306d9edd80c5a89a153fc1"
+        },
+        {
+            "name": "topEntity.v",
+            "sha256": "2c4592480ab649d95b4041a8e90339c6eb770da2d8db8c5b9c5d89272a6cf80f"
+        }
+    ],
+    "flags": [
+        20,
+        20
+    ],
+    "hash": "12c9629286235e3ae6917b61e4348df651af410bc35c320cf100fc2b11d43c1c",
+    "top_component": {
+        "name": "topEntity",
+        "ports_flat": [
+            {
+                "direction": "in",
+                "domain": "MyDomain",
+                "is_clock": true,
+                "name": "clk",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "MyDomain",
+                "is_clock": false,
+                "name": "rst",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "MyDomain",
+                "is_clock": false,
+                "name": "en",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "input0_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "input0_1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_0",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_2",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_3",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_4",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_5",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_6",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_7",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_8",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_9",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_10_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_10_1",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_10_2",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_11",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_0_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_0_1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_1_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_1_1",
+                "type_name": "",
+                "width": 1
+            }
+        ]
+    },
+    "version": "unstable"
+}
