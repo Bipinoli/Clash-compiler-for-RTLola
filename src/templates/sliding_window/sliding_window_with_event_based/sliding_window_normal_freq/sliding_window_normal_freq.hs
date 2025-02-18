@@ -1,4 +1,4 @@
-module SlidingWindowWithEventBased where
+module SlidingWindowNormalFreq where
 
 import Clash.Prelude
 
@@ -153,8 +153,13 @@ queue input = output
 
 ---------------------------------------------------------------
 
+periodBns = 1000000 :: Signal dom Int -- 1kHz in ns
+bucketBSpanNs = 1000000 -- 0.001s in nanoseconds
+type BBucketCnt = 3 -- total aggregate = 3 * 0.001 = 0.003s
 
-monitor :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Bool, Bool, Int, Bool, Bool, (Int, Bool), Int, Bool, Bool, Int, Int, Vec 2 Int), ((Int, Bool), (Int, Bool)))
+---------------------------------------------------------------
+
+monitor :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Bool, Bool, Int, Bool, Int, Int, Bool, Bool, Int, Int, Vec BBucketCnt Int, Bool), ((Int, Bool), (Int, Bool)))
 monitor input0 = bundle (debugSignals, outputs)
     where 
         -- Note:
@@ -166,9 +171,10 @@ monitor input0 = bundle (debugSignals, outputs)
         qData = input0
 
         -- extra debug signals
-        debugSignals = bundle (qPush, qPop, x, qPushValid, qPopValid, qOut, qWait, enA, enB, stage, timerB, winX)
+        debugSignals = bundle (qPush, qPop, x, qPopValid, qOutX, qWait, enA, enB, stage, timerB, winX, slideB)
         (qPushValid, qPopValid, qOut, qWait) = unbundle inputBuffer
-        (enA, enB, stage, timerB, winX) = unbundle evalDebugSignals
+        (qOutX, _) = unbundle qOut
+        (enA, enB, stage, timerB, winX, slideB) = unbundle evalDebugSignals
 
 
 
@@ -176,13 +182,14 @@ monitor input0 = bundle (debugSignals, outputs)
 ---------------------------------------------------------------
 
 
-pacer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom QOutput -> Signal dom (Int, (Bool, Bool), (Int, Bool, Int), (Bool, Bool))
-pacer en inputBuffer = bundle (debugSignals, status, sustainedInput, enables)
+pacer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom QOutput -> Signal dom (Int, (Bool, Bool), (Int, Bool, Int), (Bool, Bool), Bool)
+pacer en inputBuffer = bundle (debugSignals, status, sustainedInput, enables, slides)
     where 
         -- inputData & enables must be sustained until next pacer phase
         -- status must not be sustained
         status = bundle (toPop, pacerStable) 
         enables = bundle (enA, enB)
+        slides = slideB
 
         toPop = mux (en .&&. (stage .==. (pure 0))) (pure True) (pure False)
         pacerStable = mux (en .&&. (stage .==. (pure 1))) (pure True) (pure False)
@@ -194,13 +201,14 @@ pacer en inputBuffer = bundle (debugSignals, status, sustainedInput, enables)
 
         enA = register False (mux (en .&&. stage .==. (pure 1)) newEnA enA)
         enB = register False (mux (en .&&. stage .==. (pure 1)) newEnB enB)
+        slideB = register False (mux (en .&&. stage .==. (pure 1)) newSlideB slideB)
 
         newEnA = qPopValid .&&. newX
         newEnB = timerB .>=. periodBns
+        newSlideB = newEnB
 
         timerB = timer resetBTimer
         resetBTimer = en .&&. stage .==. (pure 1) .&&. timerB .>=. periodBns
-        periodBns = 2000 :: Signal dom Int -- 500kHz in ns
 
         stage = register 0 (nextStage <$> en <*> stage)
 
@@ -218,24 +226,30 @@ pacer en inputBuffer = bundle (debugSignals, status, sustainedInput, enables)
 ---------------------------------------------------------------
 
 
-evaluator :: HiddenClockResetEnable dom => Signal dom QOutput -> Signal dom ((Bool, Bool, Int, Int, Vec 2 Int), Bool, ((Int, Bool), (Int, Bool)))
+evaluator :: HiddenClockResetEnable dom => Signal dom QOutput -> Signal dom ((Bool, Bool, Int, Int, Vec BBucketCnt Int, Bool), Bool, ((Int, Bool), (Int, Bool)))
 evaluator inputBuffer = bundle (debugSignals, toPop, outputs)
     where 
         -- stage 0 - 1 -> pacing stage
         -- stage 2 -> eval a & winX4B -- different than the concept of layers provided by RTLola
         -- stage 3 -> eval b
         -- stage 4 -> output
+        -- Note: 
+        -- Even though a & b are in the same RTLola layers 
+        -- due to b depending on the sliding window, b must be evaluated 1 cycle later
+        -- thus making the b effectively in a different layer
+        -- i.e with sliding window => effective layer = layer + 1
         stage = hotPotato 5
 
         outputs = bundle (outputA, outputB)
         outputA = bundle (outA, aktvA)
         outputB = bundle (outB, aktvB)
 
-        (pacingDebugSignals, pacingStatus, inputData, enables) = unbundle (pacer (stage .==. (pure 0) .||. stage .==. (pure 1)) inputBuffer)
+        (pacingDebugSignals, pacingStatus, inputData, enables, slides) = unbundle (pacer (stage .==. (pure 0) .||. stage .==. (pure 1)) inputBuffer)
         (toPop, _) = unbundle pacingStatus
 
         outA = evaluateA (stage .==. (pure 2) .&&. enA) x
-        winX4B = windowXForB (stage .==. (pure 2)) inputData
+        -- window must be evaluated irrespective of pacing
+        winX4B = slidingWinX4B (stage .==. (pure 2)) slideB inputData
 
         outB = evaluateB (stage .==. (pure 3) .&&. enB) winX4B
 
@@ -244,9 +258,10 @@ evaluator inputBuffer = bundle (debugSignals, toPop, outputs)
 
         (x, newX, waitedX) = unbundle inputData
         (enA, enB) = unbundle enables
+        slideB = slides
 
         --- debug signals
-        debugSignals = bundle (enA, enB, stage, timerB, winX4B)
+        debugSignals = bundle (enA, enB, stage, timerB, winX4B, slideB)
         timerB = pacingDebugSignals
 
 
@@ -257,34 +272,39 @@ evaluateA en x = out
     where out = register 0 (mux en (x * 10) out)
 
 
--- evaluation freq of a = 500kHz = 0.000002s
--- aggregate over = 0.000004s
+-- evaluation freq of a = 40kHz = 0.000025s
+-- aggregate over = 0.000050s
 -- buckets required = 2
--- bucket span = 0.000002s
-windowXForB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Int, Bool, Int) -> Signal dom (Vec 2 Int)
-windowXForB en timedInput = window
+-- bucket span = 0.000025s
+slidingWinX4B :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Int, Bool, Int) -> Signal dom (Vec BBucketCnt Int)
+slidingWinX4B en slide timedInput = window
     where 
         window = register winDflt (mux en nextWindowSignal window)
-        winDflt = repeat 0 :: Vec 2 Int
-        nextWindowSignal = nextWindow <$> window <*> timedInput
+        winDflt = repeat bktDflt :: Vec BBucketCnt Int
+        bktDflt = 0 :: Int
+        nextWindowSignal = nextWindow <$> window <*> slide <*> timedInput
 
-        nextWindow :: Vec 2 Int -> (Int, Bool, Int) -> Vec 2 Int 
-        nextWindow win inpt = out
+        nextWindow :: Vec BBucketCnt Int -> Bool -> (Int, Bool, Int) -> Vec BBucketCnt Int
+        nextWindow win toSlide inpt = out
             where 
-                out = if not newX || bucketsBefore >= length win then win
-                      else updateBucket win (length win - 1 - bucketsBefore) x
-                bucketsBefore = (cyclesBefore * systemClockPeriodNs) `div` bucketSpanNs 
-                (x, newX, cyclesBefore) = inpt
-                bucketSpanNs = 2000 -- 0.000002s in nanoseconds
+                out = if not toSlide then 
+                        if not newX || bucketsBefore >= length win then win
+                        else updateBucket win (length win - 1 - bucketsBefore) x
+                      else 
+                        if not newX || bucketsBefore >= length win - 1 then (win <<+ bktDflt)
+                        else updateBucket (win <<+ bktDflt) (length win - 1 - bucketsBefore) x
 
-        updateBucket :: Vec 2 Int -> Int -> Int -> Vec 2 Int
+                bucketsBefore = (cyclesBefore * systemClockPeriodNs) `div` bucketBSpanNs 
+                (x, newX, cyclesBefore) = inpt
+
+        updateBucket :: Vec BBucketCnt Int -> Int -> Int -> Vec BBucketCnt Int
         updateBucket win index value = map (\(indx, v) -> if indx == index then bBucketFx v value else v) (zip indices win)
-            where indices = iterateI (+1) 0 :: Vec 2 Int
+            where indices = iterateI (+1) 0 :: Vec BBucketCnt Int
 
 bBucketFx :: Int -> Int -> Int
 bBucketFx accum new = accum + new
 
-evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec 2 Int) -> Signal dom Int
+evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec BBucketCnt Int) -> Signal dom Int
 evaluateB en winX = register 0 (mux en newVal oldVal)
     where 
         oldVal = evaluateB en winX
@@ -296,5 +316,5 @@ evaluateB en winX = register 0 (mux en newVal oldVal)
 
 
 topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
-    Signal MyDomain (Int, Bool) -> Signal MyDomain ((Bool, Bool, Int, Bool, Bool, (Int, Bool), Int, Bool, Bool, Int, Int, Vec 2 Int), ((Int, Bool), (Int, Bool)))
+    Signal MyDomain (Int, Bool) -> Signal MyDomain ((Bool, Bool, Int, Bool, Int, Int, Bool, Bool, Int, Int, Vec BBucketCnt Int, Bool), ((Int, Bool), (Int, Bool)))
 topEntity clk rst en input0 = exposeClockResetEnable (monitor input0) clk rst en
