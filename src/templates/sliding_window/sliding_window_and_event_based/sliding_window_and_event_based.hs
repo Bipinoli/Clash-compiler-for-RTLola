@@ -22,20 +22,40 @@ import Data.Coerce
 -- d -> period = 0.002s, over = 0.004s, buckets = 2, bucket size = 0.002s 
 
 newtype DataX = DataX Int deriving (Generic, NFDataX)
+type HasDataX = (DataX, Bool)
+
 newtype PacingBC = PacingBC Bool deriving (Generic, NFDataX) -- every 0.001s
 newtype PacingD = PacingD Bool deriving (Generic, NFDataX) -- every 0.002s
 
 newtype SlideBC = SlideBC Bool deriving (Generic, NFDataX) -- every 0.001s
 newtype SlideD = SlideD Bool deriving (Generic, NFDataX) -- every 0.002s
+aDflt = (coerce @Int @DataX 0)
+bDflt = (coerce @Int @DataX 0)
+type DDflt = 0
+type BucketsWinB = 3
+type BucketsWinC = 4
+type BucketsWinD = 2
+type BucketBDflt = 0
+type BucketCDflt = 0
+type BucketDDflt = 0
+
+
+---------------------------------------------------------------
+-- Differences to the old architecture
+-- 1. old architecture's hlc alternatively evaluates event-based and periodic pacing, I am doing them at the same time
+-- 2. I am grouping the pacings to reduce registers in the queue
+-- 3. I am emiting sliding event to the queue just like pacing
+-- 4. I have merged the 2 state machines into 1 in LLC
 
 
 ---------------------------------------------------------------
 -- Total odering of events maintained in the queue
 
-type Inputs = (DataX, Bool)
+type Inputs = HasDataX
 type Slides = (SlideBC, SlideD)
 type Pacings = (PacingBC, PacingD)
 type Event = (Inputs, Slides, Pacings)
+-- existing architecture keeps event-based and periodic events separately -> alernate one after another
 
 nullEvent :: Event
 nullEvent = ((coerce @Int @DataX 0, False), (coerce False, coerce False), (coerce False, coerce False))
@@ -114,223 +134,121 @@ queue input = output
 
 ---------------------------------------------------------------
 
--- hlc :: HiddenClockResetEnable dom => Int -
-
-
-
----------------------------------------------------------------
-
--- llc 
-
----------------------------------------------------------------
-
-
 -- Create a clock domain with 2 microseconds period (500 kHz) to match the testbench
 createDomain vSystem{vName="MyDomain", vPeriod=2000} -- period in nanoseconds
 
--- systemClockPeriodNs :: Int
--- systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @MyDomain)
-
-
--- generateClock :: HiddenClockResetEnable dom => Int -> Signal dom (Bool, Int)
--- generateClock desiredPeriodInNs = register initClk (mux (countSignal .<. halfToCount) hiClk loClk)
---   where
---     initClk = (False, 0)
---     hiClk = bundle (pure True, countSignal)
---     loClk = bundle (pure False, countSignal)
-
---     countSignal = counter toCount
---     toCount = desiredPeriodInNs `div` systemClockPeriodNs
---     halfToCount = pure $ toCount `div` 2
-
---     counter :: HiddenClockResetEnable dom => Int -> Signal dom Int
---     counter toCount = register 0 (mux (prevVal .<. pure (toCount - 1)) (prevVal + 1) 0)
---         where prevVal = counter toCount
-
--- clockDivider :: HiddenClockResetEnable dom => Int -> Signal dom (Bool, Int)
--- clockDivider factor = generateClock $ systemClockPeriodNs * factor
-
-
--- timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
--- timer reset = register deltaTime (mux reset (pure deltaTime) nextTime)
---     where 
---         nextTime = timer reset + pure deltaTime
---         deltaTime = systemClockPeriodNs
+systemClockPeriodNs :: Int
+systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @MyDomain)
 
 
 
--- ---------------------------------------------------------------
+hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Event, Int)
+hlc inputs = bundle (bundle (inputs, slides, pacings), timer1)
+    where 
+        slides = bundle (coerce slideBC, coerce slideD)
+        pacings = bundle (coerce pacingBC, coerce pacingD)
 
--- hotPotato :: HiddenClockResetEnable dom => Int -> Signal dom Int
--- hotPotato n = let s = register 0 (mux (s .==. pure (n-1)) 0 (s + 1)) in s
+        slideBC = timer1Over
+        slideD = timer2Over
+        pacingBC = timer1Over
+        pacingD = timer2Over
 
+        timer1Over = timer1 .>=. period1Ns
+        timer1 = timer timer1Over
+        timer2Over = timer2 .>=. period2Ns
+        timer2 = timer timer2Over
+        period1Ns = 1000000 -- 0.001s in ns
+        period2Ns = 2000000 -- 0.002s in ns
 
-
-
--- ---------------------------------------------------------------
-
--- periodBns = 1000000 :: Signal dom Int -- 1kHz in ns
--- bucketBSpanNs = 1000000 -- 0.001s in nanoseconds
--- type BBucketCnt = 3 -- total aggregate = 3 * 0.001 = 0.003s
-
--- ---------------------------------------------------------------
-
--- monitor :: HiddenClockResetEnable dom => Signal dom (Int, Bool) -> Signal dom ((Bool, Bool, Int, Bool, Int, Int, Bool, Bool, Int, Int, Vec BBucketCnt Int, Bool), ((Int, Bool), (Int, Bool)))
--- monitor input0 = bundle (debugSignals, outputs)
---     where 
---         -- Note:
---         -- As the input will only be picked on the rising edge of the clock
---         -- It is assumed that the pushed input is sustained until the rising edge
---         inputBuffer = queue (bundle (qPush, qPop, qData))
---         (evalDebugSignals, qPop, outputs) = unbundle (evaluator inputBuffer) 
---         (x, qPush) = unbundle input0
---         qData = input0
-
---         -- extra debug signals
---         debugSignals = bundle (qPush, qPop, x, qPopValid, qOutX, qWait, enA, enB, stage, timerB, winX, slideB)
---         (qPushValid, qPopValid, qOut, qWait) = unbundle inputBuffer
---         (qOutX, _) = unbundle qOut
---         (enA, enB, stage, timerB, winX, slideB) = unbundle evalDebugSignals
+        timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
+        timer reset = register 0 (mux reset (pure deltaTime) nextTime)
+            where 
+                nextTime = timer reset + pure deltaTime
+                deltaTime = systemClockPeriodNs
 
 
 
+---------------------------------------------------------------
 
--- ---------------------------------------------------------------
-
-
--- pacer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom QOutput -> Signal dom (Int, (Bool, Bool), (Int, Bool, Int), (Bool, Bool), Bool)
--- pacer en inputBuffer = bundle (debugSignals, status, sustainedInput, enables, slides)
---     where 
---         -- inputData & enables must be sustained until next pacer phase
---         -- status must not be sustained
---         status = bundle (toPop, pacerStable) 
---         enables = bundle (enA, enB)
---         slides = slideB
-
---         toPop = mux (en .&&. (stage .==. (pure 0))) (pure True) (pure False)
---         pacerStable = mux (en .&&. (stage .==. (pure 1))) (pure True) (pure False)
-
---         sustainedInput = register (0, False, 0) (mux (en .&&. stage .==. (pure 1)) (bundle (x, newX .&&. qPopValid, waitedX)) sustainedInput)
-
---         (x, newX) = unbundle xData
---         (_, qPopValid, xData, waitedX) = unbundle inputBuffer
-
---         enA = register False (mux (en .&&. stage .==. (pure 1)) newEnA enA)
---         enB = register False (mux (en .&&. stage .==. (pure 1)) newEnB enB)
---         slideB = register False (mux (en .&&. stage .==. (pure 1)) newSlideB slideB)
-
---         newEnA = qPopValid .&&. newX
---         newEnB = timerB .>=. periodBns
---         newSlideB = newEnB
-
---         timerB = timer resetBTimer
---         resetBTimer = en .&&. stage .==. (pure 1) .&&. timerB .>=. periodBns
-
---         stage = register 0 (nextStage <$> en <*> stage)
-
---         -- stage 0 -> inactive / active with queue pop
---         -- stage 1 -> active & provide proper enable signals as output
---         nextStage :: Bool -> Int -> Int
---         nextStage enb stg = nxtStg
---             where 
---                 nxtStg = if not enb || stg == 1 then 0 else 1
-
---         -- debug signals
---         debugSignals = timerB
+type Outputs = (HasDataX, HasDataX)
 
 
--- ---------------------------------------------------------------
+data State = StatePop | StateReadEvent | StateEvalLayer1 | StateEvalLayer2 | StateOutput
+    deriving (Generic, Eq, NFDataX)
+
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool)
+llc event = bundle (toPop)
+    where 
+        state = register StatePop nextStateSignal
+        toPop = state .==. (pure StatePop)
+        (isValidEvent, poppedEvent) = unbundle event
+ 
+        eventInfo = register nullEvent (mux (state .==. pure StateReadEvent) poppedEvent eventInfo)
+
+        -- TODO:
+        -- state 1 -> eval a & sliding window b
+        -- state 2 -> eval b
+        -- state 3 -> outptu
 
 
--- evaluator :: HiddenClockResetEnable dom => Signal dom QOutput -> Signal dom ((Bool, Bool, Int, Int, Vec BBucketCnt Int, Bool), Bool, ((Int, Bool), (Int, Bool)))
--- evaluator inputBuffer = bundle (debugSignals, toPop, outputs)
---     where 
---         -- stage 0 - 1 -> pacing stage
---         -- stage 2 -> eval a & winX4B -- different than the concept of layers provided by RTLola
---         -- stage 3 -> eval b
---         -- stage 4 -> output
---         -- Note: 
---         -- Even though a & b are in the same RTLola layers 
---         -- due to b depending on the sliding window, b must be evaluated 1 cycle later
---         -- thus making the b effectively in a different layer
---         -- i.e with sliding window => effective layer = layer + 1
---         stage = hotPotato 5
+        nextStateSignal = nextState <$> state <*> isValidEvent
+        
+        nextState :: State -> Bool -> State
+        nextState curState validEvent = case curState of
+            StatePop -> if validEvent then StateReadEvent else StatePop 
+            StateReadEvent -> StateEvalLayer1
+            StateEvalLayer1 -> StateEvalLayer2
+            StateEvalLayer2 -> StatePop
 
---         outputs = bundle (outputA, outputB)
---         outputA = bundle (outA, aktvA)
---         outputB = bundle (outB, aktvB)
 
---         (pacingDebugSignals, pacingStatus, inputData, enables, slides) = unbundle (pacer (stage .==. (pure 0) .||. stage .==. (pure 1)) inputBuffer)
---         (toPop, _) = unbundle pacingStatus
 
---         outA = evaluateA (stage .==. (pure 2) .&&. enA) x
---         -- window must be evaluated irrespective of pacing
---         winX4B = slidingWinX4B (stage .==. (pure 2)) slideB inputData
+evaluateA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataX -> Signal dom DataX
+evaluateA en x = out 
+    where 
+        out = register aDflt (mux en newOut out)
+        newOut = coerce @Int @DataX <$> (old * new)
+        old = coerce @DataX @Int <$> out
+        new = coerce @DataX @Int <$> x
 
---         outB = evaluateB (stage .==. (pure 3) .&&. enB) winX4B
 
---         aktvA = (stage .==. (pure 4)) .&&. enA
---         aktvB = (stage .==. (pure 4)) .&&. enB
+slidingWinB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom HasDataX -> Signal dom (Vec BucketsWinB DataX)
+slidingWinB en slide hasX = window
+    where 
+        window = register winDflt (mux en nextWindowSignal window)
+        winDflt = repeat bDflt :: Vec BucketsWinB DataX
+        nextWindowSignal = nextWindow <$> window <*> slide <*> hasX
 
---         (x, newX, waitedX) = unbundle inputData
---         (enA, enB) = unbundle enables
---         slideB = slides
+        nextWindow :: Vec BucketsWinB DataX -> Bool -> HasDataX -> Vec BucketsWinB DataX
+        nextWindow win toSlide inpt = out
+            where 
+                out = if not toSlide then 
+                        if not newX then win
+                        else replace (length win - 1) (bBucketFx (last win) x) win
+                      else 
+                        if not newX then win <<+ bDflt
+                        else replace (length win - 1) (bBucketFx (last win) x) (win <<+ bDflt)
+                (x, newX) = inpt
 
---         --- debug signals
---         debugSignals = bundle (enA, enB, stage, timerB, winX4B, slideB)
---         timerB = pacingDebugSignals
+bBucketFx :: DataX -> DataX -> DataX
+bBucketFx accum new = out
+    where 
+        out = coerce @Int @DataX (d1 + d2)
+        d1 = coerce @DataX @Int accum
+        d2 = coerce @DataX @Int accum
 
 
 
 
--- evaluateA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
--- evaluateA en x = out 
---     where out = register 0 (mux en (x * 10) out)
+---------------------------------------------------------------
+
+-- monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom Event
+-- monitor inputs = hlc inputs
 
 
--- -- evaluation freq of a = 40kHz = 0.000025s
--- -- aggregate over = 0.000050s
--- -- buckets required = 2
--- -- bucket span = 0.000025s
--- slidingWinX4B :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Int, Bool, Int) -> Signal dom (Vec BBucketCnt Int)
--- slidingWinX4B en slide timedInput = window
---     where 
---         window = register winDflt (mux en nextWindowSignal window)
---         winDflt = repeat bktDflt :: Vec BBucketCnt Int
---         bktDflt = 0 :: Int
---         nextWindowSignal = nextWindow <$> window <*> slide <*> timedInput
-
---         nextWindow :: Vec BBucketCnt Int -> Bool -> (Int, Bool, Int) -> Vec BBucketCnt Int
---         nextWindow win toSlide inpt = out
---             where 
---                 out = if not toSlide then 
---                         if not newX || bucketsBefore >= length win then win
---                         else updateBucket win (length win - 1 - bucketsBefore) x
---                       else 
---                         if not newX || bucketsBefore >= length win - 1 then (win <<+ bktDflt)
---                         else updateBucket (win <<+ bktDflt) (length win - 1 - bucketsBefore) x
-
---                 bucketsBefore = (cyclesBefore * systemClockPeriodNs) `div` bucketBSpanNs 
---                 (x, newX, cyclesBefore) = inpt
-
---         updateBucket :: Vec BBucketCnt Int -> Int -> Int -> Vec BBucketCnt Int
---         updateBucket win index value = map (\(indx, v) -> if indx == index then bBucketFx v value else v) (zip indices win)
---             where indices = iterateI (+1) 0 :: Vec BBucketCnt Int
-
--- bBucketFx :: Int -> Int -> Int
--- bBucketFx accum new = accum + new
-
--- evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec BBucketCnt Int) -> Signal dom Int
--- evaluateB en winX = register 0 (mux en newVal oldVal)
---     where 
---         oldVal = evaluateB en winX
---         newVal = (fold bBucketFx) <$> winX
+---------------------------------------------------------------
 
 
+topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
+    Signal MyDomain Inputs -> Signal MyDomain (Event, Int)
+topEntity clk rst en input0 = exposeClockResetEnable (hlc input0) clk rst en
 
--- ---------------------------------------------------------------
-
-
--- topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
---     Signal MyDomain (Int, Bool) -> Signal MyDomain ((Bool, Bool, Int, Bool, Int, Int, Bool, Bool, Int, Int, Vec BBucketCnt Int, Bool), ((Int, Bool), (Int, Bool)))
--- topEntity clk rst en input0 = exposeClockResetEnable (monitor input0) clk rst en
