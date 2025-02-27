@@ -24,6 +24,7 @@ import Data.Coerce
 newtype DataX = DataX Int deriving (Generic, NFDataX)
 type HasDataX = (DataX, Bool)
 
+newtype PacingA = PacingA Bool deriving (Generic, NFDataX)
 newtype PacingBC = PacingBC Bool deriving (Generic, NFDataX) -- every 0.001s
 newtype PacingD = PacingD Bool deriving (Generic, NFDataX) -- every 0.002s
 
@@ -42,10 +43,11 @@ type BucketDDflt = 0
 
 ---------------------------------------------------------------
 -- Differences to the old architecture
--- 1. old architecture's hlc alternatively evaluates event-based and periodic pacing, I am doing them at the same time
+-- 1. Old architecture's hlc alternatively evaluates event-based and periodic pacing, I am doing them at the same time
 -- 2. I am grouping the pacings to reduce registers in the queue
 -- 3. I am emiting sliding event to the queue just like pacing
 -- 4. I have merged the 2 state machines into 1 in LLC
+-- 5. Old architecture also works with offline monitor -- this doesn't
 
 
 ---------------------------------------------------------------
@@ -53,12 +55,12 @@ type BucketDDflt = 0
 
 type Inputs = HasDataX
 type Slides = (SlideBC, SlideD)
-type Pacings = (PacingBC, PacingD)
+type Pacings = (PacingA, PacingBC, PacingD)
 type Event = (Inputs, Slides, Pacings)
 -- existing architecture keeps event-based and periodic events separately -> alernate one after another
 
 nullEvent :: Event
-nullEvent = ((coerce @Int @DataX 0, False), (coerce False, coerce False), (coerce False, coerce False))
+nullEvent = ((coerce @Int @DataX 0, False), (coerce False, coerce False), (coerce False, coerce False, coerce False))
 type QMemSize = 6
 
 type QData = Event
@@ -145,13 +147,16 @@ systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @MyDomain)
 hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Event, Int)
 hlc inputs = bundle (bundle (inputs, slides, pacings), timer1)
     where 
-        slides = bundle (coerce slideBC, coerce slideD)
-        pacings = bundle (coerce pacingBC, coerce pacingD)
+        slides = bundle (slideBC, slideD)
+        pacings = bundle (pacingA, pacingBC, pacingD)
 
-        slideBC = timer1Over
-        slideD = timer2Over
-        pacingBC = timer1Over
-        pacingD = timer2Over
+        slideBC = coerce <$> timer1Over
+        slideD = coerce <$> timer2Over
+
+        (_, newX) = unbundle inputs
+        pacingA = coerce <$> newX
+        pacingBC = coerce <$> timer1Over
+        pacingD = coerce <$> timer2Over
 
         timer1Over = timer1 .>=. period1Ns
         timer1 = timer timer1Over
@@ -172,25 +177,41 @@ hlc inputs = bundle (bundle (inputs, slides, pacings), timer1)
 
 type Outputs = (HasDataX, HasDataX)
 
-
 data State = StatePop | StateReadEvent | StateEvalLayer1 | StateEvalLayer2 | StateOutput
     deriving (Generic, Eq, NFDataX)
 
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool)
-llc event = bundle (toPop)
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool, Outputs)
+llc event = bundle (toPop, outputs)
     where 
         state = register StatePop nextStateSignal
+
+        -- state: pop
         toPop = state .==. (pure StatePop)
         (isValidEvent, poppedEvent) = unbundle event
  
+        -- state: read event
         eventInfo = register nullEvent (mux (state .==. pure StateReadEvent) poppedEvent eventInfo)
+        (hasDataX, slides, pacings) = unbundle eventInfo
+        (slideBC, slideD) = unbundle slides
+        (pacingA, pacingBC, pacingD) = unbundle pacings
+        (x, newX) = unbundle hasDataX
 
-        -- TODO:
-        -- state 1 -> eval a & sliding window b
-        -- state 2 -> eval b
-        -- state 3 -> outptu
+        -- state: layer 1
+        evalA = evaluateA (state .==. (pure StateEvalLayer1) .&&. (coerce pacingA)) x
+        swB = slidingWinB (state .==. (pure StateEvalLayer1)) (coerce slideBC) hasDataX
 
+        -- state: layer 2
+        evalB = evaluateB (state .==. (pure StateEvalLayer2) .&&. (coerce pacingBC)) swB
 
+        -- state: output
+        outAktvA = state .==. (pure StateOutput) .&&. (coerce pacingA)
+        outAktvB = state .==. (pure StateOutput) .&&. (coerce pacingBC)
+
+        outputs = bundle (outputA, outputB)
+        outputA = bundle (evalA, outAktvA)
+        outputB = bundle (evalB, outAktvB)
+
+        -- state transition
         nextStateSignal = nextState <$> state <*> isValidEvent
         
         nextState :: State -> Bool -> State
@@ -198,7 +219,8 @@ llc event = bundle (toPop)
             StatePop -> if validEvent then StateReadEvent else StatePop 
             StateReadEvent -> StateEvalLayer1
             StateEvalLayer1 -> StateEvalLayer2
-            StateEvalLayer2 -> StatePop
+            StateEvalLayer2 -> StateOutput
+            StateOutput -> StatePop
 
 
 
@@ -210,6 +232,22 @@ evaluateA en x = out
         old = coerce @DataX @Int <$> out
         new = coerce @DataX @Int <$> x
 
+evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec BucketsWinB DataX) -> Signal dom DataX
+evaluateB en win = out
+    where 
+        out = register bDflt (mux en newOut out)
+        newOut = merge <$> win
+
+        merge :: Vec BucketsWinB DataX -> DataX
+        merge win = fold bBucketFx win
+
+
+bBucketFx :: DataX -> DataX -> DataX
+bBucketFx accum new = out
+    where 
+        out = coerce @Int @DataX (d1 + d2)
+        d1 = coerce @DataX @Int accum
+        d2 = coerce @DataX @Int accum
 
 slidingWinB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom HasDataX -> Signal dom (Vec BucketsWinB DataX)
 slidingWinB en slide hasX = window
@@ -229,12 +267,7 @@ slidingWinB en slide hasX = window
                         else replace (length win - 1) (bBucketFx (last win) x) (win <<+ bDflt)
                 (x, newX) = inpt
 
-bBucketFx :: DataX -> DataX -> DataX
-bBucketFx accum new = out
-    where 
-        out = coerce @Int @DataX (d1 + d2)
-        d1 = coerce @DataX @Int accum
-        d2 = coerce @DataX @Int accum
+
 
 
 
