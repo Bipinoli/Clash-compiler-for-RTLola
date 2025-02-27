@@ -17,12 +17,21 @@ import Data.Coerce
 -- output d @0.5kHz := x.aggregate(over: 0.004s, using: count)
 
 -- sliding window
--- b -> period = 0.001s, over = 0.003s, buckets = 3, bucket size = 0.001s 
--- c -> period = 0.001s, over = 0.004s, buckets = 4, bucket size = 0.001s 
--- d -> period = 0.002s, over = 0.004s, buckets = 2, bucket size = 0.002s 
+-- b -> period = 0.001s, over = 0.003s, buckets = 4, bucket size = 0.001s 
+-- c -> period = 0.001s, over = 0.004s, buckets = 5, bucket size = 0.001s 
+-- d -> period = 0.002s, over = 0.004s, buckets = 3, bucket size = 0.002s 
 
-newtype DataX = DataX Int deriving (Generic, NFDataX)
+-- Note:
+-- In RTLola sliding-window aggregation the span of window is inlclusive in the right but exclusive to the left
+-- i.e in the output b above, data at the exact time 0.001s won't be included in the aggregation at time 0.003s
+-- To deal with this we need one more bucket such that this extreme data can be put into it
+-- Also we must not mix this extreme data into the bucket aggregation
+-- therefore, when we have both new data and time to slide the window, first we must update the window and then slide it
+
+
+newtype DataX = DataX Int deriving (Generic, NFDataX, Show)
 type HasDataX = (DataX, Bool)
+type Inputs = HasDataX
 
 newtype PacingA = PacingA Bool deriving (Generic, NFDataX)
 newtype PacingBC = PacingBC Bool deriving (Generic, NFDataX) -- every 0.001s
@@ -32,13 +41,9 @@ newtype SlideBC = SlideBC Bool deriving (Generic, NFDataX) -- every 0.001s
 newtype SlideD = SlideD Bool deriving (Generic, NFDataX) -- every 0.002s
 aDflt = (coerce @Int @DataX 0)
 bDflt = (coerce @Int @DataX 0)
-type DDflt = 0
-type BucketsWinB = 3
-type BucketsWinC = 4
-type BucketsWinD = 2
-type BucketBDflt = 0
-type BucketCDflt = 0
-type BucketDDflt = 0
+type BucketsWinB = 4
+
+type Outputs = (HasDataX, HasDataX)
 
 
 ---------------------------------------------------------------
@@ -53,7 +58,6 @@ type BucketDDflt = 0
 ---------------------------------------------------------------
 -- Total odering of events maintained in the queue
 
-type Inputs = HasDataX
 type Slides = (SlideBC, SlideD)
 type Pacings = (PacingA, PacingBC, PacingD)
 type Event = (Inputs, Slides, Pacings)
@@ -144,9 +148,12 @@ systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @MyDomain)
 
 
 
-hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Event, Int)
-hlc inputs = bundle (bundle (inputs, slides, pacings), timer1)
+hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom ((Bool, Event), Int)
+hlc inputs = bundle (out, debugSignals)
     where 
+        out = bundle (newEvent, event)
+        newEvent = newX .||. (coerce slideBC) .||. (coerce pacingA) .||. (coerce pacingBC)
+        event = bundle (inputs, slides, pacings)
         slides = bundle (slideBC, slideD)
         pacings = bundle (pacingA, pacingBC, pacingD)
 
@@ -171,26 +178,23 @@ hlc inputs = bundle (bundle (inputs, slides, pacings), timer1)
                 nextTime = timer reset + pure deltaTime
                 deltaTime = systemClockPeriodNs
 
+        debugSignals = timer1
 
 
 ---------------------------------------------------------------
 
-type Outputs = (HasDataX, HasDataX)
-
-data State = StatePop | StateReadEvent | StateEvalLayer1 | StateEvalLayer2 | StateOutput
+data State = StatePop | StateEvalLayer1 | StateEvalLayer2 | StateOutput
     deriving (Generic, Eq, NFDataX)
 
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool, Outputs)
-llc event = bundle (toPop, outputs)
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool, Outputs, (State, Vec BucketsWinB DataX, DataX, PacingA, PacingBC, SlideBC))
+llc event = bundle (toPop, outputs, debugSignals)
     where 
         state = register StatePop nextStateSignal
 
         -- state: pop
         toPop = state .==. (pure StatePop)
         (isValidEvent, poppedEvent) = unbundle event
- 
-        -- state: read event
-        eventInfo = register nullEvent (mux (state .==. pure StateReadEvent) poppedEvent eventInfo)
+        eventInfo = register nullEvent (mux isValidEvent poppedEvent eventInfo)
         (hasDataX, slides, pacings) = unbundle eventInfo
         (slideBC, slideD) = unbundle slides
         (pacingA, pacingBC, pacingD) = unbundle pacings
@@ -216,21 +220,21 @@ llc event = bundle (toPop, outputs)
         
         nextState :: State -> Bool -> State
         nextState curState validEvent = case curState of
-            StatePop -> if validEvent then StateReadEvent else StatePop 
-            StateReadEvent -> StateEvalLayer1
+            StatePop -> if validEvent then StateEvalLayer1 else StatePop 
             StateEvalLayer1 -> StateEvalLayer2
             StateEvalLayer2 -> StateOutput
             StateOutput -> StatePop
 
+        debugSignals = bundle (state, swB, x, pacingA, pacingBC, slideBC)
+
 
 
 evaluateA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataX -> Signal dom DataX
-evaluateA en x = out 
+evaluateA en x = operate <$> x 
     where 
-        out = register aDflt (mux en newOut out)
-        newOut = coerce @Int @DataX <$> (old * new)
-        old = coerce @DataX @Int <$> out
-        new = coerce @DataX @Int <$> x
+        operate :: DataX -> DataX
+        operate d = coerce @Int @DataX out
+            where out = (coerce @DataX @Int d) * 10
 
 evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec BucketsWinB DataX) -> Signal dom DataX
 evaluateB en win = out
@@ -247,7 +251,7 @@ bBucketFx accum new = out
     where 
         out = coerce @Int @DataX (d1 + d2)
         d1 = coerce @DataX @Int accum
-        d2 = coerce @DataX @Int accum
+        d2 = coerce @DataX @Int new
 
 slidingWinB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom HasDataX -> Signal dom (Vec BucketsWinB DataX)
 slidingWinB en slide hasX = window
@@ -259,29 +263,43 @@ slidingWinB en slide hasX = window
         nextWindow :: Vec BucketsWinB DataX -> Bool -> HasDataX -> Vec BucketsWinB DataX
         nextWindow win toSlide inpt = out
             where 
-                out = if not toSlide then 
-                        if not newX then win
-                        else replace (length win - 1) (bBucketFx (last win) x) win
-                      else 
-                        if not newX then win <<+ bDflt
-                        else replace (length win - 1) (bBucketFx (last win) x) (win <<+ bDflt)
                 (x, newX) = inpt
-
-
-
-
+                out = case (toSlide, newX) of 
+                    (False, False) -> win
+                    (False, True) -> updatedWin
+                    (True, False) -> win <<+ bDflt
+                    -- update before slide -> existing semantics in RTLola
+                    (True, True) -> updatedWin <<+ bDflt
+                updatedWin = replace lastIndx (bBucketFx (last win) x) win
+                lastIndx = length win - 1
+                updated = replace lastIndx (bBucketFx (last win) x) win
 
 
 ---------------------------------------------------------------
 
--- monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom Event
--- monitor inputs = hlc inputs
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (Int, State, Vec BucketsWinB DataX, Bool, Bool, Bool, Bool, DataX, PacingA, PacingBC, SlideBC))
+monitor inputs = bundle (outputs, debugSignals)
+    where 
+        (qPushValid, qPopValid, qPopData) = unbundle (queue (bundle (qPush, qPop, qInptData)))
+
+        (eventInfo, hlcDebugInfo) = unbundle (hlc inputs)
+        (newEvent, event) = unbundle eventInfo
+        qPush = newEvent
+        qInptData = event
+
+        (toPop, outputs, llcDebugInfo) = unbundle (llc (bundle (qPopValid, qPopData)))
+        qPop = toPop
+
+        -- debug signals
+        debugSignals = bundle (hlcTimer, llcState, swB, qPush, qPop, qPushValid, qPopValid, x, pacingA, pacingBC, slideBC)
+        hlcTimer = hlcDebugInfo
+        (llcState, swB, x, pacingA, pacingBC, slideBC) = unbundle llcDebugInfo
 
 
 ---------------------------------------------------------------
 
 
 topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
-    Signal MyDomain Inputs -> Signal MyDomain (Event, Int)
-topEntity clk rst en input0 = exposeClockResetEnable (hlc input0) clk rst en
+    Signal MyDomain Inputs -> Signal MyDomain (Outputs, (Int, State, Vec BucketsWinB DataX, Bool, Bool, Bool, Bool, DataX, PacingA, PacingBC, SlideBC))
+topEntity clk rst en input0 = exposeClockResetEnable (monitor input0) clk rst en
 

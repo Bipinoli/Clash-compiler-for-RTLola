@@ -7,42 +7,36 @@ module testbench;
     reg signed [63:0] input_x;
     reg new_input;
 
-    wire signed [63:0] event_input_x;
-    wire event_input_new;
-    wire slideBC;
-    wire slideD;
-    wire pacingBC;
-    wire pacingD;
-    wire signed [63:0] timer1;
+    wire signed [63:0] a;
+    wire aktv_a;
+    wire signed [63:0] b;
+    wire aktv_b;
 
+    wire signed [63:0] hlc_timer;
+    wire pacing_a;
+    wire pacing_b;
+    wire slide_b;
+
+    wire signed [2:0] llc_state;
+    wire signed [63:0] sw_b_0;
+    wire signed [63:0] sw_b_1;
+    wire signed [63:0] sw_b_2;
+    wire signed [63:0] sw_b_3;
+
+    wire push_valid;
+    wire pop_valid;
     wire qPush;
     wire qPop;
-    wire signed [63:0] qInX;
-    wire qPushValid;
-    wire qPopValid;
-    wire signed [63:0] qOutX;
-    wire qOutNewX;
-    wire signed [63:0] qWaitX;
-    wire enA;
-    wire enB;
-    wire signed [63:0] stage;
-    wire signed [63:0] timerB;
-    wire signed [63:0] winX_0;
-    wire signed [63:0] winX_1;
-    wire signed [63:0] winX_2;
-    wire slideB;
 
-    wire signed [63:0] outA;
-    wire aktvOutA;
-    wire signed [63:0] outB;
-    wire aktvOutB;
+    wire signed [63:0] llc_x;
 
     topEntity monitor (clk, rst, en,
                        input_x, new_input,
-                       event_input_x, event_input_new,
-                       slideBC, slideD,
-                       pacingBC, pacingD,
-                       timer1
+                       a, aktv_a, b, aktv_b,
+                       hlc_timer, llc_state,
+                       sw_b_0, sw_b_1, sw_b_2, sw_b_3,
+                       qPush, qPop, push_valid, pop_valid,
+                       llc_x, pacing_a, pacing_b, slide_b
                        );
 
     always begin
