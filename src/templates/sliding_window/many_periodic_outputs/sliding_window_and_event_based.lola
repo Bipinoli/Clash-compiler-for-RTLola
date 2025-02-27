@@ -1,0 +1,6 @@
+input x : Int
+
+output a := x * 10
+output b @1kHz := x.aggregate(over: 0.003s, using: sum)
+output c @1kHz := x.aggregate(over: 0.004s, using: count)
+output d @0.5kHz := x.aggregate(over: 0.004s, using: count)
