@@ -17,7 +17,7 @@ module topEntity
     , output wire signed [63:0] result_0_1_0
     , output wire  result_0_1_1
     , output wire signed [63:0] result_1_0
-    , output wire [1:0] result_1_1
+    , output wire [2:0] result_1_1
     , output wire signed [63:0] result_1_2_0
     , output wire signed [63:0] result_1_2_1
     , output wire signed [63:0] result_1_2_2
@@ -39,12 +39,12 @@ module topEntity
   wire  newX;
   // sliding_window_and_event_based.hs:150:1-89
   wire  timer1Over;
-  wire [455:0] result_5;
-  // sliding_window_and_event_based.hs:235:1-116
+  wire [456:0] result_5;
+  // sliding_window_and_event_based.hs:236:1-116
   wire  eta;
-  // sliding_window_and_event_based.hs:235:1-116
+  // sliding_window_and_event_based.hs:236:1-116
   reg signed [63:0] out = (64'sd0);
-  // sliding_window_and_event_based.hs:235:1-116
+  // sliding_window_and_event_based.hs:236:1-116
   wire signed [63:0] t;
   wire signed [63:0] result_6;
   // sliding_window_and_event_based.hs:185:1-156
@@ -58,23 +58,23 @@ module topEntity
   // sliding_window_and_event_based.hs:185:1-156
   wire signed [63:0] x_0;
   wire  result_9;
-  // sliding_window_and_event_based.hs:252:1-140
+  // sliding_window_and_event_based.hs:253:1-140
   wire signed [63:0] y;
-  // sliding_window_and_event_based.hs:252:1-140
+  // sliding_window_and_event_based.hs:253:1-140
   wire signed [63:0] x2;
-  // sliding_window_and_event_based.hs:252:1-140
+  // sliding_window_and_event_based.hs:253:1-140
   wire signed [63:0] x1_0;
-  // sliding_window_and_event_based.hs:252:1-140
+  // sliding_window_and_event_based.hs:253:1-140
   reg [255:0] window = {64'sd0,   64'sd0,   64'sd0,   64'sd0};
   wire [255:0] result_10;
   wire [255:0] result_11;
-  // sliding_window_and_event_based.hs:252:1-140
+  // sliding_window_and_event_based.hs:253:1-140
   wire [255:0] c$t_case_alt;
-  // sliding_window_and_event_based.hs:252:1-140
+  // sliding_window_and_event_based.hs:253:1-140
   wire [255:0] c$t_case_alt_0;
-  // sliding_window_and_event_based.hs:252:1-140
+  // sliding_window_and_event_based.hs:253:1-140
   wire [255:0] updatedWin;
-  // sliding_window_and_event_based.hs:252:1-140
+  // sliding_window_and_event_based.hs:253:1-140
   wire  wild2;
   // sliding_window_and_event_based.hs:185:1-156
   wire  slideB;
@@ -84,11 +84,11 @@ module topEntity
   // sliding_window_and_event_based.hs:183:24-25
   wire signed [63:0] \a# ;
   // sliding_window_and_event_based.hs:185:1-156
-  reg [1:0] c$state_app_arg;
+  reg [2:0] c$state_app_arg;
   // sliding_window_and_event_based.hs:185:1-156
-  reg [1:0] state = 2'd0;
+  reg [2:0] state = 3'd0;
   // sliding_window_and_event_based.hs:185:1-156
-  wire [1:0] c$state_case_alt;
+  wire [2:0] c$state_case_alt;
   // sliding_window_and_event_based.hs:185:1-156
   wire [67:0] c$eventInfo_app_arg;
   // sliding_window_and_event_based.hs:185:1-156
@@ -142,11 +142,11 @@ module topEntity
   reg signed [63:0] c$cursor_case_alt_4;
   // sliding_window_and_event_based.hs:81:1-78
   wire signed [63:0] c$cursor_case_alt_5;
-  // sliding_window_and_event_based.hs:276:1-176
+  // sliding_window_and_event_based.hs:277:1-176
   wire  qPopValid;
-  // sliding_window_and_event_based.hs:276:1-176
+  // sliding_window_and_event_based.hs:277:1-176
   wire  qPush;
-  // sliding_window_and_event_based.hs:276:1-176
+  // sliding_window_and_event_based.hs:277:1-176
   wire  qPop;
   wire [64:0] input0;
   wire signed [63:0] c$tte_rhs;
@@ -158,11 +158,11 @@ module topEntity
   wire signed [63:0] c$tte_rhs_2;
   wire [475:0] c$buffer_case_alt_sel_alt_t_1;
   wire signed [63:0] c$tte_rhs_3;
-  wire [522:0] result;
+  wire [523:0] result;
   wire [129:0] result_0;
   wire [64:0] result_0_0;
   wire [64:0] result_0_1;
-  wire [392:0] result_1;
+  wire [393:0] result_1;
   wire [255:0] result_1_2;
 
   assign input0 = {input0_0,   input0_1};
@@ -272,13 +272,13 @@ module topEntity
 
   assign pacingB = eventInfo[0:0];
 
-  assign c$tte_rhs = (\a#  == 64'sd2) ? 64'sd1 : 64'sd0;
+  assign c$tte_rhs = (\a#  == 64'sd3) ? 64'sd1 : 64'sd0;
 
   assign result_7 = c$tte_rhs[0];
 
   assign pacingA = eventInfo[1:1];
 
-  assign c$tte_rhs_0 = (\a#  == 64'sd3) ? 64'sd1 : 64'sd0;
+  assign c$tte_rhs_0 = (\a#  == 64'sd4) ? 64'sd1 : 64'sd0;
 
   assign result_8 = c$tte_rhs_0[0];
 
@@ -335,7 +335,7 @@ module topEntity
 
   assign hasDataX = eventInfo[67:3];
 
-  assign c$tte_rhs_2 = (\a#  == 64'sd1) ? 64'sd1 : 64'sd0;
+  assign c$tte_rhs_2 = (\a#  == 64'sd2) ? 64'sd1 : 64'sd0;
 
   assign result_12 = c$tte_rhs_2[0];
 
@@ -343,24 +343,25 @@ module topEntity
 
   always @(*) begin
     case(state)
-      2'b00 : c$state_app_arg = c$state_case_alt;
-      2'b01 : c$state_app_arg = 2'd2;
-      2'b10 : c$state_app_arg = 2'd3;
-      default : c$state_app_arg = 2'd0;
+      3'b000 : c$state_app_arg = 3'd1;
+      3'b001 : c$state_app_arg = c$state_case_alt;
+      3'b010 : c$state_app_arg = 3'd3;
+      3'b011 : c$state_app_arg = 3'd4;
+      default : c$state_app_arg = 3'd0;
     endcase
   end
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : state_register
     if ( rst) begin
-      state <= 2'd0;
+      state <= 3'd0;
     end else if (en) begin
       state <= c$state_app_arg;
     end
   end
   // register end
 
-  assign c$state_case_alt = qPopValid ? 2'd1 : 2'd0;
+  assign c$state_case_alt = qPopValid ? 3'd2 : 3'd0;
 
   assign c$eventInfo_app_arg = qPopValid ? result_13[67:0] : eventInfo;
 
@@ -509,8 +510,8 @@ module topEntity
 
   assign c$cursor_case_alt_5 = (x_1 - 64'sd1);
 
-  assign result = {result_5[454:325],
-                   {$signed(result_4[63:0]),   result_5[324:323],
+  assign result = {result_5[455:326],
+                   {$signed(result_4[63:0]),   result_5[325:323],
                     result_5[322:67],   qPush,   qPop,
                     result_13[69:69],   qPopValid,
                     $signed(result_5[66:3]),   result_5[2:2],
@@ -520,11 +521,11 @@ module topEntity
 
   assign qPush = result_4[132:132];
 
-  assign qPop = result_5[455:455];
+  assign qPop = result_5[456:456];
 
-  assign result_0 = result[522:393];
+  assign result_0 = result[523:394];
 
-  assign result_1 = result[392:0];
+  assign result_1 = result[393:0];
 
   assign result_0_0 = result_0[129:65];
 
@@ -538,9 +539,9 @@ module topEntity
 
   assign result_0_1_1 = result_0_1[0:0];
 
-  assign result_1_0 = $signed(result_1[392:329]);
+  assign result_1_0 = $signed(result_1[393:330]);
 
-  assign result_1_1 = result_1[328:327];
+  assign result_1_1 = result_1[329:327];
 
   assign result_1_2 = result_1[326:71];
 

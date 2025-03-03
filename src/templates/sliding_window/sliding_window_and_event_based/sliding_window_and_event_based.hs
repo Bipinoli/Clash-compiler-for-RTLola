@@ -179,7 +179,7 @@ hlc inputs = bundle (out, debugSignals)
 
 ---------------------------------------------------------------
 
-data State = StatePop | StateEvalLayer1 | StateEvalLayer2 | StateOutput
+data State = StatePop | StateRead |  StateEvalLayer1 | StateEvalLayer2 | StateOutput
     deriving (Generic, Eq, NFDataX)
 
 llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool, Outputs, (State, Vec BucketsWinB DataX, DataX, PacingA, PacingB, SlideB))
@@ -216,7 +216,8 @@ llc event = bundle (toPop, outputs, debugSignals)
         
         nextState :: State -> Bool -> State
         nextState curState validEvent = case curState of
-            StatePop -> if validEvent then StateEvalLayer1 else StatePop 
+            StatePop -> StateRead
+            StateRead -> if validEvent then StateEvalLayer1 else StatePop 
             StateEvalLayer1 -> StateEvalLayer2
             StateEvalLayer2 -> StateOutput
             StateOutput -> StatePop
