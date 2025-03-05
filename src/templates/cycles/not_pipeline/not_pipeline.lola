@@ -1,0 +1,6 @@
+input x : Int32 // layer 0
+
+// well-formed spec as the cycle doesn't have 0 weight
+output a := x + c.offset(by: -2).defaults(to: 0) // layer 1 - pacing @x
+output b := a + 1 // layer 2 - pacing @x
+output c := b + 1 // layer 3 - pacing @x

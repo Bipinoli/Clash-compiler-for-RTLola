@@ -13,13 +13,9 @@ import Data.Coerce
 -- input x : Int
 -- output a := x * 10
 -- output b @1kHz := x.aggregate(over: 0.003s, using: sum)
--- output c @1kHz := x.aggregate(over: 0.004s, using: count)
--- output d @0.5kHz := x.aggregate(over: 0.004s, using: count)
 
 -- sliding window
 -- b -> period = 0.001s, over = 0.003s, buckets = 4, bucket size = 0.001s 
--- c -> period = 0.001s, over = 0.004s, buckets = 5, bucket size = 0.001s 
--- d -> period = 0.002s, over = 0.004s, buckets = 3, bucket size = 0.002s 
 
 -- Note:
 -- In RTLola sliding-window aggregation the span of window is inlclusive in the right but exclusive to the left
