@@ -16,20 +16,28 @@ import Clash.Prelude
 -- output e := a.offset(by:-1).defaults(to:1) + c
 -- output f := a + a.offset(by: -1).defaults(to: 0)
 -- output g := b + f
--- output time_stream @1Hz := a.hold().defaults(to:6)
+-- output time_stream @1kHz := a.hold().defaults(to:6)
 
 -------------------------------------
 -- |   stream    |  layer |  pacing  | datatype
 -------------------------------------
 -- |     c       |   1    |  a & b   | Int8
 -- |     d       |   1    |  a & b   | Int8
--- |     e       |   1    |  a & b   | Int8
+-- |     e       |   2    |  a & b   | Int8
 -- |     f       |   1    |    a     | Int8
 -- |     g       |   2    |  a & b   | Int8
 -- | time_stream |   1    |   1Hz    | Int8
 -------------------------------------
 
 type Data = Signed 8
+type DataA = Data
+type DataB = Data
+type DataC = Data
+type DataD = Data
+type DataE = Data
+type DataF = Data
+type DataG = Data
+type DataTimeStream = Data
 type HasData = (Data, Bool)
 type Inputs = (HasData, HasData)
 
@@ -58,9 +66,7 @@ mkPacingAAndB :: PacingA -> PacingB -> PacingAAndB
 mkPacingAAndB a b = PacingAAndB (unwrap a && unwrap b)
 
 
--- aDflt = DataX 0
--- bDflt = DataX 0
--- cDflt = DataX 0
+dataDeflt = 0 :: Data
 
 
 
@@ -177,7 +183,7 @@ hlc inputs = out
         pacing1Hz = Pacing1Hz <$> timer1Over
         timer1Over = timer1 .>=. period1Ns
         timer1 = timer timer1Over
-        period1Ns = 1000000000 -- 1Hz in ns
+        period1Ns = 1000000 -- 1kHz in ns
 
         timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
         timer reset = register 0 (mux reset (pure deltaTime) nextTime)
@@ -188,104 +194,161 @@ hlc inputs = out
 
 ---------------------------------------------------------------
 
--- data State = StatePop | StateRead |  StateEvalLayer1 | StateEvalLayer2  | StateEvalLayer3 | StateOutput
---     deriving (Generic, Eq, NFDataX)
+data State = StatePop | StateRead | StateEvalLayer0 | StateEvalLayer1 | StateEvalLayer2  | StateOutput
+    deriving (Generic, Eq, NFDataX)
 
--- llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool, Outputs, (State, DataX, PacingABC))
--- llc event = bundle (toPop, outputs, debugSignals)
---     where 
---         state = register StatePop nextStateSignal
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool, Outputs, (State, DataA, DataB, Pacing1Hz))
+llc event = bundle (toPop, outputs, debugSignals)
+    where 
+        state = register StatePop nextStateSignal
 
---         -- state: pop
---         toPop = state .==. (pure StatePop)
---         (isValidEvent, poppedEvent) = unbundle event
---         eventInfo = register nullEvent (mux isValidEvent poppedEvent eventInfo)
---         (hasDataX, pacingABC) = unbundle eventInfo
---         (x, newX) = unbundle hasDataX
+        -- state: pop
+        toPop = state .==. (pure StatePop)
+        (isValidEvent, poppedEvent) = unbundle event
+        eventInfo = register nullEvent (mux isValidEvent poppedEvent eventInfo)
+        (inputs, pacings) = unbundle eventInfo
+        (hasA, hasB) = unbundle inputs
+        (a, _) = unbundle hasA
+        (b, _) = unbundle hasB
+        (pacingA, pacingAAndB, pacing1Hz) = unbundle pacings
 
---         -- state: layer 1
---         evalA = evaluateA (state .==. (pure StateEvalLayer1) .&&. (unwrapPacingABC <$> pacingABC)) x evalCWin
+        -- state: layer 0
+        winA = streamA (state .==. (pure StateEvalLayer0)) a
 
---         -- state: layer 2
---         evalB = evaluateB (state .==. (pure StateEvalLayer2) .&&. (unwrapPacingABC <$> pacingABC)) evalA
+        -- state: layer 1
+        evalC = streamC (state .==. (pure StateEvalLayer1) .&&. (unwrap <$> pacingAAndB)) a b evalD
+        evalD = streamD (state .==. (pure StateEvalLayer1) .&&. (unwrap <$> pacingAAndB)) b evalE
+        evalF = streamF (state .==. (pure StateEvalLayer1) .&&. (unwrap <$> pacingA)) a winA
+        evalTS = streamTimeStream (state .==. (pure StateEvalLayer1) .&&. (unwrap <$> pacing1Hz)) winA
 
---         -- state: layer 3
---         evalCWin = evaluateC (state .==. (pure StateEvalLayer3) .&&. (unwrapPacingABC <$> pacingABC)) evalB
+        -- state: layer 2
+        evalE = streamE (state .==. (pure StateEvalLayer2) .&&. (unwrap <$> pacingAAndB)) winA evalC
+        evalG = streamG (state .==. (pure StateEvalLayer2) .&&. (unwrap <$> pacingAAndB)) b evalF
 
---         -- state: output
---         outAktvABC = state .==. (pure StateOutput) .&&. (unwrapPacingABC <$> pacingABC)
+        -- state: output
+        outAktvCDEG = state .==. (pure StateOutput) .&&. (unwrap <$> pacingAAndB)
+        outAktvF = state .==. (pure StateOutput) .&&. (unwrap <$> pacingA)
+        outAktvTS = state .==. (pure StateOutput) .&&. (unwrap <$> pacing1Hz)
 
---         outputs = bundle (outputA, outputB, outputC)
---         outputA = bundle (evalA, outAktvABC)
---         outputB = bundle (evalB, outAktvABC)
---         outputC = bundle (last <$> evalCWin, outAktvABC)
+        outputs = bundle (outputC, outputD, outputE, outputF, outputG, outputTS)
+        outputC = bundle (evalC, outAktvCDEG)
+        outputD = bundle (dOut, outAktvCDEG)
+        outputE = bundle (last <$> eOut, outAktvCDEG)
+        outputF = bundle (evalF, outAktvF)
+        outputG = bundle (evalG, outAktvCDEG)
+        outputTS = bundle (evalTS, outAktvTS)
 
---         -- state transition
---         nextStateSignal = nextState <$> state <*> isValidEvent
+        (dOut, dValid) = unbundle evalD
+        (eOut, eValid) = unbundle evalE
+
+        -- state transition
+        nextStateSignal = nextState <$> state <*> isValidEvent
         
---         nextState :: State -> Bool -> State
---         nextState curState validEvent = case curState of
---             StatePop -> StateRead
---             StateRead -> if validEvent then StateEvalLayer1 else StatePop 
---             StateEvalLayer1 -> StateEvalLayer2
---             StateEvalLayer2 -> StateEvalLayer3
---             StateEvalLayer3 -> StateOutput
---             StateOutput -> StatePop
+        nextState :: State -> Bool -> State
+        nextState curState validEvent = case curState of
+            StatePop -> StateRead
+            StateRead -> if validEvent then StateEvalLayer0 else StatePop 
+            StateEvalLayer0 -> StateEvalLayer1
+            StateEvalLayer1 -> StateEvalLayer2
+            StateEvalLayer2 -> StateOutput
+            StateOutput -> StatePop
 
---         debugSignals = bundle (state, x, pacingABC)
+        debugSignals = bundle (state, a, b, pacing1Hz)
 
 
-
-evaluateC :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Data -> Signal dom Data -> Signal dom Data -> Signal dom Data
-evaluateC en x winC = out
+streamA :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataA -> Signal dom (Vec 2 DataA, Vec 2 Bool)
+streamA en a = bundle (dataOut, validOut)
     where 
-        out = register aDflt (mux en (operate <$> x <*> winC) out)
-        operate :: DataX -> Vec 2 DataX -> DataX
-        operate d win = DataX (unwrapDataX d + unwrapDataX (head win))
+        dataOut = register (repeat dataDeflt) (mux en ((<<+) <$> dataOut <*> a) dataOut)
+        validOut = register (repeat False) (mux en ((<<+) <$> validOut <*> pure True) validOut)
 
-
-evaluateB :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataX -> Signal dom DataX
-evaluateB en a = out
+streamC :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataA -> Signal dom DataB -> Signal dom (DataD, Bool) -> Signal dom DataC
+streamC en a b winD = out
     where 
-        out = register bDflt (mux en (operate <$> a) out)
-        operate :: DataX -> DataX
-        operate d = DataX (unwrapDataX d + 1)
+        out = register dataDeflt (mux en nextOut out)
+        nextOut = a + b + (mux offsetValid offsetData defaultData)
 
+        defaultData = pure 3 :: Signal dom DataD
+        (offsetData, offsetValid) = unbundle winD
 
-evaluateC :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataX -> Signal dom (Vec 2 DataX)
-evaluateC en b = out
+streamD :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataB -> Signal dom (Vec 2 DataE, Vec 2 Bool) -> Signal dom (DataD, Bool)
+streamD en b winE = bundle (out, outValid)
     where 
-        out = register (repeat cDflt) (mux en (operate <$> out <*> b) out)
+        out = register dataDeflt (mux en nextOut out)
+        outValid = register False (mux en (pure True) outValid)
+        nextOut = b + (mux offsetValid offsetData defaultData)
 
-        operate :: Vec 2 DataX -> DataX -> Vec 2 DataX
-        operate winC d = winC <<+ DataX (unwrapDataX d + 1) 
+        defaultData = pure 4 :: Signal dom DataE
+        offsetIndex = 0
+        (dataE, validE) = unbundle winE
+        offsetData = (!!) <$> dataE <*> pure offsetIndex
+        offsetValid = (!!) <$> validE <*> pure offsetIndex
+
+streamE :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec 2 DataA, Vec 2 Bool) -> Signal dom DataC -> Signal dom (Vec 2 DataE, Vec 2 Bool)
+streamE en winA c = bundle (out, outValid)
+    where 
+        out = register (repeat dataDeflt) (mux en ((<<+) <$> out <*> nextRslt) out)
+        outValid = register (repeat False) (mux en ((<<+) <$> outValid <*> pure True) outValid)
+        nextRslt = (mux offsetValid offsetData defaultData) + c
+
+        defaultData = pure 1 :: Signal dom DataE
+        offsetIndex = 0
+        (dataA, validA) = unbundle winA
+        offsetData = (!!) <$> dataA <*> pure offsetIndex
+        offsetValid = (!!) <$> validA <*> pure offsetIndex
+
+streamF :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataA -> Signal dom (Vec 2 DataA, Vec 2 Bool) -> Signal dom DataF
+streamF en a winA = out
+    where 
+        out = register dataDeflt (mux en nextOut out)
+        nextOut = a + (mux offsetValid offsetData defaultData)
+        defaultData = pure 0 :: Signal dom DataA
+        offsetIndex = 0
+        (dataA, validA) = unbundle winA
+        offsetData = (!!) <$> dataA <*> pure offsetIndex
+        offsetValid = (!!) <$> validA <*> pure offsetIndex
+
+streamG :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataB -> Signal dom DataF -> Signal dom DataG
+streamG en b f = out
+    where 
+        out = register dataDeflt (mux en nextOut out)
+        nextOut = b + f
+
+streamTimeStream :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec 2 DataA, Vec 2 Bool) -> Signal dom DataTimeStream
+streamTimeStream en winA = out
+    where 
+        out = register dataDeflt (mux en nextOut out)
+        nextOut = mux offsetValid offsetData defaultData
+        (dataA, validA) = unbundle winA
+        offsetData = last <$> dataA
+        offsetValid = last <$> validA
+        defaultData = pure 6 :: Signal dom DataA
 
 
 
+---------------------------------------------------------------
 
--- ---------------------------------------------------------------
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (Bool, Bool, Bool, Bool, State, Data, Data, Pacing1Hz))
+monitor inputs = bundle (outputs, debugSignals)
+    where 
+        (qPushValid, qPopValid, qPopData) = unbundle (queue (bundle (qPush, qPop, qInptData)))
 
--- monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (State, Bool, Bool, Bool, Bool, DataX, PacingABC))
--- monitor inputs = bundle (outputs, debugSignals)
---     where 
---         (qPushValid, qPopValid, qPopData) = unbundle (queue (bundle (qPush, qPop, qInptData)))
+        (newEvent, event) = unbundle (hlc inputs)
+        qPush = newEvent
+        qInptData = event
 
---         (newEvent, event) = unbundle (hlc inputs)
---         qPush = newEvent
---         qInptData = event
+        (toPop, outputs, llcDebugInfo) = unbundle (llc (bundle (qPopValid, qPopData)))
+        qPop = toPop
 
---         (toPop, outputs, llcDebugInfo) = unbundle (llc (bundle (qPopValid, qPopData)))
---         qPop = toPop
-
---         -- debug signals
---         debugSignals = bundle (llcState, qPush, qPop, qPushValid, qPopValid, x, pacingABC)
---         (llcState, x, pacingABC) = unbundle llcDebugInfo
-
-
--- ---------------------------------------------------------------
+        -- debug signals
+        debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcState, llcA, llcB, pacing1Hz)
+        (llcState, llcA, llcB, pacing1Hz) = unbundle llcDebugInfo
 
 
--- topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
---     Signal MyDomain Inputs -> Signal MyDomain (Outputs, (State, Bool, Bool, Bool, Bool, DataX, PacingABC))
--- topEntity clk rst en input0 = exposeClockResetEnable (monitor input0) clk rst en
+---------------------------------------------------------------
+
+
+topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
+    Signal MyDomain Inputs -> Signal MyDomain (Outputs, (Bool, Bool, Bool, Bool, State, Data, Data, Pacing1Hz))
+topEntity clk rst en input0 = exposeClockResetEnable (monitor input0) clk rst en
 
