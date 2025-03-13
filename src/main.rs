@@ -5,9 +5,9 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
-mod transpile;
+// mod transpile;
 
-/// Simple program to convert Lola specs to Haskell
+/// Compile RTLola specs to Clash
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
@@ -22,9 +22,9 @@ fn save_mir_as_json(mir: RtLolaMir, filename: String) {
     let _ = file.write_all(serialized.as_bytes());
 }
 
-fn to_haskell(mir: RtLolaMir) {
-    transpile::transpile(&mir);
-}
+// fn to_clash(mir: RtLolaMir) {
+//     transpile::transpile(&mir);
+// }
 
 fn main() {
     let args = Args::parse();
@@ -44,8 +44,8 @@ fn main() {
     let handler = rtlola_frontend::Handler::from(&config);
     match rtlola_frontend::parse(&config) {
         Ok(mir) => {
-            // save_mir_as_json(mir.clone(), mir_filename);
-            to_haskell(mir.clone());
+            save_mir_as_json(mir.clone(), mir_filename);
+            // to_haskell(mir.clone());
         }
         Err(e) => {
             handler.emit_error(&e);
