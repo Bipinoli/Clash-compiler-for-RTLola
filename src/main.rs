@@ -6,6 +6,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 // mod transpile;
+mod utils;
 
 /// Compile RTLola specs to Clash
 #[derive(Parser, Debug)]
