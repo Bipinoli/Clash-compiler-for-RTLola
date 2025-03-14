@@ -6,8 +6,8 @@ use std::io::Write;
 use std::path::PathBuf;
 
 // mod transpile;
-mod utils;
 mod hardware_ir;
+mod utils;
 
 /// Compile RTLola specs to Clash
 #[derive(Parser, Debug)]

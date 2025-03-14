@@ -1,11 +1,12 @@
-use std::{cmp::Ordering, collections::{HashMap, HashSet}};
+use std::collections::{HashMap, HashSet};
 
-use rtlola_frontend as RF;
+use rtlola_frontend::{self as RF, mir::StreamReference};
 
 use crate::utils;
 
 #[derive(PartialEq, Eq, Clone, Debug, Hash, PartialOrd, Ord)]
 enum EvalNode {
+    InputStream(usize),
     InputWindow(usize),
     OutputStream(usize),
     SlidingWindow(usize),
@@ -41,19 +42,51 @@ fn merge_eval_orders(orders: Vec<Vec<EvalNode>>) -> Vec<Vec<EvalNode>> {
         map.insert(item.clone(), i);
         reverse_map.insert(i, item);
     }
-    // let orders: Vec< = orders.into_iter().map(
-
-    // ).collect();
-
-    unimplemented!()
+    let orders: Vec<Vec<usize>> = orders
+        .into_iter()
+        .map(|v| {
+            v.into_iter()
+                .map(|a| map.get(&a).unwrap().clone())
+                .collect()
+        })
+        .collect();
+    let merged_orders = utils::merge_orders(orders);
+    let merged_orders: Vec<Vec<EvalNode>> = merged_orders
+        .into_iter()
+        .map(|v| {
+            v.into_iter()
+                .map(|i| reverse_map.get(&i).unwrap().clone())
+                .collect()
+        })
+        .collect();
+    merged_orders
 }
 
 fn eval_orders_from_sliding_windows(mir: &RF::RtLolaMir) -> Vec<Vec<EvalNode>> {
-    unimplemented!()
+    let mut orders: Vec<Vec<EvalNode>>  = vec![];
+    for sw in &mir.sliding_windows {
+        // target -> window -> caller
+        let target = match sw.target {
+            StreamReference::In(x) => EvalNode::InputStream(x),
+            StreamReference::Out(x) => EvalNode::OutputStream(x),
+        };
+        let window = EvalNode::SlidingWindow(sw.reference.idx());
+        let caller = match sw.caller {
+            StreamReference::In(x) => EvalNode::InputStream(x),
+            StreamReference::Out(x) => EvalNode::OutputStream(x),
+        };
+        orders.push(vec![target, window, caller]);
+    }
+    orders
 }
 
 fn eval_orders_from_outputs(mir: &RF::RtLolaMir) -> Vec<Vec<EvalNode>> {
-    unimplemented!()
+    let mut orders: Vec<Vec<EvalNode>>  = vec![];
+    for out in &mir.outputs {
+        // whatever `out` accesses must be evaluated before
+        
+    }
+    orders
 }
 
 #[cfg(test)]
