@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-fn extract_roots(orders: Vec<Vec<i32>>) -> (Vec<i32>, Vec<Vec<i32>>) {
-    let mut roots: HashMap<i32, bool> = HashMap::new();
+fn extract_roots(orders: Vec<Vec<usize>>) -> (Vec<usize>, Vec<Vec<usize>>) {
+    let mut roots: HashMap<usize, bool> = HashMap::new();
     for order in &orders {
         if let Some(first_elem) = order.first() {
             roots.entry(*first_elem).or_insert(true);
@@ -10,11 +10,11 @@ fn extract_roots(orders: Vec<Vec<i32>>) -> (Vec<i32>, Vec<Vec<i32>>) {
             roots.insert(*elem, false);
         }
     }
-    let mut actual_roots: Vec<i32> = roots
+    let mut actual_roots: Vec<usize> = roots
         .iter()
         .filter_map(|(&elem, &is_root)| if is_root { Some(elem) } else { None })
         .collect();
-    let filtered: Vec<Vec<i32>> = orders
+    let filtered: Vec<Vec<usize>> = orders
         .into_iter()
         .map(|order| order.into_iter().filter(|elem| !roots[elem]).collect())
         .collect();
@@ -22,8 +22,8 @@ fn extract_roots(orders: Vec<Vec<i32>>) -> (Vec<i32>, Vec<Vec<i32>>) {
     (actual_roots, filtered)
 }
 
-pub fn merge_orders(orders: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
-    let orders: Vec<Vec<i32>> = orders.into_iter().filter(|lst| !lst.is_empty()).collect();
+pub fn merge_orders(orders: Vec<Vec<usize>>) -> Vec<Vec<usize>> {
+    let orders: Vec<Vec<usize>> = orders.into_iter().filter(|lst| !lst.is_empty()).collect();
     if orders.is_empty() {
         return vec![];
     }

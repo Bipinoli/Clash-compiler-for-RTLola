@@ -7,6 +7,7 @@ use std::path::PathBuf;
 
 // mod transpile;
 mod utils;
+mod hardware_ir;
 
 /// Compile RTLola specs to Clash
 #[derive(Parser, Debug)]
