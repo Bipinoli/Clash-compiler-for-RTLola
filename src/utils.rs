@@ -56,6 +56,8 @@ mod tests {
             vec![8, 7],
             vec![1, 8, 5],
             vec![1, 6],
+            vec![2, 5],
+            vec![2, 8, 5]
         ];
         let expected = vec![vec![2], vec![1, 3], vec![4, 6, 8], vec![5, 7]];
         let actual = merge_orders(inpt_lst);
