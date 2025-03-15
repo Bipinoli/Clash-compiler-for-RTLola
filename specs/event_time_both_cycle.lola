@@ -1,0 +1,9 @@
+input x : Int
+
+output a := x + c.offset(by: -1).defaults(to: 0)
+output b := a + 1
+output c := b + 1
+
+output d @1kHz := a.hold(or: 0)  + f.offset(by: -1).defaults(to: 0)
+output e := d + 1
+output f := e + 1

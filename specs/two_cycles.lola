@@ -1,0 +1,7 @@
+input x : Int
+
+output a := x.offset(by: -1).defaults(to: 10) + b.offset(by: -1).defaults(to: -10)
+output b := x.offset(by: -2).defaults(to: 0) + c
+output c := a + d 
+output d := x.offset(by: -3).defaults(to: 0) + a * 10
+

@@ -1,0 +1,8 @@
+input x : Int
+input y : Int
+
+output a := x + c.offset(by: -2).defaults(to: 0) + e.offset(by: -1).defaults(to: 0)
+output b := a + 1
+output c := b + 1 + e.offset(by: -2).defaults(to: 1)
+output d := c + 1
+output e := d + y
