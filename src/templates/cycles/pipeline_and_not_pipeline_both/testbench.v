@@ -14,8 +14,17 @@ module testbench;
     wire signed [63:0] output_f;
     wire output_f_aktv;
 
+    wire signed [7:0] tag_0;
     wire signed [63:0] winF_0;
+    wire signed [7:0] tag_1;
     wire signed [63:0] winF_1;
+    wire signed [7:0] tag_2;
+    wire signed [63:0] winF_2;
+    wire signed [7:0] tag_3;
+    wire signed [63:0] winF_3;
+    wire signed [7:0] tag_4;
+    wire signed [63:0] winF_4;
+
 
     wire [2:0] llc_state;
     wire qPush;
@@ -31,7 +40,11 @@ module testbench;
                        output_d, output_d_aktv,
                        output_e, output_e_aktv,
                        output_f, output_f_aktv,
-                       winF_0, winF_1
+                       tag_0, winF_0, 
+                       tag_1, winF_1, 
+                       tag_2, winF_2, 
+                       tag_3, winF_3, 
+                       tag_4, winF_4 
                        );
 
     always begin

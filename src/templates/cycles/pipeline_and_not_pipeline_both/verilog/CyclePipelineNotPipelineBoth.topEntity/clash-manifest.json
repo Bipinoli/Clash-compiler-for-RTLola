@@ -46,14 +46,14 @@
         },
         {
             "name": "topEntity.v",
-            "sha256": "f77eb5705df98af23216b44692e531ba3e650f0087c9cab4fdcc1a7726e8d512"
+            "sha256": "11eea6cd8d55ddc6d9d3f13c055c86af37cec864fe43b5ea2beafd2bb3c8cc39"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "465e41af8205e8d95c1cae9cecb781dfa9d765043d865574d02e3906f8e996c8",
+    "hash": "3888c175c242eb0373f390ec457a93ede6ea7e5177743882961fef6731cfc92d",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -140,14 +140,70 @@
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_0",
+                "name": "result_1_0_0",
+                "type_name": "[7:0]",
+                "width": 8
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_0_1",
                 "type_name": "signed [63:0]",
                 "width": 64
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_1",
+                "name": "result_1_1_0",
+                "type_name": "[7:0]",
+                "width": 8
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_1_1",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_2_0",
+                "type_name": "[7:0]",
+                "width": 8
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_2_1",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_3_0",
+                "type_name": "[7:0]",
+                "width": 8
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_3_1",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_0",
+                "type_name": "[7:0]",
+                "width": 8
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_1",
                 "type_name": "signed [63:0]",
                 "width": 64
             }

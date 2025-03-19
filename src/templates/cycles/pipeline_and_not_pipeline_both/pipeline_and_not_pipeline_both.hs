@@ -148,7 +148,21 @@ hlc inputs = out
 ---------------------------------------------------------------
 ---------------- LLC that can be pipelined --------------------
 
-pipelineLLC :: HiddenClockResetEnable dom => Signal dom Event -> Signal dom (Outputs, Vec 2 DataX)
+type Tag = Unsigned 8
+maxTag = 4 :: Tag
+
+getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> a
+getOffset win tag offset dflt = out
+    where 
+        offsetTag = if tag >= offset then tag - offset else tag - offset + maxTag
+        -- findIndex finds the first matching from left so duplicate is not an issue
+        out = case findIndex (\(t, _) -> t == offsetTag) win of
+            Just i -> let (_, v) = win !! i in v 
+            Nothing -> dflt 
+
+type TaggedDataX = (Tag, DataX)
+
+pipelineLLC :: HiddenClockResetEnable dom => Signal dom Event -> Signal dom (Outputs, Vec 5 TaggedDataX)
 pipelineLLC event = bundle (outputs, debugSignals)
     where 
         (inputs, pacings) = unbundle event
@@ -161,7 +175,9 @@ pipelineLLC event = bundle (outputs, debugSignals)
         pacingE = delay False pacingD
         pacingF = delay False pacingE
 
-        evalD = streamD pacingD x evalF 
+        tag = genTag pacingD
+
+        evalD = streamD pacingD (bundle (tag, x)) evalF 
         evalE = streamE pacingE evalD
         evalF = streamF pacingF evalE
 
@@ -170,37 +186,60 @@ pipelineLLC event = bundle (outputs, debugSignals)
         outAktvF = delay False outAktvE
 
         outputs = bundle (outputD, outputE, outputF)
-        outputD = bundle (evalD, outAktvD)
-        outputE = bundle (evalE, outAktvE)
-        outputF = bundle (last <$> evalF, outAktvF)
+        outputD = bundle (outD, outAktvD)
+        outputE = bundle (outE, outAktvE)
+        outputF = bundle (outF, outAktvF)
+        (_, outD) = unbundle evalD
+        (_, outE) = unbundle evalE
+        (_, outF) = unbundle (last <$> evalF)
+
+        genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
+        genTag en = t
+            where 
+                t = register 1 (mux en next_t t)
+                next_t = mux (t .==. (pure maxTag)) (pure 0) (t + 1)
 
         --- debug infos
         debugSignals = evalF
-        
 
 
--- Note: due to propagation time of 3 cycles, stream f is always at -3 compared to stream d 
--- i.e current f = -3 offset, so we should store one value in past for offset of -4 -> window 2
-streamD :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataX -> Signal dom (Vec 2 DataX) -> Signal dom DataX
+streamD :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom TaggedDataX -> Signal dom (Vec 5 TaggedDataX) -> Signal dom TaggedDataX
 streamD en x winF = out
     where 
-        out = register dDflt (mux en (operate <$> x <*> winF) out)
-        operate :: DataX -> Vec 2 DataX -> DataX
-        operate _x _winF = DataX (unwrapDataX _x + unwrapDataX (head _winF))
+        out = register (0, dDflt) (mux en (operate <$> x <*> winF) out)
 
-streamE :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataX -> Signal dom DataX
+        operate :: TaggedDataX -> Vec 5 TaggedDataX -> TaggedDataX
+        operate _tx _winF = (tag, rslt)
+            where 
+                (tag, _x) = _tx
+                rslt = DataX (xVal + offsetVal)
+                xVal = unwrapDataX _x
+                offsetVal = unwrapDataX (getOffset _winF tag (4 :: Tag) dDflt)
+
+
+streamE :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom TaggedDataX -> Signal dom TaggedDataX
 streamE en d = out
     where 
-        out = register eDflt (mux en (operate <$> d) out)
-        operate :: DataX -> DataX
-        operate _d = DataX (unwrapDataX _d + 1)
+        out = register (0, eDflt) (mux en (operate <$> d) out)
 
-streamF :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom DataX -> Signal dom (Vec 2 DataX)
+        operate :: TaggedDataX -> TaggedDataX
+        operate _td = (tag, rslt)
+            where 
+                (tag, _d) = _td
+                rslt = DataX (unwrapDataX _d + 1)
+
+
+streamF :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom TaggedDataX -> Signal dom (Vec 5 TaggedDataX)
 streamF en e = out
     where 
-        out = register (repeat fDflt) (mux en (operate <$> out <*> e) out)
-        operate :: Vec 2 DataX -> DataX -> Vec 2 DataX
-        operate winF _e = winF <<+ DataX (unwrapDataX _e + 1)
+        out = register (repeat (0, fDflt)) (mux en (operate <$> out <*> e) out)
+
+        operate :: Vec 5 TaggedDataX -> TaggedDataX -> Vec 5 TaggedDataX
+        operate _winF _te = _winF <<+ taggedRslt
+            where 
+                (tag, _e) = _te
+                rslt = DataX (unwrapDataX _e + 1)
+                taggedRslt = (tag, rslt)
 
 
 
@@ -283,7 +322,7 @@ streamF en e = out
 
 ---------------------------------------------------------------
 
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, Vec 2 DataX)
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, Vec 5 TaggedDataX)
 monitor inputs = bundle (outputs, debugSignals)
     where 
         (newEvent, event) = unbundle (hlc inputs)
@@ -312,6 +351,18 @@ monitor inputs = bundle (outputs, debugSignals)
 
 
 topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
-    Signal MyDomain Inputs -> Signal MyDomain (Outputs, Vec 2 DataX)
+    Signal MyDomain Inputs -> Signal MyDomain (Outputs, Vec 5 TaggedDataX)
 topEntity clk rst en input0 = exposeClockResetEnable (monitor input0) clk rst en
 
+
+-- circuit :: HiddenClockResetEnable dom => Signal dom Tag -> Signal dom (Vec 3 (Tag, Int)) -> Signal dom Int
+-- circuit t w = out
+--     where 
+--         out = getOffset <$> w <*> t <*> off <*> dflt
+--         dflt = pure (100 :: Int)
+--         off = pure (2 :: Tag)
+
+
+-- topEntity :: Clock System -> Reset System -> Enable System ->
+--     Signal System Tag -> Signal System (Vec 3 (Tag, Int)) -> Signal System Int
+-- topEntity clk rst en input0 = exposeClockResetEnable (circuit input0) clk rst en
