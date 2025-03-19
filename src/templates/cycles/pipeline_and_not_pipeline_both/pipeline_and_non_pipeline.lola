@@ -6,6 +6,6 @@ output b := a + 1
 output c := b + 1
 
 // part that can be pipelined
-output d := x + e.offset(by: -3).defaults(to: 0)
+output d := x + f.offset(by: -4).defaults(to: 0)
 output e := d + 1
 output f := e + 1
