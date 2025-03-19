@@ -1,0 +1,11 @@
+input x : Int32
+
+// part that can't be pipelined
+output a := x + c.offset(by: -1).defaults(to: 0)
+output b := a + 1
+output c := b + 1
+
+// part that can be pipelined
+output d := x + e.offset(by: -3).defaults(to: 0)
+output e := d + 1
+output f := e + 1
