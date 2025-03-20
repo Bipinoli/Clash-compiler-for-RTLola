@@ -35,12 +35,10 @@ module testbench;
 
 
     wire [2:0] llc_state;
-    wire qPush;
-    wire qPop;
-    wire qPushValid;
-    wire qPopValid;
     wire signed [63:0] llc_x;
-    wire pacingABC;
+    wire pacing_abc;
+    wire q_push_valid;
+    wire q_pop_valid;
 
 
     topEntity monitor (clk, rst, en,
@@ -50,7 +48,9 @@ module testbench;
                        output_c, output_c_aktv,
                        output_d, output_d_aktv,
                        output_e, output_e_aktv,
-                       output_f, output_f_aktv
+                       output_f, output_f_aktv,
+                       llc_state, llc_x, pacing_abc,
+                       q_push_valid, q_pop_valid
                        );
 
     always begin

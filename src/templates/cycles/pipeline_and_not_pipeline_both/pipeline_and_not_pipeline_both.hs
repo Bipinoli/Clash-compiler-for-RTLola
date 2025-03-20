@@ -54,7 +54,7 @@ type Event = (Inputs, Pacings)
 
 nullEvent :: Event
 nullEvent = ((DataX 0, False), PacingABCDEF False)
-type QMemSize = 6
+type QMemSize = 20
 
 type QData = Event
 type QMem = Vec QMemSize QData
@@ -325,8 +325,8 @@ streamC en b = out
 
 ---------------------------------------------------------------
 
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom Outputs
-monitor inputs = outputs
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (State, DataX, PacingABCDEF, Bool, Bool))
+monitor inputs = bundle (outputs, debugSignals)
     where 
         (newEvent, event) = unbundle (hlc inputs)
 
@@ -342,10 +342,15 @@ monitor inputs = outputs
         -- pipelined LLC
         (outputsPipelined, llcPipelinedDebugInfo) = unbundle (pipelinedLLC event)
 
+        -- debug signals
+        debugSignals = bundle (llc_state, llc_x, llc_pacing, qPushValid, qPopValid)
+        (llc_state, llc_x, llc_pacing) = unbundle llcNonPipelinedDebugInfo
+
+
 
 -- ---------------------------------------------------------------
 
 
 topEntity :: Clock MyDomain -> Reset MyDomain -> Enable MyDomain -> 
-    Signal MyDomain Inputs -> Signal MyDomain Outputs
+    Signal MyDomain Inputs -> Signal MyDomain (Outputs, (State, DataX, PacingABCDEF, Bool, Bool))
 topEntity clk rst en input0 = exposeClockResetEnable (monitor input0) clk rst en
