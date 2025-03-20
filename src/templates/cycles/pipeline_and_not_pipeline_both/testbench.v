@@ -7,6 +7,14 @@ module testbench;
     reg signed [63:0] input_x;
     reg new_input;
 
+    wire signed [63:0] output_a;
+    wire output_a_aktv;
+    wire signed [63:0] output_b;
+    wire output_b_aktv;
+    wire signed [63:0] output_c;
+    wire output_c_aktv;
+
+
     wire signed [63:0] output_d;
     wire output_d_aktv;
     wire signed [63:0] output_e;
@@ -37,14 +45,12 @@ module testbench;
 
     topEntity monitor (clk, rst, en,
                        input_x, new_input,
+                       output_a, output_a_aktv,
+                       output_b, output_b_aktv,
+                       output_c, output_c_aktv,
                        output_d, output_d_aktv,
                        output_e, output_e_aktv,
-                       output_f, output_f_aktv,
-                       tag_0, winF_0, 
-                       tag_1, winF_1, 
-                       tag_2, winF_2, 
-                       tag_3, winF_3, 
-                       tag_4, winF_4 
+                       output_f, output_f_aktv
                        );
 
     always begin
@@ -138,7 +144,7 @@ module testbench;
         new_input = 1; 
         #2; new_input = 0;
 
-        #12;
+        #40;
         $finish; 
     end
 
