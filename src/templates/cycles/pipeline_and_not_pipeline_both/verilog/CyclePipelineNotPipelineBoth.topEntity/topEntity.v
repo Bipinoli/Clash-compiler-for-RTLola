@@ -35,61 +35,61 @@ module topEntity
   wire [554:0] result_3;
   reg  c$app_arg = 1'b0;
   wire [71:0] result_4;
-  // pipeline_and_not_pipeline_both.hs:220:1-108
+  // pipeline_and_not_pipeline_both.hs:221:1-108
   reg [71:0] out = {8'd0,   64'sd0};
-  // pipeline_and_not_pipeline_both.hs:220:1-108
+  // pipeline_and_not_pipeline_both.hs:221:1-108
   wire signed [63:0] _d;
-  // pipeline_and_not_pipeline_both.hs:220:1-108
+  // pipeline_and_not_pipeline_both.hs:221:1-108
   wire signed [63:0] x;
-  // pipeline_and_not_pipeline_both.hs:220:1-108
+  // pipeline_and_not_pipeline_both.hs:221:1-108
   wire [71:0] t;
   wire signed [63:0] result_5;
   wire [71:0] c$case_scrut;
-  // pipeline_and_not_pipeline_both.hs:154:1-65
+  // pipeline_and_not_pipeline_both.hs:156:1-65
   wire [2:0] i;
   wire [3:0] c$case_scrut_0;
-  // pipeline_and_not_pipeline_both.hs:154:1-65
+  // pipeline_and_not_pipeline_both.hs:156:1-65
   wire [23:0] ws;
-  // pipeline_and_not_pipeline_both.hs:154:1-65
+  // pipeline_and_not_pipeline_both.hs:156:1-65
   wire [19:0] c$ws_app_arg;
-  // pipeline_and_not_pipeline_both.hs:154:1-65
+  // pipeline_and_not_pipeline_both.hs:156:1-65
   wire [7:0] offsetTag;
-  // pipeline_and_not_pipeline_both.hs:154:1-65
+  // pipeline_and_not_pipeline_both.hs:156:1-65
   wire [379:0] c$ws_app_arg_0;
-  // pipeline_and_not_pipeline_both.hs:154:1-65
+  // pipeline_and_not_pipeline_both.hs:156:1-65
   wire [7:0] c$offsetTag_app_arg;
   wire [71:0] result_6;
-  // pipeline_and_not_pipeline_both.hs:206:1-142
+  // pipeline_and_not_pipeline_both.hs:207:1-142
   reg [71:0] out_0 = {8'd0,   64'sd0};
-  // pipeline_and_not_pipeline_both.hs:206:1-142
+  // pipeline_and_not_pipeline_both.hs:207:1-142
   wire signed [63:0] _x;
-  // pipeline_and_not_pipeline_both.hs:206:1-142
+  // pipeline_and_not_pipeline_both.hs:207:1-142
   wire signed [63:0] x_0;
-  // pipeline_and_not_pipeline_both.hs:206:1-142
+  // pipeline_and_not_pipeline_both.hs:207:1-142
   wire signed [63:0] y;
-  // pipeline_and_not_pipeline_both.hs:165:1-104
+  // pipeline_and_not_pipeline_both.hs:166:1-104
   reg [7:0] t_0 = 8'd1;
   wire [7:0] result_7;
   wire [7:0] result_8;
-  // pipeline_and_not_pipeline_both.hs:165:1-104
+  // pipeline_and_not_pipeline_both.hs:166:1-104
   wire [7:0] f1;
-  // pipeline_and_not_pipeline_both.hs:165:1-104
+  // pipeline_and_not_pipeline_both.hs:166:1-104
   wire  b;
   wire [359:0] result_9;
-  // pipeline_and_not_pipeline_both.hs:232:1-116
+  // pipeline_and_not_pipeline_both.hs:233:1-116
   reg [359:0] out_1 = {{8'd0,   64'sd0},   {8'd0,   64'sd0},   {8'd0,   64'sd0},   {8'd0,   64'sd0},
  {8'd0,   64'sd0}};
-  // pipeline_and_not_pipeline_both.hs:232:1-116
+  // pipeline_and_not_pipeline_both.hs:233:1-116
   wire signed [63:0] _e;
-  // pipeline_and_not_pipeline_both.hs:232:1-116
+  // pipeline_and_not_pipeline_both.hs:233:1-116
   wire signed [63:0] x_1;
-  // pipeline_and_not_pipeline_both.hs:232:1-116
+  // pipeline_and_not_pipeline_both.hs:233:1-116
   wire [359:0] t_1;
-  // pipeline_and_not_pipeline_both.hs:165:1-104
+  // pipeline_and_not_pipeline_both.hs:166:1-104
   reg  c$evalF_app_arg = 1'b0;
-  // pipeline_and_not_pipeline_both.hs:165:1-104
+  // pipeline_and_not_pipeline_both.hs:166:1-104
   reg  pacingE = 1'b0;
-  // pipeline_and_not_pipeline_both.hs:165:1-104
+  // pipeline_and_not_pipeline_both.hs:166:1-104
   wire  pacingDEF;
   wire [64:0] input0;
   wire [71:0] result__dc_arg_3;
@@ -178,9 +178,9 @@ module topEntity
 
     assign map_index = 3'd4 - i_2[0+:3];
     wire [3:0] c$case_alt;
-    // pipeline_and_not_pipeline_both.hs:154:1-65
+    // pipeline_and_not_pipeline_both.hs:156:1-65
     wire [7:0] t_3;
-    // pipeline_and_not_pipeline_both.hs:154:1-65
+    // pipeline_and_not_pipeline_both.hs:156:1-65
     wire [71:0] x_3;
     assign map_out = c$case_alt;
 
@@ -196,7 +196,7 @@ module topEntity
   endgenerate
   // imap end
 
-  assign offsetTag = (t_0 >= 8'd4) ? c$offsetTag_app_arg : (c$offsetTag_app_arg + 8'd4);
+  assign offsetTag = (t_0 > 8'd4) ? c$offsetTag_app_arg : (c$offsetTag_app_arg + 8'd5);
 
   assign c$vec2 = (ws[20-1 : 0]);
 
@@ -250,11 +250,11 @@ module topEntity
 
   assign result_7 = pacingDEF ? result_8 : t_0;
 
-  assign result_8 = b ? 8'd0 : f1;
+  assign result_8 = b ? 8'd1 : f1;
 
   assign f1 = t_0 + 8'd1;
 
-  assign b = t_0 == 8'd4;
+  assign b = t_0 == 8'd5;
 
   assign result_9 = c$evalF_app_arg ? t_1 : out_1;
 

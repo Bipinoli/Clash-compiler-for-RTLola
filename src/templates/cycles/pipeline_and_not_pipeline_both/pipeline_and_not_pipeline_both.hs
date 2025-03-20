@@ -149,13 +149,14 @@ hlc inputs = out
 ---------------- LLC that can be pipelined --------------------
 
 type Tag = Unsigned 8
-maxTag = 4 :: Tag
+-- maxTag must be at least the size of the sliding window to avoid duplicate tags in the window
+maxTag = 5 :: Tag
+dfltTag = 0 :: Tag
 
 getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> a
 getOffset win tag offset dflt = out
     where 
-        offsetTag = if tag >= offset then tag - offset else tag - offset + maxTag
-        -- findIndex finds the first matching from left so duplicate is not an issue
+        offsetTag = if tag > offset then tag - offset else tag - offset + maxTag
         out = case findIndex (\(t, _) -> t == offsetTag) win of
             Just i -> let (_, v) = win !! i in v 
             Nothing -> dflt 
@@ -197,7 +198,7 @@ pipelineLLC event = bundle (outputs, debugSignals)
         genTag en = t
             where 
                 t = register 1 (mux en next_t t)
-                next_t = mux (t .==. (pure maxTag)) (pure 0) (t + 1)
+                next_t = mux (t .==. (pure maxTag)) (pure 1) (t + 1)
 
         --- debug infos
         debugSignals = evalF
@@ -206,7 +207,7 @@ pipelineLLC event = bundle (outputs, debugSignals)
 streamD :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom TaggedDataX -> Signal dom (Vec 5 TaggedDataX) -> Signal dom TaggedDataX
 streamD en x winF = out
     where 
-        out = register (0, dDflt) (mux en (operate <$> x <*> winF) out)
+        out = register (dfltTag, dDflt) (mux en (operate <$> x <*> winF) out)
 
         operate :: TaggedDataX -> Vec 5 TaggedDataX -> TaggedDataX
         operate _tx _winF = (tag, rslt)
@@ -220,7 +221,7 @@ streamD en x winF = out
 streamE :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom TaggedDataX -> Signal dom TaggedDataX
 streamE en d = out
     where 
-        out = register (0, eDflt) (mux en (operate <$> d) out)
+        out = register (dfltTag, eDflt) (mux en (operate <$> d) out)
 
         operate :: TaggedDataX -> TaggedDataX
         operate _td = (tag, rslt)
@@ -232,7 +233,7 @@ streamE en d = out
 streamF :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom TaggedDataX -> Signal dom (Vec 5 TaggedDataX)
 streamF en e = out
     where 
-        out = register (repeat (0, fDflt)) (mux en (operate <$> out <*> e) out)
+        out = register (repeat (dfltTag, fDflt)) (mux en (operate <$> out <*> e) out)
 
         operate :: Vec 5 TaggedDataX -> TaggedDataX -> Vec 5 TaggedDataX
         operate _winF _te = _winF <<+ taggedRslt

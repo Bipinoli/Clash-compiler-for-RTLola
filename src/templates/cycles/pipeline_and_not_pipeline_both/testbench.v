@@ -96,6 +96,48 @@ module testbench;
         new_input = 1;
         #2; new_input = 0;
 
+        #4;
+        input_x = 9;
+        new_input = 1;
+
+        #2;
+        input_x = 10;
+        new_input = 1; 
+
+        #2;
+        input_x = 11;
+        new_input = 1; 
+
+        #2;
+        input_x = 12;
+        new_input = 1; 
+
+        #2;
+        input_x = 13;
+        new_input = 1; 
+
+        #2;
+        input_x = 14;
+        new_input = 1; 
+
+        #2;
+        input_x = 15;
+        new_input = 1; 
+
+        #2;
+        input_x = 16;
+        new_input = 1;
+        #2; new_input = 0;
+
+        #10;
+        input_x = 17;
+        new_input = 1; 
+
+        #2;
+        input_x = 18;
+        new_input = 1; 
+        #2; new_input = 0;
+
         #12;
         $finish; 
     end
