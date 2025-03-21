@@ -40,6 +40,40 @@ impl HardwareIR {
     }
 }
 
+// Algorithm to find pipeline & not pipeline graph
+// find evaluation order
+// mark all the nodes that can't be pipelined
+// split the order into two by removing the marked nodes into different list 
+// the marked input node might be needed on the pipeline graph as well
+// for that verify if any child node in the pipeline graph is reachable from it
+// if so keep a copy of such input node in the pipeline graph as well
+
+// Algorithm
+// cycle can only exist along the offset edge
+// for each offset edge - find the longest distance (d) from it to the source 
+// if no such distance exist then there is no cycle
+// if there is a cycle then check if d > offset
+// if so then we can't evaluate this particular node in pipeline fashion
+// due to the dependency all the children & parents nodes of it can't be pipelined as well
+
+fn find_longest_distance(src: RF::mir::StreamReference, dest: RF::mir::StreamReference) -> usize {
+    // src == dest
+    // no 
+    unimplemented!()
+}
+
+
+fn mark_all_parents() {
+    unimplemented!()
+}
+
+fn mark_all_children() {
+
+}
+
+
+
+
 pub fn node_tree(mir: RF::RtLolaMir) -> Vec<Vec<Node>> {
     let mut orders = node_orders_from_sliding_windows(&mir);
     let ouput_orders = node_orders_from_outputs(&mir);
