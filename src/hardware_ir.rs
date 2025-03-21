@@ -105,7 +105,7 @@ fn node_orders_from_outputs(mir: &RF::RtLolaMir) -> Vec<Vec<Node>> {
     for out in &mir.outputs {
        for (acced_ref, info) in &out.accesses {
             let (_, info) = info.first().unwrap();
-            let offset = match info {
+            let offset : Option<u32> = match info {
                 StreamAccessKind::Offset(x) => match x {
                     Offset::Past(p) => Some(p.clone()),
                     _ => None,
