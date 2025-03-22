@@ -1,9 +1,19 @@
-use std::collections::{HashMap, HashSet};
+/// Creates a code generation friendly IR with evaluation order and pipeline evaluation info
+///
+/// Inorder to gather such information it does structural analysis of RTLolaMIR graph
+/// Evaluation layer provided in RTLolaMIR assumes the alternate evaluation of event-based & periodic streams which is no longer valid here
+/// So the evaluation order is identified by the structural dependency analysis of the RTLolaMIR graph
+/// However, the provided evaluation layer is still useful in identifying the start stream of evaluation on a subgraph with no connection from inputs
+use std::{
+    collections::{HashMap, HashSet},
+    hash::Hash,
+};
 
-use rtlola_frontend::mir::{Offset, RtLolaMir, StreamAccessKind, StreamReference};
+use rtlola_frontend::mir::{
+    Offset, OutputStream, RtLolaMir, Stream, StreamAccessKind, StreamReference,
+};
 
 use crate::utils;
-
 
 #[derive(PartialEq, Eq, Clone, Debug, Hash, PartialOrd, Ord)]
 pub enum Node {
@@ -25,95 +35,108 @@ impl HardwareIR {
             evaluation_order: vec![],
         }
     }
-
-    fn extract_roots() {
-        // There can be a sub-graph which generates periodic signals without consuming the inputs
-        // Hence we can't reach all the nodes just by traversing from the inputs
-        // Such disjoint periodic graph can be a cycle which means just looking at the structure of the graph we can identify the root
-        // However, RTLola frontend performs HIR layer analysis according to the language semantics
-        // We can chhoose the nodes with the smallest evaluation layer in the disjoing graph as the roots
-        unimplemented!()
-    }
-
-    fn build_eval_tree() {
-        // Starting from the roots perform breadth first traversal
-        // Making sure to avoid infinitely looping on the cycle by tracking the visited nodes
-        // However, naive BFS won't work as there could be multiple ways to reach the same descendent node
-        // In such cases, we must choose the longest way to reach a descendent node due to the data dependency
-        // For this, we order nodes s.t the ones that can reach the others under consideration must be evaluated first
-        // TODO: Time complexity: O(v) * O(v * e) = O(v^2 * e)
-        unimplemented!()
-    }
-
-    fn mark_non_pipeline() {
-        // Cycle in RTLola can only exist along the offset edge
-        // For each node that consumes data from offset
-        // Check the distance (d) along the eval tree to reach such source
-        // If we can reach then the cycle exists
-        // If the distance > offset value, then the data transfer takes too long
-        // Which means the current node can't be evaluated in a pipeline fashion
-        // Due to the data dependency all of the children & parents of a node that can't be pipelined can't be pipelined as well
-        // TODO: Time complexity: 
-        unimplemented!()
-    }
-
-    fn eval_order_from_sliding_window(mir: &RtLolaMir) -> Vec<Vec<Node>> {
-        let mut orders: Vec<Vec<Node>> = vec![];
-        for sw in &mir.sliding_windows {
-            // target -> window -> caller
-            let target = match sw.target {
-                StreamReference::In(x) => Node::InputStream(x),
-                StreamReference::Out(x) => Node::OutputStream(x),
-            };
-            let window = Node::SlidingWindow(sw.reference.idx());
-            let caller = match sw.caller {
-                StreamReference::In(x) => Node::InputStream(x),
-                StreamReference::Out(x) => Node::OutputStream(x),
-            };
-            orders.push(vec![target, window, caller]);
-        }
-        orders
-    }
-
-    fn node_orders_from_outputs(mir: &RtLolaMir) -> Vec<Vec<Node>> {
-        let mut orders: Vec<Vec<Node>> = vec![];
-        for out in &mir.outputs {
-            for (acced_ref, info) in &out.accesses {
-                let (_, info) = info.first().unwrap();
-                let offset: Option<u32> = match info {
-                    StreamAccessKind::Offset(x) => match x {
-                        Offset::Past(p) => Some(p.clone()),
-                        _ => None,
-                    },
-                    _ => None,
-                };
-                let accessed_node = match offset {
-                    Some(off) => match acced_ref {
-                        StreamReference::In(x) => Node::Offset(OffsetNode {
-                            from: Box::new(Node::InputStream(x.clone())),
-                            by: off.clone() as usize,
-                        }),
-                        StreamReference::Out(x) => Node::Offset(OffsetNode {
-                            from: Box::new(Node::OutputStream(x.clone())),
-                            by: off.clone() as usize,
-                        }),
-                    },
-                    None => match acced_ref {
-                        StreamReference::In(x) => Node::InputStream(x.clone()),
-                        StreamReference::Out(x) => Node::OutputStream(x.clone()),
-                    },
-                };
-                orders.push(vec![
-                    accessed_node,
-                    Node::OutputStream(out.reference.out_ix()),
-                ]);
-            }
-        }
-        orders
-    }
-
 }
 
+fn mark_non_pipeline() {
+    // Cycle in RTLola can only exist along the offset edge
+    // For each node that consumes data from offset
+    // Check the distance (d) along the eval tree to reach such source
+    // If we can reach then the cycle exists
+    // If the distance > offset value, then the data transfer takes too long
+    // Which means the current node can't be evaluated in a pipeline fashion
+    // Due to the data dependency all of the children & parents of a node that can't be pipelined can't be pipelined as well
+    unimplemented!()
+}
+
+fn build_eval_tree(mir: &RtLolaMir, roots: &Vec<StreamReference>) -> (Vec<StreamReference>, Vec<Vec<StreamReference>>) {
+    // Starting from the roots explore nodes in level-order
+    // Naive BFS won't work as there could be multiple ways to reach the same descendent node
+    // In such cases, we must choose the longest way to reach a descendent node due to the data dependency
+    // For this, we order nodes s.t the ones that can reach the others under consideration must be evaluated first
+    // Time complexity: O(v) * O(v * e) = O(v^2 * e)
+
+    let mut eval_tree: Vec<Vec<StreamReference>> = Vec::new();
+    for _ in 0..(mir.inputs.len() + mir.outputs.len()) {
+        eval_tree.push(Vec::new());
+    }
+
+    let roots = extract_roots(mir);
+    for root in &roots {
+        let children = match root {
+            StreamReference::In(x) => mir.inputs[x.clone()].accessed_by(),
+            StreamReference::Out(x) => mir.outputs[x.clone()].accessed_by()
+        };
+        for child in children {
+            // self loop
+            if root.is_output() && child.0.out_ix() == root.out_ix() {
+                continue;
+            }
+            // TODO:   -------
+        }
+    }
+    // TODO: -------- 
+
+    let mut cur_level: Vec<usize> = Vec::new();
+    let mut next_level: Vec<usize> = Vec::new();
+
+    // TODO: -------- 
+    
+    (roots, eval_tree)
+}
+
+pub fn extract_roots(mir: &RtLolaMir) -> Vec<StreamReference> {
+    // There can be a sub-graph which generates periodic signals without consuming the inputs
+    // Hence we can't reach all the nodes just by traversing from the inputs
+    // Such disjoint periodic graph can be a cycle which means just looking at the structure of the graph we can't identify the root
+    // However, RTLola frontend performs HIR layer analysis according to the language semantics
+    // We can choose the nodes with the smallest evaluation layer in the disjoing graph as the roots
+
+    let mut roots: Vec<usize> = Vec::new();
+    for root in &mir.inputs {
+        for nd in &root.accessed_by {
+            roots.push(nd.0.out_ix());
+        }
+    }
+    let reached = traverse(mir, roots);
+
+    let mut retval: Vec<StreamReference> = Vec::new();
+    for inpt in &mir.inputs {
+        retval.push(inpt.reference.clone());
+    }
+    let mut disjoint: Vec<&OutputStream> = reached
+        .iter()
+        .enumerate()
+        .filter(|(i, &x)| !x)
+        .map(|(i, _)| &mir.outputs[i])
+        .collect();
+    disjoint.sort_by_key(|&x| x.eval_layer());
+    if !disjoint.is_empty() {
+        let min_layer = disjoint.first().unwrap().eval_layer();
+        for nd in disjoint {
+            if nd.eval_layer() != min_layer {
+                break;
+            }
+            retval.push(nd.reference.clone());
+        }
+    }
+    retval
+}
+
+fn traverse(mir: &RtLolaMir, roots: Vec<usize>) -> Vec<bool> {
+    let mut visited = vec![false; mir.outputs.len()];
+    let mut q: Vec<usize> = roots;
+
+    while !q.is_empty() {
+        let nd = q.pop().unwrap();
+        visited[nd] = true;
+        for child in &mir.outputs[nd].accessed_by {
+            if !visited[child.0.out_ix()] {
+                q.push(child.0.out_ix());
+            }
+        }
+    }
+    visited
+}
 
 // pub fn node_tree(mir: RtLolaMir) -> Vec<Vec<Node>> {
 //     let mut orders = node_orders_from_sliding_windows(&mir);
@@ -156,10 +179,6 @@ impl HardwareIR {
 //         .collect();
 //     merged_orders
 // }
-
-
-
-
 
 // #[cfg(test)]
 // mod tests {

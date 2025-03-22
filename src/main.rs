@@ -47,6 +47,8 @@ fn main() {
     match rtlola_frontend::parse(&config) {
         Ok(mir) => {
             save_mir_as_json(mir.clone(), mir_filename);
+            let roots = hardware_ir::extract_roots(&mir);
+            dbg!(&roots);
             // to_haskell(mir.clone());
             // let node_tree = hardware_ir::node_tree(mir.clone());
             // dbg!(&node_tree);
