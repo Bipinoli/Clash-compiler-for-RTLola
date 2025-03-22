@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use rtlola_frontend::{self as RF, mir::{Offset, StreamAccessKind, StreamReference}};
+use rtlola_frontend::mir::{Offset, RtLolaMir, StreamAccessKind, StreamReference};
 
 use crate::utils;
 
@@ -27,54 +27,49 @@ pub enum Node {
 
 #[derive(PartialEq, Clone)]
 struct HardwareIR {
-    mir: RF::RtLolaMir,
+    mir: RtLolaMir,
     evaluation_order: Vec<Vec<Node>>,
 }
 
 impl HardwareIR {
-    fn new(mir: RF::RtLolaMir) -> Self {
+    fn new(mir: RtLolaMir) -> Self {
         HardwareIR {
             mir: mir,
             evaluation_order: vec![],
         }
     }
-}
 
-// Algorithm to find pipeline & not pipeline graph
-// find evaluation order
-// mark all the nodes that can't be pipelined
-// split the order into two by removing the marked nodes into different list 
-// the marked input node might be needed on the pipeline graph as well
-// for that verify if any child node in the pipeline graph is reachable from it
-// if so keep a copy of such input node in the pipeline graph as well
+    fn extract_roots() {
+        // There can be a sub-graph which generates periodc signals without consuming the inputs
+        // Hence we can't reach all the nodes just by traversing from the inputs
+        unimplemented!()
+    }
 
-// Algorithm
-// cycle can only exist along the offset edge
-// for each offset edge - find the longest distance (d) from it to the source 
-// if no such distance exist then there is no cycle
-// if there is a cycle then check if d > offset
-// if so then we can't evaluate this particular node in pipeline fashion
-// due to the dependency all the children & parents nodes of it can't be pipelined as well
+    fn build_eval_tree() {
+        // Starting from the roots perform breadth first traversal
+        // Making sure to avoid infinitely looping on the cycle by tracking the visited nodes
+        // However, naive BFS won't work as there could be multiple ways to reach the same descendent node
+        // In such cases, we must choose the longest way to reach a descendent node due to the data dependency
+        // For this, we order nodes s.t the ones that can reach the others under consideration must be evaluated first
+        unimplemented!()
+    }
 
-fn find_longest_distance(src: RF::mir::StreamReference, dest: RF::mir::StreamReference) -> usize {
-    // src == dest
-    // no 
-    unimplemented!()
-}
+    fn mark_non_pipeline() {
+        // Cycle in RTLola can only exist along the offset edge
+        // For each node that consumes data from offset
+        // Check the distance (d) along the eval tree to reach such source
+        // If we can reach then the cycle exists
+        // If the distance > offset value, then the data transfer takes too long
+        // Which means the current node can't be evaluated in a pipeline fashion
+        // Due to the data dependency all of the children & parents of a node that can't be pipelined can't be pipelined as well
+        unimplemented!()
+    }
 
-
-fn mark_all_parents() {
-    unimplemented!()
-}
-
-fn mark_all_children() {
 
 }
 
 
-
-
-pub fn node_tree(mir: RF::RtLolaMir) -> Vec<Vec<Node>> {
+pub fn node_tree(mir: RtLolaMir) -> Vec<Vec<Node>> {
     let mut orders = node_orders_from_sliding_windows(&mir);
     let ouput_orders = node_orders_from_outputs(&mir);
     orders.extend(ouput_orders);
@@ -116,8 +111,8 @@ fn merge_nodes_into_tree(orders: Vec<Vec<Node>>) -> Vec<Vec<Node>> {
     merged_orders
 }
 
-fn node_orders_from_sliding_windows(mir: &RF::RtLolaMir) -> Vec<Vec<Node>> {
-    let mut orders: Vec<Vec<Node>>  = vec![];
+fn node_orders_from_sliding_windows(mir: &RtLolaMir) -> Vec<Vec<Node>> {
+    let mut orders: Vec<Vec<Node>> = vec![];
     for sw in &mir.sliding_windows {
         // target -> window -> caller
         let target = match sw.target {
@@ -134,12 +129,12 @@ fn node_orders_from_sliding_windows(mir: &RF::RtLolaMir) -> Vec<Vec<Node>> {
     orders
 }
 
-fn node_orders_from_outputs(mir: &RF::RtLolaMir) -> Vec<Vec<Node>> {
-    let mut orders: Vec<Vec<Node>>  = vec![];
+fn node_orders_from_outputs(mir: &RtLolaMir) -> Vec<Vec<Node>> {
+    let mut orders: Vec<Vec<Node>> = vec![];
     for out in &mir.outputs {
-       for (acced_ref, info) in &out.accesses {
+        for (acced_ref, info) in &out.accesses {
             let (_, info) = info.first().unwrap();
-            let offset : Option<u32> = match info {
+            let offset: Option<u32> = match info {
                 StreamAccessKind::Offset(x) => match x {
                     Offset::Past(p) => Some(p.clone()),
                     _ => None,
@@ -160,13 +155,13 @@ fn node_orders_from_outputs(mir: &RF::RtLolaMir) -> Vec<Vec<Node>> {
                 None => match acced_ref {
                     StreamReference::In(x) => Node::InputStream(x.clone()),
                     StreamReference::Out(x) => Node::OutputStream(x.clone()),
-                }
+                },
             };
             orders.push(vec![
                 accessed_node,
-                Node::OutputStream(out.reference.out_ix())
+                Node::OutputStream(out.reference.out_ix()),
             ]);
-       }
+        }
     }
     orders
 }
@@ -197,7 +192,13 @@ mod tests {
         ];
         // from outputs analysis
         let output_orders = vec![
-            vec![Node::Offset(OffsetNode { from: Box::new(Node::InputStream(0)) , by: 1 }), Node::OutputStream(0)],
+            vec![
+                Node::Offset(OffsetNode {
+                    from: Box::new(Node::InputStream(0)),
+                    by: 1,
+                }),
+                Node::OutputStream(0),
+            ],
             vec![Node::OutputStream(0), Node::OutputStream(1)],
             vec![Node::SlidingWindow(0), Node::OutputStream(2)],
             vec![Node::SlidingWindow(1), Node::OutputStream(3)],
@@ -206,7 +207,10 @@ mod tests {
         orders.extend(output_orders);
 
         let expected = vec![
-            vec![Node::Offset(OffsetNode { from: Box::new(Node::InputStream(0)) , by: 1 })],
+            vec![Node::Offset(OffsetNode {
+                from: Box::new(Node::InputStream(0)),
+                by: 1,
+            })],
             vec![Node::OutputStream(0)],
             vec![Node::OutputStream(1), Node::SlidingWindow(1)],
             vec![Node::OutputStream(3), Node::SlidingWindow(0)],

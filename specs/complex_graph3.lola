@@ -1,0 +1,20 @@
+input x : Int32
+
+output a := x + c.offset(by: -2).defaults(to: 0) 
+output b := a + 1
+output c := b + 1
+
+output d := x + 1
+output e := x.offset(by: -1).defaults(to: 0)
+output f := e + 1
+output g := d.offset(by: -3).defaults(to: 0) + f + j.offset(by: -1).defaults(to: 0)
+output h := g + k.offset(by: -1).defaults(to: 0)
+output i := g + h.offset(by: -3).defaults(to: 0)
+output j := i + 1
+output k := i + 1
+
+output m @ 1kHz := 1 + m.offset(by: -1).defaults(to: 0)
+output n := m * 10
+output o := f.hold().defaults(to: 0) + n
+output p := o + q
+output q := m + 1
