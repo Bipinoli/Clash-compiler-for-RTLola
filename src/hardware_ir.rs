@@ -1,9 +1,26 @@
 /// Creates a code generation friendly IR with evaluation order and pipeline evaluation info
 ///
-/// Inorder to gather such information it does structural analysis of RTLolaMIR graph
+/// Inorder to gather such information we do structural analysis of RTLolaMIR graph
 /// Evaluation layer provided in RTLolaMIR assumes the alternate evaluation of event-based & periodic streams which is no longer valid here
-/// So the evaluation order is identified by the structural dependency analysis of the RTLolaMIR graph
-/// However, the provided evaluation layer is still useful in identifying the start stream of evaluation on a subgraph with no connection from inputs
+/// Also if a node depends on data via past offsets, RTLolaMIR thinks the node can be evaluated right in the beginning as all the dependencies are in the past
+/// However, that assumes we are not doing evaluation in a pipeline fashion. 
+/// When the offset exists along a long path from the input, then even the past data might not be ready already
+/// 
+/// For example:
+/// ```
+/// output x @1Hz := x.offset(by: -1).defaults(to: 0) + 1
+/// output a := x + 1
+/// output b := x + 1
+/// output c := a + 1
+/// output d := c + 1
+/// output e := b.offset(by: -1).defaults(to: 0) + d.offset(by: -1).defaults(to: 0)
+/// ```
+/// 
+/// Here, e must be evaluated after b & d in-pipeline fashion
+/// However, If the offset is sufficiently large we don't have to wait for b & d
+/// 
+/// For these reasons, we cannot directly use the evaluation layer provided in RTLolaMIR as it is
+/// So the evaluation order and pipeline info is identified by the structural dependency analysis of the RTLolaMIR graph
 use std::{
     collections::{HashMap, HashSet},
     hash::Hash,
