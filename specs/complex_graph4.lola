@@ -1,0 +1,7 @@
+output x @1kHz := x.offset(by: -1).defaults(to: 0) + 1
+output a := x + f.offset(by: -3).defaults(to: 0)
+output b := x + 1
+output c := b + 1
+output d := a + c
+output e := a + d
+output f := e + 1

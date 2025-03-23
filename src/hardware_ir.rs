@@ -26,7 +26,8 @@ use std::{
 };
 
 use rtlola_frontend::mir::{
-    Offset, OutputStream, RtLolaMir, Stream, StreamAccessKind, StreamReference,
+
+    Offset, Origin, OutputStream, RtLolaMir, Stream, StreamAccessKind, StreamReference,
 };
 
 use crate::utils;
@@ -36,6 +37,46 @@ pub enum Node {
     InputStream(usize),
     OutputStream(usize),
     SlidingWindow(usize),
+}
+impl Node {
+    fn from_stream(stream_ref: &StreamReference) -> Node {
+        match stream_ref {
+            StreamReference::In(x) => Node::InputStream(x.clone()),
+            StreamReference::Out(x) => Node::OutputStream(x.clone()),
+        }
+    }
+    fn from_accessed_by(access: &(StreamReference, Vec<(Origin, StreamAccessKind)>)) -> Node {
+        match access.1.first().unwrap().1 {
+            StreamAccessKind::SlidingWindow(x) => Node::SlidingWindow(x.idx()),
+            _ => Node::OutputStream(access.0.out_ix()),
+        }
+    }
+    fn get_children(&self, mir: &RtLolaMir) -> Vec<Node> {
+        let mut children: Vec<Node> = Vec::new();
+        match self {
+            Node::InputStream(x) => {
+                for child in &mir.inputs[x.clone()].accessed_by {
+                    children.push(Node::from_accessed_by(child));
+                }
+            }
+            Node::OutputStream(x) => {
+                for child in &mir.outputs[x.clone()].accessed_by {
+                    children.push(Node::from_accessed_by(child));
+                }
+            }
+            Node::SlidingWindow(x) => {
+                let child = Node::OutputStream(mir.sliding_windows[x.clone()].caller.out_ix());
+                children.push(child);
+            }
+        }
+        children
+    }
+    fn out_ix(&self) -> usize {
+        match self {
+            Node::OutputStream(x) => x.clone(),
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[derive(PartialEq, Clone)]
@@ -64,44 +105,37 @@ fn mark_non_pipeline() {
     unimplemented!()
 }
 
-fn build_eval_tree(
-    mir: &RtLolaMir,
-    roots: &Vec<StreamReference>,
-) -> (Vec<StreamReference>, Vec<Vec<StreamReference>>) {
+pub fn get_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     // Starting from the roots explore nodes in level-order
     // Naive BFS won't work as there could be multiple ways to reach the same descendent node
     // In such cases, we must choose the longest way to reach a descendent node due to the data dependency
 
-    let mut eval_tree: Vec<Vec<StreamReference>> = Vec::new();
-    for _ in 0..(mir.inputs.len() + mir.outputs.len()) {
-        eval_tree.push(Vec::new());
-    }
+    let mut order: Vec<Vec<Node>> = Vec::new();
 
-    let roots = extract_roots(mir);
-    for root in &roots {
-        let children = match root {
-            StreamReference::In(x) => mir.inputs[x.clone()].accessed_by(),
-            StreamReference::Out(x) => mir.outputs[x.clone()].accessed_by(),
-        };
-        for child in children {
-            // self loop
-            if root.is_output() && child.0.out_ix() == root.out_ix() {
-                continue;
+    let mut next_level: Vec<Node> = Vec::new();
+    let mut cur_level: Vec<Node> = extract_roots(mir);
+
+    let mut visited: HashSet<Node> = HashSet::new();
+    while !cur_level.is_empty() {
+        order.push(cur_level.clone());
+        cur_level.iter().for_each(|nd| {
+            visited.insert(nd.clone());
+        });
+        for node in &cur_level {
+            for child in node.get_children(mir) {
+                if !visited.contains(&child) {
+                    next_level.push(child);
+                }
             }
-            // TODO:   -------
         }
+        // check reachability without going through the already visited nodes
+        cur_level = remove_reachable_roots(mir, next_level.clone(), &visited);
+        next_level = vec![];
     }
-    // TODO: --------
-
-    let mut cur_level: Vec<usize> = Vec::new();
-    let mut next_level: Vec<usize> = Vec::new();
-
-    // TODO: --------
-
-    (roots, eval_tree)
+    order
 }
 
-pub fn extract_roots(mir: &RtLolaMir) -> Vec<StreamReference> {
+pub fn extract_roots(mir: &RtLolaMir) -> Vec<Node> {
     // There can be a sub-graph which generates periodic signals without consuming the inputs
     // Hence we can't reach all the nodes just by traversing from the inputs
     // To identify roots in such disjointed graph we can start by estimating the ones with the lowest eval layer in RTLolaMIR
@@ -138,171 +172,73 @@ pub fn extract_roots(mir: &RtLolaMir) -> Vec<StreamReference> {
     // Here all nodes are reachable starting from any one and they have the same eval layers (calcualted by removing offset edges)
     // Hence any arbitrary node can be chosen as a root
 
-    let mut roots: Vec<usize> = Vec::new();
-    for root in &mir.inputs {
-        for nd in &root.accessed_by {
-            roots.push(nd.0.out_ix());
-        }
-    }
-    let reached = traverse(mir, roots);
-
-    let mut retval: Vec<StreamReference> = Vec::new();
+    let mut roots: Vec<Node> = Vec::new();
     for inpt in &mir.inputs {
-        retval.push(inpt.reference.clone());
+        roots.push(Node::InputStream(inpt.reference.in_ix()));
     }
-    let mut disjoint: Vec<&OutputStream> = reached
-        .iter()
-        .enumerate()
-        .filter(|(_, &x)| !x)
-        .map(|(i, _)| &mir.outputs[i])
-        .collect();
-    disjoint.sort_by_key(|&x| x.eval_layer());
-    let mut estimated_roots: Vec<usize> = Vec::new();
-    if !disjoint.is_empty() {
-        let min_layer = disjoint.first().unwrap().eval_layer();
-        for nd in disjoint {
-            if nd.eval_layer() != min_layer {
-                break;
-            }
-            estimated_roots.push(nd.reference.out_ix());
+    let reached = traverse(mir, roots.clone(), &HashSet::new());
+
+    let mut disjoint: Vec<Node> = Vec::new();
+    for i in 0..mir.outputs.len() {
+        let nd = Node::OutputStream(i);
+        if !reached.contains(&nd) {
+            disjoint.push(nd);
         }
     }
-    for root in remove_reachables(mir, estimated_roots) {
-        retval.push(mir.outputs[root].reference.clone());
+    disjoint.sort_by_key(|nd| match nd {
+        Node::SlidingWindow(_) => usize::MAX,
+        Node::OutputStream(x) => mir.outputs[x.clone()].eval_layer().inner(),
+        Node::InputStream(_) => unreachable!(),
+    });
+    if !disjoint.is_empty() {
+        let first = disjoint.first().unwrap().clone();
+        let estimated_roots: Vec<Node> = disjoint
+            .into_iter()
+            .take_while(|nd| match nd {
+                Node::OutputStream(x) => {
+                    let nd_layer = mir.outputs[x.clone()].eval_layer();
+                    let first_layer = mir.outputs[first.out_ix()].eval_layer();
+                    nd_layer == first_layer
+                }
+                _ => false,
+            })
+            .collect();
+        for root in remove_reachable_roots(mir, estimated_roots, &HashSet::new()) {
+            roots.push(root);
+        }
     }
-    retval
+    roots
 }
 
-fn remove_reachables(mir: &RtLolaMir, roots: Vec<usize>) -> Vec<usize> {
-    let mut unreachable: HashSet<usize> = HashSet::from_iter(roots.clone());
+fn remove_reachable_roots(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<Node>) -> Vec<Node> {
+    let mut unreachable: HashSet<Node> = HashSet::from_iter(roots.clone());
     for node in roots {
         if !unreachable.contains(&node) {
             continue;
         }
-        traverse(mir, vec![node])
+        traverse(mir, vec![node.clone()], frozen)
             .into_iter()
-            .enumerate()
-            .for_each(|(i, reached)| {
-                if i != node && reached {
-                    unreachable.remove(&i);
+            .for_each(|nd| {
+                if nd != node {
+                    unreachable.remove(&nd);
                 }
             });
     }
     unreachable.into_iter().collect()
 }
 
-fn traverse(mir: &RtLolaMir, roots: Vec<usize>) -> Vec<bool> {
-    let mut visited = vec![false; mir.outputs.len()];
-    let mut q: Vec<usize> = roots;
+fn traverse(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<Node>) -> HashSet<Node> {
+    let mut reached: HashSet<Node> = HashSet::new();
+    let mut stk: Vec<Node> = roots;
 
-    while !q.is_empty() {
-        let nd = q.pop().unwrap();
-        visited[nd] = true;
-        for child in &mir.outputs[nd].accessed_by {
-            if !visited[child.0.out_ix()] {
-                q.push(child.0.out_ix());
+    while !stk.is_empty() {
+        let nd = stk.pop().unwrap();
+        reached.insert(nd.clone());
+        for child in nd.get_children(mir) {
+            if !reached.contains(&child) & !frozen.contains(&child) {
+                stk.push(child);
             }
         }
     }
-    visited
+    reached
 }
-
-// pub fn node_tree(mir: RtLolaMir) -> Vec<Vec<Node>> {
-//     let mut orders = node_orders_from_sliding_windows(&mir);
-//     let ouput_orders = node_orders_from_outputs(&mir);
-//     orders.extend(ouput_orders);
-//     merge_nodes_into_tree(orders)
-// }
-
-// fn merge_nodes_into_tree(orders: Vec<Vec<Node>>) -> Vec<Vec<Node>> {
-//     let mut set = HashSet::new();
-//     for order in orders.clone() {
-//         for node in order {
-//             set.insert(node);
-//         }
-//     }
-//     let mut keys: Vec<Node> = set.into_iter().collect();
-//     keys.sort_by(|a, b| a.cmp(&b));
-//     let mut map = HashMap::new();
-//     let mut reverse_map = HashMap::new();
-//     for (i, item) in keys.into_iter().enumerate() {
-//         map.insert(item.clone(), i);
-//         reverse_map.insert(i, item);
-//     }
-//     let orders: Vec<Vec<usize>> = orders
-//         .into_iter()
-//         .map(|v| {
-//             v.into_iter()
-//                 .map(|a| map.get(&a).unwrap().clone())
-//                 .collect()
-//         })
-//         .collect();
-//     let merged_orders = utils::merge_orders(orders);
-//     let merged_orders: Vec<Vec<Node>> = merged_orders
-//         .into_iter()
-//         .map(|v| {
-//             v.into_iter()
-//                 .map(|i| reverse_map.get(&i).unwrap().clone())
-//                 .collect()
-//         })
-//         .collect();
-//     merged_orders
-// }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-
-//     #[test]
-//     fn merge_nodes_into_tree_works() {
-//         // from sliding window analysis
-//         let mut orders = vec![
-//             vec![
-//                 Node::OutputStream(1),
-//                 Node::SlidingWindow(0),
-//                 Node::OutputStream(2),
-//             ],
-//             vec![
-//                 Node::OutputStream(2),
-//                 Node::SlidingWindow(2),
-//                 Node::OutputStream(4),
-//             ],
-//             vec![
-//                 Node::OutputStream(0),
-//                 Node::SlidingWindow(1),
-//                 Node::OutputStream(3),
-//             ],
-//         ];
-//         // from outputs analysis
-//         let output_orders = vec![
-//             vec![
-//                 Node::Offset(OffsetNode {
-//                     from: Box::new(Node::InputStream(0)),
-//                     by: 1,
-//                 }),
-//                 Node::OutputStream(0),
-//             ],
-//             vec![Node::OutputStream(0), Node::OutputStream(1)],
-//             vec![Node::SlidingWindow(0), Node::OutputStream(2)],
-//             vec![Node::SlidingWindow(1), Node::OutputStream(3)],
-//             vec![Node::SlidingWindow(2), Node::OutputStream(4)],
-//         ];
-//         orders.extend(output_orders);
-
-//         let expected = vec![
-//             vec![Node::Offset(OffsetNode {
-//                 from: Box::new(Node::InputStream(0)),
-//                 by: 1,
-//             })],
-//             vec![Node::OutputStream(0)],
-//             vec![Node::OutputStream(1), Node::SlidingWindow(1)],
-//             vec![Node::OutputStream(3), Node::SlidingWindow(0)],
-//             vec![Node::OutputStream(2)],
-//             vec![Node::SlidingWindow(2)],
-//             vec![Node::OutputStream(4)],
-//         ];
-
-//         let actual = merge_nodes_into_tree(orders);
-//         assert_eq!(actual, expected);
-//     }
-// }
