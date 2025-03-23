@@ -3,24 +3,23 @@
 /// Inorder to gather such information we do structural analysis of RTLolaMIR graph
 /// Evaluation layer provided in RTLolaMIR assumes the alternate evaluation of event-based & periodic streams which is no longer valid here
 /// Also if a node depends on data via past offsets, RTLolaMIR thinks the node can be evaluated right in the beginning as all the dependencies are in the past
-/// However, that assumes we are not doing evaluation in a pipeline fashion. 
+/// However, that assumes we are not doing evaluation in a pipeline fashion.
 /// When the offset exists along a long path from the input, then even the past data might not be ready already
-/// 
+///
 /// For example:
-/// ```
 /// output x @1Hz := x.offset(by: -1).defaults(to: 0) + 1
 /// output a := x + 1
 /// output b := x + 1
 /// output c := a + 1
 /// output d := c + 1
 /// output e := b.offset(by: -1).defaults(to: 0) + d.offset(by: -1).defaults(to: 0)
-/// ```
-/// 
+///
 /// Here, e must be evaluated after b & d in-pipeline fashion
 /// However, If the offset is sufficiently large we don't have to wait for b & d
-/// 
+///
 /// For these reasons, we cannot directly use the evaluation layer provided in RTLolaMIR as it is
 /// So the evaluation order and pipeline info is identified by the structural dependency analysis of the RTLolaMIR graph
+/// However, the evaluation layer in RTLolaMIR is still used to guess the initial set of root nodes in the graph (see extract_roots function)
 use std::{
     collections::{HashMap, HashSet},
     hash::Hash,
@@ -65,12 +64,13 @@ fn mark_non_pipeline() {
     unimplemented!()
 }
 
-fn build_eval_tree(mir: &RtLolaMir, roots: &Vec<StreamReference>) -> (Vec<StreamReference>, Vec<Vec<StreamReference>>) {
+fn build_eval_tree(
+    mir: &RtLolaMir,
+    roots: &Vec<StreamReference>,
+) -> (Vec<StreamReference>, Vec<Vec<StreamReference>>) {
     // Starting from the roots explore nodes in level-order
     // Naive BFS won't work as there could be multiple ways to reach the same descendent node
     // In such cases, we must choose the longest way to reach a descendent node due to the data dependency
-    // For this, we order nodes s.t the ones that can reach the others under consideration must be evaluated first
-    // Time complexity: O(v) * O(v * e) = O(v^2 * e)
 
     let mut eval_tree: Vec<Vec<StreamReference>> = Vec::new();
     for _ in 0..(mir.inputs.len() + mir.outputs.len()) {
@@ -81,7 +81,7 @@ fn build_eval_tree(mir: &RtLolaMir, roots: &Vec<StreamReference>) -> (Vec<Stream
     for root in &roots {
         let children = match root {
             StreamReference::In(x) => mir.inputs[x.clone()].accessed_by(),
-            StreamReference::Out(x) => mir.outputs[x.clone()].accessed_by()
+            StreamReference::Out(x) => mir.outputs[x.clone()].accessed_by(),
         };
         for child in children {
             // self loop
@@ -91,22 +91,52 @@ fn build_eval_tree(mir: &RtLolaMir, roots: &Vec<StreamReference>) -> (Vec<Stream
             // TODO:   -------
         }
     }
-    // TODO: -------- 
+    // TODO: --------
 
     let mut cur_level: Vec<usize> = Vec::new();
     let mut next_level: Vec<usize> = Vec::new();
 
-    // TODO: -------- 
-    
+    // TODO: --------
+
     (roots, eval_tree)
 }
 
 pub fn extract_roots(mir: &RtLolaMir) -> Vec<StreamReference> {
     // There can be a sub-graph which generates periodic signals without consuming the inputs
     // Hence we can't reach all the nodes just by traversing from the inputs
-    // Such disjoint periodic graph can be a cycle which means just looking at the structure of the graph we can't identify the root
-    // However, RTLola frontend performs HIR layer analysis according to the language semantics
-    // We can choose the nodes with the smallest evaluation layer in the disjoing graph as the roots
+    // To identify roots in such disjointed graph we can start by estimating the ones with the lowest eval layer in RTLolaMIR
+    //
+    // For example in:
+    // output a @1Hz := c.offset(by: -1).defaults(to: 0) + 1
+    // output b := a + 1
+    // output c := b + 1
+    //
+    // a will have the lowest layer therefore an estimate for a root
+    // This is because, when we don't have a pipeline evaluation any past offset is guaranteed to have been evaluated
+    // Hence the layer can be identifed by ignoring the offsets
+    //
+    // However offset can also exist without a cycle
+    //
+    // For example in:
+    // output x @1Hz := x.offset(by: -1).defaults(to: 0) + 1
+    // output a := x + 1
+    // output b := x + 1
+    // output c := a + 1
+    // output d := c + 1
+    // output e := b.offset(by: -1).defaults(to: 0) + d.offset(by: -1).defaults(to: 0)
+    //
+    // x & e have the lowest evaluation layers as the layer is calucated by RTLola by ignoring the offset edges
+    // however e is reachable from x so only 'x' should be a root
+    // So we need to do reachablility analysis on the initial estimate to find actual roots
+    //
+    // There can also be a case when it is not clear which node should be a root
+    // For example:
+    // output a @1Hz := c.offset(by: -1).defaults(to: 0) + 1
+    // output b := a.offset(by: -1).defaults(to: 0) + 1
+    // output c := b.offset(by: -1).defaults(to: 0) + 1
+    //
+    // Here all nodes are reachable starting from any one and they have the same eval layers (calcualted by removing offset edges)
+    // Hence any arbitrary node can be chosen as a root
 
     let mut roots: Vec<usize> = Vec::new();
     for root in &mir.inputs {
@@ -123,20 +153,42 @@ pub fn extract_roots(mir: &RtLolaMir) -> Vec<StreamReference> {
     let mut disjoint: Vec<&OutputStream> = reached
         .iter()
         .enumerate()
-        .filter(|(i, &x)| !x)
+        .filter(|(_, &x)| !x)
         .map(|(i, _)| &mir.outputs[i])
         .collect();
     disjoint.sort_by_key(|&x| x.eval_layer());
+    let mut estimated_roots: Vec<usize> = Vec::new();
     if !disjoint.is_empty() {
         let min_layer = disjoint.first().unwrap().eval_layer();
         for nd in disjoint {
             if nd.eval_layer() != min_layer {
                 break;
             }
-            retval.push(nd.reference.clone());
+            estimated_roots.push(nd.reference.out_ix());
         }
     }
+    for root in remove_reachables(mir, estimated_roots) {
+        retval.push(mir.outputs[root].reference.clone());
+    }
     retval
+}
+
+fn remove_reachables(mir: &RtLolaMir, roots: Vec<usize>) -> Vec<usize> {
+    let mut unreachable: HashSet<usize> = HashSet::from_iter(roots.clone());
+    for node in roots {
+        if !unreachable.contains(&node) {
+            continue;
+        }
+        traverse(mir, vec![node])
+            .into_iter()
+            .enumerate()
+            .for_each(|(i, reached)| {
+                if i != node && reached {
+                    unreachable.remove(&i);
+                }
+            });
+    }
+    unreachable.into_iter().collect()
 }
 
 fn traverse(mir: &RtLolaMir, roots: Vec<usize>) -> Vec<bool> {
