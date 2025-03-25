@@ -24,8 +24,7 @@
 /// So the evaluation order and pipeline info is identified by the structural dependency analysis of the RTLolaMIR graph
 /// However, the evaluation layer in RTLolaMIR is still used to guess the initial set of root nodes in the graph (see extract_roots function)
 use std::{
-    collections::{HashMap, HashSet},
-    hash::Hash,
+    cmp::Ordering, collections::{HashMap, HashSet}, hash::Hash
 };
 
 use rtlola_frontend::mir::{
@@ -121,10 +120,61 @@ fn mark_non_pipeline() {
 }
 
 pub fn get_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
-    // Starting from the roots explore nodes in level-order
-    // Naive BFS won't work as there could be multiple ways to reach the same descendent node
-    // In such cases, we must choose the longest way to reach a descendent node due to the data dependency
-
+    // Starting from the roots explore nodes in the level-order
+    //
+    // For example:
+    // input x : Int32
+    // output a := x + 1
+    // output b := a + 1
+    // output c := x + b
+    // 
+    // Here the levels will be [x], [a, c], [b]
+    // Here in the level [a, c] we could be evaluated after [x]
+    // However as c is reachable from a, so we should remove c from the 2nd level
+    // Giving us the order: [[x], [a], [b], [c]]
+    // 
+    // However, with a loop this simple idea won't work
+    // 
+    // For example: 
+    // input x : Int32
+    // output a := x + 1
+    // output b := x + d.offset(by: -1).defaults(to: 0)
+    // output c := a + b
+    // output d := c + 1
+    // 
+    // Here the 2nd level would be [a, b] 
+    // However b is reachable from 'a' via the loop
+    // If we ignore b in the first level we would get the order [[a], [c], [d], [b]]
+    // Which is wrong as c must be evaluated only after we have both a & b
+    //
+    // Note that the loop can only exist along the -ve offset
+    // So we could remove the -ve offset to avoid the loop in the graph
+    // As the source node for a -ve offset must be in the past, removing the edge doesn't create a dependency issue
+    // However, not all -ve edges create a loop
+    //
+    // For example:
+    // input x : Int
+    // output a := x + 1
+    // output b := a + 1
+    // output c := b.offset(by: -1).defaults(to: 0) 
+    //
+    // Here if we remove -ve offset of b-c, c would be disconnected 
+    // As c has pacing @x, it would mean we can evaluated c as soon as we have x
+    // Giving the order [[x], [a,c], [b]]
+    // However, in a pipeline execution this would be wrong
+    // t1 t2 t3 t4 ..
+    // x1 x2 x3 x4 ..
+    // .. a1 a2 a3 ..
+    // .. .. b1 b2 ..
+    // As you can see, at eval cycle 2
+    // the past value of b i.e b1 is only ready by time t4
+    // so the evaluation order [[x], [a,c], [b]] is wrong
+    // as we can't evaluate c along with a because the past value of b is not ready yet
+    // However, depending on the offset we can evaluate it earlier
+    // See eval order refinement algorithm for more details i.e function refine_eval_order
+    //
+    // So, to identify the correct eval order we should only remove those offsets that results in a cycle
+    // After that we can order the nodes in a level-order
     let mut order: Vec<Vec<Node>> = Vec::new();
 
     let mut next_level: Vec<Node> = Vec::new();
@@ -144,10 +194,22 @@ pub fn get_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
             }
         }
         // check reachability without going through the already visited nodes
-        cur_level = remove_reachable_roots(mir, next_level.clone(), &visited);
+        cur_level = order_nodes_by_reachability(mir, next_level.clone(), &visited);
         next_level = vec![];
     }
     order
+}
+
+
+
+fn order_nodes_by_reachability(mir: &RtLolaMir, nodes: Vec<Node>, frozen: &HashSet<Node>) -> Vec<Node> {
+    let no_duplicate: Vec<Node> = nodes.clone().into_iter().collect::<HashSet<_>>().into_iter().collect();
+    let mut ordered = no_duplicate;
+    ordered.sort_by(|a, b| {
+        let unreachables = remove_reachable_roots(mir, vec![a.clone(), b.clone()], frozen);
+        if unreachables.contains(a) {Ordering::Less} else {Ordering::Greater}
+    });
+    ordered
 }
 
 pub fn refine_eval_order(mir: &RtLolaMir, eval_order: Vec<Vec<Node>>) -> Vec<Vec<Node>> {
