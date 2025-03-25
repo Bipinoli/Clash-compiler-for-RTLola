@@ -51,6 +51,8 @@ fn main() {
             dbg!(&roots);
             let order = hardware_ir::get_eval_order(&mir);
             dbg!(&order);
+            let order = hardware_ir::refine_eval_order(&mir, order);
+            dbg!(&order);
             // to_haskell(mir.clone());
             // let node_tree = hardware_ir::node_tree(mir.clone());
             // dbg!(&node_tree);

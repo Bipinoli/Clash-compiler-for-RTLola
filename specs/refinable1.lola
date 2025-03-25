@@ -4,4 +4,4 @@ output a := x + 1
 output b := x + 1
 output c := a + 1
 output d := c + 1
-output e := b.offset(by: -1).defaults(to: 0)  + d.offset(by: -1).defaults(to: 0)
+output e := b.offset(by: -1).defaults(to: 0)  + d.offset(by: -2).defaults(to: 0)

@@ -3,7 +3,7 @@
 /// Inorder to gather such information we do structural analysis of RTLolaMIR graph
 /// Evaluation layer provided in RTLolaMIR assumes the alternate evaluation of event-based & periodic streams which is no longer valid here
 /// Also if a node depends on data via past offsets, RTLolaMIR thinks the node can be evaluated right in the beginning as all the dependencies are in the past
-/// However, that assumes we are not doing evaluation in a pipeline fashion.
+/// However, that assumes we are not doing evaluation in a pipeline fashion where the past values might not have been fully evaluated yet
 /// When the offset exists along a long path from the input, then even the past data might not be ready already
 ///
 /// For example:
@@ -14,8 +14,11 @@
 /// output d := c + 1
 /// output e := b.offset(by: -1).defaults(to: 0) + d.offset(by: -1).defaults(to: 0)
 ///
-/// Here, e must be evaluated after b & d in-pipeline fashion
-/// However, If the offset is sufficiently large we don't have to wait for b & d
+/// Here, e can't be evaluated before b & d as the past value might not have reached b & d yet
+/// For a correct evaluation we could just eval e after b & d
+/// However, depending on the offset it depends on, it can potentially be evaluated earlier in pipeline
+/// Potentially saving us a cycle and providing faster output of e
+/// Check refine_eval_order function for more info
 ///
 /// For these reasons, we cannot directly use the evaluation layer provided in RTLolaMIR as it is
 /// So the evaluation order and pipeline info is identified by the structural dependency analysis of the RTLolaMIR graph
@@ -26,7 +29,6 @@ use std::{
 };
 
 use rtlola_frontend::mir::{
-
     Offset, Origin, OutputStream, RtLolaMir, Stream, StreamAccessKind, StreamReference,
 };
 
@@ -45,7 +47,7 @@ impl Node {
             StreamReference::Out(x) => Node::OutputStream(x.clone()),
         }
     }
-    fn from_accessed_by(access: &(StreamReference, Vec<(Origin, StreamAccessKind)>)) -> Node {
+    fn from_access(access: &(StreamReference, Vec<(Origin, StreamAccessKind)>)) -> Node {
         match access.1.first().unwrap().1 {
             StreamAccessKind::SlidingWindow(x) => Node::SlidingWindow(x.idx()),
             _ => Node::OutputStream(access.0.out_ix()),
@@ -56,20 +58,34 @@ impl Node {
         match self {
             Node::InputStream(x) => {
                 for child in &mir.inputs[x.clone()].accessed_by {
-                    children.push(Node::from_accessed_by(child));
+                    children.push(Node::from_access(child));
                 }
             }
             Node::OutputStream(x) => {
                 for child in &mir.outputs[x.clone()].accessed_by {
-                    children.push(Node::from_accessed_by(child));
+                    children.push(Node::from_access(child));
                 }
             }
             Node::SlidingWindow(x) => {
-                let child = Node::OutputStream(mir.sliding_windows[x.clone()].caller.out_ix());
-                children.push(child);
+                children.push(Node::from_stream(&mir.sliding_windows[x.clone()].caller));
             }
         }
         children
+    }
+    fn get_parents(&self, mir: &RtLolaMir) -> Vec<Node> {
+        let mut parents: Vec<Node> = Vec::new();
+        match self {
+            Node::OutputStream(x) => {
+                for parent in &mir.outputs[x.clone()].accesses {
+                    parents.push(Node::from_access(parent));
+                }
+            }
+            Node::SlidingWindow(x) => {
+                parents.push(Node::from_stream(&mir.sliding_windows[x.clone()].target));
+            }
+            _ => {}
+        }
+        parents
     }
     fn out_ix(&self) -> usize {
         match self {
@@ -96,12 +112,11 @@ impl HardwareIR {
 
 fn mark_non_pipeline() {
     // Cycle in RTLola can only exist along the offset edge
-    // For each node that consumes data from offset
-    // Check the distance (d) along the eval tree to reach such source
-    // If we can reach then the cycle exists
-    // If the distance > offset value, then the data transfer takes too long
-    // Which means the current node can't be evaluated in a pipeline fashion
-    // Due to the data dependency all of the children & parents of a node that can't be pipelined can't be pipelined as well
+    // For each node that consumes data with offset
+    // Check if source is evaluated after
+    // If the source is evaluated after time (t) with t > offset
+    // Then the node can't be evaluated in pipelined fashion
+    // Due to data dependency all the children and parents of the node can't be pipelined either
     unimplemented!()
 }
 
@@ -133,6 +148,121 @@ pub fn get_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
         next_level = vec![];
     }
     order
+}
+
+pub fn refine_eval_order(mir: &RtLolaMir, eval_order: Vec<Vec<Node>>) -> Vec<Vec<Node>> {
+    // When the node only depends on the past values of other nodes
+    // It can potentially be evaluated earlier
+    // For example:
+    // output x @1Hz := x.offset(by: -1).defaults(to: 0) + 1
+    // output a := x + 1
+    // output b := x + 1
+    // output c := a + 1
+    // output d := c + 1
+    // output e := b.offset(by: -1).defaults(to: 0) + d.offset(by: -1).defaults(to: 0)
+    //
+    // Here the eval order would be x -> a, b -> c -> d -> e
+    // However, as e depends only on the past (-1 offset) values of d & e
+    // Without affecting the pipeline, it can be evaluated earlier like: x -> a,b -> c -> d,e
+    // If e depends on d by -3 offset then we could evalaute it even earlier
+    // i.e x -> a, b, e -> c -> d
+    // which can be found by checking the level of b & d in the eval order
+    // b = level 1, d = level 3
+    // In pipeline evaluation at each cycle we calculate a new value for a step
+    // At level 3, we are about to calcuate new value of d which means we just have the -1 offset value ready there
+    // So if we want -3 offset value of d it would be already availabe at level - (offset - 1)
+    // We can choose the minimum level >= 0 which is valid for both b & d
+    // And that's the earliest level where e can be evaluated in pipeline
+    //
+    // When we evaluate a node earlier, some of it's children could also be evaluated earlier
+    // Also, we need to consider that it can have children only depending via offsets
+    // So, this offset based analysis should be run enough times to catch those opportunities
+    // Also the chilif it had children dpending only on it, they could
+    // So, after adapting this node the children could be impoved fsame analysis must be also run on the children
+    let mut eval_order = eval_order;
+
+    // Running analysis multiple times to accomodate the same "offset only deps" based refinement for children
+    for _ in 0..mir.outputs.len() {
+        for out in &mir.outputs {
+            let mut all_past_deps = true;
+            let mut deps: Vec<(Node, usize)> = Vec::new();
+            for child in &out.accesses {
+                match child.1.first().unwrap().1 {
+                    StreamAccessKind::Offset(off) => {
+                        deps.push((
+                            Node::from_stream(&child.0),
+                            match off {
+                                Offset::Past(x) => x as usize,
+                                _ => unreachable!(),
+                            },
+                        ));
+                    }
+                    _ => {
+                        all_past_deps = false;
+                    }
+                }
+            }
+            if all_past_deps {
+                let new_level = deps
+                    .into_iter()
+                    .map(|(nd, offset)| {
+                        let level = find_level(&nd, &eval_order);
+                        let earliest_posible = if level > (offset - 1) {
+                            level - (offset - 1)
+                        } else {
+                            0
+                        };
+                        earliest_posible
+                    })
+                    .max()
+                    .unwrap();
+                let node = Node::OutputStream(out.reference.out_ix());
+                let old_level = find_level(&node, &eval_order);
+                if new_level < old_level {
+                    eval_order = patch_eval_order(node, old_level, new_level, eval_order);
+                }
+            }
+        }
+    }
+
+    // Possible to evaluate nodes earlier after "offset only" refinement
+    let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
+    for _ in 0..all_nodes.len() {
+        for node in &all_nodes {
+            let old_level = find_level(node, &eval_order);
+            let new_level = node
+                .get_parents(mir)
+                .into_iter()
+                .map(|parent| find_level(&parent, &eval_order) + 1)
+                .max()
+                .unwrap();
+            if new_level < old_level {
+                eval_order = patch_eval_order(node.clone(), old_level, new_level, eval_order);
+            }
+        }
+    }
+    eval_order.into_iter().filter(|x| !x.is_empty()).collect()
+}
+
+fn patch_eval_order(
+    node: Node,
+    old_level: usize,
+    new_level: usize,
+    eval_order: Vec<Vec<Node>>,
+) -> Vec<Vec<Node>> {
+    let mut eval_order = eval_order;
+    eval_order[old_level].retain(|nd| *nd != node);
+    eval_order[new_level].push(node);
+    eval_order
+}
+
+fn find_level(node: &Node, eval_order: &Vec<Vec<Node>>) -> usize {
+    for (i, nodes) in eval_order.iter().enumerate() {
+        if nodes.contains(node) {
+            return i;
+        }
+    }
+    unreachable!()
 }
 
 pub fn extract_roots(mir: &RtLolaMir) -> Vec<Node> {

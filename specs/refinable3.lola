@@ -1,0 +1,12 @@
+output x @1kHz := x.offset(by: -1).defaults(to: 0) + 1
+
+output a := x + 1
+output b := x + i.offset(by: -10).defaults(to: 0) 
+output c := a + 1
+output d := c + 1
+output e := b.offset(by: -1).defaults(to: 0)  + d.offset(by: -2).defaults(to: 0)
+output f := e + a
+output g := e + c
+output h @1kHz := e.aggregate(over: 1s, using: sum) + d.aggregate(over: 1s, using: sum)
+output i @1kHz := g.aggregate(over: 1s, using: sum) + b.aggregate(over: 1s, using: sum)
+output j := e.offset(by: -2).defaults(to: 0) + 1
