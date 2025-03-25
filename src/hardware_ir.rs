@@ -24,7 +24,9 @@
 /// So the evaluation order and pipeline info is identified by the structural dependency analysis of the RTLolaMIR graph
 /// However, the evaluation layer in RTLolaMIR is still used to guess the initial set of root nodes in the graph (see extract_roots function)
 use std::{
-    cmp::Ordering, collections::{HashMap, HashSet}, hash::Hash
+    cmp::Ordering,
+    collections::{HashMap, HashSet},
+    hash::Hash,
 };
 
 use rtlola_frontend::mir::{
@@ -46,12 +48,14 @@ impl Node {
             StreamReference::Out(x) => Node::OutputStream(x.clone()),
         }
     }
+
     fn from_access(access: &(StreamReference, Vec<(Origin, StreamAccessKind)>)) -> Node {
         match access.1.first().unwrap().1 {
             StreamAccessKind::SlidingWindow(x) => Node::SlidingWindow(x.idx()),
-            _ => Node::OutputStream(access.0.out_ix()),
+            _ => Node::from_stream(&access.0)
         }
     }
+
     fn get_children(&self, mir: &RtLolaMir) -> Vec<Node> {
         let mut children: Vec<Node> = Vec::new();
         match self {
@@ -71,6 +75,53 @@ impl Node {
         }
         children
     }
+
+    fn get_real_children(&self, mir: &RtLolaMir) -> Vec<Node> {
+        // children except for the ones that make loop with -ve offset
+        let mut real_children: Vec<Node> = Vec::new();
+        let children = self.get_children(mir);
+        for child in children {
+            let is_past_offset_child = {
+                match child {
+                    Node::OutputStream(x) => {
+                        let past_offsets = &mir.outputs[x.clone()]
+                            .accesses
+                            .iter()
+                            .filter(|access| {
+                                let parent_node = Node::from_stream(&access.0);
+                                parent_node == *self
+                            })
+                            .map(|access| {
+                                let access_kind = access.1.first().unwrap().1;
+                                match access_kind {
+                                    StreamAccessKind::Offset(off) => match off {
+                                        Offset::Past(_) => true,
+                                        _ => false,
+                                    },
+                                    _ => false,
+                                }
+                            })
+                            .filter(|x| *x)
+                            .collect::<Vec<_>>();
+                        !past_offsets.is_empty()
+                    }
+                    Node::SlidingWindow(_) => false,
+                    Node::InputStream(_) => unreachable!(),
+                }
+            };
+            let is_real_child = if is_past_offset_child {
+                let reached = traverse(mir, vec![child.clone()], &HashSet::new());
+                !reached.contains(self)
+            } else {
+                true
+            };
+            if is_real_child {
+                real_children.push(child);
+            }
+        }
+        real_children
+    }
+
     fn get_parents(&self, mir: &RtLolaMir) -> Vec<Node> {
         let mut parents: Vec<Node> = Vec::new();
         match self {
@@ -86,6 +137,7 @@ impl Node {
         }
         parents
     }
+
     fn out_ix(&self) -> usize {
         match self {
             Node::OutputStream(x) => x.clone(),
@@ -119,7 +171,7 @@ fn mark_non_pipeline() {
     unimplemented!()
 }
 
-pub fn get_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
+pub fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     // Starting from the roots explore nodes in the level-order
     //
     // For example:
@@ -127,22 +179,22 @@ pub fn get_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     // output a := x + 1
     // output b := a + 1
     // output c := x + b
-    // 
+    //
     // Here the levels will be [x], [a, c], [b]
     // Here in the level [a, c] we could be evaluated after [x]
     // However as c is reachable from a, so we should remove c from the 2nd level
     // Giving us the order: [[x], [a], [b], [c]]
-    // 
+    //
     // However, with a loop this simple idea won't work
-    // 
-    // For example: 
+    //
+    // For example:
     // input x : Int32
     // output a := x + 1
     // output b := x + d.offset(by: -1).defaults(to: 0)
     // output c := a + b
     // output d := c + 1
-    // 
-    // Here the 2nd level would be [a, b] 
+    //
+    // Here the 2nd level would be [a, b]
     // However b is reachable from 'a' via the loop
     // If we ignore b in the first level we would get the order [[a], [c], [d], [b]]
     // Which is wrong as c must be evaluated only after we have both a & b
@@ -156,9 +208,9 @@ pub fn get_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     // input x : Int
     // output a := x + 1
     // output b := a + 1
-    // output c := b.offset(by: -1).defaults(to: 0) 
+    // output c := b.offset(by: -1).defaults(to: 0)
     //
-    // Here if we remove -ve offset of b-c, c would be disconnected 
+    // Here if we remove -ve offset of b-c, c would be disconnected
     // As c has pacing @x, it would mean we can evaluated c as soon as we have x
     // Giving the order [[x], [a,c], [b]]
     // However, in a pipeline execution this would be wrong
@@ -187,30 +239,19 @@ pub fn get_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
             visited.insert(nd.clone());
         });
         for node in &cur_level {
-            for child in node.get_children(mir) {
+            for child in node.get_real_children(mir) {
                 if !visited.contains(&child) {
                     next_level.push(child);
                 }
             }
         }
         // check reachability without going through the already visited nodes
-        cur_level = order_nodes_by_reachability(mir, next_level.clone(), &visited);
+        cur_level = remove_reachable_roots(mir, next_level.clone(), &visited);
         next_level = vec![];
     }
     order
 }
 
-
-
-fn order_nodes_by_reachability(mir: &RtLolaMir, nodes: Vec<Node>, frozen: &HashSet<Node>) -> Vec<Node> {
-    let no_duplicate: Vec<Node> = nodes.clone().into_iter().collect::<HashSet<_>>().into_iter().collect();
-    let mut ordered = no_duplicate;
-    ordered.sort_by(|a, b| {
-        let unreachables = remove_reachable_roots(mir, vec![a.clone(), b.clone()], frozen);
-        if unreachables.contains(a) {Ordering::Less} else {Ordering::Greater}
-    });
-    ordered
-}
 
 pub fn refine_eval_order(mir: &RtLolaMir, eval_order: Vec<Vec<Node>>) -> Vec<Vec<Node>> {
     // When the node only depends on the past values of other nodes
@@ -297,7 +338,7 @@ pub fn refine_eval_order(mir: &RtLolaMir, eval_order: Vec<Vec<Node>>) -> Vec<Vec
                 .into_iter()
                 .map(|parent| find_level(&parent, &eval_order) + 1)
                 .max()
-                .unwrap();
+                .unwrap_or(old_level.clone());
             if new_level < old_level {
                 eval_order = patch_eval_order(node.clone(), old_level, new_level, eval_order);
             }
@@ -408,7 +449,7 @@ fn remove_reachable_roots(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<No
         if !unreachable.contains(&node) {
             continue;
         }
-        traverse(mir, vec![node.clone()], frozen)
+        traverse_real_children(mir, vec![node.clone()], frozen)
             .into_iter()
             .for_each(|nd| {
                 if nd != node {
@@ -418,6 +459,23 @@ fn remove_reachable_roots(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<No
     }
     unreachable.into_iter().collect()
 }
+
+fn traverse_real_children(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<Node>) -> HashSet<Node> {
+    let mut reached: HashSet<Node> = HashSet::new();
+    let mut stk: Vec<Node> = roots;
+
+    while !stk.is_empty() {
+        let nd = stk.pop().unwrap();
+        reached.insert(nd.clone());
+        for child in nd.get_real_children(mir) {
+            if !reached.contains(&child) & !frozen.contains(&child) {
+                stk.push(child);
+            }
+        }
+    }
+    reached
+}
+
 
 fn traverse(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<Node>) -> HashSet<Node> {
     let mut reached: HashSet<Node> = HashSet::new();

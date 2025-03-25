@@ -49,7 +49,7 @@ fn main() {
             save_mir_as_json(mir.clone(), mir_filename);
             let roots = hardware_ir::extract_roots(&mir);
             dbg!(&roots);
-            let order = hardware_ir::get_eval_order(&mir);
+            let order = hardware_ir::find_eval_order(&mir);
             dbg!(&order);
             let order = hardware_ir::refine_eval_order(&mir, order);
             dbg!(&order);
