@@ -1,0 +1,5 @@
+input x : Int
+output a := x + d.offset(by: -1).defaults(to: 0)
+output b := a + 1
+output c := b.offset(by: -1).defaults(to: 0)
+output d := c + 1

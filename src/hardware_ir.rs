@@ -52,7 +52,7 @@ impl Node {
     fn from_access(access: &(StreamReference, Vec<(Origin, StreamAccessKind)>)) -> Node {
         match access.1.first().unwrap().1 {
             StreamAccessKind::SlidingWindow(x) => Node::SlidingWindow(x.idx()),
-            _ => Node::from_stream(&access.0)
+            _ => Node::from_stream(&access.0),
         }
     }
 
@@ -119,6 +119,8 @@ impl Node {
                 real_children.push(child);
             }
         }
+        let children_str = real_children.iter().map(|nd| nd.prettify(mir)).collect::<Vec<_>>().join(", ");
+        println!("Parent: {}, real children: {}", self.prettify(mir), children_str);
         real_children
     }
 
@@ -144,6 +146,29 @@ impl Node {
             _ => unreachable!(),
         }
     }
+
+    pub fn prettify(&self, mir: &RtLolaMir) -> String {
+        match self {
+            Node::InputStream(x) => mir.inputs[x.clone()].name.clone(),
+            Node::OutputStream(x) => mir.outputs[x.clone()].name.clone(),
+            Node::SlidingWindow(x) => {
+                let caller = {
+                    mir.outputs[mir.sliding_windows[x.clone()].caller.out_ix()]
+                        .name
+                        .clone()
+                };
+                let target = {
+                    let target = mir.sliding_windows[x.clone()].target;
+                    if target.is_output() {
+                        mir.outputs[target.out_ix()].name.clone()
+                    } else {
+                        mir.inputs[target.in_ix()].name.clone()
+                    }
+                };
+                format!("SW {} - {}", target, caller)
+            }
+        }
+    }
 }
 
 #[derive(PartialEq, Clone)]
@@ -161,17 +186,45 @@ impl HardwareIR {
     }
 }
 
-fn mark_non_pipeline() {
-    // Cycle in RTLola can only exist along the offset edge
-    // For each node that consumes data with offset
-    // Check if source is evaluated after
-    // If the source is evaluated after time (t) with t > offset
-    // Then the node can't be evaluated in pipelined fashion
-    // Due to data dependency all the children and parents of the node can't be pipelined either
-    unimplemented!()
+fn visualize_pipeline() {
+
+}
+
+fn analyse_for_pipelining(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
+
+}
+
+fn window_size(node: &Node, child: &Node, pipeline_shift: usize, offset: usize, eval_order: &Vec<Vec<Node>>) -> usize {
+    let dist = level_distance(node, child, eval_order);
+    if dist <= 0 {
+        let dist = (-dist) as f32;
+        ((offset as f32) + 1.0 - (dist / (pipeline_shift as f32 + 1.0)).ceil()) as usize
+    } else {
+        ((dist as f32) / (pipeline_shift as f32 + 1.0)).ceil() as usize
+    }
+}
+
+fn pipeline_shift(node: &Node, parent: &Node, offset: usize, eval_order: &Vec<Vec<Node>>) -> usize {
+    let dist = level_distance(parent, node, eval_order);
+    if dist < 0 {
+        ((-dist + 1) - offset as i32) as usize
+    } else {
+        0
+    }
+}
+
+fn level_distance(a: &Node, b: &Node, eval_order: &Vec<Vec<Node>>) -> i32 {
+    let level_a = find_level(a, eval_order) as i32; 
+    let level_b = find_level(b, eval_order) as i32;
+    level_a - level_b
 }
 
 pub fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
+    unimplemented!()
+}
+
+
+pub fn find_eval_order_wrong_algo(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     // Starting from the roots explore nodes in the level-order
     //
     // For example:
@@ -251,7 +304,6 @@ pub fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     }
     order
 }
-
 
 pub fn refine_eval_order(mir: &RtLolaMir, eval_order: Vec<Vec<Node>>) -> Vec<Vec<Node>> {
     // When the node only depends on the past values of other nodes
@@ -460,7 +512,11 @@ fn remove_reachable_roots(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<No
     unreachable.into_iter().collect()
 }
 
-fn traverse_real_children(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<Node>) -> HashSet<Node> {
+fn traverse_real_children(
+    mir: &RtLolaMir,
+    roots: Vec<Node>,
+    frozen: &HashSet<Node>,
+) -> HashSet<Node> {
     let mut reached: HashSet<Node> = HashSet::new();
     let mut stk: Vec<Node> = roots;
 
@@ -476,7 +532,6 @@ fn traverse_real_children(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<No
     reached
 }
 
-
 fn traverse(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<Node>) -> HashSet<Node> {
     let mut reached: HashSet<Node> = HashSet::new();
     let mut stk: Vec<Node> = roots;
@@ -491,4 +546,18 @@ fn traverse(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<Node>) -> HashSe
         }
     }
     reached
+}
+
+pub fn prettify_eval_order(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> String {
+    eval_order
+        .iter()
+        .map(|order| {
+            order
+                .iter()
+                .map(|nd| nd.prettify(mir))
+                .collect::<Vec<_>>()
+                .join(", ")
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
