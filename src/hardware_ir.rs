@@ -4,27 +4,8 @@
 /// Evaluation layer provided in RTLolaMIR assumes the alternate evaluation of event-based & periodic streams which is no longer valid here
 /// Also if a node depends on data via past offsets, RTLolaMIR thinks the node can be evaluated right in the beginning as all the dependencies are in the past
 /// However, that assumes we are not doing evaluation in a pipeline fashion where the past values might not have been fully evaluated yet
-/// When the offset exists along a long path from the input, then even the past data might not be ready already
-///
-/// For example:
-/// output x @1Hz := x.offset(by: -1).defaults(to: 0) + 1
-/// output a := x + 1
-/// output b := x + 1
-/// output c := a + 1
-/// output d := c + 1
-/// output e := b.offset(by: -1).defaults(to: 0) + d.offset(by: -1).defaults(to: 0)
-///
-/// Here, e can't be evaluated before b & d as the past value might not have reached b & d yet
-/// For a correct evaluation we could just eval e after b & d
-/// However, depending on the offset it depends on, it can potentially be evaluated earlier in pipeline
-/// Potentially saving us a cycle and providing faster output of e
-/// Check refine_eval_order function for more info
-///
-/// For these reasons, we cannot directly use the evaluation layer provided in RTLolaMIR as it is
-/// So the evaluation order and pipeline info is identified by the structural dependency analysis of the RTLolaMIR graph
-/// However, the evaluation layer in RTLolaMIR is still used to guess the initial set of root nodes in the graph (see extract_roots function)
 use std::{
-    cmp::{self, Ordering}, collections::{HashMap, HashSet}, hash::Hash, usize, vec
+    cmp::{self, }, collections::{HashMap, HashSet}, hash::Hash, usize, vec
 };
 
 use rtlola_frontend::mir::{
@@ -54,21 +35,39 @@ impl Node {
         }
     }
 
-    fn get_children(&self, mir: &RtLolaMir) -> Vec<Node> {
-        let mut children: Vec<Node> = Vec::new();
+    fn get_children(&self, mir: &RtLolaMir) -> Vec<(Node, usize)> {
+        let mut children: Vec<(Node, usize)> = Vec::new();
         match self {
             Node::InputStream(x) => {
                 for child in &mir.inputs[x.clone()].accessed_by {
-                    children.push(Node::from_access(child));
+                    let offset = match child.1.first().unwrap().1 {
+                        StreamAccessKind::Offset(off) => {
+                            match off {
+                                Offset::Past(x) => x as usize,
+                                _ => unreachable!()
+                            }
+                        }
+                        _ => 0
+                    };
+                    children.push((Node::from_access(child), offset));
                 }
             }
             Node::OutputStream(x) => {
                 for child in &mir.outputs[x.clone()].accessed_by {
-                    children.push(Node::from_access(child));
+                    let offset = match child.1.first().unwrap().1 {
+                        StreamAccessKind::Offset(off) => {
+                            match off {
+                                Offset::Past(x) => x as usize,
+                                _ => unreachable!()
+                            }
+                        }
+                        _ => 0
+                    };
+                    children.push((Node::from_access(child), offset));
                 }
             }
             Node::SlidingWindow(x) => {
-                children.push(Node::from_stream(&mir.sliding_windows[x.clone()].caller));
+                children.push((Node::from_stream(&mir.sliding_windows[x.clone()].caller), 0));
             }
         }
         children
@@ -104,70 +103,6 @@ impl Node {
         children
     }
 
-    // fn get_real_children(&self, mir: &RtLolaMir) -> Vec<Node> {
-    //     // children except for the ones that make loop with -ve offset
-    //     let mut real_children: Vec<Node> = Vec::new();
-    //     let children = self.get_children(mir);
-    //     for child in children {
-    //         let is_past_offset_child = {
-    //             match child {
-    //                 Node::OutputStream(x) => {
-    //                     let past_offsets = &mir.outputs[x.clone()]
-    //                         .accesses
-    //                         .iter()
-    //                         .filter(|access| {
-    //                             let parent_node = Node::from_stream(&access.0);
-    //                             parent_node == *self
-    //                         })
-    //                         .map(|access| {
-    //                             let access_kind = access.1.first().unwrap().1;
-    //                             match access_kind {
-    //                                 StreamAccessKind::Offset(off) => match off {
-    //                                     Offset::Past(_) => true,
-    //                                     _ => false,
-    //                                 },
-    //                                 _ => false,
-    //                             }
-    //                         })
-    //                         .filter(|x| *x)
-    //                         .collect::<Vec<_>>();
-    //                     !past_offsets.is_empty()
-    //                 }
-    //                 Node::SlidingWindow(_) => false,
-    //                 Node::InputStream(_) => unreachable!(),
-    //             }
-    //         };
-    //         let is_real_child = if is_past_offset_child {
-    //             let reached = traverse(mir, vec![child.clone()], &HashSet::new());
-    //             !reached.contains(self)
-    //         } else {
-    //             true
-    //         };
-    //         if is_real_child {
-    //             real_children.push(child);
-    //         }
-    //     }
-    //     let children_str = real_children.iter().map(|nd| nd.prettify(mir)).collect::<Vec<_>>().join(", ");
-    //     real_children
-    // }
-
-    fn get_parents(&self, mir: &RtLolaMir) -> Vec<Node> {
-        let mut parents: Vec<Node> = Vec::new();
-        match self {
-            Node::OutputStream(x) => {
-                for parent in &mir.outputs[x.clone()].accesses {
-                    parents.push(Node::from_access(parent));
-                }
-            }
-            Node::SlidingWindow(x) => {
-                parents.push(Node::from_stream(&mir.sliding_windows[x.clone()].target));
-            }
-
-            _ => {}
-        }
-        parents
-    }
-
     fn get_offset_parents(&self, mir: &RtLolaMir) -> Vec<(Node, usize)> {
         let mut parents: Vec<(Node, usize)> = Vec::new();
         match self {
@@ -189,13 +124,6 @@ impl Node {
             _ => {}
         }
         parents
-    }
-
-    fn out_ix(&self) -> usize {
-        match self {
-            Node::OutputStream(x) => x.clone(),
-            _ => unreachable!(),
-        }
     }
 
     pub fn prettify(&self, mir: &RtLolaMir) -> String {
@@ -275,8 +203,17 @@ pub fn visualize_pipeline(
     }
 }
 
-fn analyse_for_pipelining(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
-    unimplemented!()
+fn analyse_window_size(eval_order: &Vec<Vec<Node>>, pipeline_wait: usize, mir: &RtLolaMir) {
+    let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
+    all_nodes.into_iter().for_each(|node|{
+        let window = node.get_children(mir).into_iter().map(|(child, offset)| window_size(&node, &child, pipeline_wait, offset, eval_order)).max();
+        match window {
+            Some(win) => {
+                println!("window {} = {}", node.prettify(mir), win);
+            },
+            _ => {}
+        }
+    });
 }
 
 fn window_size(
@@ -286,6 +223,7 @@ fn window_size(
     offset: usize,
     eval_order: &Vec<Vec<Node>>,
 ) -> usize {
+    // TODO: debug window size calculation (can use refinable1 or refinable2 as an example)
     let dist = level_distance(node, child, eval_order);
     if dist <= 0 {
         let dist = (-dist) as f32;
@@ -298,8 +236,7 @@ fn window_size(
 fn pipeline_wait(node: &Node, parent: &Node, offset: usize, eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> usize {
     let propagation_time = level_distance(parent, node, eval_order);
     let value_avail_time = propagation_time + 1; // 1 cycle for the eval
-    // we must wait until 
-    // value_avail_time <= (wait + 1) * offset
+    // we must wait until: value_avail_time <= (wait + 1) * offset
     let wait = if value_avail_time < 0 {
         0
     } else {
@@ -370,8 +307,10 @@ pub fn find_eval_order(mir: &RtLolaMir) -> usize {
 
     let mut best_pipeline_wait = usize::MAX;
     all_combinations.into_iter().for_each(|eval_order| {
-        println!("\n{}", prettify_eval_order(&eval_order, mir));
+        println!();
+        display_eval_order(&eval_order, mir);
         let pipeline_wait = find_necessary_pipeline_wait(&eval_order, mir);
+        analyse_window_size(&eval_order, pipeline_wait, mir);
         visualize_pipeline(&eval_order, pipeline_wait, 10, mir);
         best_pipeline_wait = cmp::min(best_pipeline_wait, pipeline_wait);
     });
@@ -555,225 +494,8 @@ fn find_level(node: &Node, eval_order: &Vec<Vec<Node>>) -> usize {
     unreachable!()
 }
 
-// pub fn refine_eval_order(mir: &RtLolaMir, eval_order: Vec<Vec<Node>>) -> Vec<Vec<Node>> {
-//     // When the node only depends on the past values of other nodes
-//     // It can potentially be evaluated earlier
-//     // For example:
-//     // output x @1Hz := x.offset(by: -1).defaults(to: 0) + 1
-//     // output a := x + 1
-//     // output b := x + 1
-//     // output c := a + 1
-//     // output d := c + 1
-//     // output e := b.offset(by: -1).defaults(to: 0) + d.offset(by: -1).defaults(to: 0)
-//     //
-//     // Here the eval order would be x -> a, b -> c -> d -> e
-//     // However, as e depends only on the past (-1 offset) values of d & e
-//     // Without affecting the pipeline, it can be evaluated earlier like: x -> a,b -> c -> d,e
-//     // If e depends on d by -3 offset then we could evalaute it even earlier
-//     // i.e x -> a, b, e -> c -> d
-//     // which can be found by checking the level of b & d in the eval order
-//     // b = level 1, d = level 3
-//     // In pipeline evaluation at each cycle we calculate a new value for a step
-//     // At level 3, we are about to calcuate new value of d which means we just have the -1 offset value ready there
-//     // So if we want -3 offset value of d it would be already availabe at level - (offset - 1)
-//     // We can choose the minimum level >= 0 which is valid for both b & d
-//     // And that's the earliest level where e can be evaluated in pipeline
-//     //
-//     // When we evaluate a node earlier, some of it's children could also be evaluated earlier
-//     // Also, we need to consider that it can have children only depending via offsets
-//     // So, this offset based analysis should be run enough times to catch those opportunities
-//     // Also the chilif it had children dpending only on it, they could
-//     // So, after adapting this node the children could be impoved fsame analysis must be also run on the children
-//     let mut eval_order = eval_order;
-
-//     // Running analysis multiple times to accomodate the same "offset only deps" based refinement for children
-//     for _ in 0..mir.outputs.len() {
-//         for out in &mir.outputs {
-//             let mut all_past_deps = true;
-//             let mut deps: Vec<(Node, usize)> = Vec::new();
-//             for child in &out.accesses {
-//                 match child.1.first().unwrap().1 {
-//                     StreamAccessKind::Offset(off) => {
-//                         deps.push((
-//                             Node::from_stream(&child.0),
-//                             match off {
-//                                 Offset::Past(x) => x as usize,
-//                                 _ => unreachable!(),
-//                             },
-//                         ));
-//                     }
-//                     _ => {
-//                         all_past_deps = false;
-//                     }
-//                 }
-//             }
-//             if all_past_deps {
-//                 let new_level = deps
-//                     .into_iter()
-//                     .map(|(nd, offset)| {
-//                         let level = find_level(&nd, &eval_order);
-//                         let earliest_posible = if level > (offset - 1) {
-//                             level - (offset - 1)
-//                         } else {
-//                             0
-//                         };
-//                         earliest_posible
-//                     })
-//                     .max()
-//                     .unwrap();
-//                 let node = Node::OutputStream(out.reference.out_ix());
-//                 let old_level = find_level(&node, &eval_order);
-//                 if new_level < old_level {
-//                     eval_order = patch_eval_order(node, old_level, new_level, eval_order);
-//                 }
-//             }
-//         }
-//     }
-
-//     // Possible to evaluate nodes earlier after "offset only" refinement
-//     let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
-//     for _ in 0..all_nodes.len() {
-//         for node in &all_nodes {
-//             let old_level = find_level(node, &eval_order);
-//             let new_level = node
-//                 .get_parents(mir)
-//                 .into_iter()
-//                 .map(|parent| find_level(&parent, &eval_order) + 1)
-//                 .max()
-//                 .unwrap_or(old_level.clone());
-//             if new_level < old_level {
-//                 eval_order = patch_eval_order(node.clone(), old_level, new_level, eval_order);
-//             }
-//         }
-//     }
-//     eval_order.into_iter().filter(|x| !x.is_empty()).collect()
-// }
-
-// fn patch_eval_order(
-//     node: Node,
-//     old_level: usize,
-//     new_level: usize,
-//     eval_order: Vec<Vec<Node>>,
-// ) -> Vec<Vec<Node>> {
-//     let mut eval_order = eval_order;
-//     eval_order[old_level].retain(|nd| *nd != node);
-//     eval_order[new_level].push(node);
-//     eval_order
-// }
-
-// pub fn extract_roots(mir: &RtLolaMir) -> Vec<Node> {
-//     // There can be a sub-graph which generates periodic signals without consuming the inputs
-//     // Hence we can't reach all the nodes just by traversing from the inputs
-//     // To identify roots in such disjointed graph we can start by estimating the ones with the lowest eval layer in RTLolaMIR
-//     //
-//     // For example in:
-//     // output a @1Hz := c.offset(by: -1).defaults(to: 0) + 1
-//     // output b := a + 1
-//     // output c := b + 1
-//     //
-//     // a will have the lowest layer therefore an estimate for a root
-//     // This is because, when we don't have a pipeline evaluation any past offset is guaranteed to have been evaluated
-//     // Hence the layer can be identifed by ignoring the offsets
-//     //
-//     // However offset can also exist without a cycle
-//     //
-//     // For example in:
-//     // output x @1Hz := x.offset(by: -1).defaults(to: 0) + 1
-//     // output a := x + 1
-//     // output b := x + 1
-//     // output c := a + 1
-//     // output d := c + 1
-//     // output e := b.offset(by: -1).defaults(to: 0) + d.offset(by: -1).defaults(to: 0)
-//     //
-//     // x & e have the lowest evaluation layers as the layer is calucated by RTLola by ignoring the offset edges
-//     // however e is reachable from x so only 'x' should be a root
-//     // So we need to do reachablility analysis on the initial estimate to find actual roots
-//     //
-//     // There can also be a case when it is not clear which node should be a root
-//     // For example:
-//     // output a @1Hz := c.offset(by: -1).defaults(to: 0) + 1
-//     // output b := a.offset(by: -1).defaults(to: 0) + 1
-//     // output c := b.offset(by: -1).defaults(to: 0) + 1
-//     //
-//     // Here all nodes are reachable starting from any one and they have the same eval layers (calcualted by removing offset edges)
-//     // Hence any arbitrary node can be chosen as a root
-
-//     let mut roots: Vec<Node> = Vec::new();
-//     for inpt in &mir.inputs {
-//         roots.push(Node::InputStream(inpt.reference.in_ix()));
-//     }
-//     let reached = traverse(mir, roots.clone(), &HashSet::new());
-
-//     let mut disjoint: Vec<Node> = Vec::new();
-//     for i in 0..mir.outputs.len() {
-//         let nd = Node::OutputStream(i);
-//         if !reached.contains(&nd) {
-//             disjoint.push(nd);
-//         }
-//     }
-//     disjoint.sort_by_key(|nd| match nd {
-//         Node::SlidingWindow(_) => usize::MAX,
-//         Node::OutputStream(x) => mir.outputs[x.clone()].eval_layer().inner(),
-//         Node::InputStream(_) => unreachable!(),
-//     });
-//     if !disjoint.is_empty() {
-//         let first = disjoint.first().unwrap().clone();
-//         let estimated_roots: Vec<Node> = disjoint
-//             .into_iter()
-//             .take_while(|nd| match nd {
-//                 Node::OutputStream(x) => {
-//                     let nd_layer = mir.outputs[x.clone()].eval_layer();
-//                     let first_layer = mir.outputs[first.out_ix()].eval_layer();
-//                     nd_layer == first_layer
-//                 }
-//                 _ => false,
-//             })
-//             .collect();
-//         for root in remove_reachable_roots(mir, estimated_roots, &HashSet::new()) {
-//             roots.push(root);
-//         }
-//     }
-//     roots
-// }
-
-// fn traverse_real_children(
-//     mir: &RtLolaMir,
-//     roots: Vec<Node>,
-//     frozen: &HashSet<Node>,
-// ) -> HashSet<Node> {
-//     let mut reached: HashSet<Node> = HashSet::new();
-//     let mut stk: Vec<Node> = roots;
-
-//     while !stk.is_empty() {
-//         let nd = stk.pop().unwrap();
-//         reached.insert(nd.clone());
-//         for child in nd.get_real_children(mir) {
-//             if !reached.contains(&child) & !frozen.contains(&child) {
-//                 stk.push(child);
-//             }
-//         }
-//     }
-//     reached
-// }
-
-// fn traverse(mir: &RtLolaMir, roots: Vec<Node>, frozen: &HashSet<Node>) -> HashSet<Node> {
-//     let mut reached: HashSet<Node> = HashSet::new();
-//     let mut stk: Vec<Node> = roots;
-
-//     while !stk.is_empty() {
-//         let nd = stk.pop().unwrap();
-//         reached.insert(nd.clone());
-//         for child in nd.get_children(mir) {
-//             if !reached.contains(&child) & !frozen.contains(&child) {
-//                 stk.push(child);
-//             }
-//         }
-//     }
-//     reached
-// }
-
-pub fn prettify_eval_order(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> String {
-    eval_order
+pub fn display_eval_order(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
+    let order = eval_order
         .iter()
         .map(|order| {
             order
@@ -783,5 +505,6 @@ pub fn prettify_eval_order(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> Stri
                 .join(", ")
         })
         .collect::<Vec<_>>()
-        .join("\n")
+        .join("\n");
+    println!("{}\n", order);
 }
