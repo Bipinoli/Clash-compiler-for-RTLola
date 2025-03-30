@@ -57,10 +57,10 @@ fn main() {
                     .collect::<Vec<_>>()
                     .join(", ")
             );
-            let order = hardware_ir::find_eval_order(&mir);
-            println!("{}", prettify_eval_order(&order, &mir));
+            let order = hardware_ir::find_eval_order_wrong_algo(&mir);
             let order = hardware_ir::refine_eval_order(&mir, order);
-            println!("{}", prettify_eval_order(&order, &mir));
+            // println!("{}", prettify_eval_order(&order, &mir));
+            hardware_ir::visualize_pipeline(&order, 2, 15, &mir);
             // to_haskell(mir.clone());
             // let node_tree = hardware_ir::node_tree(mir.clone());
             // dbg!(&node_tree);

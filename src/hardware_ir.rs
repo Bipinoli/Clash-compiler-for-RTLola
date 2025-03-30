@@ -120,7 +120,6 @@ impl Node {
             }
         }
         let children_str = real_children.iter().map(|nd| nd.prettify(mir)).collect::<Vec<_>>().join(", ");
-        println!("Parent: {}, real children: {}", self.prettify(mir), children_str);
         real_children
     }
 
@@ -134,6 +133,32 @@ impl Node {
             }
             Node::SlidingWindow(x) => {
                 parents.push(Node::from_stream(&mir.sliding_windows[x.clone()].target));
+            }
+
+            _ => {}
+        }
+        parents
+    }
+
+    fn get_offset_parents(&self, mir: &RtLolaMir) -> Vec<(Node, usize)> {
+        let mut parents: Vec<(Node, usize)> = Vec::new();
+        match self {
+            Node::OutputStream(x) => {
+                for parent in &mir.outputs[x.clone()].accesses {
+                    match parent.1.first().unwrap().1 {
+                        StreamAccessKind::Offset(off) => {
+                            match off {
+                                Offset::Past(x) => {
+                                    parents.push((Node::from_access(parent), x.clone() as usize));
+                                },
+                                _ => {
+                                    unreachable!()
+                                }
+                            }
+                        }, 
+                        _ => {}
+                    }
+                }
             }
             _ => {}
         }
@@ -165,7 +190,7 @@ impl Node {
                         mir.inputs[target.in_ix()].name.clone()
                     }
                 };
-                format!("SW {} - {}", target, caller)
+                format!("sw({},{})", target, caller)
             }
         }
     }
@@ -186,12 +211,35 @@ impl HardwareIR {
     }
 }
 
-fn visualize_pipeline() {
+pub fn visualize_pipeline(eval_order: &Vec<Vec<Node>>, pipeline_shift: usize, time_steps: usize, mir: &RtLolaMir) {
+    let orders: Vec<String> = eval_order.iter().map(|order| {
+        order.iter().map(|nd| nd.prettify(mir)).collect::<Vec<String>>().join(",")
+    }).collect();
+    let max_len = orders.iter().map(|x| x.len()).max().unwrap();
+    for (i, x) in orders.iter().enumerate() {
+        let mut line: Vec<String> = Vec::new();
+        let mut shift_cnt = 0;
+        for j in 0..time_steps {
+            let padded_str = if j >= i && shift_cnt == 0 {
+                shift_cnt = pipeline_shift;
+                format!("{:width$}", x.as_str(), width = max_len)
+            } else {
+                if j >= i {
+                    shift_cnt -= 1;
+                }
+                format!("{:width$}", "", width = max_len)
+            };
+            line.push(padded_str);
+        }
+        let line = line.join(" | ");
+        println!("{}", line);
+        println!("{}", "-".repeat(line.len()));
+    }
+} 
 
-}
 
 fn analyse_for_pipelining(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
-
+    unimplemented!()
 }
 
 fn window_size(node: &Node, child: &Node, pipeline_shift: usize, offset: usize, eval_order: &Vec<Vec<Node>>) -> usize {
@@ -219,7 +267,47 @@ fn level_distance(a: &Node, b: &Node, eval_order: &Vec<Vec<Node>>) -> i32 {
     level_a - level_b
 }
 
+fn find_necessary_pipeline_shift(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> usize {
+    let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect(); 
+    let max_shift = all_nodes.into_iter().map(|node| {
+        node.get_offset_parents(mir).into_iter().map(|(parent, offset)| {
+            pipeline_shift(&node, &parent, offset, eval_order)
+        }).max()
+    }).max();
+    max_shift.unwrap_or(Some(0)).unwrap()
+}
+
 pub fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
+    // Find eval order ignoring the offsets
+    // This can give us disjointed sub-graphs
+    // If we don't want to pipeline, we can run them in parallel 
+    // As the next eval cycle will only run after completely finishing earlier,
+    // this gives us correct evaluation as all past values (offsets) will be alredy be available
+    // However, it might still be possible to pipeline the evaluation
+    // For this we could check the dependency by offsets and check the maximum pipeline_shift necessary
+    // The amount of necesary pipeline_shift also depends on when we want to start evaluation of the disjointed graphs
+    // For this we can try all the possible combinations and choose the one which requires the minimum pipeline_shift
+    //
+    // For example:
+    // input x: Int
+    // output a := x + 1
+    // output b := a + 1
+    // output c := b + 1
+    // output d := c.offset(by: -1).defaults(to: 0)
+    //
+    // After removing offsets the isolated graphs with eval orders are [x, a, b, c] and [d]
+    // We could try all combinations of eval orders i.e:
+    // [(x, d), a, b, c], [x, (a, d), b, c], [x, a, (b, d), c], [x, a, b, (c, d)], [x, a, b, c, d]
+    // Among them the eval order [x, a, b, (c, d)] & [x, a, b, c, d] will give the least pipeline_shift necessary i.e 0
+    // However [x, a, b, (c, d)] is more desirable as the total eval layers are smaller and we get to evaluate d as early as possible
+    // When we look deeper, it makes sense as when evaluating c we will already the the past value of c availabe 
+    // Whereas if we had tried to evaluate d along with b then we would need to wait one cycle until the c gets evaluated 
+    // It is possible to avoid checking all possbile combinations using this observations
+    // However for the sake of simplicity we can simpley check all the combinations
+    // Given the time complexity of O(n ^ (k + 1)) is acceptable, which is true in most practial cases
+    // where n = max length of eval order ~ number of nodes
+    //       k = number of disjointed sub-graphs
+    //      here we have n choice to start k eval-orders and each pipeline_shift calculation takes O(n) hence k + 1 in the exponent
     unimplemented!()
 }
 
