@@ -1,5 +1,4 @@
 use clap::{command, Parser};
-use hardware_ir::prettify_eval_order;
 use rtlola_frontend::{self, RtLolaMir};
 use serde_json;
 use std::fs::File;
@@ -48,19 +47,15 @@ fn main() {
     match rtlola_frontend::parse(&config) {
         Ok(mir) => {
             save_mir_as_json(mir.clone(), mir_filename);
-            let roots = hardware_ir::extract_roots(&mir);
-            println!(
-                "Roots: {}",
-                roots
-                    .iter()
-                    .map(|nd| nd.prettify(&mir))
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            );
-            let order = hardware_ir::find_eval_order_wrong_algo(&mir);
-            let order = hardware_ir::refine_eval_order(&mir, order);
+            let best_pipeline_wait = hardware_ir::find_eval_order(&mir);
+            dbg!(&best_pipeline_wait);
+            // let eval_orders = hardware_ir::find_disjoint_eval_orders(&mir);
+            // eval_orders
+            //     .into_iter()
+            //     .map(|order| hardware_ir::prettify_eval_order(&order, &mir))
+            //     .for_each(|x| println!("{}\n", x));
             // println!("{}", prettify_eval_order(&order, &mir));
-            hardware_ir::visualize_pipeline(&order, 2, 15, &mir);
+            // hardware_ir::visualize_pipeline(&order, 2, 15, &mir);
             // to_haskell(mir.clone());
             // let node_tree = hardware_ir::node_tree(mir.clone());
             // dbg!(&node_tree);
