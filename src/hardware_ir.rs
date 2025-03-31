@@ -5,7 +5,10 @@
 /// Also if a node depends on data via past offsets, RTLolaMIR thinks the node can be evaluated right in the beginning as all the dependencies are in the past
 /// However, that assumes we are not doing evaluation in a pipeline fashion where the past values might not have been fully evaluated yet
 use std::{
-    cmp::{self, }, collections::{HashMap, HashSet}, hash::Hash, usize, vec
+    cmp::{self},
+    collections::{HashMap, HashSet},
+    hash::Hash,
+    usize, vec,
 };
 
 use rtlola_frontend::mir::{
@@ -13,6 +16,8 @@ use rtlola_frontend::mir::{
 };
 
 use crate::utils;
+
+static DISPLAY_ALL_COMBINATIONS: bool = false;
 
 #[derive(PartialEq, Eq, Clone, Debug, Hash, PartialOrd, Ord)]
 pub enum Node {
@@ -41,13 +46,11 @@ impl Node {
             Node::InputStream(x) => {
                 for child in &mir.inputs[x.clone()].accessed_by {
                     let offset = match child.1.first().unwrap().1 {
-                        StreamAccessKind::Offset(off) => {
-                            match off {
-                                Offset::Past(x) => x as usize,
-                                _ => unreachable!()
-                            }
-                        }
-                        _ => 0
+                        StreamAccessKind::Offset(off) => match off {
+                            Offset::Past(x) => x as usize,
+                            _ => unreachable!(),
+                        },
+                        _ => 0,
                     };
                     children.push((Node::from_access(child), offset));
                 }
@@ -55,13 +58,11 @@ impl Node {
             Node::OutputStream(x) => {
                 for child in &mir.outputs[x.clone()].accessed_by {
                     let offset = match child.1.first().unwrap().1 {
-                        StreamAccessKind::Offset(off) => {
-                            match off {
-                                Offset::Past(x) => x as usize,
-                                _ => unreachable!()
-                            }
-                        }
-                        _ => 0
+                        StreamAccessKind::Offset(off) => match off {
+                            Offset::Past(x) => x as usize,
+                            _ => unreachable!(),
+                        },
+                        _ => 0,
                     };
                     children.push((Node::from_access(child), offset));
                 }
@@ -165,7 +166,16 @@ impl HardwareIR {
     }
 }
 
-pub fn visualize_pipeline(
+pub fn run_analysis(mir: &RtLolaMir) {
+    let eval_order = find_eval_order(mir);
+    println!("\n------- The best pipeline --------");
+    display_eval_order(&eval_order, mir);
+    analyse_window_size(&eval_order, mir);
+    let pipeline_wait = find_necessary_pipeline_wait(&eval_order, mir);
+    visualize_pipeline(&eval_order, pipeline_wait, 10, mir);
+}
+
+fn visualize_pipeline(
     eval_order: &Vec<Vec<Node>>,
     pipeline_wait: usize,
     time_steps: usize,
@@ -203,14 +213,21 @@ pub fn visualize_pipeline(
     }
 }
 
-fn analyse_window_size(eval_order: &Vec<Vec<Node>>, pipeline_wait: usize, mir: &RtLolaMir) {
+fn analyse_window_size(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
+    let pipeline_wait = find_necessary_pipeline_wait(eval_order, mir);
     let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
-    all_nodes.into_iter().for_each(|node|{
-        let window = node.get_children(mir).into_iter().map(|(child, offset)| window_size(&node, &child, pipeline_wait, offset, eval_order, mir)).max();
+    all_nodes.into_iter().for_each(|node| {
+        let window = node
+            .get_children(mir)
+            .into_iter()
+            .map(|(child, offset)| {
+                window_size(&node, &child, pipeline_wait, offset, eval_order, mir)
+            })
+            .max();
         match window {
             Some(win) => {
                 println!("window {} = {}", node.prettify(mir), win);
-            },
+            }
             _ => {}
         }
     });
@@ -222,32 +239,40 @@ fn window_size(
     pipeline_wait: usize,
     offset: usize,
     eval_order: &Vec<Vec<Node>>,
-    mir: &RtLolaMir
+    mir: &RtLolaMir,
 ) -> usize {
     let propagation_time = level_distance(node, child, eval_order);
     let window = if propagation_time < 0 {
         let propagation_time = -propagation_time;
         let time_left_after_propagation = (pipeline_wait + 1) * offset + propagation_time as usize;
-        let num_of_evals = ((time_left_after_propagation as f32) / (pipeline_wait as f32 + 1.0)).ceil();
+        let num_of_evals =
+            ((time_left_after_propagation as f32) / (pipeline_wait as f32 + 1.0)).ceil();
         num_of_evals as usize
     } else {
         let time_left_after_propagation = (pipeline_wait + 1) * offset - propagation_time as usize;
-        let num_of_evals = ((time_left_after_propagation as f32) / (pipeline_wait as f32 + 1.0)).ceil();
+        let num_of_evals =
+            ((time_left_after_propagation as f32) / (pipeline_wait as f32 + 1.0)).ceil();
         num_of_evals as usize
     };
     // println!("window {} due to child {} = {}, offset = {}, prop_time = {}", node.prettify(mir), child.prettify(mir), window, offset, propagation_time);
     window
 }
 
-fn pipeline_wait(node: &Node, parent: &Node, offset: usize, eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> usize {
+fn pipeline_wait(
+    node: &Node,
+    parent: &Node,
+    offset: usize,
+    eval_order: &Vec<Vec<Node>>,
+    mir: &RtLolaMir,
+) -> usize {
     let propagation_time = level_distance(parent, node, eval_order);
     let value_avail_time = propagation_time + 1; // 1 cycle for the eval
-    // we must wait until: value_avail_time <= (wait + 1) * offset
+                                                 // we must wait until: value_avail_time <= (wait + 1) * offset
     let wait = if value_avail_time < 0 {
         0
     } else {
-        (((value_avail_time as f32)/(offset as f32)).ceil() - 1.0) as usize
-    }; 
+        (((value_avail_time as f32) / (offset as f32)).ceil() - 1.0) as usize
+    };
     // println!("pipeline wait {} - {} = {}, offset = {}", parent.prettify(mir), node.prettify(mir), wait, offset);
     wait
 }
@@ -273,7 +298,7 @@ fn find_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) ->
     max_shift.unwrap_or(0)
 }
 
-pub fn find_eval_order(mir: &RtLolaMir) -> usize {
+pub fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     // First find the eval orders ignoring the offsets
     // This can give us disjointed sub-graphs
     // If we don't want to pipeline then we can run them in parallel
@@ -308,22 +333,66 @@ pub fn find_eval_order(mir: &RtLolaMir) -> usize {
     let eval_orders = find_disjoint_eval_orders(mir);
     let n = eval_orders.first().unwrap().len();
     let all_starts = gen_all_combinations(n, eval_orders.len() - 1);
-    let all_combinations: Vec<Vec<Vec<Node>>> = all_starts.into_iter().map(|start| {
-        merge_eval_orders(&eval_orders, start)
-    }).collect::<HashSet<_>>().into_iter().collect();
+    let all_combinations: Vec<Vec<Vec<Node>>> = all_starts
+        .into_iter()
+        .map(|start| merge_eval_orders(&eval_orders, start))
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect();
 
-    let mut best_pipeline_wait = usize::MAX;
-    all_combinations.into_iter().for_each(|eval_order| {
-        println!();
-        display_eval_order(&eval_order, mir);
-        let pipeline_wait = find_necessary_pipeline_wait(&eval_order, mir);
-        analyse_window_size(&eval_order, pipeline_wait, mir);
-        visualize_pipeline(&eval_order, pipeline_wait, 10, mir);
-        best_pipeline_wait = cmp::min(best_pipeline_wait, pipeline_wait);
-    });
-    best_pipeline_wait
+    if DISPLAY_ALL_COMBINATIONS {
+        all_combinations.iter().for_each(|eval_order| {
+            println!();
+            display_eval_order(&eval_order, mir);
+            analyse_window_size(&eval_order, mir);
+            let pipeline_wait = find_necessary_pipeline_wait(&eval_order, mir);
+            visualize_pipeline(&eval_order, pipeline_wait, 10, mir);
+        });
+    }
+    all_combinations
+        .into_iter()
+        .reduce(|best, item| choose_better_eval_order(best, item, mir))
+        .unwrap()
 }
 
+fn choose_better_eval_order(
+    eval_order1: Vec<Vec<Node>>,
+    eval_order2: Vec<Vec<Node>>,
+    mir: &RtLolaMir,
+) -> Vec<Vec<Node>> {
+    let pipeline_wait1 = find_necessary_pipeline_wait(&eval_order1, mir);
+    let pipeline_wait2 = find_necessary_pipeline_wait(&eval_order2, mir);
+    if pipeline_wait1 < pipeline_wait2 {
+        return eval_order1;
+    }
+    if pipeline_wait2 < pipeline_wait1 {
+        return eval_order2;
+    }
+    if eval_order1.len() < eval_order2.len() {
+        return eval_order1;
+    }
+    if eval_order2.len() < eval_order1.len() {
+        return eval_order2;
+    }
+    // choose the one which evaluates most nodes the earliest
+    let mut earilest_different_level = None;
+    for i in 0..(cmp::min(eval_order1.len(), eval_order2.len())) {
+        if eval_order1[i].len() != eval_order2[i].len() {
+            earilest_different_level = Some(i);
+            break;
+        }
+    }
+    match earilest_different_level {
+        Some(i) => {
+            if eval_order1[i].len() > eval_order2[i].len() {
+                eval_order1
+            } else {
+                eval_order2
+            }
+        }
+        None => eval_order2,
+    }
+}
 
 fn gen_all_combinations(n: usize, k: usize) -> Vec<Vec<usize>> {
     let mut result = Vec::new();
@@ -336,7 +405,7 @@ fn gen_combination(n: usize, k: usize, cur: &mut Vec<usize>, result: &mut Vec<Ve
         result.push(cur.clone());
         return;
     }
-    for i in 0..=(2*n) {
+    for i in 0..=(2 * n) {
         cur.push(i);
         gen_combination(n, k, cur, result);
         cur.pop();
@@ -345,35 +414,50 @@ fn gen_combination(n: usize, k: usize, cur: &mut Vec<usize>, result: &mut Vec<Ve
 
 fn merge_eval_orders(eval_orders: &Vec<Vec<Vec<Node>>>, starts: Vec<usize>) -> Vec<Vec<Node>> {
     assert!(eval_orders.len() == starts.len() + 1);
-    let eval_orders: Vec<Vec<Vec<Node>>> = eval_orders.iter().enumerate().map(|(i, orders)| {
-        if i > 0 {
-            let mut extended: Vec<Vec<Node>> = vec![Vec::new(); starts[i-1]];
-            extended.extend(orders.clone());
-            extended
-        } else {
-            orders.clone()
-        }
-    }).collect();
-    let max_len = eval_orders.iter().map(|eval_order| eval_order.len()).max().unwrap();
-    let extended_eval_orders: Vec<Vec<Vec<Node>>> = eval_orders.into_iter().map(|eval_order| {
-        let to_pad = max_len - eval_order.len();
-        let padding: Vec<Vec<Node>> = vec![Vec::new(); to_pad];
-        let mut eval_order = eval_order;
-        eval_order.extend(padding);
-        eval_order
-    }).collect();
+    let eval_orders: Vec<Vec<Vec<Node>>> = eval_orders
+        .iter()
+        .enumerate()
+        .map(|(i, orders)| {
+            if i > 0 {
+                let mut extended: Vec<Vec<Node>> = vec![Vec::new(); starts[i - 1]];
+                extended.extend(orders.clone());
+                extended
+            } else {
+                orders.clone()
+            }
+        })
+        .collect();
+    let max_len = eval_orders
+        .iter()
+        .map(|eval_order| eval_order.len())
+        .max()
+        .unwrap();
+    let extended_eval_orders: Vec<Vec<Vec<Node>>> = eval_orders
+        .into_iter()
+        .map(|eval_order| {
+            let to_pad = max_len - eval_order.len();
+            let padding: Vec<Vec<Node>> = vec![Vec::new(); to_pad];
+            let mut eval_order = eval_order;
+            eval_order.extend(padding);
+            eval_order
+        })
+        .collect();
     let mut merged: Vec<Vec<Node>> = Vec::new();
     for i in 0..max_len {
-        let level: Vec<Node> = extended_eval_orders.iter().map(|eval_order| {
-            eval_order[i].clone()
-        }).fold(Vec::new(), |acc, item| {
-            let mut acc = acc;
-            acc.extend(item);
-            acc
-        });
+        let level: Vec<Node> = extended_eval_orders
+            .iter()
+            .map(|eval_order| eval_order[i].clone())
+            .fold(Vec::new(), |acc, item| {
+                let mut acc = acc;
+                acc.extend(item);
+                acc
+            });
         merged.push(level);
     }
-    merged.into_iter().filter(|level| !level.is_empty()).collect()
+    merged
+        .into_iter()
+        .filter(|level| !level.is_empty())
+        .collect()
 }
 
 /// returns disjoint eval orders ordered_by their length in desc order

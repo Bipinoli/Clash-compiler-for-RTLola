@@ -47,8 +47,9 @@ fn main() {
     match rtlola_frontend::parse(&config) {
         Ok(mir) => {
             save_mir_as_json(mir.clone(), mir_filename);
-            let best_pipeline_wait = hardware_ir::find_eval_order(&mir);
-            dbg!(&best_pipeline_wait);
+            hardware_ir::run_analysis(&mir);
+            // let best_pipeline_wait = hardware_ir::find_eval_order(&mir);
+            // dbg!(&best_pipeline_wait);
             // let eval_orders = hardware_ir::find_disjoint_eval_orders(&mir);
             // eval_orders
             //     .into_iter()
