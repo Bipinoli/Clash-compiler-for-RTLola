@@ -206,7 +206,7 @@ pub fn visualize_pipeline(
 fn analyse_window_size(eval_order: &Vec<Vec<Node>>, pipeline_wait: usize, mir: &RtLolaMir) {
     let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
     all_nodes.into_iter().for_each(|node|{
-        let window = node.get_children(mir).into_iter().map(|(child, offset)| window_size(&node, &child, pipeline_wait, offset, eval_order)).max();
+        let window = node.get_children(mir).into_iter().map(|(child, offset)| window_size(&node, &child, pipeline_wait, offset, eval_order, mir)).max();
         match window {
             Some(win) => {
                 println!("window {} = {}", node.prettify(mir), win);
@@ -222,15 +222,21 @@ fn window_size(
     pipeline_wait: usize,
     offset: usize,
     eval_order: &Vec<Vec<Node>>,
+    mir: &RtLolaMir
 ) -> usize {
-    // TODO: debug window size calculation (can use refinable1 or refinable2 as an example)
-    let dist = level_distance(node, child, eval_order);
-    if dist <= 0 {
-        let dist = (-dist) as f32;
-        ((offset as f32) + 1.0 - (dist / (pipeline_wait as f32 + 1.0)).ceil()) as usize
+    let propagation_time = level_distance(node, child, eval_order);
+    let window = if propagation_time < 0 {
+        let propagation_time = -propagation_time;
+        let time_left_after_propagation = (pipeline_wait + 1) * offset + propagation_time as usize;
+        let num_of_evals = ((time_left_after_propagation as f32) / (pipeline_wait as f32 + 1.0)).ceil();
+        num_of_evals as usize
     } else {
-        ((dist as f32) / (pipeline_wait as f32 + 1.0)).ceil() as usize
-    }
+        let time_left_after_propagation = (pipeline_wait + 1) * offset - propagation_time as usize;
+        let num_of_evals = ((time_left_after_propagation as f32) / (pipeline_wait as f32 + 1.0)).ceil();
+        num_of_evals as usize
+    };
+    // println!("window {} due to child {} = {}, offset = {}, prop_time = {}", node.prettify(mir), child.prettify(mir), window, offset, propagation_time);
+    window
 }
 
 fn pipeline_wait(node: &Node, parent: &Node, offset: usize, eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> usize {
@@ -261,9 +267,10 @@ fn find_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) ->
                 .into_iter()
                 .map(|(parent, offset)| pipeline_wait(&node, &parent, offset, eval_order, mir))
                 .max()
+                .unwrap_or(0)
         })
         .max();
-    max_shift.unwrap_or(Some(0)).unwrap()
+    max_shift.unwrap_or(0)
 }
 
 pub fn find_eval_order(mir: &RtLolaMir) -> usize {
