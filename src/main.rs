@@ -7,7 +7,7 @@ use std::path::PathBuf;
 
 // mod transpile;
 mod hardware_ir;
-mod utils;
+mod codegen;
 
 /// Compile RTLola specs to Clash
 #[derive(Parser, Debug)]
@@ -47,19 +47,9 @@ fn main() {
     match rtlola_frontend::parse(&config) {
         Ok(mir) => {
             save_mir_as_json(mir.clone(), mir_filename);
-            hardware_ir::run_analysis(&mir);
-            // let best_pipeline_wait = hardware_ir::find_eval_order(&mir);
-            // dbg!(&best_pipeline_wait);
-            // let eval_orders = hardware_ir::find_disjoint_eval_orders(&mir);
-            // eval_orders
-            //     .into_iter()
-            //     .map(|order| hardware_ir::prettify_eval_order(&order, &mir))
-            //     .for_each(|x| println!("{}\n", x));
-            // println!("{}", prettify_eval_order(&order, &mir));
-            // hardware_ir::visualize_pipeline(&order, 2, 15, &mir);
-            // to_haskell(mir.clone());
-            // let node_tree = hardware_ir::node_tree(mir.clone());
-            // dbg!(&node_tree);
+            hardware_ir::display_analysis(&mir);
+            let hard_ir = hardware_ir::HardwareIR::new(mir);
+            let _ = codegen::generate_clash(hard_ir);
         }
         Err(e) => {
             handler.emit_error(&e);

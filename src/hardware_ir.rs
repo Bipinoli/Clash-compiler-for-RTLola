@@ -11,11 +11,7 @@ use std::{
     usize, vec,
 };
 
-use rtlola_frontend::mir::{
-    Offset, Origin, OutputStream, RtLolaMir, Stream, StreamAccessKind, StreamReference,
-};
-
-use crate::utils;
+use rtlola_frontend::mir::{Offset, Origin, RtLolaMir, StreamAccessKind, StreamReference};
 
 static DISPLAY_ALL_COMBINATIONS: bool = false;
 
@@ -151,27 +147,34 @@ impl Node {
     }
 }
 
-#[derive(PartialEq, Clone)]
-struct HardwareIR {
+#[derive(PartialEq, Clone, Debug)]
+pub struct HardwareIR {
     mir: RtLolaMir,
     evaluation_order: Vec<Vec<Node>>,
+    pipeline_wait: usize,
+    required_memory: HashMap<Node, usize>,
 }
 
 impl HardwareIR {
-    fn new(mir: RtLolaMir) -> Self {
+    pub fn new(mir: RtLolaMir) -> Self {
+        let eval_order = find_eval_order(&mir, false);
+        let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, &mir);
+        let required_memory = calculate_required_memory(&eval_order, &mir);
         HardwareIR {
             mir: mir,
-            evaluation_order: vec![],
+            evaluation_order: eval_order,
+            pipeline_wait: pipeline_wait,
+            required_memory: required_memory,
         }
     }
 }
 
-pub fn run_analysis(mir: &RtLolaMir) {
-    let eval_order = find_eval_order(mir);
+pub fn display_analysis(mir: &RtLolaMir) {
+    let eval_order = find_eval_order(mir, DISPLAY_ALL_COMBINATIONS);
     println!("\n------- The best pipeline --------");
     display_eval_order(&eval_order, mir);
-    analyse_window_size(&eval_order, mir);
-    let pipeline_wait = find_necessary_pipeline_wait(&eval_order, mir);
+    display_required_memory(&eval_order, mir);
+    let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, mir);
     visualize_pipeline(&eval_order, pipeline_wait, 10, mir);
 }
 
@@ -213,8 +216,30 @@ fn visualize_pipeline(
     }
 }
 
-fn analyse_window_size(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
-    let pipeline_wait = find_necessary_pipeline_wait(eval_order, mir);
+fn calculate_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> HashMap<Node, usize> {
+    let mut needed_memory: HashMap<Node, usize> = HashMap::new();
+    let pipeline_wait = calculate_necessary_pipeline_wait(eval_order, mir);
+    let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
+    all_nodes.into_iter().for_each(|node| {
+        let window = node
+            .get_children(mir)
+            .into_iter()
+            .map(|(child, offset)| {
+                window_size(&node, &child, pipeline_wait, offset, eval_order, mir)
+            })
+            .max();
+        match window {
+            Some(win) => {
+                needed_memory.insert(node, win);
+            }
+            _ => {}
+        }
+    });
+    needed_memory
+}
+
+fn display_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
+    let pipeline_wait = calculate_necessary_pipeline_wait(eval_order, mir);
     let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
     all_nodes.into_iter().for_each(|node| {
         let window = node
@@ -258,7 +283,7 @@ fn window_size(
     window
 }
 
-fn pipeline_wait(
+fn calculate_pipeline_wait(
     node: &Node,
     parent: &Node,
     offset: usize,
@@ -283,14 +308,16 @@ fn level_distance(a: &Node, b: &Node, eval_order: &Vec<Vec<Node>>) -> i32 {
     level_a - level_b
 }
 
-fn find_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> usize {
+fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> usize {
     let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
     let max_shift = all_nodes
         .into_iter()
         .map(|node| {
             node.get_offset_parents(mir)
                 .into_iter()
-                .map(|(parent, offset)| pipeline_wait(&node, &parent, offset, eval_order, mir))
+                .map(|(parent, offset)| {
+                    calculate_pipeline_wait(&node, &parent, offset, eval_order, mir)
+                })
                 .max()
                 .unwrap_or(0)
         })
@@ -298,7 +325,7 @@ fn find_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) ->
     max_shift.unwrap_or(0)
 }
 
-pub fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
+fn find_eval_order(mir: &RtLolaMir, display_all_combinations: bool) -> Vec<Vec<Node>> {
     // First find the eval orders ignoring the offsets
     // This can give us disjointed sub-graphs
     // If we don't want to pipeline then we can run them in parallel
@@ -340,12 +367,12 @@ pub fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
         .into_iter()
         .collect();
 
-    if DISPLAY_ALL_COMBINATIONS {
+    if display_all_combinations {
         all_combinations.iter().for_each(|eval_order| {
             println!();
             display_eval_order(&eval_order, mir);
-            analyse_window_size(&eval_order, mir);
-            let pipeline_wait = find_necessary_pipeline_wait(&eval_order, mir);
+            display_required_memory(&eval_order, mir);
+            let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, mir);
             visualize_pipeline(&eval_order, pipeline_wait, 10, mir);
         });
     }
@@ -360,8 +387,8 @@ fn choose_better_eval_order(
     eval_order2: Vec<Vec<Node>>,
     mir: &RtLolaMir,
 ) -> Vec<Vec<Node>> {
-    let pipeline_wait1 = find_necessary_pipeline_wait(&eval_order1, mir);
-    let pipeline_wait2 = find_necessary_pipeline_wait(&eval_order2, mir);
+    let pipeline_wait1 = calculate_necessary_pipeline_wait(&eval_order1, mir);
+    let pipeline_wait2 = calculate_necessary_pipeline_wait(&eval_order2, mir);
     if pipeline_wait1 < pipeline_wait2 {
         return eval_order1;
     }
@@ -461,7 +488,7 @@ fn merge_eval_orders(eval_orders: &Vec<Vec<Vec<Node>>>, starts: Vec<usize>) -> V
 }
 
 /// returns disjoint eval orders ordered_by their length in desc order
-pub fn find_disjoint_eval_orders(mir: &RtLolaMir) -> Vec<Vec<Vec<Node>>> {
+fn find_disjoint_eval_orders(mir: &RtLolaMir) -> Vec<Vec<Vec<Node>>> {
     let mut orders: Vec<Vec<Vec<Node>>> = get_roots(mir)
         .into_iter()
         .map(|roots| dag_eval_order(roots, mir))
@@ -472,7 +499,7 @@ pub fn find_disjoint_eval_orders(mir: &RtLolaMir) -> Vec<Vec<Vec<Node>>> {
 
 /// get roots of the graph after ignoring offset edges
 /// roots are grouped together if they belog to the same connected sub-graph
-pub fn get_roots(mir: &RtLolaMir) -> Vec<Vec<Node>> {
+fn get_roots(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     let inputs: Vec<Node> = mir
         .inputs
         .iter()
@@ -533,7 +560,7 @@ fn traverse(mir: &RtLolaMir, roots: Vec<Node>) -> HashSet<Node> {
 }
 
 // evaluation order from a DAG (directed acyclic graph)
-pub fn dag_eval_order(roots: Vec<Node>, mir: &RtLolaMir) -> Vec<Vec<Node>> {
+fn dag_eval_order(roots: Vec<Node>, mir: &RtLolaMir) -> Vec<Vec<Node>> {
     let mut order: Vec<Vec<Node>> = Vec::new();
 
     let mut cur_level: Vec<Node> = roots;
@@ -585,7 +612,7 @@ fn find_level(node: &Node, eval_order: &Vec<Vec<Node>>) -> usize {
     unreachable!()
 }
 
-pub fn display_eval_order(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
+fn display_eval_order(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
     let order = eval_order
         .iter()
         .map(|order| {
