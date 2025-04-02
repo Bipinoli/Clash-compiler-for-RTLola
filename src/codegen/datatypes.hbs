@@ -32,8 +32,15 @@
 {{~/inline}}
 
 type Pacings = {{>pacing_tuples}}
+{{#if has_sliding_window}}
+type Slides = {{slides}}
+{{/if}}
 
+{{#if has_sliding_window}}
+type Event = (Inputs, Slides, Pacings)
+{{else}}
 type Event = (Inputs, Pacings)
+{{/if}}
 
 {{#*inline "joined_defaults"}}
     {{~#each input_defaults~}}

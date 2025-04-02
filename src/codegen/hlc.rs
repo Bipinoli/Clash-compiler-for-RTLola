@@ -5,7 +5,9 @@ use serde::Serialize;
 use crate::{codegen::register_template, hardware_ir::HardwareIR};
 
 #[derive(Serialize)]
-struct Data {}
+struct Data {
+    has_periodic_pacing: bool,
+}
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
     register_template(
@@ -13,7 +15,9 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         "src/codegen/hlc.hbs".to_string(),
         handlebars,
     );
-    let data = Data {};
+    let data = Data {
+        has_periodic_pacing: true,
+    };
     match handlebars.render("hlc", &data) {
         Ok(result) => Some(result),
         Err(e) => {
@@ -21,4 +25,8 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
             None
         }
     }
+}
+
+fn get_pacing(ir: &HardwareIR) -> String {
+    unimplemented!()
 }

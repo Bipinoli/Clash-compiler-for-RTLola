@@ -1,3 +1,9 @@
+{{#if has_periodic_pacing}}
+systemClockPeriodNs :: Int
+systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @System)
+{{/if}}
+
+
 hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Event)
 hlc inputs = out
     where 
@@ -7,3 +13,10 @@ hlc inputs = out
         event = bundle (inputs, pacings)
         pacings = newX
 
+{{#if has_periodic_pacing}}
+        timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
+        timer reset = register 0 (mux reset (pure deltaTime) nextTime)
+            where 
+                nextTime = timer reset + pure deltaTime
+                deltaTime = systemClockPeriodNs
+{{/if}}

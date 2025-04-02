@@ -42,7 +42,7 @@ fn main() {
     match rtlola_frontend::parse(&config) {
         Ok(mir) => {
             save_mir_as_json(mir.clone(), mir_filename);
-            // hardware_ir::display_analysis(&mir);
+            hardware_ir::display_analysis(&mir);
             let hard_ir = hardware_ir::HardwareIR::new(mir);
             let _ = codegen::generate_clash(hard_ir);
         }
