@@ -5,9 +5,8 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
-// mod transpile;
-mod hardware_ir;
 mod codegen;
+mod hardware_ir;
 
 /// Compile RTLola specs to Clash
 #[derive(Parser, Debug)]
@@ -23,10 +22,6 @@ fn save_mir_as_json(mir: RtLolaMir, filename: String) {
         File::create(format!("mir/{}", filename)).expect("couldn't create a file to save MIR");
     let _ = file.write_all(serialized.as_bytes());
 }
-
-// fn to_clash(mir: RtLolaMir) {
-//     transpile::transpile(&mir);
-// }
 
 fn main() {
     let args = Args::parse();
@@ -47,7 +42,7 @@ fn main() {
     match rtlola_frontend::parse(&config) {
         Ok(mir) => {
             save_mir_as_json(mir.clone(), mir_filename);
-            hardware_ir::display_analysis(&mir);
+            // hardware_ir::display_analysis(&mir);
             let hard_ir = hardware_ir::HardwareIR::new(mir);
             let _ = codegen::generate_clash(hard_ir);
         }

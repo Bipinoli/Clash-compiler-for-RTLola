@@ -1,0 +1,53 @@
+
+{{#each input_types~}}
+    type HasInput{{@index}} = ({{this}}, Bool)
+{{/each}}
+{{#if (gt (len input_types) 1)~}}
+    type Inputs = ({{#each input_types}}HasInput{{@index}}{{#unless @last}}, {{/unless}}{{/each}})
+{{else~}}
+    type Inputs = HasInput0
+{{/if}}
+
+{{#each output_types~}}
+    type HasOutput{{@index}} = ({{this}}, Bool)
+{{/each}}
+{{#if (gt (len output_types) 1)~}}
+    type Outputs = ({{#each output_types}}HasOutput{{@index}}{{#unless @last}}, {{/unless}}{{/each}})
+{{else~}}
+    type Outputs = HasOutput0
+{{/if~}}
+
+{{~#*inline "joined_pacings"~}}
+    {{~#each output_types~}}
+        Bool{{#unless @last}}, {{/unless}}
+    {{~/each~}}
+{{~/inline~}}
+
+{{#*inline "pacing_tuples"}}
+    {{~#if (gt (len output_types) 1)~}}
+        ({{>joined_pacings}})
+    {{~else~}}
+        Bool
+    {{~/if~}}
+{{~/inline}}
+
+type Pacings = {{>pacing_tuples}}
+
+type Event = (Inputs, Pacings)
+
+{{#*inline "joined_defaults"}}
+    {{~#each input_defaults~}}
+        ({{this}}, False){{#unless @last}}, {{/unless}}
+    {{~/each~}}
+{{~/inline}}
+
+{{~#*inline "defaults_tuples"~}}
+    {{~#if (gt (len input_defaults) 1)~}}
+        ({{~>joined_defaults~}})
+    {{~else~}}
+        {{~>joined_defaults~}}
+{{~/if~}}
+{{~/inline~}}
+
+nullEvent :: Event
+nullEvent = ({{>defaults_tuples}}, {{>pacing_tuples}})

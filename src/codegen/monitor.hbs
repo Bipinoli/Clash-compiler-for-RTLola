@@ -1,0 +1,86 @@
+module {{spec_name}} where
+
+import Clash.Prelude
+
+
+---------------------------------------------------------------
+
+{{{data_types}}}
+
+---------------------------------------------------------------
+
+type QMemSize = {{queue_size}}
+
+type QData = Event
+type QMem = Vec QMemSize QData
+type QCursor = Int
+type QPush = Bool
+type QPop = Bool
+type QPushValid = Bool
+type QPopValid = Bool
+
+type QState = (QMem, QCursor)
+type QInput = (QPush, QPop, QData)
+type QOutput = (QPushValid, QPopValid, QData)
+
+queue :: HiddenClockResetEnable dom => Signal dom QInput -> Signal dom QOutput
+queue input = output
+    where 
+        -- keeping in registers to avoid any combinational output
+        output = bundle (pushValid, popValid, outData)
+        state = bundle (buffer, cursor)
+        buffer = register (repeat nullEvent :: QMem) nextBufferSignal
+        cursor = register 0 nextCursorSignal
+        pushValid = register False nextPushValidSignal
+        popValid = register False nextPopValidSignal
+        outData = register nullEvent nextOutDataSignal
+
+        -- Signal is an applicative functor
+        -- <$> = alias for fmap - wraps normal function into a function on Signal
+        -- <*> = apply applicative - it applies signal of function to a signal of a value
+
+        nextBufferSignal = nextBuffer <$> buffer <*> bundle (input, cursor)
+        nextCursorSignal = nextCursor <$> cursor <*> bundle (input, buffer)
+        nextOutDataSignal = nextOutData <$> bundle (input, cursor, buffer)
+        nextPushValidSignal = nextPushValid <$> bundle (input, cursor, buffer)
+        nextPopValidSignal = nextPopValid <$> bundle (input, cursor)
+        
+        nextBuffer :: QMem -> (QInput, QCursor) -> QMem
+        nextBuffer buf ((push, pop, qData), cur) = out
+            where 
+                out = case (push, pop) of
+                    (True, _) -> if cur /= length buf then qData +>> buf else buf
+                    (_, _) -> buf
+
+        nextCursor :: QCursor -> (QInput, QMem) -> QCursor
+        nextCursor cur ((push, pop, _), buf) = out
+            where 
+                out = case (push, pop) of
+                    (True, False) -> if cur /= length buf then cur + 1 else cur
+                    (False, True) -> if cur /= 0 then cur - 1 else 0
+                    (True, True) -> if cur == 0 then cur + 1 else cur 
+                    (_, _) -> cur
+
+        nextOutData :: (QInput, QCursor, QMem) -> QData
+        nextOutData ((push, pop, _), cur, buf) = out
+            where 
+                out = case (push, pop) of
+                    (_, True) -> if cur == 0 then nullEvent else buf !! (cur - 1)
+                    (_, _) -> nullEvent
+
+        nextPushValid :: (QInput, QCursor, QMem) -> QPush
+        nextPushValid ((push, pop, _), cur, buf) = out
+            where 
+                out = case (push, pop) of
+                    (True, _) -> cur /= length buf
+                    (_, _) -> False
+
+        nextPopValid :: (QInput, QCursor) -> QPop
+        nextPopValid ((push, pop, _), cur) = out
+            where 
+                out = case (push, pop) of
+                    (_, True) -> cur /= 0
+                    (_, _) -> False
+
+
+---------------------------------------------------------------

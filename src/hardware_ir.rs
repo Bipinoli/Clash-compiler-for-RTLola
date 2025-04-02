@@ -4,6 +4,7 @@
 /// Evaluation layer provided in RTLolaMIR assumes the alternate evaluation of event-based & periodic streams which is no longer valid here
 /// Also if a node depends on data via past offsets, RTLolaMIR thinks the node can be evaluated right in the beginning as all the dependencies are in the past
 /// However, that assumes we are not doing evaluation in a pipeline fashion where the past values might not have been fully evaluated yet
+use serde::Serialize;
 use std::{
     cmp::{self},
     collections::{HashMap, HashSet},
@@ -15,7 +16,7 @@ use rtlola_frontend::mir::{Offset, Origin, RtLolaMir, StreamAccessKind, StreamRe
 
 static DISPLAY_ALL_COMBINATIONS: bool = false;
 
-#[derive(PartialEq, Eq, Clone, Debug, Hash, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, Clone, Debug, Hash, PartialOrd, Ord, Serialize)]
 pub enum Node {
     InputStream(usize),
     OutputStream(usize),
@@ -147,7 +148,7 @@ impl Node {
     }
 }
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Serialize)]
 pub struct HardwareIR {
     mir: RtLolaMir,
     evaluation_order: Vec<Vec<Node>>,
