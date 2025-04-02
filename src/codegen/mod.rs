@@ -5,12 +5,14 @@ use handlebars::{
 use serde::Serialize;
 
 mod datatypes;
+mod hlc;
 
 #[derive(Serialize)]
 struct Data {
     spec_name: String,
-    data_types: String,
     queue_size: usize,
+    data_types: String,
+    hlc: String,
 }
 
 pub fn generate_clash(hard_ir: HardwareIR) {
@@ -23,13 +25,17 @@ pub fn generate_clash(hard_ir: HardwareIR) {
     );
 
     let dtypes = datatypes::render(&hard_ir, &mut reg);
+    let hlc = hlc::render(&hard_ir, &mut reg);
 
-    let all_parts_reddy = vec![dtypes.clone()].iter().all(|d| d.is_some());
+    let all_parts_reddy = vec![dtypes.clone(), hlc.clone()]
+        .iter()
+        .all(|d| d.is_some());
     if all_parts_reddy {
         let data = Data {
             spec_name: "Monitor_name".to_string(),
             data_types: dtypes.unwrap(),
-            queue_size: 20,
+            queue_size: hard_ir.pipeline_wait + 2,
+            hlc: hlc.unwrap(),
         };
         match reg.render("monitor", &data) {
             Ok(result) => {

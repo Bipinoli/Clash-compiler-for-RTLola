@@ -35,10 +35,6 @@ queue input = output
         popValid = register False nextPopValidSignal
         outData = register nullEvent nextOutDataSignal
 
-        -- Signal is an applicative functor
-        -- <$> = alias for fmap - wraps normal function into a function on Signal
-        -- <*> = apply applicative - it applies signal of function to a signal of a value
-
         nextBufferSignal = nextBuffer <$> buffer <*> bundle (input, cursor)
         nextCursorSignal = nextCursor <$> cursor <*> bundle (input, buffer)
         nextOutDataSignal = nextOutData <$> bundle (input, cursor, buffer)
@@ -84,3 +80,5 @@ queue input = output
 
 
 ---------------------------------------------------------------
+
+{{{hlc}}}

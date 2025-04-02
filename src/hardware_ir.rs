@@ -150,10 +150,10 @@ impl Node {
 
 #[derive(PartialEq, Clone, Debug, Serialize)]
 pub struct HardwareIR {
-    mir: RtLolaMir,
-    evaluation_order: Vec<Vec<Node>>,
-    pipeline_wait: usize,
-    required_memory: HashMap<Node, usize>,
+    pub mir: RtLolaMir,
+    pub evaluation_order: Vec<Vec<Node>>,
+    pub pipeline_wait: usize,
+    pub required_memory: HashMap<Node, usize>,
 }
 
 impl HardwareIR {

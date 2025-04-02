@@ -1,0 +1,9 @@
+hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Event)
+hlc inputs = out
+    where 
+        out = bundle (newEvent, event)
+        newEvent = newX
+        (_, newX) = unbundle inputs
+        event = bundle (inputs, pacings)
+        pacings = newX
+
