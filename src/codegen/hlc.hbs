@@ -8,10 +8,23 @@ hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Even
 hlc inputs = out
     where 
         out = bundle (newEvent, event)
-        newEvent = newX
-        (_, newX) = unbundle inputs
+        newEvent = {{new_event_condition}}
+        {{#if has_sliding_window}}
+        event = bundle (inputs, slides, pacings)
+        {{else}}
         event = bundle (inputs, pacings)
-        pacings = newX
+        {{/if}}
+
+        slides = {{bundled_slides}}
+        pacings = {{bundled_pacings}}
+
+        {{#each unbundled_inputs}}
+        {{{this}}}
+        {{/each}}
+
+        {{#each pacings}}
+        {{{this}}}
+        {{/each}}
 
 {{#if has_periodic_pacing}}
         timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int

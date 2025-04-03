@@ -10,7 +10,8 @@ struct Data {
     output_types: Vec<String>,
     input_defaults: Vec<String>,
     has_sliding_window: bool,
-    slides: String,
+    slide_types: String,
+    slide_defaults: String,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
@@ -23,8 +24,9 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         input_types: get_input_types(ir),
         output_types: get_output_types(ir),
         input_defaults: get_input_defaults(ir),
-        has_sliding_window: get_slides(ir).len() > 0,
-        slides: get_slides(ir),
+        has_sliding_window: get_slide_types(ir).len() > 0,
+        slide_types: get_slide_types(ir),
+        slide_defaults: get_slide_defaults(ir),
     };
     match handlebars.render("datatypes", &data) {
         Ok(result) => Some(result),
@@ -73,11 +75,27 @@ fn get_default_for_type(typ: &RF::mir::Type) -> String {
     }
 }
 
-fn get_slides(ir: &HardwareIR) -> String {
-    let slides = ir.mir
+fn get_slide_types(ir: &HardwareIR) -> String {
+    let slides = ir
+        .mir
         .sliding_windows
         .iter()
         .map(|_| "Bool".to_string())
+        .collect::<Vec<String>>()
+        .join(", ");
+    if ir.mir.sliding_windows.len() > 1 {
+        format!("({})", slides)
+    } else {
+        slides
+    }
+}
+
+fn get_slide_defaults(ir: &HardwareIR) -> String {
+    let slides = ir
+        .mir
+        .sliding_windows
+        .iter()
+        .map(|_| "False".to_string())
         .collect::<Vec<String>>()
         .join(", ");
     if ir.mir.sliding_windows.len() > 1 {

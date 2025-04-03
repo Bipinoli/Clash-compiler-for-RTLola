@@ -33,7 +33,7 @@
 
 type Pacings = {{>pacing_tuples}}
 {{#if has_sliding_window}}
-type Slides = {{slides}}
+type Slides = {{slide_types}}
 {{/if}}
 
 {{#if has_sliding_window}}
@@ -42,19 +42,51 @@ type Event = (Inputs, Slides, Pacings)
 type Event = (Inputs, Pacings)
 {{/if}}
 
-{{#*inline "joined_defaults"}}
+{{#*inline "joined_default_inputs"}}
     {{~#each input_defaults~}}
         ({{this}}, False){{#unless @last}}, {{/unless}}
     {{~/each~}}
 {{~/inline}}
 
-{{~#*inline "defaults_tuples"~}}
+{{~#*inline "default_inputs"~}}
     {{~#if (gt (len input_defaults) 1)~}}
-        ({{~>joined_defaults~}})
+        ({{~>joined_default_inputs~}})
     {{~else~}}
-        {{~>joined_defaults~}}
+        {{~>joined_default_inputs~}}
+{{~/if~}}
+{{~/inline~}}
+
+{{#*inline "joined_default_pacings"}}
+    {{~#each output_types~}}
+        False{{#unless @last}}, {{/unless}}
+    {{~/each~}}
+{{~/inline}}
+
+{{~#*inline "default_pacings"~}}
+    {{~#if (gt (len output_types) 1)~}}
+        ({{~>joined_default_pacings~}})
+    {{~else~}}
+        {{~>joined_default_pacings~}}
+{{~/if~}}
+{{~/inline~}}
+
+{{#*inline "joined_default_pacings"}}
+    {{~#each output_types~}}
+        False{{#unless @last}}, {{/unless}}
+    {{~/each~}}
+{{~/inline}}
+
+{{~#*inline "default_pacings"~}}
+    {{~#if (gt (len output_types) 1)~}}
+        ({{~>joined_default_pacings~}})
+    {{~else~}}
+        {{~>joined_default_pacings~}}
 {{~/if~}}
 {{~/inline~}}
 
 nullEvent :: Event
-nullEvent = ({{>defaults_tuples}}, {{>pacing_tuples}})
+{{#if has_sliding_window}}
+nullEvent = ({{>default_inputs}}, {{slide_defaults}}, {{>default_pacings}})
+{{else}}
+nullEvent = ({{>default_inputs}}, {{>default_pacings}})
+{{/if}}

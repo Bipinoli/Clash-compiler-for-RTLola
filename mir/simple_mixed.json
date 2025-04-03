@@ -69,6 +69,23 @@
               }
             ]
           ]
+        ],
+        [
+          {
+            "Out": 6
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "SlidingWindow": {
+                  "Sliding": 1
+                }
+              }
+            ]
+          ]
         ]
       ],
       "aggregated_by": [
@@ -78,6 +95,14 @@
           },
           {
             "Sliding": 0
+          }
+        ],
+        [
+          {
+            "Out": 6
+          },
+          {
+            "Sliding": 1
           }
         ]
       ],
@@ -90,6 +115,24 @@
       },
       "reference": {
         "In": 0
+      }
+    },
+    {
+      "name": "y",
+      "ty": {
+        "Int": "Int64"
+      },
+      "accessed_by": [],
+      "aggregated_by": [],
+      "layer": {
+        "spawn": 0,
+        "evaluation": 0
+      },
+      "memory_bound": {
+        "Bounded": 1
+      },
+      "reference": {
+        "In": 1
       }
     }
   ],
@@ -685,7 +728,7 @@
       "accessed_by": [
         [
           {
-            "Out": 6
+            "Out": 7
           },
           [
             [
@@ -847,7 +890,7 @@
         ],
         [
           {
-            "Out": 6
+            "Out": 7
           },
           [
             [
@@ -949,7 +992,7 @@
       "accessed_by": [
         [
           {
-            "Out": 6
+            "Out": 7
           },
           [
             [
@@ -971,6 +1014,94 @@
       },
       "reference": {
         "Out": 5
+      },
+      "params": []
+    },
+    {
+      "name": "ff",
+      "kind": {
+        "NamedOutput": "ff"
+      },
+      "ty": {
+        "Int": "Int64"
+      },
+      "spawn": {
+        "expression": null,
+        "pacing": "Constant",
+        "condition": null
+      },
+      "eval": {
+        "clauses": [
+          {
+            "condition": null,
+            "expression": {
+              "kind": {
+                "StreamAccess": {
+                  "target": {
+                    "In": 0
+                  },
+                  "parameters": [],
+                  "access_kind": {
+                    "SlidingWindow": {
+                      "Sliding": 1
+                    }
+                  }
+                }
+              },
+              "ty": {
+                "Int": "Int64"
+              }
+            },
+            "pacing": {
+              "GlobalPeriodic": [
+                1000,
+                1
+              ]
+            }
+          }
+        ],
+        "eval_pacing": {
+          "GlobalPeriodic": [
+            1000,
+            1
+          ]
+        }
+      },
+      "close": {
+        "condition": null,
+        "pacing": "Constant",
+        "has_self_reference": false
+      },
+      "accesses": [
+        [
+          {
+            "In": 0
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "SlidingWindow": {
+                  "Sliding": 1
+                }
+              }
+            ]
+          ]
+        ]
+      ],
+      "accessed_by": [],
+      "aggregated_by": [],
+      "memory_bound": {
+        "Bounded": 1
+      },
+      "layer": {
+        "spawn": 0,
+        "evaluation": 1
+      },
+      "reference": {
+        "Out": 6
       },
       "params": []
     },
@@ -1149,7 +1280,7 @@
         "evaluation": 2
       },
       "reference": {
-        "Out": 6
+        "Out": 7
       },
       "params": []
     }
@@ -1178,6 +1309,16 @@
     {
       "reference": {
         "Out": 6
+      },
+      "frequency": [
+        1000,
+        1
+      ],
+      "locality": "Global"
+    },
+    {
+      "reference": {
+        "Out": 7
       },
       "frequency": [
         1000,
@@ -1252,6 +1393,33 @@
       "op": "Sum",
       "reference": {
         "Sliding": 0
+      },
+      "ty": {
+        "Int": "Int64"
+      }
+    },
+    {
+      "target": {
+        "In": 0
+      },
+      "caller": {
+        "Out": 6
+      },
+      "duration": {
+        "secs": 0,
+        "nanos": 3000000
+      },
+      "num_buckets": {
+        "Bounded": 3
+      },
+      "bucket_size": {
+        "secs": 0,
+        "nanos": 1000000
+      },
+      "wait": false,
+      "op": "Sum",
+      "reference": {
+        "Sliding": 1
       },
       "ty": {
         "Int": "Int64"

@@ -1,12 +1,22 @@
+use std::collections::HashSet;
+
 use handlebars::Handlebars;
-use rtlola_frontend as RF;
+use rtlola_frontend::mir::{ActivationCondition, OutputStream, PacingType, StreamReference};
 use serde::Serialize;
+use uom::si::rational64::Frequency;
+use uom::num_rational::Ratio;
 
 use crate::{codegen::register_template, hardware_ir::HardwareIR};
 
 #[derive(Serialize)]
 struct Data {
     has_periodic_pacing: bool,
+    has_sliding_window: bool,
+    new_event_condition: String,
+    bundled_slides: String,
+    bundled_pacings: String,
+    unbundled_inputs: Vec<String>,
+    pacings: Vec<String>,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
@@ -16,7 +26,13 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         handlebars,
     );
     let data = Data {
-        has_periodic_pacing: true,
+        has_periodic_pacing: get_has_periodic_pacing(ir),
+        has_sliding_window: get_has_sliding_window(ir),
+        new_event_condition: get_new_event_condition(ir),
+        bundled_slides: get_bundled_slides(ir),
+        bundled_pacings: get_bundled_pacings(ir),
+        unbundled_inputs: get_unbundled_inputs(ir),
+        pacings: get_pacings(ir),
     };
     match handlebars.render("hlc", &data) {
         Ok(result) => Some(result),
@@ -27,6 +43,137 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
     }
 }
 
-fn get_pacing(ir: &HardwareIR) -> String {
-    unimplemented!()
+fn get_has_sliding_window(ir: &HardwareIR) -> bool {
+    ir.mir.sliding_windows.len() > 0
+}
+
+fn get_has_periodic_pacing(ir: &HardwareIR) -> bool {
+    ir.mir.outputs.iter().any(|out| match out.eval.eval_pacing {
+        PacingType::Event(_) => false,
+        PacingType::GlobalPeriodic(_) => true,
+        _ => unimplemented!(),
+    })
+}
+
+fn get_new_event_condition(ir: &HardwareIR) -> String {
+    let slides = ir
+        .mir
+        .sliding_windows
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("slide{}", i))
+        .collect::<Vec<_>>()
+        .join(" .||. ");
+    let pacings = ir
+        .mir
+        .outputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("pacing{}", i))
+        .collect::<Vec<_>>()
+        .join(" .||. ");
+    if slides.len() > 0 {
+        format!("{} .||. {}", slides, pacings)
+    } else {
+        pacings
+    }
+}
+
+fn get_bundled_slides(ir: &HardwareIR) -> String {
+    let slides = ir
+        .mir
+        .sliding_windows
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("slide{}", i))
+        .collect::<Vec<_>>()
+        .join(", ");
+    if ir.mir.sliding_windows.len() > 1 {
+        format!("bundle ({})", slides)
+    } else {
+        slides
+    }
+}
+
+fn get_bundled_pacings(ir: &HardwareIR) -> String {
+    let pacings = ir
+        .mir
+        .outputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("pacing{}", i))
+        .collect::<Vec<_>>()
+        .join(", ");
+    if ir.mir.outputs.len() > 1 {
+        format!("bundle ({})", pacings)
+    } else {
+        pacings
+    }
+}
+
+fn get_unbundled_inputs(ir: &HardwareIR) -> Vec<String> {
+    if ir.mir.inputs.len() == 1 {
+        return vec!["(_, hasInput0) = unbundle inputs".to_string()];
+    }
+    let inputs = ir
+        .mir
+        .inputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("input{}", i))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let mut retval = vec![format!("({}) = unbundle inputs", inputs)];
+    let unbundled: Vec<String> = ir
+        .mir
+        .inputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("(_, hasInput{}) = unbundle input{}", i, i))
+        .collect();
+    retval.extend(unbundled);
+    retval
+}
+
+fn get_pacings(ir: &HardwareIR) -> Vec<String> {
+    ir.mir
+        .outputs
+        .iter()
+        .enumerate()
+        .map(|(i, output)| format!("pacing{} = {}", i, get_pacing_from_output(output)))
+        .collect()
+}
+
+fn get_pacing_from_output(output: &OutputStream) -> String {
+    match &output.eval.eval_pacing {
+        PacingType::Event(cond) => get_pacing_from_activation_cond(&cond),
+        PacingType::GlobalPeriodic(freq) => get_period_in_ns(freq),
+        _ => unimplemented!(),
+    }
+}
+
+fn get_pacing_from_activation_cond(cond: &ActivationCondition) -> String {
+    match cond {
+        ActivationCondition::Stream(st) => match st {
+            StreamReference::In(x) => format!("hasInput{}", x),
+            _ => unreachable!(),
+        },
+        ActivationCondition::Conjunction(conj) => conj
+            .iter()
+            .map(|cond| get_pacing_from_activation_cond(cond))
+            .collect::<Vec<_>>()
+            .join(" .&&. "),
+        _ => unimplemented!(),
+    }
+}
+
+fn get_period_in_ns(freq: &Frequency) -> String {
+    let period_in_seconds = Ratio::new(freq.value.denom().clone(), freq.value.numer().clone());
+    let nanos = Ratio::new(1_000_000_000, 1);
+    let period_in_nanoseconds = period_in_seconds * nanos;
+    format!("period_ns = {}", period_in_nanoseconds)
+}
+
+fn gather_all_periods(ir: &HardwareIR) {
+    let periods: HashSet<_> = ir.mir.outputs.iter().map(f);
 }

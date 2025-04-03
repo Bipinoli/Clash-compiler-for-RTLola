@@ -7,7 +7,8 @@ import Clash.Prelude
 
 
 type HasInput0 = (Int, Bool)
-type Inputs = HasInput0
+type HasInput1 = (Int, Bool)
+type Inputs = (HasInput0, HasInput1)
 
 type HasOutput0 = (Int, Bool)
 type HasOutput1 = (Int, Bool)
@@ -16,15 +17,17 @@ type HasOutput3 = (Int, Bool)
 type HasOutput4 = (Int, Bool)
 type HasOutput5 = (Int, Bool)
 type HasOutput6 = (Int, Bool)
-type Outputs = (HasOutput0, HasOutput1, HasOutput2, HasOutput3, HasOutput4, HasOutput5, HasOutput6)
+type HasOutput7 = (Int, Bool)
+type Outputs = (HasOutput0, HasOutput1, HasOutput2, HasOutput3, HasOutput4, HasOutput5, HasOutput6, HasOutput7)
 
-type Pacings = (Bool, Bool, Bool, Bool, Bool, Bool, Bool)
-type Slides = Bool
+type Pacings = (Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool)
+type Slides = (Bool, Bool)
 
 type Event = (Inputs, Slides, Pacings)
 
 nullEvent :: Event
-nullEvent = ((0, False), (Bool, Bool, Bool, Bool, Bool, Bool, Bool))
+nullEvent = (((0, False), (0, False)), (False, False), (False, False, False, False, False, False, False, False))
+
 
 ---------------------------------------------------------------
 
@@ -108,13 +111,31 @@ hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Even
 hlc inputs = out
     where 
         out = bundle (newEvent, event)
-        newEvent =  .||. slide0 .|| pacing0 
+        newEvent = slide0 .||. pacing0  .||. pacing1  .||. pacing2  .||. pacing3  .||. pacing4  .||. pacing5  .||. pacing6  
+        event = bundle (inputs, slides, pacings)
 
-        (_, hasInput0) = unbundle inputs
+        slides = bundle (slide0, slide0)
+        pacings = bundle (pacing0, pacing1, pacing2, pacing3, pacing4, pacing5, pacing6, pacing6)
 
+        (input0, input1) = unbundle inputs
+        (_, hasInput0) = unbundle input0
+        (_, hasInput1) = unbundle input1
 
-        event = bundle (inputs, pacings)
-        pacings = newX
+        pacing0 = hasInput0
+        pacing1 = hasInput0
+        pacing2 = hasInput0
+        pacing3 = hasInput0 .&&. hasInput0
+        pacing4 = timer0Over
+        pacing5 = timer0Over
+        pacing6 = timer0Over
+
+        slide0 = timer0Over
+
+        
+
+        timer0Over = timer0 .>=. period0InNs
+        timer0 = timer timer0Over
+        period0InNs = 1000000 -- 0.001s in ns
 
         timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
         timer reset = register 0 (mux reset (pure deltaTime) nextTime)
