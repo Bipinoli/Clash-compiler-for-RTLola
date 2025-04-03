@@ -15,7 +15,9 @@ hlc inputs = out
         event = bundle (inputs, pacings)
         {{/if}}
 
+        {{#if has_sliding_window}}
         slides = {{bundled_slides}}
+        {{/if}}
         pacings = {{bundled_pacings}}
 
         {{#each unbundled_inputs}}
@@ -24,6 +26,16 @@ hlc inputs = out
 
         {{#each pacings}}
         {{{this}}}
+        {{/each}}
+
+        {{#each slides}}
+        {{{this}}}
+        {{/each}}
+
+        {{~#each periods}}
+        timer{{@index}}Over = timer{{@index}} .>=. period{{@index}}InNs
+        timer{{@index}} = timer timer{{@index}}Over
+        period{{@index}}InNs = {{this}}
         {{/each}}
 
 {{#if has_periodic_pacing}}

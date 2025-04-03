@@ -111,11 +111,11 @@ hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Even
 hlc inputs = out
     where 
         out = bundle (newEvent, event)
-        newEvent = slide0 .||. pacing0  .||. pacing1  .||. pacing2  .||. pacing3  .||. pacing4  .||. pacing5  .||. pacing6  
+        newEvent = slide0 .||. slide1 .||. pacing0 .||. pacing1 .||. pacing2 .||. pacing3 .||. pacing4 .||. pacing5 .||. pacing6 .||. pacing7
         event = bundle (inputs, slides, pacings)
 
-        slides = bundle (slide0, slide0)
-        pacings = bundle (pacing0, pacing1, pacing2, pacing3, pacing4, pacing5, pacing6, pacing6)
+        slides = bundle (slide0, slide1)
+        pacings = bundle (pacing0, pacing1, pacing2, pacing3, pacing4, pacing5, pacing6, pacing7)
 
         (input0, input1) = unbundle inputs
         (_, hasInput0) = unbundle input0
@@ -123,19 +123,25 @@ hlc inputs = out
 
         pacing0 = hasInput0
         pacing1 = hasInput0
-        pacing2 = hasInput0
-        pacing3 = hasInput0 .&&. hasInput0
+        pacing2 = hasInput0 .&&. hasInput1
+        pacing3 = hasInput0 .&&. hasInput1
         pacing4 = timer0Over
-        pacing5 = timer0Over
-        pacing6 = timer0Over
+        pacing5 = timer1Over
+        pacing6 = timer1Over
+        pacing7 = timer1Over
 
-        slide0 = timer0Over
-
-        
+        slide0 = timer2Over
+        slide1 = timer2Over
 
         timer0Over = timer0 .>=. period0InNs
         timer0 = timer timer0Over
-        period0InNs = 1000000 -- 0.001s in ns
+        period0InNs = 500000
+        timer1Over = timer1 .>=. period1InNs
+        timer1 = timer timer1Over
+        period1InNs = 1000000
+        timer2Over = timer2 .>=. period2InNs
+        timer2 = timer timer2Over
+        period2InNs = 3000000
 
         timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
         timer reset = register 0 (mux reset (pure deltaTime) nextTime)
