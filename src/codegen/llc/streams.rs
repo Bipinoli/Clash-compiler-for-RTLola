@@ -1,10 +1,9 @@
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
-    ArithLogOp, Constant, Expression, ExpressionKind, MemorizationBound, OutputStream,
-    StreamAccessKind, StreamReference,
+    ArithLogOp, Constant, Expression, ExpressionKind, MemorizationBound, StreamAccessKind,
+    StreamReference, WindowOperation,
 };
-use serde::{de, Serialize};
-use uom::si::time::day_sidereal;
+use serde::Serialize;
 
 use crate::{
     codegen::{datatypes, register_template},
@@ -42,15 +41,14 @@ struct BucketFunction {
 #[derive(Serialize)]
 struct SlidingWindow {
     window_size: String,
-    input_type: String,
-    output_type: String,
+    data_type: String,
     default_value: String,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
     register_template(
-        "llc".to_string(),
-        "src/codegen/llc.hbs".to_string(),
+        "streams".to_string(),
+        "src/codegen/llc/streams.hbs".to_string(),
         handlebars,
     );
     let data = Data {
@@ -61,7 +59,7 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         bucket_functions: get_bucket_functions(ir),
         sliding_windows: get_sliding_windows(ir),
     };
-    match handlebars.render("llc", &data) {
+    match handlebars.render("streams", &data) {
         Ok(result) => Some(result),
         Err(e) => {
             println!("Rendering error: {}", e);
@@ -108,28 +106,19 @@ fn get_streams(ir: &HardwareIR) -> Vec<Stream> {
                 .join(" ");
             let default_value = datatypes::get_default_for_type(&out.ty);
             let expression = if !is_sliding_window_based {
-                get_expression(i, &out.eval.clauses.first().unwrap().expression, ir)
+                get_expression(0, &out.eval.clauses.first().unwrap().expression, ir).0
             } else {
                 String::new()
             };
             let (sliding_window, window_size) = if is_sliding_window_based {
-                // In RTLola sliding-window aggregation, the span of window is inlclusive in the right but exclusive to the left
-                // For example:
-                //      output b @1kHz := x.aggregate(over: 0.003s, using: sum)
-                // Here, in the output b, data at the exact time 0.001s won't be included in the aggregation at time 0.003s
-                // To deal with this we need one more bucket such that this extreme data can be put into it
-                // Also we must not mix this extreme data into the bucket aggregation
-                // Also note, when we have both new data and time to slide the window, first we must update the window and then slide it
                 let window_idx = match out.accesses.first().unwrap().1.first().unwrap().1 {
                     StreamAccessKind::SlidingWindow(win) => win.idx(),
                     _ => unreachable!(),
                 };
-                match ir.mir.sliding_windows[window_idx].num_buckets {
-                    MemorizationBound::Bounded(x) => {
-                        (format!("{}", window_idx), format!("{}", x + 1))
-                    }
-                    _ => unimplemented!(),
-                }
+                (
+                    format!("{}", window_idx),
+                    get_sliding_window_size(window_idx, ir),
+                )
             } else {
                 (String::new(), String::new())
             };
@@ -148,47 +137,91 @@ fn get_streams(ir: &HardwareIR) -> Vec<Stream> {
 }
 
 fn get_bucket_functions(ir: &HardwareIR) -> Vec<BucketFunction> {
-    let func = BucketFunction {
-        data_type: "Int".to_string(),
-        expression: "acc + item".to_string(),
-    };
-    vec![func]
+    ir.mir
+        .sliding_windows
+        .iter()
+        .map(|sw| {
+            let data_type = datatypes::get_type(&sw.ty);
+            let expression = match sw.op {
+                WindowOperation::Sum => "acc + item".to_string(),
+                _ => unimplemented!(),
+            };
+            BucketFunction {
+                data_type,
+                expression,
+            }
+        })
+        .collect()
 }
 
 fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
-    let sw = SlidingWindow {
-        input_type: "HasInput0".to_string(),
-        window_size: "4".to_string(),
-        output_type: "Int".to_string(),
-        default_value: "0".to_string(),
-    };
-    vec![sw]
+    ir.mir
+        .sliding_windows
+        .iter()
+        .enumerate()
+        .map(|(i, sw)| {
+            let data_type = datatypes::get_type(&sw.ty);
+            let window_size = get_sliding_window_size(i, ir);
+            let default_value = match sw.op {
+                WindowOperation::Sum => "0".to_string(),
+                _ => unimplemented!(),
+            };
+            SlidingWindow {
+                data_type,
+                window_size,
+                default_value,
+            }
+        })
+        .collect()
 }
 
-fn get_expression(tag: usize, expr: &Expression, ir: &HardwareIR) -> String {
+fn get_expression(tag: usize, expr: &Expression, ir: &HardwareIR) -> (String, usize) {
     match &expr.kind {
         ExpressionKind::LoadConstant(con) => match con {
-            Constant::Int(x) => format!("{}", x),
+            Constant::Int(x) => (format!("{}", x), tag),
             _ => unimplemented!(),
         },
         ExpressionKind::StreamAccess {
             target: _,
-            parameters : _,
+            parameters: _,
             access_kind: _,
-        } => format!("d{}", tag),
+        } => (format!("d{}", tag), tag + 1),
         ExpressionKind::Default { expr, default: _ } => get_expression(tag, &expr, ir),
         ExpressionKind::ArithLog(operator, expressions) => {
+            let mut tag = tag;
             let expressions: Vec<String> = expressions
                 .into_iter()
-                .map(|expr| get_expression(tag, &expr, ir))
+                .enumerate()
+                .map(|(i, expr)| {
+                    let (expr, next_tag) = get_expression(tag, expr, ir);
+                    tag = next_tag;
+                    expr
+                })
                 .collect();
-            match operator {
+            let final_expression = match operator {
                 ArithLogOp::Add => expressions.join(" + "),
                 ArithLogOp::Sub => expressions.join(" - "),
                 ArithLogOp::Mul => expressions.join(" * "),
                 ArithLogOp::Div => expressions.join(" / "),
                 _ => unimplemented!(),
-            }
+            };
+            (final_expression, tag)
+        }
+        _ => unimplemented!(),
+    }
+}
+
+fn get_sliding_window_size(window_idx: usize, ir: &HardwareIR) -> String {
+    // In RTLola sliding-window aggregation, the span of window is inlclusive in the right but exclusive to the left
+    // For example:
+    //      output b @1kHz := x.aggregate(over: 0.003s, using: sum)
+    // Here, in the output b, data at the exact time 0.001s won't be included in the aggregation at time 0.003s
+    // To deal with this we need one more bucket such that this extreme data can be put into it
+    // Also we must not mix this extreme data into the bucket aggregation
+    // Also note, when we have both new data and time to slide the window, first we must update the window and then slide it
+    match ir.mir.sliding_windows[window_idx].num_buckets {
+        MemorizationBound::Bounded(x) => {
+            format!("{}", x + 1)
         }
         _ => unimplemented!(),
     }

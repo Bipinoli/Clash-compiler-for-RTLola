@@ -38,14 +38,14 @@ windowBucketFunc{{@index}} acc item = {{this.expression}}
 
 {{#if has_sliding_window}}
 {{#each sliding_windows}}
-slidingWindow{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom {{this.input_type}} -> Signal dom (Vec {{this.window_size}} {{this.output_type}})
+slidingWindow{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom ({{this.data_type}}, Bool) -> Signal dom (Vec {{this.window_size}} {{this.data_type}})
 slidingWindow{{@index}} en slide hasInput = window
     where
         window = register dflt (mux en next window)
-        dflt = repeat {{this.default_value}} :: Vec {{this.window_size}} {{this.output_type}}
-        next = nextWindow <$> window <*> slide <*> hasInpt
+        dflt = repeat {{this.default_value}} :: Vec {{this.window_size}} {{this.data_type}}
+        next = nextWindow <$> window <*> slide <*> hasInput
 
-        nextWindow :: Vec {{this.window_size}} {{this.output_type}} -> Bool -> {{this.input_type}} -> Vec {{this.window_size}} {{this.output_type}}
+        nextWindow :: Vec {{this.window_size}} {{this.data_type}} -> Bool -> ({{this.data_type}}, Bool) -> Vec {{this.window_size}} {{this.data_type}}
         nextWindow win toSlide inpt = out
             where
                 (dta, hasData) = inpt
