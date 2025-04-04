@@ -32,7 +32,7 @@ hlc inputs = out
         {{{this}}}
         {{/each}}
 
-        {{~#each periods}}
+        {{#each periods}}
         timer{{@index}}Over = timer{{@index}} .>=. period{{@index}}InNs
         timer{{@index}} = timer timer{{@index}}Over
         period{{@index}}InNs = {{this}}

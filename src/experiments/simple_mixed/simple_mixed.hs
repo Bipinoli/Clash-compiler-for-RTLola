@@ -31,7 +31,7 @@ nullEvent = (((0, False), (0, False)), (False, False), (False, False, False, Fal
 
 ---------------------------------------------------------------
 
-type QMemSize = 2
+type QMemSize = 4
 
 type QData = Event
 type QMem = Vec QMemSize QData
@@ -121,7 +121,7 @@ hlc inputs = out
         (_, hasInput0) = unbundle input0
         (_, hasInput1) = unbundle input1
 
-        pacing0 = hasInput0
+        pacing0 = hasInput0 .&&. hasInput1
         pacing1 = hasInput0
         pacing2 = hasInput0 .&&. hasInput1
         pacing3 = hasInput0 .&&. hasInput1
@@ -131,7 +131,7 @@ hlc inputs = out
         pacing7 = timer1Over
 
         slide0 = timer2Over
-        slide1 = timer2Over
+        slide1 = timer3Over
 
         timer0Over = timer0 .>=. period0InNs
         timer0 = timer timer0Over
@@ -142,9 +142,89 @@ hlc inputs = out
         timer2Over = timer2 .>=. period2InNs
         timer2 = timer timer2Over
         period2InNs = 3000000
+        timer3Over = timer3 .>=. period3InNs
+        timer3 = timer timer3Over
+        period3InNs = 4000000
 
         timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
         timer reset = register 0 (mux reset (pure deltaTime) nextTime)
             where 
                 nextTime = timer reset + pure deltaTime
                 deltaTime = systemClockPeriodNs
+
+---------------------------------------------------------------
+
+pipelineReady :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
+pipelineReady rst = toWait .==. pure 0 
+    where 
+        waitTime = pure 2 :: Signal dom Int
+        toWait = register (0 :: Int) next
+        next = mux rst waitTime (mux (toWait .>. pure 0) (toWait - 1) toWait)
+
+
+stream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int -> Signal dom Int
+stream0 en d0 d1 = out
+    where 
+        out = register 0 (mux en next out)
+        next = d0 + d1 + 1
+
+stream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
+stream1 en d0 = out
+    where 
+        out = register 0 (mux en next out)
+        next = d0 + 1
+
+stream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int -> Signal dom Int -> Signal dom Int -> Signal dom Int
+stream2 en d0 d1 d2 d3 = out
+    where 
+        out = register 0 (mux en next out)
+        next = d0 + d1 + d2 + d3
+
+stream3 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int -> Signal dom Int
+stream3 en d0 d1 = out
+    where 
+        out = register 0 (mux en next out)
+        next = d0 * d1
+
+stream4 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
+stream4 en d0 = out
+    where 
+        out = register 0 (mux en next out)
+        next = d0 + 1
+
+stream5 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec 4 Int) -> Signal dom Int
+stream5 en sw = out
+    where
+        out = register 0 (mux en next out)
+        next = merge <$> sw
+
+        merge :: Vec 4 Int -> Int
+        merge win = fold windowBucketFunc0 win
+
+stream6 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int -> Signal dom Int -> Signal dom Int
+stream6 en d0 d1 d2 = out
+    where 
+        out = register 0 (mux en next out)
+        next = d0 + d1 + d2
+
+windowBucketFunc0 :: Int -> Int -> Int
+windowBucketFunc0 acc item = acc + item
+
+slidingWindow0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom HasInput0 -> Signal dom (Vec 4 Int)
+slidingWindow0 en slide hasInpt = window
+    where 
+        window = register dflt (mux en next window)
+        dflt = repeat 0 :: Vec 4 Int
+        next = nextWindow <$> window <*> slide <*> hasInpt
+
+        nextWindow :: Vec 4 Int -> Bool -> HasInput0 -> Vec 4 Int
+        nextWindow win toSlide inpt = out
+            where
+                (dta, hasData) = inpt
+                out = case (toSlide, hasData) of
+                    (False, False) -> win
+                    (False, True) -> updatedWin
+                    (True, False) -> win <<+ 0
+                updatedWin = replace lastIndx (windowBucketFunc0 (last win) dta) win
+                lastIndx = length win - 1
+

@@ -61,14 +61,14 @@ fn get_output_types(ir: &HardwareIR) -> Vec<String> {
         .collect()
 }
 
-fn get_type(typ: &RF::mir::Type) -> String {
+pub fn get_type(typ: &RF::mir::Type) -> String {
     match typ {
         RF::mir::Type::Int(_) => "Int".to_string(),
         _ => unreachable!("unknown type {}", typ),
     }
 }
 
-fn get_default_for_type(typ: &RF::mir::Type) -> String {
+pub fn get_default_for_type(typ: &RF::mir::Type) -> String {
     match typ {
         RF::mir::Type::Int(_) => "0".to_string(),
         _ => unreachable!("unknown type {}", typ),

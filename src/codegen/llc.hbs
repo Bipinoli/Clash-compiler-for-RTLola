@@ -1,0 +1,61 @@
+{{#if has_pipeline_wait}}
+pipelineReady :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
+pipelineReady rst = toWait .==. pure 0 
+    where 
+        waitTime = pure {{pipeline_wait}} :: Signal dom Int
+        toWait = register (0 :: Int) next
+        next = mux rst waitTime (mux (toWait .>. pure 0) (toWait - 1) toWait)
+{{/if}}
+
+
+{{#each streams}}
+
+{{#if this.is_sliding_window_based}}
+stream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec {{this.window_size}} {{this.output_type}}) -> Signal dom {{this.output_type}}
+stream{{@index}} en sw = out
+    where
+        out = register {{this.default_value}} (mux en next out)
+        next = merge <$> sw
+        merge :: Vec {{this.window_size}} {{this.output_type}} -> {{this.output_type}}
+        merge win = fold windowBucketFunc{{this.sliding_window}} win
+{{else}}
+stream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> {{{this.input_types}}} -> Signal dom {{this.output_type}}
+stream{{@index}} en {{this.inputs}} = out
+    where
+        out = register {{this.default_value}} (mux en next out)
+        next = {{{this.expression}}}
+{{/if}}
+
+{{/each}}
+
+{{#if has_sliding_window}}
+{{#each bucket_functions}}
+windowBucketFunc{{@index}} :: {{this.data_type}} -> {{this.data_type}} -> {{this.data_type}}
+windowBucketFunc{{@index}} acc item = {{this.expression}}
+
+{{/each}}
+{{/if}}
+
+{{#if has_sliding_window}}
+{{#each sliding_windows}}
+slidingWindow{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom {{this.input_type}} -> Signal dom (Vec {{this.window_size}} {{this.output_type}})
+slidingWindow{{@index}} en slide hasInput = window
+    where
+        window = register dflt (mux en next window)
+        dflt = repeat {{this.default_value}} :: Vec {{this.window_size}} {{this.output_type}}
+        next = nextWindow <$> window <*> slide <*> hasInpt
+
+        nextWindow :: Vec {{this.window_size}} {{this.output_type}} -> Bool -> {{this.input_type}} -> Vec {{this.window_size}} {{this.output_type}}
+        nextWindow win toSlide inpt = out
+            where
+                (dta, hasData) = inpt
+                out = case (toSlide, hasData) of
+                    (False, False) -> win
+                    (False, True) -> updatedWin
+                    (True, False) -> win <<+ 0
+                updatedWin = replace lastIndx (windowBucketFunc{{@index}} (last win) dta) win
+                lastIndx = length win - 1       
+
+
+{{/each}}
+{{/if}}

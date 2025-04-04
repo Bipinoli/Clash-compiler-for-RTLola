@@ -223,9 +223,14 @@ fn get_all_periods(ir: &HardwareIR) -> Vec<String> {
 }
 
 fn get_slides(ir: &HardwareIR, all_pacings: &Vec<String>) -> Vec<String> {
-    ir.mir.sliding_windows.iter().enumerate().map(|(i, sw)| {
-        let period = format!("{}", sw.duration.as_nanos());
-        let indx = all_pacings.iter().position(|p| *p == period).unwrap();
-        format!("slide{} = timer{}Over", i, indx)
-    }).collect()
+    ir.mir
+        .sliding_windows
+        .iter()
+        .enumerate()
+        .map(|(i, sw)| {
+            let period = format!("{}", sw.duration.as_nanos());
+            let indx = all_pacings.iter().position(|p| *p == period).unwrap();
+            format!("slide{} = timer{}Over", i, indx)
+        })
+        .collect()
 }

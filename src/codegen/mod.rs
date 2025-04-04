@@ -6,6 +6,7 @@ use serde::Serialize;
 
 mod datatypes;
 mod hlc;
+mod llc;
 
 #[derive(Serialize)]
 struct Data {
@@ -13,6 +14,7 @@ struct Data {
     queue_size: usize,
     data_types: String,
     hlc: String,
+    llc: String,
 }
 
 pub fn generate_clash(hard_ir: HardwareIR) {
@@ -26,8 +28,9 @@ pub fn generate_clash(hard_ir: HardwareIR) {
 
     let dtypes = datatypes::render(&hard_ir, &mut reg);
     let hlc = hlc::render(&hard_ir, &mut reg);
+    let llc = llc::render(&hard_ir, &mut reg);
 
-    let all_parts_reddy = vec![dtypes.clone(), hlc.clone()]
+    let all_parts_reddy = vec![dtypes.clone(), hlc.clone(), llc.clone()]
         .iter()
         .all(|d| d.is_some());
     if all_parts_reddy {
@@ -36,6 +39,7 @@ pub fn generate_clash(hard_ir: HardwareIR) {
             data_types: dtypes.unwrap(),
             queue_size: hard_ir.pipeline_wait + 2,
             hlc: hlc.unwrap(),
+            llc: llc.unwrap(),
         };
         match reg.render("monitor", &data) {
             Ok(result) => {
