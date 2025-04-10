@@ -3,8 +3,8 @@ use rtlola_frontend::{self, RtLolaMir};
 use serde_json;
 use std::fs::File;
 use std::io::Write;
+use std::io::{self, Read};
 use std::path::PathBuf;
-
 mod codegen;
 mod hardware_ir;
 
@@ -34,16 +34,18 @@ fn main() {
         .unwrap()
         .to_string()
         + ".json";
-    let config = rtlola_frontend::ParserConfig::from_path(spec_path).unwrap_or_else(|e| {
+    let config = rtlola_frontend::ParserConfig::from_path(spec_path.clone()).unwrap_or_else(|e| {
         eprintln!("{}", e);
         std::process::exit(1)
     });
     let handler = rtlola_frontend::Handler::from(&config);
     match rtlola_frontend::parse(&config) {
         Ok(mir) => {
+            let spec = read_file(spec_path.clone());
+            let filename = spec_path.file_stem().unwrap().to_str().unwrap().to_string();
             save_mir_as_json(mir.clone(), mir_filename);
-            hardware_ir::display_analysis(&mir);
-            let hard_ir = hardware_ir::HardwareIR::new(mir);
+            // hardware_ir::display_analysis(&mir);
+            let hard_ir = hardware_ir::HardwareIR::new(mir, spec, filename);
             let _ = codegen::generate_clash(hard_ir);
         }
         Err(e) => {
@@ -51,4 +53,12 @@ fn main() {
             std::process::exit(1)
         }
     }
+}
+
+fn read_file(path: PathBuf) -> String {
+    let mut file = File::open(&path).unwrap();
+    let mut content = String::new();
+    file.read_to_string(&mut content).unwrap();
+    drop(file);
+    content
 }

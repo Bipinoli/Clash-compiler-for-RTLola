@@ -21,6 +21,12 @@ struct Data {
 }
 
 #[derive(Serialize)]
+struct InputStream {
+    is_accessed_by_offset: bool,
+    memory: usize,
+}
+
+#[derive(Serialize)]
 struct Stream {
     is_sliding_window_based: bool,
     input_types: String,
@@ -30,6 +36,7 @@ struct Stream {
     expression: String,
     sliding_window: String,
     window_size: String,
+    is_accessed_by_offset: bool,
 }
 
 #[derive(Serialize)]
@@ -131,6 +138,7 @@ fn get_streams(ir: &HardwareIR) -> Vec<Stream> {
                 expression,
                 window_size,
                 sliding_window,
+                is_accessed_by_offset: true,
             }
         })
         .collect()

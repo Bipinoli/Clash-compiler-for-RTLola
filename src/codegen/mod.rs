@@ -1,4 +1,6 @@
-use crate::hardware_ir::HardwareIR;
+use crate::hardware_ir::{
+    prettify_eval_order, prettify_required_memory, visualize_pipeline, HardwareIR,
+};
 use handlebars::{
     Context, Handlebars, Helper, Output, RenderContext, RenderError, RenderErrorReason,
 };
@@ -11,6 +13,10 @@ mod llc;
 #[derive(Serialize)]
 struct Data {
     spec_name: String,
+    spec: String,
+    eval_order: String,
+    required_memory: String,
+    pipeline_visualization: String,
     queue_size: usize,
     data_types: String,
     hlc: String,
@@ -35,7 +41,11 @@ pub fn generate_clash(hard_ir: HardwareIR) {
         .all(|d| d.is_some());
     if all_parts_reddy {
         let data = Data {
-            spec_name: "Monitor_name".to_string(),
+            spec_name: to_pascal_case(&hard_ir.spec_name),
+            spec: get_spec(&hard_ir),
+            eval_order: get_eval_order(&hard_ir),
+            required_memory: get_required_memory(&hard_ir),
+            pipeline_visualization: get_pipeline_visualization(&hard_ir),
             data_types: dtypes.unwrap(),
             queue_size: hard_ir.pipeline_wait + 2,
             hlc: hlc.unwrap(),
@@ -130,4 +140,54 @@ fn build_tuple(
     };
     out.write(&tuple_val)?;
     Ok(())
+}
+
+fn get_spec(ir: &HardwareIR) -> String {
+    ir.spec
+        .split("\n")
+        .map(|s| format!("-- {}", s))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn to_pascal_case(s: &str) -> String {
+    s.split(|c: char| c == ' ' || c == '_' || c == '-')
+        .filter(|w| !w.is_empty())
+        .map(|word| {
+            let mut chars = word.chars();
+            match chars.next() {
+                Some(first_char) => {
+                    let mut capitalized = String::new();
+                    capitalized.push_str(&first_char.to_uppercase().to_string());
+                    capitalized.push_str(&chars.as_str().to_lowercase());
+                    capitalized
+                }
+                None => String::new(),
+            }
+        })
+        .collect()
+}
+
+fn get_eval_order(ir: &HardwareIR) -> String {
+    prettify_eval_order(&ir.evaluation_order, &ir.mir)
+        .iter()
+        .map(|s| format!("-- {}", s))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn get_required_memory(ir: &HardwareIR) -> String {
+    prettify_required_memory(&ir.evaluation_order, &ir.mir)
+        .iter()
+        .map(|s| format!("-- {}", s))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn get_pipeline_visualization(ir: &HardwareIR) -> String {
+    visualize_pipeline(&ir.evaluation_order, ir.pipeline_wait, 10, &ir.mir)
+        .iter()
+        .map(|s| format!("-- {}", s))
+        .collect::<Vec<_>>()
+        .join("\n")
 }

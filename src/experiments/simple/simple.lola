@@ -1,0 +1,5 @@
+input x : Int
+
+output a := x.offset(by: -1).defaults(to: 10) + b.offset(by: -3).defaults(to: 20)
+output b := a + 1
+output c @1kHz := b.aggregate(over: 0.003s, using: sum)

@@ -154,18 +154,22 @@ pub struct HardwareIR {
     pub evaluation_order: Vec<Vec<Node>>,
     pub pipeline_wait: usize,
     pub required_memory: HashMap<Node, usize>,
+    pub spec: String,
+    pub spec_name: String,
 }
 
 impl HardwareIR {
-    pub fn new(mir: RtLolaMir) -> Self {
+    pub fn new(mir: RtLolaMir, spec: String, spec_name: String) -> Self {
         let eval_order = find_eval_order(&mir, false);
         let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, &mir);
         let required_memory = calculate_required_memory(&eval_order, &mir);
         HardwareIR {
-            mir: mir,
             evaluation_order: eval_order,
-            pipeline_wait: pipeline_wait,
-            required_memory: required_memory,
+            mir,
+            pipeline_wait,
+            required_memory,
+            spec,
+            spec_name,
         }
     }
 }
@@ -173,18 +177,24 @@ impl HardwareIR {
 pub fn display_analysis(mir: &RtLolaMir) {
     let eval_order = find_eval_order(mir, DISPLAY_ALL_COMBINATIONS);
     println!("\n------- The best pipeline --------");
-    display_eval_order(&eval_order, mir);
-    display_required_memory(&eval_order, mir);
+    println!("{}\n", prettify_eval_order(&eval_order, mir).join("\n"));
+    println!(
+        "{}\n",
+        prettify_required_memory(&eval_order, mir).join("\n")
+    );
     let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, mir);
-    visualize_pipeline(&eval_order, pipeline_wait, 10, mir);
+    println!(
+        "{}\n",
+        visualize_pipeline(&eval_order, pipeline_wait, 10, mir).join("\n")
+    );
 }
 
-fn visualize_pipeline(
+pub fn visualize_pipeline(
     eval_order: &Vec<Vec<Node>>,
     pipeline_wait: usize,
     time_steps: usize,
     mir: &RtLolaMir,
-) {
+) -> Vec<String> {
     let orders: Vec<String> = eval_order
         .iter()
         .map(|order| {
@@ -196,6 +206,7 @@ fn visualize_pipeline(
         })
         .collect();
     let max_len = orders.iter().map(|x| x.len()).max().unwrap();
+    let mut visual: Vec<String> = Vec::new();
     for (i, x) in orders.iter().enumerate() {
         let mut line: Vec<String> = Vec::new();
         let mut shift_cnt = 0;
@@ -212,9 +223,10 @@ fn visualize_pipeline(
             line.push(padded_str);
         }
         let line = line.join(" | ");
-        println!("{}", line);
-        println!("{}", "-".repeat(line.len()));
+        visual.push(format!("{}", line));
+        visual.push(format!("{}", "-".repeat(line.len())));
     }
+    visual
 }
 
 fn calculate_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> HashMap<Node, usize> {
@@ -239,9 +251,10 @@ fn calculate_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> Ha
     needed_memory
 }
 
-fn display_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
+pub fn prettify_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> Vec<String> {
     let pipeline_wait = calculate_necessary_pipeline_wait(eval_order, mir);
     let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
+    let mut retval: Vec<String> = Vec::new();
     all_nodes.into_iter().for_each(|node| {
         let window = node
             .get_children(mir)
@@ -252,11 +265,12 @@ fn display_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
             .max();
         match window {
             Some(win) => {
-                println!("window {} = {}", node.prettify(mir), win);
+                retval.push(format!("window {} = {}", node.prettify(mir), win));
             }
             _ => {}
         }
     });
+    retval
 }
 
 fn window_size(
@@ -371,8 +385,11 @@ fn find_eval_order(mir: &RtLolaMir, display_all_combinations: bool) -> Vec<Vec<N
     if display_all_combinations {
         all_combinations.iter().for_each(|eval_order| {
             println!();
-            display_eval_order(&eval_order, mir);
-            display_required_memory(&eval_order, mir);
+            println!("{}\n", prettify_eval_order(&eval_order, mir).join("\n"));
+            println!(
+                "{}\n",
+                prettify_required_memory(&eval_order, mir).join("\n")
+            );
             let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, mir);
             visualize_pipeline(&eval_order, pipeline_wait, 10, mir);
         });
@@ -613,8 +630,8 @@ fn find_level(node: &Node, eval_order: &Vec<Vec<Node>>) -> usize {
     unreachable!()
 }
 
-fn display_eval_order(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
-    let order = eval_order
+pub fn prettify_eval_order(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> Vec<String> {
+    eval_order
         .iter()
         .map(|order| {
             order
@@ -624,6 +641,4 @@ fn display_eval_order(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) {
                 .join(", ")
         })
         .collect::<Vec<_>>()
-        .join("\n");
-    println!("{}\n", order);
 }

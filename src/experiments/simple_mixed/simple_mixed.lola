@@ -8,5 +8,5 @@ output d := a * c
 
 output e @2kHz := e.offset(by: -1).defaults(to: 0) + 1
 output f @1kHz := x.aggregate(over: 0.003s, using: sum) 
-output ff @1kHz := d.aggregate(over: 0.004s, using: sum) 
 output g := e + f + d.hold(or: 100)
+// output ff @1kHz := d.aggregate(over: 0.004s, using: sum) 
