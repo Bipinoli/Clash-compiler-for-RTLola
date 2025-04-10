@@ -5,27 +5,29 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- input x : Int
+-- input y : Int
 -- 
--- output a := x.offset(by: -1).defaults(to: 10) + b.offset(by: -3).defaults(to: 20)
--- output b := a + 1
--- output c @1kHz := b.aggregate(over: 0.003s, using: sum)
+-- output a := x.offset(by: -2).defaults(to: 10) + b.offset(by: -3).defaults(to: 20)
+-- output b := a + y
+-- output c @1kHz := b.aggregate(over: 0.003s, using: sum) + b.hold(or: 0)
 
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- a, x
+-- y, a, x
 -- b
 -- sw(b,c)
 -- c
 
 -- Memory Window
+-- window y = 1
 -- window a = 1
--- window x = 1
+-- window x = 2
 -- window b = 2
 -- window sw(b,c) = 1
 
 -- Pipeline Visualization
--- a,x     | a,x     | a,x     | a,x     | a,x     | a,x     | a,x     | a,x     | a,x     | a,x    
+-- y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x  
 -- -------------------------------------------------------------------------------------------------
 --         | b       | b       | b       | b       | b       | b       | b       | b       | b      
 -- -------------------------------------------------------------------------------------------------
@@ -38,7 +40,8 @@ import Clash.Prelude
 
 
 type HasInput0 = (Int, Bool)
-type Inputs = HasInput0
+type HasInput1 = (Int, Bool)
+type Inputs = (HasInput0, HasInput1)
 
 type HasOutput0 = (Int, Bool)
 type HasOutput1 = (Int, Bool)
@@ -51,7 +54,7 @@ type Slides = Bool
 type Event = (Inputs, Slides, Pacings)
 
 nullEvent :: Event
-nullEvent = ((0, False), False, (False, False, False))
+nullEvent = (((0, False), (0, False)), False, (False, False, False))
 
 
 ---------------------------------------------------------------
@@ -142,10 +145,12 @@ hlc inputs = out
         slides = slide0
         pacings = bundle (pacing0, pacing1, pacing2)
 
-        (_, hasInput0) = unbundle inputs
+        (input0, input1) = unbundle inputs
+        (_, hasInput0) = unbundle input0
+        (_, hasInput1) = unbundle input1
 
-        pacing0 = hasInput0
-        pacing1 = hasInput0
+        pacing0 = hasInput0 .&&. hasInput1
+        pacing1 = hasInput0 .&&. hasInput1
         pacing2 = timer0Over
 
         slide0 = timer1Over
@@ -168,28 +173,42 @@ hlc inputs = out
 
 
 
+input0Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom (Vec 2 Int, Vec 2 Bool)
+input0Window en d = bundle (dataOut, validOut)
+    where 
+        dataOut = register (repeat 0) (mux en ((<<+) <$> dataOut <*> d) dataOut)
+        validOut = register (repeat False) (mux en ((<<+) <$> validOut <*> pure True) validOut)
 
-stream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int -> Signal dom Int
-stream0 en d0 d1 = out
+
+input1Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
+input1Window en d = out
+    where out = register 0 (mux en d out)
+
+
+
+outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int -> Signal dom Int
+outputStream0 en d0 d1 = out
     where
         out = register 0 (mux en next out)
         next = d0 + d1
 
 
-stream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int
-stream1 en d0 = out
+outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int -> Signal dom Int
+outputStream1 en d0 d1 = out
     where
         out = register 0 (mux en next out)
-        next = d0 + 1
+        next = d0 + d1
 
 
-stream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec 4 Int) -> Signal dom Int
-stream2 en sw = out
+outputStream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec 4 Int) -> Signal dom (Vec 3 Int) -> Signal dom (Int, Bool) -> Signal dom Int
+outputStream2 en out0 sw0 sw1  = out
     where
         out = register 0 (mux en next out)
-        next = merge <$> sw
-        merge :: Vec 4 Int -> Int
-        merge win = fold windowBucketFunc0 win
+        next = (merge0 <$> sw0) + (merge1 <$> sw1) + (mux (snd <$> out0) (fst <$> out0) (pure 100))
+        merge0 :: Vec 4 Int -> Int
+        merge0 win = fold windowBucketFunc0 win
+        merge1 :: Vec 3 Int -> Int
+        merge1 win = fold windowBucketFunc1 win
 
 
 windowBucketFunc0 :: Int -> Int -> Int

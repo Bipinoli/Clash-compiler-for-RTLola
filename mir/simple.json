@@ -17,7 +17,7 @@
               },
               {
                 "Offset": {
-                  "Past": 1
+                  "Past": 2
                 }
               }
             ]
@@ -30,10 +30,68 @@
         "evaluation": 0
       },
       "memory_bound": {
-        "Bounded": 2
+        "Bounded": 3
       },
       "reference": {
         "In": 0
+      }
+    },
+    {
+      "name": "y",
+      "ty": {
+        "Int": "Int64"
+      },
+      "accessed_by": [
+        [
+          {
+            "Out": 1
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ],
+        [
+          {
+            "Out": 2
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "SlidingWindow": {
+                  "Sliding": 1
+                }
+              }
+            ]
+          ]
+        ]
+      ],
+      "aggregated_by": [
+        [
+          {
+            "Out": 2
+          },
+          {
+            "Sliding": 1
+          }
+        ]
+      ],
+      "layer": {
+        "spawn": 0,
+        "evaluation": 0
+      },
+      "memory_bound": {
+        "Bounded": 1
+      },
+      "reference": {
+        "In": 1
       }
     }
   ],
@@ -72,7 +130,7 @@
                                 "parameters": [],
                                 "access_kind": {
                                   "Offset": {
-                                    "Past": 1
+                                    "Past": 2
                                   }
                                 }
                               }
@@ -147,18 +205,36 @@
             },
             "pacing": {
               "Event": {
-                "Stream": {
-                  "In": 0
-                }
+                "Conjunction": [
+                  {
+                    "Stream": {
+                      "In": 0
+                    }
+                  },
+                  {
+                    "Stream": {
+                      "In": 1
+                    }
+                  }
+                ]
               }
             }
           }
         ],
         "eval_pacing": {
           "Event": {
-            "Stream": {
-              "In": 0
-            }
+            "Conjunction": [
+              {
+                "Stream": {
+                  "In": 0
+                }
+              },
+              {
+                "Stream": {
+                  "In": 1
+                }
+              }
+            ]
           }
         }
       },
@@ -179,7 +255,7 @@
               },
               {
                 "Offset": {
-                  "Past": 1
+                  "Past": 2
                 }
               }
             ]
@@ -214,6 +290,19 @@
                 "Eval": 0
               },
               "Sync"
+            ]
+          ]
+        ],
+        [
+          {
+            "Out": 2
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Hold"
             ]
           ]
         ]
@@ -269,8 +358,12 @@
                     },
                     {
                       "kind": {
-                        "LoadConstant": {
-                          "Int": 1
+                        "StreamAccess": {
+                          "target": {
+                            "In": 1
+                          },
+                          "parameters": [],
+                          "access_kind": "Sync"
                         }
                       },
                       "ty": {
@@ -286,18 +379,36 @@
             },
             "pacing": {
               "Event": {
-                "Stream": {
-                  "In": 0
-                }
+                "Conjunction": [
+                  {
+                    "Stream": {
+                      "In": 0
+                    }
+                  },
+                  {
+                    "Stream": {
+                      "In": 1
+                    }
+                  }
+                ]
               }
             }
           }
         ],
         "eval_pacing": {
           "Event": {
-            "Stream": {
-              "In": 0
-            }
+            "Conjunction": [
+              {
+                "Stream": {
+                  "In": 0
+                }
+              },
+              {
+                "Stream": {
+                  "In": 1
+                }
+              }
+            ]
           }
         }
       },
@@ -307,6 +418,19 @@
         "has_self_reference": false
       },
       "accesses": [
+        [
+          {
+            "In": 1
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ],
         [
           {
             "Out": 0
@@ -398,17 +522,94 @@
             "condition": null,
             "expression": {
               "kind": {
-                "StreamAccess": {
-                  "target": {
-                    "Out": 1
-                  },
-                  "parameters": [],
-                  "access_kind": {
-                    "SlidingWindow": {
-                      "Sliding": 0
+                "ArithLog": [
+                  "Add",
+                  [
+                    {
+                      "kind": {
+                        "ArithLog": [
+                          "Add",
+                          [
+                            {
+                              "kind": {
+                                "Default": {
+                                  "expr": {
+                                    "kind": {
+                                      "StreamAccess": {
+                                        "target": {
+                                          "Out": 0
+                                        },
+                                        "parameters": [],
+                                        "access_kind": "Hold"
+                                      }
+                                    },
+                                    "ty": {
+                                      "Option": {
+                                        "Int": "Int64"
+                                      }
+                                    }
+                                  },
+                                  "default": {
+                                    "kind": {
+                                      "LoadConstant": {
+                                        "Int": 100
+                                      }
+                                    },
+                                    "ty": {
+                                      "Int": "Int64"
+                                    }
+                                  }
+                                }
+                              },
+                              "ty": {
+                                "Int": "Int64"
+                              }
+                            },
+                            {
+                              "kind": {
+                                "StreamAccess": {
+                                  "target": {
+                                    "Out": 1
+                                  },
+                                  "parameters": [],
+                                  "access_kind": {
+                                    "SlidingWindow": {
+                                      "Sliding": 0
+                                    }
+                                  }
+                                }
+                              },
+                              "ty": {
+                                "Int": "Int64"
+                              }
+                            }
+                          ]
+                        ]
+                      },
+                      "ty": {
+                        "Int": "Int64"
+                      }
+                    },
+                    {
+                      "kind": {
+                        "StreamAccess": {
+                          "target": {
+                            "In": 1
+                          },
+                          "parameters": [],
+                          "access_kind": {
+                            "SlidingWindow": {
+                              "Sliding": 1
+                            }
+                          }
+                        }
+                      },
+                      "ty": {
+                        "Int": "Int64"
+                      }
                     }
-                  }
-                }
+                  ]
+                ]
               },
               "ty": {
                 "Int": "Int64"
@@ -435,6 +636,36 @@
         "has_self_reference": false
       },
       "accesses": [
+        [
+          {
+            "In": 1
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "SlidingWindow": {
+                  "Sliding": 1
+                }
+              }
+            ]
+          ]
+        ],
+        [
+          {
+            "Out": 0
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Hold"
+            ]
+          ]
+        ],
         [
           {
             "Out": 1
@@ -486,9 +717,18 @@
         "Out": 0
       },
       "ac": {
-        "Stream": {
-          "In": 0
-        }
+        "Conjunction": [
+          {
+            "Stream": {
+              "In": 0
+            }
+          },
+          {
+            "Stream": {
+              "In": 1
+            }
+          }
+        ]
       }
     },
     {
@@ -496,9 +736,18 @@
         "Out": 1
       },
       "ac": {
-        "Stream": {
-          "In": 0
-        }
+        "Conjunction": [
+          {
+            "Stream": {
+              "In": 0
+            }
+          },
+          {
+            "Stream": {
+              "In": 1
+            }
+          }
+        ]
       }
     }
   ],
@@ -526,6 +775,33 @@
       "op": "Sum",
       "reference": {
         "Sliding": 0
+      },
+      "ty": {
+        "Int": "Int64"
+      }
+    },
+    {
+      "target": {
+        "In": 1
+      },
+      "caller": {
+        "Out": 2
+      },
+      "duration": {
+        "secs": 0,
+        "nanos": 2000000
+      },
+      "num_buckets": {
+        "Bounded": 2
+      },
+      "bucket_size": {
+        "secs": 0,
+        "nanos": 1000000
+      },
+      "wait": false,
+      "op": "Sum",
+      "reference": {
+        "Sliding": 1
       },
       "ty": {
         "Int": "Int64"

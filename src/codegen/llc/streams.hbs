@@ -7,22 +7,39 @@ pipelineReady rst = toWait .==. pure 0
         next = mux rst waitTime (mux (toWait .>. pure 0) (toWait - 1) toWait)
 {{/if}}
 
+{{#each input_streams}}
 
-{{#each streams}}
+{{#if this.is_accessed_by_offset}}
+input{{@index}}Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom {{this.data_type}} -> Signal dom (Vec {{this.memory}} {{this.data_type}}, Vec {{this.memory}} Bool)
+input{{@index}}Window en d = bundle (dataOut, validOut)
+    where 
+        dataOut = register (repeat {{this.default_value}}) (mux en ((<<+) <$> dataOut <*> d) dataOut)
+        validOut = register (repeat False) (mux en ((<<+) <$> validOut <*> pure True) validOut)
+{{else}}
+input{{@index}}Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom {{this.data_type}} -> Signal dom {{this.data_type}}
+input{{@index}}Window en d = out
+    where out = register {{this.default_value}} (mux en d out)
+{{/if}}
+
+{{/each}}
+
+{{#each output_streams}}
 
 {{#if this.is_sliding_window_based}}
-stream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec {{this.window_size}} {{this.output_type}}) -> Signal dom {{this.output_type}}
-stream{{@index}} en sw = out
+outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> {{#each this.input_types}}Signal dom {{this}}{{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom {{this.output_type}}
+outputStream{{@index}} en {{this.inputs}} = result
     where
-        out = register {{this.default_value}} (mux en next out)
-        next = merge <$> sw
-        merge :: Vec {{this.window_size}} {{this.output_type}} -> {{this.output_type}}
-        merge win = fold windowBucketFunc{{this.sliding_window}} win
+        result = register {{this.default_value}} (mux en next result)
+        next = {{{this.expression}}}
+        {{#each this.sliding_window_inputs}}
+        merge{{this.window_idx}} :: Vec {{this.window_size}} {{this.data_type}} -> {{this.data_type}}
+        merge{{this.window_idx}} win = fold windowBucketFunc{{this.window_idx}} win
+        {{/each}}
 {{else}}
-stream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> {{{this.input_types}}} -> Signal dom {{this.output_type}}
-stream{{@index}} en {{this.inputs}} = out
+outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> {{#each this.input_types}}Signal dom {{this}}{{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom {{this.output_type}}
+outputStream{{@index}} en {{this.inputs}} = result
     where
-        out = register {{this.default_value}} (mux en next out)
+        result = register {{this.default_value}} (mux en next result)
         next = {{{this.expression}}}
 {{/if}}
 
