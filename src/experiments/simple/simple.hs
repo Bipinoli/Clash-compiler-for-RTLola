@@ -9,32 +9,34 @@ import Clash.Prelude
 -- 
 -- output a := x.offset(by: -2).defaults(to: 10) + b.offset(by: -3).defaults(to: 20)
 -- output b := a + y
--- output c @1kHz := b.aggregate(over: 0.003s, using: sum) + b.hold(or: 0)
+-- output c @1kHz := a.hold(or: 100) + b.aggregate(over: 0.003s, using: sum) + y.aggregate(over: 0.002s, using: sum)
 
 ---------------------------------------------------------------
 
 -- Evaluation Order
 -- y, a, x
--- b
+-- sw(y,c), b
 -- sw(b,c)
 -- c
 
 -- Memory Window
 -- window y = 1
--- window a = 1
+-- window a = 3
 -- window x = 2
+-- window sw(y,c) = 2
 -- window b = 2
 -- window sw(b,c) = 1
+-- window c = 1
 
 -- Pipeline Visualization
--- y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x   | y,a,x  
--- -------------------------------------------------------------------------------------------------
---         | b       | b       | b       | b       | b       | b       | b       | b       | b      
--- -------------------------------------------------------------------------------------------------
---         |         | sw(b,c) | sw(b,c) | sw(b,c) | sw(b,c) | sw(b,c) | sw(b,c) | sw(b,c) | sw(b,c)
--- -------------------------------------------------------------------------------------------------
---         |         |         | c       | c       | c       | c       | c       | c       | c      
--- -------------------------------------------------------------------------------------------------
+-- y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x    
+-- ---------------------------------------------------------------------------------------------------------------------
+--           | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b
+-- ---------------------------------------------------------------------------------------------------------------------
+--           |           | sw(b,c)   | sw(b,c)   | sw(b,c)   | sw(b,c)   | sw(b,c)   | sw(b,c)   | sw(b,c)   | sw(b,c)  
+-- ---------------------------------------------------------------------------------------------------------------------
+--           |           |           | c         | c         | c         | c         | c         | c         | c        
+-- ---------------------------------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------
 
@@ -49,12 +51,12 @@ type HasOutput2 = (Int, Bool)
 type Outputs = (HasOutput0, HasOutput1, HasOutput2)
 
 type Pacings = (Bool, Bool, Bool)
-type Slides = Bool
+type Slides = (Bool, Bool)
 
 type Event = (Inputs, Slides, Pacings)
 
 nullEvent :: Event
-nullEvent = (((0, False), (0, False)), False, (False, False, False))
+nullEvent = (((0, False), (0, False)), (False, False), (False, False, False))
 
 
 ---------------------------------------------------------------
@@ -139,10 +141,10 @@ hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Even
 hlc inputs = out
     where 
         out = bundle (newEvent, event)
-        newEvent = slide0 .||. pacing0 .||. pacing1 .||. pacing2
+        newEvent = slide0 .||. slide1 .||. pacing0 .||. pacing1 .||. pacing2
         event = bundle (inputs, slides, pacings)
 
-        slides = slide0
+        slides = bundle (slide0, slide1)
         pacings = bundle (pacing0, pacing1, pacing2)
 
         (input0, input1) = unbundle inputs
@@ -153,14 +155,18 @@ hlc inputs = out
         pacing1 = hasInput0 .&&. hasInput1
         pacing2 = timer0Over
 
-        slide0 = timer1Over
+        slide0 = timer2Over
+        slide1 = timer1Over
 
         timer0Over = timer0 .>=. period0InNs
         timer0 = timer timer0Over
         period0InNs = 1000000
         timer1Over = timer1 .>=. period1InNs
         timer1 = timer timer1Over
-        period1InNs = 3000000
+        period1InNs = 2000000
+        timer2Over = timer2 .>=. period2InNs
+        timer2 = timer timer2Over
+        period2InNs = 3000000
 
         timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
         timer reset = register 0 (mux reset (pure deltaTime) nextTime)
@@ -186,41 +192,46 @@ input1Window en d = out
 
 
 
-outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int -> Signal dom Int
-outputStream0 en d0 d1 = out
+outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Int, Bool) -> Signal dom (Int, Bool) -> Signal dom (Vec 3 Int)
+outputStream0 en in0 out1 = result
     where
-        out = register 0 (mux en next out)
-        next = d0 + d1
+        result = register (repeat 0) (mux en next result)
+        next = (<<+) <$> next <*> nextVal
+        nextVal = (mux (snd <$> in0) (fst <$> in0) (pure 10)) + (mux (snd <$> out1) (fst <$> out1) (pure 20))
 
 
-outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int -> Signal dom Int
-outputStream1 en d0 d1 = out
+outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int -> Signal dom (Vec 2 Int)
+outputStream1 en in1 out0 = result
     where
-        out = register 0 (mux en next out)
-        next = d0 + d1
+        result = register (repeat 0) (mux en next result)
+        next = (<<+) <$> next <*> nextVal
+        nextVal = out0 + in1
 
 
-outputStream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec 4 Int) -> Signal dom (Vec 3 Int) -> Signal dom (Int, Bool) -> Signal dom Int
-outputStream2 en out0 sw0 sw1  = out
+outputStream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec 3 Int) -> Signal dom (Int, Bool) -> Signal dom (Vec 4 Int) -> Signal dom Int
+outputStream2 en sw1 out0 sw0 = result
     where
-        out = register 0 (mux en next out)
-        next = (merge0 <$> sw0) + (merge1 <$> sw1) + (mux (snd <$> out0) (fst <$> out0) (pure 100))
-        merge0 :: Vec 4 Int -> Int
-        merge0 win = fold windowBucketFunc0 win
+        result = register 0 (mux en next result)
+        next = (mux (snd <$> out0) (fst <$> out0) (pure 100)) + (merge0 <$> sw0) + (merge1 <$> sw1)
         merge1 :: Vec 3 Int -> Int
         merge1 win = fold windowBucketFunc1 win
+        merge0 :: Vec 4 Int -> Int
+        merge0 win = fold windowBucketFunc0 win
 
 
 windowBucketFunc0 :: Int -> Int -> Int
 windowBucketFunc0 acc item = acc + item
+
+windowBucketFunc1 :: Int -> Int -> Int
+windowBucketFunc1 acc item = acc + item
 
 
 slidingWindow0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Int, Bool) -> Signal dom (Vec 4 Int)
 slidingWindow0 en slide hasInput = window
     where
         window = register dflt (mux en next window)
-        dflt = repeat 0 :: Vec 4 Int
         next = nextWindow <$> window <*> slide <*> hasInput
+        dflt = repeat 0 :: Vec 4 Int
 
         nextWindow :: Vec 4 Int -> Bool -> (Int, Bool) -> Vec 4 Int
         nextWindow win toSlide inpt = out
@@ -231,6 +242,26 @@ slidingWindow0 en slide hasInput = window
                     (False, True) -> updatedWin
                     (True, False) -> win <<+ 0
                 updatedWin = replace lastIndx (windowBucketFunc0 (last win) dta) win
+                lastIndx = length win - 1       
+
+
+slidingWindow1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Int, Bool) -> Signal dom (Vec 2 (Vec 3 Int)) 
+slidingWindow1 en slide hasInput = window
+    where
+        window = register (repeat dflt) (mux en next window)
+        next = (<<+) <$> next <*> nextVal
+        nextVal = nextWindow <$> (last <$> window) <*> slide <*> hasInput
+        dflt = repeat 0 :: Vec 3 Int
+
+        nextWindow :: Vec 3 Int -> Bool -> (Int, Bool) -> Vec 3 Int
+        nextWindow win toSlide inpt = out
+            where
+                (dta, hasData) = inpt
+                out = case (toSlide, hasData) of
+                    (False, False) -> win
+                    (False, True) -> updatedWin
+                    (True, False) -> win <<+ 0
+                updatedWin = replace lastIndx (windowBucketFunc1 (last win) dta) win
                 lastIndx = length win - 1       
 
 

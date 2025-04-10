@@ -55,6 +55,7 @@ struct SlidingWindow {
     window_size: usize,
     data_type: String,
     default_value: String,
+    memory: usize,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
@@ -129,11 +130,6 @@ fn get_output_streams(ir: &HardwareIR) -> Vec<OutputStream> {
                 })
                 .count()
                 > 0;
-            let memory: usize = 1;
-            assert!(
-                !is_sliding_window_based || (is_sliding_window_based && memory == 1),
-                "sliding_window can't require > 1 memory"
-            );
             OutputStream {
                 is_sliding_window_based,
                 inputs: get_inputs(out),
@@ -141,7 +137,11 @@ fn get_output_streams(ir: &HardwareIR) -> Vec<OutputStream> {
                 output_type: datatypes::get_type(&out.ty),
                 default_value: datatypes::get_default_for_type(&out.ty),
                 expression: get_expression(&out.eval.clauses.first().unwrap().expression, ir),
-                memory,
+                memory: ir
+                    .required_memory
+                    .get(&Node::OutputStream(i))
+                    .unwrap()
+                    .clone(),
                 is_accessed_by_offset: true,
                 sliding_window_inputs: get_sliding_window_inputs(out, ir),
             }
@@ -173,17 +173,16 @@ fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
         .iter()
         .enumerate()
         .map(|(i, sw)| {
-            let data_type = datatypes::get_type(&sw.ty);
-            let window_size = get_sliding_window_size(i, ir);
             let default_value = match sw.op {
                 WindowOperation::Sum => "0".to_string(),
                 _ => unimplemented!(),
             };
             SlidingWindow {
                 window_idx: i,
-                data_type,
-                window_size,
                 default_value,
+                data_type: datatypes::get_type(&sw.ty),
+                window_size: get_sliding_window_size(i, ir),
+                memory: ir.required_memory.get(&Node::SlidingWindow(i)).unwrap().clone()
             }
         })
         .collect()
@@ -196,9 +195,9 @@ fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
             _ => unimplemented!(),
         },
         ExpressionKind::StreamAccess {
-            target: target,
+            target,
             parameters: _,
-            access_kind: access_kind,
+            access_kind,
         } => match access_kind {
             StreamAccessKind::SlidingWindow(x) => {
                 format!("(merge{} <$> sw{})", x.idx(), x.idx())
@@ -210,7 +209,7 @@ fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
         },
         ExpressionKind::Default {
             expr,
-            default: default,
+            default,
         } => {
             let dflt = get_expression(&default, ir);
             let actual = get_expression(&expr, ir);
@@ -222,8 +221,7 @@ fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
         ExpressionKind::ArithLog(operator, expressions) => {
             let expressions: Vec<String> = expressions
                 .into_iter()
-                .enumerate()
-                .map(|(i, expr)| get_expression(expr, ir))
+                .map(|expr| get_expression(expr, ir))
                 .collect();
             let final_expression = match operator {
                 ArithLogOp::Add => expressions.join(" + "),
@@ -241,8 +239,7 @@ fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
 fn get_inputs(out: &MIR::OutputStream) -> String {
     out.accesses
         .iter()
-        .enumerate()
-        .map(|(i, access)| {
+        .map(|access| {
             let stream_ref = match access.0 {
                 StreamReference::In(x) => format!("in{}", x),
                 StreamReference::Out(x) => format!("out{}", x),
@@ -259,12 +256,10 @@ fn get_inputs(out: &MIR::OutputStream) -> String {
         .join(" ")
 }
 
-
 fn get_input_types(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<String> {
     out.accesses
         .iter()
-        .enumerate()
-        .map(|(i, access)| {
+        .map(|access| {
             let stream_data_type = match access.0 {
                 StreamReference::In(x) => datatypes::get_type(&ir.mir.inputs[x].ty),
                 StreamReference::Out(x) => datatypes::get_type(&ir.mir.outputs[x].ty),
@@ -273,14 +268,14 @@ fn get_input_types(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<String> {
                 StreamAccessKind::Sync => stream_data_type,
                 StreamAccessKind::Hold => {
                     format!("({}, Bool)", stream_data_type)
-                },
+                }
                 StreamAccessKind::Offset(_) => {
                     format!("({}, Bool)", stream_data_type)
-                },
+                }
                 StreamAccessKind::SlidingWindow(sw) => {
                     let window_size = get_sliding_window_size(sw.idx(), ir);
                     format!("(Vec {} {})", window_size, stream_data_type)
-                },
+                }
                 _ => unimplemented!(),
             }
         })
@@ -290,24 +285,21 @@ fn get_input_types(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<String> {
 fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<SlidingWindow> {
     out.accesses
         .iter()
-        .filter(|access| {
-            match access.1.first().unwrap().1 {
-                StreamAccessKind::SlidingWindow(_) => true,
-                _ => false
-            }
+        .filter(|access| match access.1.first().unwrap().1 {
+            StreamAccessKind::SlidingWindow(_) => true,
+            _ => false,
         })
-        .map(|access| {
-            match access.1.first().unwrap().1 {
-                StreamAccessKind::SlidingWindow(sw) => {
-                    SlidingWindow {
-                        window_idx: sw.idx(),
-                        window_size: get_sliding_window_size(sw.idx(), ir),
-                        data_type: datatypes::get_type(&ir.mir.sliding_windows[sw.idx()].ty),
-                        default_value: datatypes::get_default_for_type(&ir.mir.sliding_windows[sw.idx()].ty),
-                    }
-                },
-                _ => unreachable!(),
-            }
+        .map(|access| match access.1.first().unwrap().1 {
+            StreamAccessKind::SlidingWindow(sw) => SlidingWindow {
+                window_idx: sw.idx(),
+                window_size: get_sliding_window_size(sw.idx(), ir),
+                data_type: datatypes::get_type(&ir.mir.sliding_windows[sw.idx()].ty),
+                default_value: datatypes::get_default_for_type(
+                    &ir.mir.sliding_windows[sw.idx()].ty,
+                ),
+                memory: ir.required_memory.get(&Node::SlidingWindow(sw.idx())).unwrap().clone()
+            },
+            _ => unreachable!(),
         })
         .collect()
 }

@@ -3,7 +3,7 @@ use rtlola_frontend::{self, RtLolaMir};
 use serde_json;
 use std::fs::File;
 use std::io::Write;
-use std::io::{self, Read};
+use std::io::Read;
 use std::path::PathBuf;
 mod codegen;
 mod hardware_ir;

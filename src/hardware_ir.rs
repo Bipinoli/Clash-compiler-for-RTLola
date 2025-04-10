@@ -240,13 +240,9 @@ fn calculate_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> Ha
             .map(|(child, offset)| {
                 window_size(&node, &child, pipeline_wait, offset, eval_order, mir)
             })
-            .max();
-        match window {
-            Some(win) => {
-                needed_memory.insert(node, win);
-            }
-            _ => {}
-        }
+            .max()
+            .unwrap_or(1);
+        needed_memory.insert(node, window);
     });
     needed_memory
 }
@@ -262,13 +258,9 @@ pub fn prettify_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) ->
             .map(|(child, offset)| {
                 window_size(&node, &child, pipeline_wait, offset, eval_order, mir)
             })
-            .max();
-        match window {
-            Some(win) => {
-                retval.push(format!("window {} = {}", node.prettify(mir), win));
-            }
-            _ => {}
-        }
+            .max()
+            .unwrap_or(1);
+        retval.push(format!("window {} = {}", node.prettify(mir), window));
     });
     retval
 }
@@ -279,7 +271,7 @@ fn window_size(
     pipeline_wait: usize,
     offset: usize,
     eval_order: &Vec<Vec<Node>>,
-    mir: &RtLolaMir,
+    _mir: &RtLolaMir,
 ) -> usize {
     let propagation_time = level_distance(node, child, eval_order);
     let window = if propagation_time < 0 {
@@ -303,7 +295,7 @@ fn calculate_pipeline_wait(
     parent: &Node,
     offset: usize,
     eval_order: &Vec<Vec<Node>>,
-    mir: &RtLolaMir,
+    _mir: &RtLolaMir,
 ) -> usize {
     let propagation_time = level_distance(parent, node, eval_order);
     let value_avail_time = propagation_time + 1; // 1 cycle for the eval
