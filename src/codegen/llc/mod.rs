@@ -8,6 +8,7 @@ mod streams;
 #[derive(Serialize)]
 struct Data {
     streams: String,
+    max_tag: usize,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
@@ -18,6 +19,7 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
     );
     let data = Data {
         streams: streams::render(ir, handlebars).unwrap(),
+        max_tag: streams::get_sliding_windows(ir).iter().map(|sw| sw.window_size.clone()).max().unwrap_or(5) * 2,
     };
     match handlebars.render("llc", &data) {
         Ok(result) => Some(result),

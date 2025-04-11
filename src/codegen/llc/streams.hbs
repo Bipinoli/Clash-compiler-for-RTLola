@@ -31,16 +31,19 @@ outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> {{#ea
 {{else}}
 outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> {{#each this.input_types}}Signal dom {{this}}{{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom {{this.output_type}}
 {{/if}}
-outputStream{{@index}} en {{this.inputs}} = result
+outputStream{{@index}} en {{#each this.inputs}}{{this}}WithTag {{/each}}= result
     where
         {{#if (gt this.memory 1)}}
-        result = register (repeat {{this.default_value}}) (mux en next result)
-        next = (<<+) <$> next <*> nextVal
-        nexttVal = {{{this.expression}}}
+        result = register (repeat (0 :: Tag, {{this.default_value}})) (mux en next result)
+        next = (<<+) <$> next <*> nextValWithTag
         {{else}}
-        result = register {{this.default_value}} (mux en next result)
-        next = {{{this.expression}}}
+        result = register (0 :: Tag, {{this.default_value}}) (mux en nextValWithTag result)
         {{/if}}
+        nextValWithTag = bundle (tag, nextVal)
+        nextVal = {{{this.expression}}}
+        {{#each this.inputs}}
+        ({{#if @first}}tag{{else}}_{{/if}}, {{this}}) = unbundle {{this}}WithTag
+        {{/each}}
         {{#each this.sliding_window_inputs}}
         merge{{this.window_idx}} :: Vec {{this.window_size}} {{this.data_type}} -> {{this.data_type}}
         merge{{this.window_idx}} win = fold windowBucketFunc{{this.window_idx}} win
@@ -51,16 +54,19 @@ outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> {{#ea
 {{else}}
 outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> {{#each this.input_types}}Signal dom {{this}}{{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom {{this.output_type}}
 {{/if}}
-outputStream{{@index}} en {{this.inputs}} = result
+outputStream{{@index}} en {{#each this.inputs}}{{this}}WithTag {{/each}}= result
     where
         {{#if (gt this.memory 1)}}
-        result = register (repeat {{this.default_value}}) (mux en next result)
-        next = (<<+) <$> next <*> nextVal
-        nextVal = {{{this.expression}}}
+        result = register (repeat (0 :: Tag, {{this.default_value}})) (mux en next result)
+        next = (<<+) <$> next <*> nextValWithTag
         {{else}}
-        result = register {{this.default_value}} (mux en next result)
-        next = {{{this.expression}}}
+        result = register (0 :: Tag, {{this.default_value}}) (mux en nextValWithTag result)
         {{/if}}
+        nextValWithTag = bundle (tag, nextVal)
+        nextVal = {{{this.expression}}}
+        {{#each this.inputs}}
+        ({{#if @first}}tag{{else}}_{{/if}}, {{this}}) = unbundle {{this}}WithTag
+        {{/each}}
 {{/if}}
 
 {{/each}}

@@ -35,7 +35,7 @@ struct OutputStream {
     is_sliding_window_based: bool,
     output_type: String,
     default_value: String,
-    inputs: String,
+    inputs: Vec<String>,
     input_types: Vec<String>,
     expression: String,
     memory: usize,
@@ -50,12 +50,12 @@ struct BucketFunction {
 }
 
 #[derive(Serialize)]
-struct SlidingWindow {
-    window_idx: usize,
-    window_size: usize,
-    data_type: String,
-    default_value: String,
-    memory: usize,
+pub struct SlidingWindow {
+    pub window_idx: usize,
+    pub window_size: usize,
+    pub data_type: String,
+    pub default_value: String,
+    pub memory: usize,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
@@ -134,7 +134,7 @@ fn get_output_streams(ir: &HardwareIR) -> Vec<OutputStream> {
                 is_sliding_window_based,
                 inputs: get_inputs(out),
                 input_types: get_input_types(out, ir),
-                output_type: datatypes::get_type(&out.ty),
+                output_type: format!("(Tag, {})", datatypes::get_type(&out.ty)),
                 default_value: datatypes::get_default_for_type(&out.ty),
                 expression: get_expression(&out.eval.clauses.first().unwrap().expression, ir),
                 memory: ir
@@ -167,7 +167,7 @@ fn get_bucket_functions(ir: &HardwareIR) -> Vec<BucketFunction> {
         .collect()
 }
 
-fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
+pub fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
     ir.mir
         .sliding_windows
         .iter()
@@ -236,7 +236,7 @@ fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
     }
 }
 
-fn get_inputs(out: &MIR::OutputStream) -> String {
+fn get_inputs(out: &MIR::OutputStream) -> Vec<String> {
     out.accesses
         .iter()
         .map(|access| {
@@ -253,7 +253,6 @@ fn get_inputs(out: &MIR::OutputStream) -> String {
             }
         })
         .collect::<Vec<_>>()
-        .join(" ")
 }
 
 fn get_input_types(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<String> {
@@ -264,7 +263,7 @@ fn get_input_types(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<String> {
                 StreamReference::In(x) => datatypes::get_type(&ir.mir.inputs[x].ty),
                 StreamReference::Out(x) => datatypes::get_type(&ir.mir.outputs[x].ty),
             };
-            match access.1.first().unwrap().1 {
+            let data_type = match access.1.first().unwrap().1 {
                 StreamAccessKind::Sync => stream_data_type,
                 StreamAccessKind::Hold => {
                     format!("({}, Bool)", stream_data_type)
@@ -277,7 +276,8 @@ fn get_input_types(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<String> {
                     format!("(Vec {} {})", window_size, stream_data_type)
                 }
                 _ => unimplemented!(),
-            }
+            };
+            format!("(Tag, {})", data_type)
         })
         .collect()
 }

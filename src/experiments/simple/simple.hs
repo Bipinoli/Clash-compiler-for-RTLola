@@ -177,6 +177,20 @@ hlc inputs = out
 
 ---------------------------------------------------------------
 
+type Tag = Unsigned 8
+-- maxTag must be at least the size of the sliding window to avoid duplicate tags in the window
+maxTag = 8 :: Tag
+
+getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> a
+getOffset win tag offset dflt = out
+    where 
+        offsetTag = if tag > offset then tag - offset else tag - offset + maxTag
+        out = case findIndex (\(t, _) -> t == offsetTag) win of
+            Just i -> let (_, v) = win !! i in v 
+            Nothing -> dflt 
+
+
+
 
 
 input0Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom (Vec 2 Int, Vec 2 Bool)
@@ -192,27 +206,37 @@ input1Window en d = out
 
 
 
-outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Int, Bool) -> Signal dom (Int, Bool) -> Signal dom (Vec 3 Int)
-outputStream0 en in0 out1 = result
+outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, (Int, Bool)) -> Signal dom (Tag, (Int, Bool)) -> Signal dom (Vec 3 (Tag, Int))
+outputStream0 en in0WithTag out1WithTag = result
     where
-        result = register (repeat 0) (mux en next result)
-        next = (<<+) <$> next <*> nextVal
+        result = register (repeat (0 :: Tag, 0)) (mux en next result)
+        next = (<<+) <$> next <*> nextValWithTag
+        nextValWithTag = bundle (tag, nextVal)
         nextVal = (mux (snd <$> in0) (fst <$> in0) (pure 10)) + (mux (snd <$> out1) (fst <$> out1) (pure 20))
+        (tag, in0) = unbundle in0WithTag
+        (_, out1) = unbundle out1WithTag
 
 
-outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int -> Signal dom Int -> Signal dom (Vec 2 Int)
-outputStream1 en in1 out0 = result
+outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Vec 2 (Tag, Int))
+outputStream1 en in1WithTag out0WithTag = result
     where
-        result = register (repeat 0) (mux en next result)
-        next = (<<+) <$> next <*> nextVal
+        result = register (repeat (0 :: Tag, 0)) (mux en next result)
+        next = (<<+) <$> next <*> nextValWithTag
+        nextValWithTag = bundle (tag, nextVal)
         nextVal = out0 + in1
+        (tag, in1) = unbundle in1WithTag
+        (_, out0) = unbundle out0WithTag
 
 
-outputStream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Vec 3 Int) -> Signal dom (Int, Bool) -> Signal dom (Vec 4 Int) -> Signal dom Int
-outputStream2 en sw1 out0 sw0 = result
+outputStream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, (Vec 3 Int)) -> Signal dom (Tag, (Int, Bool)) -> Signal dom (Tag, (Vec 4 Int)) -> Signal dom (Tag, Int)
+outputStream2 en sw1WithTag out0WithTag sw0WithTag = result
     where
-        result = register 0 (mux en next result)
-        next = (mux (snd <$> out0) (fst <$> out0) (pure 100)) + (merge0 <$> sw0) + (merge1 <$> sw1)
+        result = register (0 :: Tag, 0) (mux en nextValWithTag result)
+        nextValWithTag = bundle (tag, nextVal)
+        nextVal = (mux (snd <$> out0) (fst <$> out0) (pure 100)) + (merge0 <$> sw0) + (merge1 <$> sw1)
+        (tag, sw1) = unbundle sw1WithTag
+        (_, out0) = unbundle out0WithTag
+        (_, sw0) = unbundle sw0WithTag
         merge1 :: Vec 3 Int -> Int
         merge1 win = fold windowBucketFunc1 win
         merge0 :: Vec 4 Int -> Int
