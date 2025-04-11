@@ -54,9 +54,18 @@ llc event = bundle (toPop, outputs)
         {{#each outputs}}
         out{{this.idx}} = outputStream{{this.idx}} enOut{{this.idx}} {{#each this.deps}}out{{../idx}}Data{{@index}} {{/each}}
         {{#each this.deps}}
-        out{{../idx}}Data{{@index}} = 
+        {{#if (or this.is_sync_access this.is_sliding_window_access)}}
+        {{#if this.memory_more_than_one}}
+        out{{../idx}}Data{{@index}} = getMatchingTag <$> {{this.source}} <*> out{{../idx}}Tag <*> (pure {{this.default_value}})
+        {{else}}
+        out{{../idx}}Data{{@index}} = {{this.source}}
+        {{/if}}
+        {{/if}}
+        {{#if this.is_offset_access}}
+        out{{../idx}}Data{{@index}} = getOffset <$> {{this.source}} <*> out{{../idx}}Tag <*> (pure {{this.offset}}) <*> (pure {{this.default_value}})
+        {{/if}}
         {{/each}}
-        
+
         {{/each}}
 
 

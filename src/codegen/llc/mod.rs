@@ -1,7 +1,11 @@
 use handlebars::Handlebars;
-use rtlola_frontend::mir::{Constant, Expression, ExpressionKind, Offset, StreamAccessKind, StreamReference, WindowReference};
+use rtlola_frontend::mir::{
+    Constant, Expression, ExpressionKind, Offset, OutputStream, StreamAccessKind, StreamReference,
+    WindowReference,
+};
 use serde::Serialize;
 
+use crate::hardware_ir::Node;
 use crate::{codegen::register_template, hardware_ir::HardwareIR};
 
 use super::datatypes;
@@ -31,6 +35,8 @@ struct Dependency {
     default_value: String,
     offset: usize,
     source: String,
+    memory_more_than_one: bool,
+    node: Node,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
@@ -65,117 +71,111 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
         .outputs
         .iter()
         .enumerate()
-        .map(|(i, out)| {
-            let deps = out.eval.
-
-
-
-            let deps1: Vec<Dependency> = out
-                .accesses
-                .iter()
-                .map(|access| {
-                    let source = match access.0 {
-                        StreamReference::In(x) => format!("input{}Win", x),
-                        StreamReference::Out(x) => format!("out{}", x),
-                    };
-                    match access.1.first().unwrap().1 {
-                        StreamAccessKind::Sync => {
-                            let default_value = match access.0 {
-                                StreamReference::In(x) => {
-                                    datatypes::get_default_for_type(&ir.mir.inputs[x].ty)
-                                }
-                                StreamReference::Out(x) => {
-                                    datatypes::get_default_for_type(&ir.mir.outputs[x].ty)
-                                }
-                            };
-                            Dependency {
-                                is_sync_access: true,
-                                is_offset_access: false,
-                                is_sliding_window_access: false,
-                                offset: 0,
-                                default_value,
-                                source,
-                            }
-                        }
-                        StreamAccessKind::Hold => {
-
-                            Dependency {
-                                is_sync_access: true,
-                                is_offset_access: false,
-                                is_sliding_window_access: false,
-                                offset: 0,
-                                default_value,
-                                source,
-                            }
-                        }
-                        StreamAccessKind::Offset(_) => stream_ref,
-                        StreamAccessKind::SlidingWindow(sw) => format!("sw{}", sw.idx()),
-                        _ => unimplemented!(),
-                    }
-                })
-                .collect();
-            Output { idx: i, deps }
+        .map(|(i, out)| Output {
+            idx: i,
+            deps: {
+                let mut deps = get_dependencies_from_expression(
+                    &out.eval.clauses.first().unwrap().expression,
+                    ir,
+                );
+                order_dependencies_according_to_access_list(&mut deps, out);
+                deps
+            },
         })
         .collect()
 }
 
-
 fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<Dependency> {
     // default values of offsets, hold etc. can only be accessed from the expression
     match &expr.kind {
-        ExpressionKind::StreamAccess { target, parameters: _, access_kind } => {
+        ExpressionKind::StreamAccess {
+            target,
+            parameters: _,
+            access_kind,
+        } => {
             let source = match target {
                 StreamReference::In(x) => format!("input{}Win", x),
                 StreamReference::Out(x) => format!("out{}", x),
             };
+            let node = match target {
+                StreamReference::In(x) => Node::InputStream(x.clone()),
+                StreamReference::Out(x) => Node::OutputStream(x.clone()),
+            };
+            let memory_more_than_one = match target {
+                StreamReference::In(x) => {
+                    ir.required_memory
+                        .get(&Node::InputStream(x.clone()))
+                        .unwrap()
+                        .clone()
+                        > 1
+                }
+                StreamReference::Out(x) => {
+                    ir.required_memory
+                        .get(&Node::OutputStream(x.clone()))
+                        .unwrap()
+                        .clone()
+                        > 1
+                }
+            };
             let dep = match access_kind {
-                StreamAccessKind::Sync => {
-                    Dependency {
-                        is_sync_access: true,
-                        is_offset_access: false,
-                        is_sliding_window_access: false,
-                        offset: 0,
-                        source,
-                        default_value: match target {
-                            StreamReference::In(x) => {
-                                datatypes::get_default_for_type(&ir.mir.inputs[x.clone()].ty)
-                            }
-                            StreamReference::Out(x) => {
-                                datatypes::get_default_for_type(&ir.mir.outputs[x.clone()].ty)
-                            } 
-                        },
-                     }
+                StreamAccessKind::Sync => Dependency {
+                    is_sync_access: true,
+                    is_offset_access: false,
+                    is_sliding_window_access: false,
+                    offset: 0,
+                    source,
+                    node,
+                    memory_more_than_one,
+                    default_value: match target {
+                        StreamReference::In(x) => {
+                            datatypes::get_default_for_type(&ir.mir.inputs[x.clone()].ty)
+                        }
+                        StreamReference::Out(x) => {
+                            datatypes::get_default_for_type(&ir.mir.outputs[x.clone()].ty)
+                        }
+                    },
                 },
-                StreamAccessKind::Hold => {
-                    Dependency {
-                        is_sync_access: true,
-                        is_offset_access: false,
-                        is_sliding_window_access: false,
-                        offset: 0,
-                        source,
-                        default_value: String::new(), 
-                     }
+                StreamAccessKind::Hold => Dependency {
+                    is_sync_access: true,
+                    is_offset_access: false,
+                    is_sliding_window_access: false,
+                    offset: 0,
+                    source,
+                    node,
+                    memory_more_than_one,
+                    default_value: String::new(),
                 },
-                StreamAccessKind::Offset(off) => {
-                   Dependency {
+                StreamAccessKind::Offset(off) => Dependency {
                     is_offset_access: true,
                     is_sync_access: false,
                     is_sliding_window_access: false,
                     source,
+                    node,
+                    memory_more_than_one,
                     default_value: String::new(),
                     offset: match off {
                         Offset::Past(x) => x.clone() as usize,
                         _ => unimplemented!(),
                     },
-                   } 
                 },
                 StreamAccessKind::SlidingWindow(sw) => {
-                    let (default_value, source) = match sw {
+                    let (default_value, source, memory) = match sw {
                         WindowReference::Sliding(x) => {
-                            let default_value = datatypes::get_default_for_type(&ir.mir.sliding_windows[x.clone()].ty);
+                            let default_value = datatypes::get_default_for_type(
+                                &ir.mir.sliding_windows[x.clone()].ty,
+                            );
                             let source = format!("sw{}", x);
-                            (default_value, source)
-                        },
+                            let memory = ir
+                                .required_memory
+                                .get(&Node::SlidingWindow(x.clone()))
+                                .unwrap()
+                                .clone();
+                            (default_value, source, memory)
+                        }
+                        _ => unimplemented!(),
+                    };
+                    let node = match sw {
+                        WindowReference::Sliding(x) => Node::SlidingWindow(x.clone()),
                         _ => unimplemented!(),
                     };
                     Dependency {
@@ -185,39 +185,73 @@ fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<D
                         offset: 0,
                         default_value,
                         source,
+                        node,
+                        memory_more_than_one: memory > 1,
                     }
-                },
-                _ => unimplemented!()
+                }
+                _ => unimplemented!(),
             };
             vec![dep]
-        },
+        }
         ExpressionKind::Default { expr, default } => {
             let deps = get_dependencies_from_expression(&expr, ir);
             let default_value = get_default_value(&default);
-            deps.iter().map(|dep| {
-                Dependency {
+            deps.iter()
+                .map(|dep| Dependency {
                     is_offset_access: dep.is_offset_access,
                     is_sliding_window_access: dep.is_sliding_window_access,
                     is_sync_access: dep.is_sync_access,
                     offset: dep.offset,
                     source: dep.source.clone(),
-                    default_value: default_value.clone()
+                    node: dep.node.clone(),
+                    memory_more_than_one: dep.memory_more_than_one,
+                    default_value: default_value.clone(),
+                })
+                .collect()
+        }
+        ExpressionKind::ArithLog(_, exprs) => exprs
+            .iter()
+            .map(|expr| get_dependencies_from_expression(expr, ir))
+            .reduce(|acc, lst| {
+                let mut acc = acc;
+                acc.extend(lst);
+                acc
+            })
+            .unwrap(),
+        _ => unimplemented!(),
+    }
+}
+
+fn order_dependencies_according_to_access_list(deps: &mut Vec<Dependency>, out: &OutputStream) {
+    deps.sort_by_key(|dep| {
+        let accesses: Vec<Node> = out
+            .accesses
+            .iter()
+            .map(|access| {
+                let node = match access.0 {
+                    StreamReference::In(x) => Node::InputStream(x.clone()),
+                    StreamReference::Out(x) => Node::OutputStream(x.clone()),
+                };
+                match access.1.first().unwrap().1 {
+                    StreamAccessKind::SlidingWindow(sw) => match sw {
+                        WindowReference::Sliding(x) => Node::SlidingWindow(x.clone()),
+                        _ => unimplemented!(),
+                    },
+                    _ => node,
                 }
-            }).collect()
-        },
-        _ => unimplemented!()
-    };
-    unimplemented!()
+            })
+            .collect();
+        let index = accesses.iter().position(|node| *node == dep.node).unwrap();
+        index
+    });
 }
 
 fn get_default_value(expr: &Expression) -> String {
     match &expr.kind {
-       ExpressionKind::LoadConstant(x) => {
-        match x {
+        ExpressionKind::LoadConstant(x) => match x {
             Constant::Int(x) => format!("{}", x),
             _ => unimplemented!(),
-        }
-       },
-       _ => unimplemented!(),
+        },
+        _ => unimplemented!(),
     }
 }
