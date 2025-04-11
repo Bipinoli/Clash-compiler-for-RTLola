@@ -224,11 +224,11 @@ llc event = bundle (toPop, outputs)
         out0Data1 = getOffset <$> out1 <*> out0Tag <*> (pure 3) <*> (pure 20)
 
         out1 = outputStream1 enOut1 out1Data0 out1Data1
-        out1Data0 = getWithMatchingTag <$> out0 <*> out1Tag <*> (pure 0)
+        out1Data0 = getMatchingTag <$> out0 <*> out1Tag <*> (pure 0)
         out1Data1 = input1Win
 
         out2 = outputStream2 enOut2 out2Data0 out2Data1 out2Data2
-        out2Data0 = getWithMatchingTag <$> sw1 <*> out2Tag <*> (pure 0)
+        out2Data0 = getMatchingTag <$> sw1 <*> out2Tag <*> (pure 0)
         out2Data1 = getMatchingTag <$> out0 <*> out2Tag <*> (pure 100)
         out2Data2 = sw0
         

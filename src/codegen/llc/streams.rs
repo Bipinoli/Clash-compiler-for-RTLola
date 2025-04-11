@@ -168,7 +168,11 @@ pub fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
                 default_value,
                 data_type: datatypes::get_type(&sw.ty),
                 window_size: get_sliding_window_size(i, ir),
-                memory: ir.required_memory.get(&Node::SlidingWindow(i)).unwrap().clone()
+                memory: ir
+                    .required_memory
+                    .get(&Node::SlidingWindow(i))
+                    .unwrap()
+                    .clone(),
             }
         })
         .collect()
@@ -193,12 +197,7 @@ fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
                 StreamReference::Out(x) => format!("out{}", x),
             },
         },
-        ExpressionKind::Default {
-            expr,
-            default: _,
-        } => {
-            get_expression(&expr, ir)
-        }
+        ExpressionKind::Default { expr, default: _ } => get_expression(&expr, ir),
         ExpressionKind::ArithLog(operator, expressions) => {
             let expressions: Vec<String> = expressions
                 .into_iter()
@@ -273,7 +272,11 @@ fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<Sl
                 default_value: datatypes::get_default_for_type(
                     &ir.mir.sliding_windows[sw.idx()].ty,
                 ),
-                memory: ir.required_memory.get(&Node::SlidingWindow(sw.idx())).unwrap().clone()
+                memory: ir
+                    .required_memory
+                    .get(&Node::SlidingWindow(sw.idx()))
+                    .unwrap()
+                    .clone(),
             },
             _ => unreachable!(),
         })

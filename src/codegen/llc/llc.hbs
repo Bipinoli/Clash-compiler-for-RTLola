@@ -39,6 +39,8 @@ llc event = bundle (toPop, outputs)
         (inputs, pacings) = unbundle poppedEvent
         {{/if}}
 
+        tag = genTag ({{#each outputs}}p{{@index}}{{#unless @last}} .||. {{/unless}}{{/each}})
+
         {{#if (gt (len outputs) 1)}}
         outputs = bundle ({{#each outputs}}output{{this.idx}}{{#unless @last}}, {{/unless}}{{/each}})
         {{else}}
@@ -50,7 +52,11 @@ llc event = bundle (toPop, outputs)
         {{/each}}
 
         {{#each outputs}}
-        out{{this.idx}} = outputStream{{this.idx}} enOut{{this.idx}} 
+        out{{this.idx}} = outputStream{{this.idx}} enOut{{this.idx}} {{#each this.deps}}out{{../idx}}Data{{@index}} {{/each}}
+        {{#each this.deps}}
+        out{{../idx}}Data{{@index}} = 
+        {{/each}}
+        
         {{/each}}
 
 
