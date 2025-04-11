@@ -1,61 +1,74 @@
 type Tag = Unsigned 8
 -- maxTag must be at least the size of the sliding window to avoid duplicate tags in the window
 maxTag = {{max_tag}} :: Tag
+invalidTag = maxTag + 1
 
-getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> a
+getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
 getOffset win tag offset dflt = out
     where 
         offsetTag = if tag > offset then tag - offset else tag - offset + maxTag
         out = case findIndex (\(t, _) -> t == offsetTag) win of
-            Just i -> let (_, v) = win !! i in v 
-            Nothing -> dflt 
+            Just i -> let (_, v) = win !! i in (tag, v)
+            Nothing -> (tag, dflt) 
 
-
-
-llc :: HiddenClockResetEnable dom => Signal dom Event -> Signal dom Outputs
-llc event = outputs
+getMatchingTag :: KnownNat n => Vec n (Tag, a) -> Tag -> a -> (Tag, a)
+getMatchingTag win tag dflt = out
     where 
-        outputs = bundle (output0, output1, output2)
+        out = case findIndex (\(t, _) -> t == tag) win of
+            Just i -> let (_, v) = win !! i in (tag, v)
+            Nothing -> (tag, dflt)
 
-        input0win = input0Window enInpt0 input0
-        input1win = input1Window enInpt1 input1
 
-        out0 = outputStream0 enOut0 
 
-        (inputs, slides, pacings) = unbundle event
-        inputX = inputs
-        pacingDEF = pacings
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool, Outputs)
+llc event = bundle (toPop, outputs)
+    where 
+        (isValidEvent, poppedEvent) = unbundle event
 
-        (x, _) = unbundle inputX
+        {{#if has_pipeline_wait}}
+        isPipelineReady = pipelineReady startNewPipeline
+        startNewPipeline = mux (isPipelineReady .&&. isValidEvent) (pure True) (pure False)
+        toPop = isPipelineReady .&&. not <$> startNewPipeline
+        {{else}}
+        toPop = pure True
+        {{/if}}
 
-        pacingD = unwrapPacingABCDEF <$> pacingDEF
-        pacingE = delay False pacingD
-        pacingF = delay False pacingE
+        {{#if has_sliding_window}}
+        (inputs, slides, pacings) = unbundle poppedEvent
+        {{else}}
+        (inputs, pacings) = unbundle poppedEvent
+        {{/if}}
 
-        tag = genTag pacingD
+        {{#if (gt (len outputs) 1)}}
+        outputs = bundle ({{#each outputs}}output{{this.idx}}{{#unless @last}}, {{/unless}}{{/each}})
+        {{else}}
+        outputs = output0
+        {{/if}}
 
-        evalD = streamD pacingD (bundle (tag, x)) evalF 
-        evalE = streamE pacingE evalD
-        evalF = streamF pacingF evalE
+        {{#each outputs}}
+        output{{this.idx}} = bundle (out{{this.idx}}, aktvOut{{this.idx}})
+        {{/each}}
 
-        outAktvD = delay False (unwrapPacingABCDEF <$> pacingDEF)
-        outAktvE = delay False outAktvD
-        outAktvF = delay False outAktvE
+        {{#each outputs}}
+        out{{this.idx}} = outputStream{{this.idx}} enOut{{this.idx}} 
+        {{/each}}
 
-        outputs = bundle (outputD, outputE, outputF)
-        outputD = bundle (outD, outAktvD)
-        outputE = bundle (outE, outAktvE)
-        outputF = bundle (outF, outAktvF)
-        (_, outD) = unbundle evalD
-        (_, outE) = unbundle evalE
-        (_, outF) = unbundle (last <$> evalF)
 
-        genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
-        genTag en = t
-            where 
-                t = register 1 (mux en next_t t)
-                next_t = mux (t .==. (pure maxTag)) (pure 1) (t + 1)
 
+
+
+
+
+
+
+{{#if has_pipeline_wait}}
+pipelineReady :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
+pipelineReady rst = toWait .==. pure 0 
+    where 
+        waitTime = pure {{pipeline_wait}} :: Signal dom Int
+        toWait = register (0 :: Int) next
+        next = mux rst waitTime (mux (toWait .>. pure 0) (toWait - 1) toWait)
+{{/if}}
 
 
 

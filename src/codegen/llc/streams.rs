@@ -13,7 +13,6 @@ use crate::{
 
 #[derive(Serialize)]
 struct Data {
-    has_pipeline_wait: bool,
     pipeline_wait: usize,
     has_sliding_window: bool,
     input_streams: Vec<InputStream>,
@@ -24,7 +23,6 @@ struct Data {
 
 #[derive(Serialize)]
 struct InputStream {
-    is_accessed_by_offset: bool,
     memory: usize,
     data_type: String,
     default_value: String,
@@ -65,7 +63,6 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         handlebars,
     );
     let data = Data {
-        has_pipeline_wait: ir.pipeline_wait > 0,
         pipeline_wait: ir.pipeline_wait,
         has_sliding_window: ir.mir.sliding_windows.len() > 0,
         input_streams: get_input_streams(ir),
@@ -95,18 +92,7 @@ fn get_input_streams(ir: &HardwareIR) -> Vec<InputStream> {
                 .get(&Node::InputStream(i))
                 .unwrap()
                 .clone();
-            let is_accessed_by_offset = {
-                inpt.accessed_by
-                    .iter()
-                    .filter(|&access| match access.1.first().unwrap().1 {
-                        StreamAccessKind::Offset(_) => true,
-                        _ => false,
-                    })
-                    .count()
-                    > 0
-            };
             InputStream {
-                is_accessed_by_offset,
                 memory,
                 data_type,
                 default_value,
@@ -134,7 +120,7 @@ fn get_output_streams(ir: &HardwareIR) -> Vec<OutputStream> {
                 is_sliding_window_based,
                 inputs: get_inputs(out),
                 input_types: get_input_types(out, ir),
-                output_type: format!("(Tag, {})", datatypes::get_type(&out.ty)),
+                output_type: datatypes::get_type(&out.ty),
                 default_value: datatypes::get_default_for_type(&out.ty),
                 expression: get_expression(&out.eval.clauses.first().unwrap().expression, ir),
                 memory: ir
@@ -209,14 +195,9 @@ fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
         },
         ExpressionKind::Default {
             expr,
-            default,
+            default: _,
         } => {
-            let dflt = get_expression(&default, ir);
-            let actual = get_expression(&expr, ir);
-            format!(
-                "(mux (snd <$> {}) (fst <$> {}) (pure {}))",
-                actual, actual, dflt
-            )
+            get_expression(&expr, ir)
         }
         ExpressionKind::ArithLog(operator, expressions) => {
             let expressions: Vec<String> = expressions
@@ -263,21 +244,16 @@ fn get_input_types(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<String> {
                 StreamReference::In(x) => datatypes::get_type(&ir.mir.inputs[x].ty),
                 StreamReference::Out(x) => datatypes::get_type(&ir.mir.outputs[x].ty),
             };
-            let data_type = match access.1.first().unwrap().1 {
+            match access.1.first().unwrap().1 {
                 StreamAccessKind::Sync => stream_data_type,
-                StreamAccessKind::Hold => {
-                    format!("({}, Bool)", stream_data_type)
-                }
-                StreamAccessKind::Offset(_) => {
-                    format!("({}, Bool)", stream_data_type)
-                }
+                StreamAccessKind::Hold => stream_data_type,
+                StreamAccessKind::Offset(_) => stream_data_type,
                 StreamAccessKind::SlidingWindow(sw) => {
                     let window_size = get_sliding_window_size(sw.idx(), ir);
                     format!("(Vec {} {})", window_size, stream_data_type)
                 }
                 _ => unimplemented!(),
-            };
-            format!("(Tag, {})", data_type)
+            }
         })
         .collect()
 }
