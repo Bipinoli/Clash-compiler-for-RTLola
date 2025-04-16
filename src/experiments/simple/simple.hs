@@ -38,6 +38,14 @@ import Clash.Prelude
 --           |           |           | c         | c         | c         | c         | c         | c         | c        
 -- ---------------------------------------------------------------------------------------------------------------------
 
+-- input0 = x
+-- input1 = y
+-- output0 = a
+-- output1 = b
+-- output2 = c
+-- sw0 = sw(b,c)
+-- sw1 = sw(y,c)
+
 ---------------------------------------------------------------
 
 
@@ -207,34 +215,76 @@ llc event = bundle (toPop, outputs)
         toPop = pure True
 
         (inputs, slides, pacings) = unbundle poppedEvent
+        (input0, input1) = unbundle inputs
+        (input0Data, input0HasData) = unbundle input0
+        (input1Data, input1HasData) = unbundle input1
+        (slide0, slide1) = unbundle slides
+        (p0, p1, p2) = unbundle pacings
 
         outputs = bundle (output0, output1, output2)
 
-        input0Win = input0Window isValidEvent ...
-        input1Win = input1Window isValidEvent ...
-
         tag = genTag (p0 .||. p1 .||. p2)
 
-        output0 = bundle (out0, aktvOut0)
-        output1 = bundle (out1, aktvOut1)
-        output2 = bundle (out2, aktvOut2)
+        in1Tag = tag
+        out0Tag = tag
+        in0Tag = tag
+        out1Tag = delay invalidTag tag
+        sw1Tag = delay invalidTag tag
+        sw0Tag = delay invalidTag (delay invalidTag tag)
+        out2Tag = delay invalidTag (delay invalidTag (delay invalidTag tag))
 
-        out0 = outputStream0 enOut0 out0Data0 out0Data1
+        enIn1 = input1HasData
+        enOut0 = p0
+        enIn0 = input0HasData
+        enOut1 = delay False p1
+        enSw1 = delay False p2
+        sw1DataPacing = delay False input1HasData
+        enSw0 = delay False (delay False p2)
+        sw0DataPacing = delay False (delay False p1)
+        enOut2 = delay False (delay False (delay False p2))
+
+        outputPhaseTag = delay invalidTag (delay invalidTag (delay invalidTag (delay invalidTag tag)))
+        output0Aktv = delay False (delay False (delay False (delay False p0)))
+        output1Aktv = delay False (delay False (delay False (delay False p1)))
+        output2Aktv = delay False (delay False (delay False (delay False p2)))
+
+        output0 = bundle (output0Data, output0Aktv)
+        (_, output0Data) = unbundle (getMatchingTag <$> out0 <*> outputPhaseTag <*> (pure 0))
+        output1 = bundle (output1Data, output1Aktv)
+        (_, output1Data) = unbundle (getMatchingTag <$> out1 <*> outputPhaseTag <*> (pure 0))
+        output2 = bundle (output2Data, output2Aktv)
+        (_, output2Data) = unbundle out2
+
+        input0Win = input0Window enIn0 (bundle (in0Tag, input0Data))
+        input1Win = input1Window enIn1 (bundle (in1Tag, input1Data))
+
+        out0 = outputStream0 enOut0 out0Data0 out0Data1 
         out0Data0 = getOffset <$> input0Win <*> out0Tag <*> (pure 2) <*> (pure 10)
         out0Data1 = getOffset <$> out1 <*> out0Tag <*> (pure 3) <*> (pure 20)
 
-        out1 = outputStream1 enOut1 out1Data0 out1Data1
-        out1Data0 = getMatchingTag <$> out0 <*> out1Tag <*> (pure 0)
-        out1Data1 = input1Win
+        out1 = outputStream1 enOut1 out1Data0 out1Data1 
+        out1Data0 = input1Win
+        out1Data1 = getMatchingTag <$> out0 <*> out1Tag <*> (pure 0)
 
-        out2 = outputStream2 enOut2 out2Data0 out2Data1 out2Data2
-        out2Data0 = getMatchingTag <$> sw1 <*> out2Tag <*> (pure 0)
+        out2 = outputStream2 enOut2 out2Data0 out2Data1 out2Data2 
+        out2Data0 = getMatchingTag <$> sw1 <*> out2Tag <*> (pure (repeat 0))
         out2Data1 = getMatchingTag <$> out0 <*> out2Tag <*> (pure 100)
         out2Data2 = sw0
-        
-        sw0 = slidingWindow0 enSw0 slide0 ...
-        sw1 = slidingWindow1 enSw1 slide1 ...
 
+        sw0 = slidingWindow0 enSw0 slide0 (bundle (sw0Tag, sw0Data))
+        sw0Data = bundle (sw0DataVal, sw0DataPacing)
+        (_, sw0DataVal) = unbundle (getMatchingTag <$> out1 <*> sw0Tag <*> (pure 0))
+
+        sw1 = slidingWindow1 enSw1 slide1 (bundle (sw1Tag, sw1Data))
+        sw1Data = bundle (sw1DataVal, sw1DataPacing)
+        (_, sw1DataVal) = unbundle input1Win
+
+
+        genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
+        genTag en = t
+            where 
+                t = register 1 (mux en next_t t)
+                next_t = mux (t .==. (pure maxTag)) (pure 1) (t + 1)
 
 
 
@@ -257,7 +307,7 @@ outputStream0 en in0WithTag out1WithTag = result
         result = register (repeat (invalidTag, 0)) (mux en next result)
         next = (<<+) <$> next <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = in0 + out1 
+        nextVal = in0 + out1
         (tag, in0) = unbundle in0WithTag
         (_, out1) = unbundle out1WithTag
 
@@ -288,6 +338,7 @@ outputStream2 en sw1WithTag out0WithTag sw0WithTag = result
         merge0 win = fold windowBucketFunc0 win
 
 
+
 windowBucketFunc0 :: Int -> Int -> Int
 windowBucketFunc0 acc item = acc + item
 
@@ -295,7 +346,7 @@ windowBucketFunc1 :: Int -> Int -> Int
 windowBucketFunc1 acc item = acc + item
 
 
-slidingWindow0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Tag, (Int, Bool)) -> Signal dom (Tag, (Vec 4 Int))
+slidingWindow0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Tag, (Int, Bool)) -> Signal dom (Tag, (Vec 4 Int)) 
 slidingWindow0 en slide hasInputWithTag = window
     where
         window = register (invalidTag, dflt) (mux en next window)

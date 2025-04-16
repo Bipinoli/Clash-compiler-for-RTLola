@@ -1,7 +1,7 @@
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
     Constant, Expression, ExpressionKind, Offset, OutputStream, StreamAccessKind, StreamReference,
-    WindowReference,
+    Window, WindowReference,
 };
 use serde::Serialize;
 
@@ -18,13 +18,28 @@ struct Data {
     max_tag: usize,
     has_pipeline_wait: bool,
     has_sliding_window: bool,
+    inputs: Vec<()>,
     outputs: Vec<Output>,
+    sliding_windows: Vec<SlidingWindow>,
+    tags: Vec<String>,
+    enables: Vec<String>,
+    output_phase_enables: Vec<String>,
 }
 
 #[derive(Serialize)]
 struct Output {
     idx: usize,
+    default_value: String,
+    memory_more_than_one: bool,
     deps: Vec<Dependency>,
+}
+
+#[derive(Serialize)]
+struct SlidingWindow {
+    idx: usize,
+    input_data: String,
+    input_data_default: String,
+    input_memory_more_than_one: bool,
 }
 
 #[derive(Serialize)]
@@ -55,7 +70,12 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
             * 2,
         has_pipeline_wait: ir.pipeline_wait > 0,
         has_sliding_window: ir.mir.sliding_windows.len() > 0,
+        inputs: ir.mir.inputs.iter().map(|_| ()).collect(),
         outputs: get_outputs(ir),
+        sliding_windows: get_sliding_windows(ir),
+        tags: get_tags(ir),
+        enables: get_enables(ir),
+        output_phase_enables: get_output_phase_enables(ir),
     };
     match handlebars.render("llc", &data) {
         Ok(result) => Some(result),
@@ -66,6 +86,151 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
     }
 }
 
+fn get_tags(ir: &HardwareIR) -> Vec<String> {
+    ir.evaluation_order
+        .iter()
+        .enumerate()
+        .map(|(i, order)| {
+            order.iter().map(move |nd| {
+                let tag = surround_with_delay(i, "invalidTag".to_string(), "tag".to_string());
+                match nd {
+                    Node::InputStream(x) => format!("in{}Tag = {}", x.clone(), tag),
+                    Node::OutputStream(x) => format!("out{}Tag = {}", x.clone(), tag),
+                    Node::SlidingWindow(x) => format!("sw{}Tag = {}", x.clone(), tag),
+                }
+            })
+        })
+        .flatten()
+        .collect()
+}
+
+fn get_enables(ir: &HardwareIR) -> Vec<String> {
+    ir.evaluation_order
+        .iter()
+        .enumerate()
+        .map(|(i, order)| {
+            order
+                .iter()
+                .map(move |nd| {
+                    let (has_two, name1, pacing1, name2, pacing2) = match nd {
+                        Node::InputStream(x) => (
+                            false,
+                            format!("enIn{}", x.clone()),
+                            format!("input{}HasData", x.clone()),
+                            String::new(),
+                            String::new(),
+                        ),
+                        Node::OutputStream(x) => (
+                            false,
+                            format!("enOut{}", x.clone()),
+                            format!("p{}", x.clone()),
+                            String::new(),
+                            String::new(),
+                        ),
+                        Node::SlidingWindow(x) => {
+                            let name1 = format!("enSw{}", x.clone());
+                            let pacing1 = match ir.mir.sliding_windows[x.clone()].caller {
+                                StreamReference::Out(x) => format!("p{}", x.clone()),
+                                _ => unreachable!(),
+                            };
+                            let name2 = format!("sw{}DataPacing", x.clone());
+                            let pacing2 = match ir.mir.sliding_windows[x.clone()].target {
+                                StreamReference::In(x) => format!("input{}HasData", x.clone()),
+                                StreamReference::Out(x) => format!("p{}", x.clone()),
+                            };
+                            (true, name1, pacing1, name2, pacing2)
+                        }
+                    };
+                    if has_two {
+                        vec![
+                            format!(
+                                "{} = {}",
+                                name1,
+                                surround_with_delay(i, "False".to_string(), pacing1)
+                            ),
+                            format!(
+                                "{} = {}",
+                                name2,
+                                surround_with_delay(i, "False".to_string(), pacing2)
+                            ),
+                        ]
+                    } else {
+                        vec![format!(
+                            "{} = {}",
+                            name1,
+                            surround_with_delay(i, "False".to_string(), pacing1)
+                        )]
+                    }
+                })
+                .flatten()
+        })
+        .flatten()
+        .collect()
+}
+
+fn get_output_phase_enables(ir: &HardwareIR) -> Vec<String> {
+    let eval_levels = ir.evaluation_order.len();
+    let output_phase_tag = vec![format!(
+        "outputPhaseTag = {}",
+        surround_with_delay(eval_levels, "invalidTag".to_string(), "tag".to_string())
+    )];
+    let output_aktvs: Vec<String> = ir
+        .mir
+        .outputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| {
+            format!(
+                "output{}Aktv = {}",
+                i.clone(),
+                surround_with_delay(eval_levels, "False".to_string(), format!("p{}", i.clone()))
+            )
+        })
+        .collect();
+    vec![&output_phase_tag[..], &output_aktvs[..]].concat()
+}
+
+fn surround_with_delay(times: usize, default_value: String, data: String) -> String {
+    if times > 0 {
+        let surround_left = format!("delay {} (", default_value).repeat(times);
+        let surround_right = ")".repeat(times - 1);
+        format!(
+            "{}{}{}",
+            String::from(&surround_left[..surround_left.len() - 1]),
+            data,
+            surround_right
+        )
+    } else {
+        data
+    }
+}
+
+fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
+    ir.mir
+        .sliding_windows
+        .iter()
+        .enumerate()
+        .map(|(i, sw)| SlidingWindow {
+            idx: i.clone(),
+            input_data: match sw.target {
+                StreamReference::In(x) => format!("input{}Win", x.clone()),
+                StreamReference::Out(x) => format!("out{}", x.clone()),
+            },
+            input_data_default: match sw.target {
+                StreamReference::In(x) => datatypes::get_default_for_type(&ir.mir.inputs[x].ty),
+                StreamReference::Out(x) => datatypes::get_default_for_type(&ir.mir.outputs[x].ty),
+            },
+            input_memory_more_than_one: {
+                let node = match sw.target {
+                    StreamReference::In(x) => Node::InputStream(x.clone()),
+                    StreamReference::Out(x) => Node::OutputStream(x.clone()),
+                };
+                ir.required_memory.get(&node).unwrap().clone() > 1
+            },
+        })
+        .collect()
+}
+
 fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
     ir.mir
         .outputs
@@ -73,6 +238,13 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
         .enumerate()
         .map(|(i, out)| Output {
             idx: i,
+            default_value: datatypes::get_default_for_type(&out.ty),
+            memory_more_than_one: ir
+                .required_memory
+                .get(&Node::OutputStream(i.clone()))
+                .unwrap()
+                .clone()
+                > 1,
             deps: {
                 let mut deps = get_dependencies_from_expression(
                     &out.eval.clauses.first().unwrap().expression,
@@ -161,8 +333,11 @@ fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<D
                 StreamAccessKind::SlidingWindow(sw) => {
                     let (default_value, source, memory) = match sw {
                         WindowReference::Sliding(x) => {
-                            let default_value = datatypes::get_default_for_type(
-                                &ir.mir.sliding_windows[x.clone()].ty,
+                            let default_value = format!(
+                                "(repeat {})",
+                                datatypes::get_default_for_type(
+                                    &ir.mir.sliding_windows[x.clone()].ty,
+                                )
                             );
                             let source = format!("sw{}", x);
                             let memory = ir

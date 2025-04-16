@@ -38,8 +38,26 @@ llc event = bundle (toPop, outputs)
         {{else}}
         (inputs, pacings) = unbundle poppedEvent
         {{/if}}
-
-        tag = genTag ({{#each outputs}}p{{@index}}{{#unless @last}} .||. {{/unless}}{{/each}})
+        {{#if (gt (len inputs) 1)}}
+        ({{#each inputs}}input{{@index}}{{#unless @last}}, {{/unless}}{{/each}}) = unbundle inputs
+        {{else}}
+        input0 = inputs
+        {{/if}}
+        {{#each inputs}}
+        (input{{@index}}Data, input{{@index}}HasData) = unbundle input{{@index}}
+        {{/each}}
+        {{#if has_sliding_window}}
+            {{#if (gt (len sliding_windows) 1)}}
+        ({{#each sliding_windows}}slide{{@index}}{{#unless @last}}, {{/unless}}{{/each}}) = unbundle slides
+            {{else}}
+        slide0 = slides
+            {{/if}}
+        {{/if}}
+        {{#if (gt (len outputs) 1)}}
+        ({{#each outputs}}p{{@index}}{{#unless @last}}, {{/unless}}{{/each}}) = unbundle pacings
+        {{else}}
+        p0 = pacings
+        {{/if}}
 
         {{#if (gt (len outputs) 1)}}
         outputs = bundle ({{#each outputs}}output{{this.idx}}{{#unless @last}}, {{/unless}}{{/each}})
@@ -47,8 +65,31 @@ llc event = bundle (toPop, outputs)
         outputs = output0
         {{/if}}
 
+        tag = genTag ({{#each outputs}}p{{@index}}{{#unless @last}} .||. {{/unless}}{{/each}})
+
+        {{#each tags}}
+        {{{this}}}
+        {{/each}}
+
+        {{#each enables}}
+        {{{this}}}
+        {{/each}}
+
+        {{#each output_phase_enables}}
+        {{{this}}}
+        {{/each}}
+
         {{#each outputs}}
-        output{{this.idx}} = bundle (out{{this.idx}}, aktvOut{{this.idx}})
+        output{{this.idx}} = bundle (output{{this.idx}}Data, output{{this.idx}}Aktv)
+        {{#if this.memory_more_than_one}}
+        (_, output{{this.idx}}Data) = unbundle (getMatchingTag <$> out{{this.idx}} <*> outputPhaseTag <*> (pure {{this.default_value}}))
+        {{else}}
+        (_, output{{this.idx}}Data) = unbundle out{{this.idx}}
+        {{/if}}
+        {{/each}}
+
+        {{#each inputs}}
+        input{{@index}}Win = input{{@index}}Window enIn{{@index}} (bundle (in{{@index}}Tag, input{{@index}}Data))
         {{/each}}
 
         {{#each outputs}}
@@ -67,13 +108,22 @@ llc event = bundle (toPop, outputs)
         {{/each}}
 
         {{/each}}
+        {{#each sliding_windows}}
+        sw{{this.idx}} = slidingWindow{{this.idx}} enSw{{this.idx}} slide{{this.idx}} (bundle (sw{{this.idx}}Tag, sw{{this.idx}}Data))
+        sw{{this.idx}}Data = bundle (sw{{this.idx}}DataVal, sw{{this.idx}}DataPacing)
+        {{#if this.input_memory_more_than_one}}
+        (_, sw{{this.idx}}DataVal) = unbundle (getMatchingTag <$> {{this.input_data}} <*> sw{{this.idx}}Tag <*> (pure {{this.input_data_default}}))
+        {{else}}
+        (_, sw{{this.idx}}DataVal) = unbundle {{this.input_data}}
+        {{/if}}
 
+        {{/each}}
 
-
-
-
-
-
+        genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
+        genTag en = t
+            where 
+                t = register 1 (mux en next_t t)
+                next_t = mux (t .==. (pure maxTag)) (pure 1) (t + 1)
 
 
 {{#if has_pipeline_wait}}
@@ -84,7 +134,6 @@ pipelineReady rst = toWait .==. pure 0
         toWait = register (0 :: Int) next
         next = mux rst waitTime (mux (toWait .>. pure 0) (toWait - 1) toWait)
 {{/if}}
-
 
 
 {{{streams}}}

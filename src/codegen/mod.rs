@@ -1,5 +1,5 @@
 use crate::hardware_ir::{
-    prettify_eval_order, prettify_required_memory, visualize_pipeline, HardwareIR,
+    prettify_eval_order, prettify_required_memory, visualize_pipeline, HardwareIR, Node,
 };
 use handlebars::{
     Context, Handlebars, Helper, Output, RenderContext, RenderError, RenderErrorReason,
@@ -17,6 +17,7 @@ struct Data {
     eval_order: String,
     required_memory: String,
     pipeline_visualization: String,
+    stream_names: Vec<String>,
     queue_size: usize,
     data_types: String,
     hlc: String,
@@ -46,6 +47,7 @@ pub fn generate_clash(hard_ir: HardwareIR) {
             eval_order: get_eval_order(&hard_ir),
             required_memory: get_required_memory(&hard_ir),
             pipeline_visualization: get_pipeline_visualization(&hard_ir),
+            stream_names: get_stream_names(&hard_ir),
             data_types: dtypes.unwrap(),
             queue_size: hard_ir.pipeline_wait + 2,
             hlc: hlc.unwrap(),
@@ -190,4 +192,29 @@ fn get_pipeline_visualization(ir: &HardwareIR) -> String {
         .map(|s| format!("-- {}", s))
         .collect::<Vec<_>>()
         .join("\n")
+}
+
+fn get_stream_names(ir: &HardwareIR) -> Vec<String> {
+    let inputs: Vec<String> = ir
+        .mir
+        .inputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("input{} = {}", i, Node::InputStream(i).prettify(&ir.mir)))
+        .collect();
+    let outputs: Vec<String> = ir
+        .mir
+        .outputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("output{} = {}", i, Node::OutputStream(i).prettify(&ir.mir)))
+        .collect();
+    let sliding_windows: Vec<String> = ir
+        .mir
+        .sliding_windows
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("sw{} = {}", i, Node::SlidingWindow(i).prettify(&ir.mir)))
+        .collect();
+    [&inputs[..], &outputs[..], &sliding_windows[..]].concat()
 }
