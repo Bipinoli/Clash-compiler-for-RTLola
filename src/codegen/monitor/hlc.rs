@@ -6,7 +6,7 @@ use serde::Serialize;
 use uom::num_rational::Ratio;
 use uom::si::rational64::Frequency;
 
-use crate::{codegen::register_template, hardware_ir::HardwareIR};
+use crate::{codegen::monitor::register_template, hardware_ir::HardwareIR};
 
 #[derive(Serialize)]
 struct Data {
@@ -24,7 +24,7 @@ struct Data {
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
     register_template(
         "hlc".to_string(),
-        "src/codegen/hlc.hbs".to_string(),
+        "src/codegen/monitor/hlc.hbs".to_string(),
         handlebars,
     );
     let data = Data {

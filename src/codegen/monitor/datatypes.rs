@@ -2,7 +2,7 @@ use handlebars::Handlebars;
 use rtlola_frontend as RF;
 use serde::Serialize;
 
-use crate::{codegen::register_template, hardware_ir::HardwareIR};
+use crate::{codegen::monitor::register_template, hardware_ir::HardwareIR};
 
 #[derive(Serialize)]
 struct Data {
@@ -17,7 +17,7 @@ struct Data {
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
     register_template(
         "datatypes".to_string(),
-        "src/codegen/datatypes.hbs".to_string(),
+        "src/codegen/monitor/datatypes.hbs".to_string(),
         handlebars,
     );
     let data = Data {

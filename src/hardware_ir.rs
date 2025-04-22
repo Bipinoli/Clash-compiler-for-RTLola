@@ -156,10 +156,11 @@ pub struct HardwareIR {
     pub required_memory: HashMap<Node, usize>,
     pub spec: String,
     pub spec_name: String,
+    pub debug: bool,
 }
 
 impl HardwareIR {
-    pub fn new(mir: RtLolaMir, spec: String, spec_name: String) -> Self {
+    pub fn new(mir: RtLolaMir, spec: String, spec_name: String, debug: bool) -> Self {
         let eval_order = find_eval_order(&mir, false);
         let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, &mir);
         let required_memory = calculate_required_memory(&eval_order, &mir);
@@ -170,6 +171,7 @@ impl HardwareIR {
             required_memory,
             spec,
             spec_name,
+            debug,
         }
     }
 }

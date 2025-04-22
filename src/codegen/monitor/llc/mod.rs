@@ -1,12 +1,12 @@
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
     Constant, Expression, ExpressionKind, Offset, OutputStream, StreamAccessKind, StreamReference,
-    Window, WindowReference,
+    WindowReference,
 };
 use serde::Serialize;
 
 use crate::hardware_ir::Node;
-use crate::{codegen::register_template, hardware_ir::HardwareIR};
+use crate::{codegen::monitor::register_template, hardware_ir::HardwareIR};
 
 use super::datatypes;
 
@@ -57,7 +57,7 @@ struct Dependency {
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
     register_template(
         "llc".to_string(),
-        "src/codegen/llc/llc.hbs".to_string(),
+        "src/codegen/monitor/llc/llc.hbs".to_string(),
         handlebars,
     );
     let data = Data {

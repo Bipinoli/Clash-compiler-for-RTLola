@@ -6,7 +6,7 @@ use rtlola_frontend::mir::{
 use serde::Serialize;
 
 use crate::{
-    codegen::{datatypes, register_template},
+    codegen::monitor::{datatypes, register_template},
     hardware_ir::HardwareIR,
     hardware_ir::Node,
 };
@@ -59,7 +59,7 @@ pub struct SlidingWindow {
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
     register_template(
         "streams".to_string(),
-        "src/codegen/llc/streams.hbs".to_string(),
+        "src/codegen/monitor/llc/streams.hbs".to_string(),
         handlebars,
     );
     let data = Data {

@@ -15,7 +15,7 @@ import Clash.Prelude
 
 -- Evaluation Order
 -- y, a, x
--- b, sw(y,c)
+-- sw(y,c), b
 -- sw(b,c)
 -- c
 
@@ -23,15 +23,15 @@ import Clash.Prelude
 -- window y = 1
 -- window a = 3
 -- window x = 2
--- window b = 2
 -- window sw(y,c) = 2
+-- window b = 2
 -- window sw(b,c) = 1
 -- window c = 1
 
 -- Pipeline Visualization
 -- y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x     | y,a,x    
 -- ---------------------------------------------------------------------------------------------------------------------
---           | b,sw(y,c) | b,sw(y,c) | b,sw(y,c) | b,sw(y,c) | b,sw(y,c) | b,sw(y,c) | b,sw(y,c) | b,sw(y,c) | b,sw(y,c)
+--           | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b | sw(y,c),b
 -- ---------------------------------------------------------------------------------------------------------------------
 --           |           | sw(b,c)   | sw(b,c)   | sw(b,c)   | sw(b,c)   | sw(b,c)   | sw(b,c)   | sw(b,c)   | sw(b,c)  
 -- ---------------------------------------------------------------------------------------------------------------------
@@ -228,17 +228,17 @@ llc event = bundle (toPop, outputs)
         in1Tag = tag
         out0Tag = tag
         in0Tag = tag
-        out1Tag = delay invalidTag tag
         sw1Tag = delay invalidTag tag
+        out1Tag = delay invalidTag tag
         sw0Tag = delay invalidTag (delay invalidTag tag)
         out2Tag = delay invalidTag (delay invalidTag (delay invalidTag tag))
 
         enIn1 = input1HasData
         enOut0 = p0
         enIn0 = input0HasData
-        enOut1 = delay False p1
         enSw1 = delay False p2
         sw1DataPacing = delay False input1HasData
+        enOut1 = delay False p1
         enSw0 = delay False (delay False p2)
         sw0DataPacing = delay False (delay False p1)
         enOut2 = delay False (delay False (delay False p2))
@@ -390,3 +390,23 @@ slidingWindow1 en slide hasInputWithTag = window
 
 
 ---------------------------------------------------------------
+
+
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom Outputs
+monitor inputs = outputs
+    where 
+        (newEvent, event) = unbundle (hlc inputs)
+
+        (qPushValid, qPopValid, qPopData) = unbundle (queue (bundle (qPush, qPop, qInptData)))
+        qPush = newEvent
+        qInptData = event
+
+        (toPop, outputs) = unbundle (llc (bundle (qPopValid, qPopData)))
+        qPop = toPop
+
+
+---------------------------------------------------------------
+
+topEntity :: Clock System -> Reset System -> Enable System -> 
+    Signal System Inputs -> Signal System Outputs
+topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en
