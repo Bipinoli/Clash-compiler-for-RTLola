@@ -16,8 +16,8 @@ module testbench;
     {{/each}}
 
     {{#if debug}}
-    wire pipeline_ready;
-    wire start_new_pipeline;
+    wire signed [63:0] tag;
+    wire toPop;
     {{/if}}
 
     topEntity monitor (
@@ -29,7 +29,7 @@ module testbench;
                         output_{{@index}}, output_{{@index}}_aktv{{#unless @last}},{{/unless}}
                         {{/each}}
                         {{#if debug}}
-                        ,pipeline_ready, start_new_pipeline
+                        ,tag, toPop
                         {{/if}}
                        );
 

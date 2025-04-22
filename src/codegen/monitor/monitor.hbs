@@ -107,9 +107,13 @@ queue input = output
 
 ---------------------------------------------------------------
 
-
+{{#if debug}}
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (Tag, Bool))
+monitor inputs = bundle (outputs, llcDebug)
+{{else}}
 monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom Outputs
 monitor inputs = outputs
+{{/if}}
     where 
         (newEvent, event) = unbundle (hlc inputs)
 
@@ -117,12 +121,22 @@ monitor inputs = outputs
         qPush = newEvent
         qInptData = event
 
+        {{#if debug}}
+        (llcOutput, llcDebug) = unbundle (llc (bundle (qPopValid, qPopData)))
+        (toPop, outputs) = unbundle llcOutput
+        {{else}}
         (toPop, outputs) = unbundle (llc (bundle (qPopValid, qPopData)))
+        {{/if}}
         qPop = toPop
 
 
 ---------------------------------------------------------------
 
+{{#if debug}}
+topEntity :: Clock System -> Reset System -> Enable System -> 
+    Signal System Inputs -> Signal System (Outputs, (Tag, Bool))
+{{else}}
 topEntity :: Clock System -> Reset System -> Enable System -> 
     Signal System Inputs -> Signal System Outputs
+{{/if}}
 topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en

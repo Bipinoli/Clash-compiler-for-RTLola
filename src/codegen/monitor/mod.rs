@@ -12,6 +12,7 @@ mod llc;
 
 #[derive(Serialize)]
 struct Data {
+    debug: bool,
     spec_name: String,
     spec: String,
     eval_order: String,
@@ -42,6 +43,7 @@ pub fn generate_clash(hard_ir: HardwareIR) -> Option<String> {
         .all(|d| d.is_some());
     if all_parts_reddy {
         let data = Data {
+            debug: hard_ir.debug,
             spec_name: hard_ir.spec_name.clone(),
             spec: get_spec(&hard_ir),
             eval_order: get_eval_order(&hard_ir),

@@ -14,6 +14,7 @@ mod streams;
 
 #[derive(Serialize)]
 struct Data {
+    debug: bool,
     streams: String,
     max_tag: usize,
     has_pipeline_wait: bool,
@@ -61,6 +62,7 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         handlebars,
     );
     let data = Data {
+        debug: ir.debug,
         streams: streams::render(ir, handlebars).unwrap(),
         max_tag: streams::get_sliding_windows(ir)
             .iter()

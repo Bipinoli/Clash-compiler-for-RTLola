@@ -17,6 +17,8 @@ module testbench;
     wire signed [63:0] output_2;
     wire output_2_aktv;
 
+    wire signed [63:0] tag;
+    wire toPop;
 
     topEntity monitor (
                         clk, rst, en,
@@ -25,6 +27,7 @@ module testbench;
                         output_0, output_0_aktv,
                         output_1, output_1_aktv,
                         output_2, output_2_aktv
+                        ,tag, toPop
                        );
 
     always begin
