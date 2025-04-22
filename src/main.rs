@@ -1,4 +1,5 @@
 use clap::{command, Parser};
+use csv::StringRecord;
 use rtlola_frontend::{self, RtLolaMir};
 use serde_json;
 use std::fs::File;
@@ -20,20 +21,28 @@ struct Args {
     #[arg(short, long)]
     output: PathBuf,
 
+    /// Generate everything (clash, testbench, scripts) except for saving mir
+    #[arg(long)]
+    all: bool,
+
     /// Should generate verilog testbench
-    #[arg(short, long, default_value_t = true)]
+    #[arg(long)]
     testbench: bool,
 
+    /// monitor trace file (*.csv) to generate a verilog testbench
+    #[arg(long)]
+    trace: Option<PathBuf>,
+
     /// Should generate verilog code & scripts
-    #[arg(short, long, default_value_t = true)]
+    #[arg(long)]
     verilog: bool,
 
     /// Should output RTLolaMIR into a json file
-    #[arg(short, long, default_value_t = false)]
+    #[arg(long)]
     mir: bool,
 
     /// Generate clash code & testbench with debug information
-    #[arg(short, long, default_value_t = true)]
+    #[arg(long)]
     debug: bool,
 }
 
@@ -63,22 +72,40 @@ fn main() {
                 to_pascal_case(&extract_file_stem(&spec_path)),
                 args.debug,
             );
-            match codegen::monitor::generate_clash(hard_ir) {
+            match codegen::monitor::generate_clash(hard_ir.clone()) {
                 Some(generated) => {
                     write_to_file(
                         args.output.join(extract_file_stem(&spec_path) + ".hs"),
                         generated,
                     );
-                    // if args.testbench {
-                    //     todo!("generate testbench");
-                    // };
-                    if args.verilog {
-                        let (verilog_exp, gen_verilog_sh) =
+                    if args.testbench || args.all {
+                        match args.trace {
+                            Some(trace_file_path) => {
+                                let file = File::open(trace_file_path).unwrap();
+                                let rows: Vec<StringRecord> = csv::Reader::from_reader(file)
+                                    .records()
+                                    .map(|r| r.unwrap())
+                                    .collect();
+                                let testbench =
+                                    codegen::testbench::generate_verilog_testbench(rows, hard_ir);
+                                write_to_file(args.output.join("testbench.v"), testbench.unwrap());
+                            }
+                            None => {
+                                println!("Error! No trace file provided to generate a testbench");
+                                return;
+                            }
+                        }
+                    };
+                    if args.verilog || args.all {
+                        let (verilog_exp, gen_verilog_sh, dump_wv, open_wv) =
                             codegen::scripts::generate_verilog_gen_script(
                                 extract_file_stem(&spec_path) + ".hs",
+                                to_pascal_case(&extract_file_stem(&spec_path)),
                             );
                         write_to_file(args.output.join("verilog.exp"), verilog_exp);
                         write_to_file(args.output.join("gen_verilog.sh"), gen_verilog_sh);
+                        write_to_file(args.output.join("dump_waveform.sh"), dump_wv);
+                        write_to_file(args.output.join("open_waveform.sh"), open_wv);
                     };
                     println!(
                         "Compilation successful! Ouput at {}",

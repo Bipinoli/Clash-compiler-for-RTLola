@@ -4,9 +4,13 @@ use serde::Serialize;
 #[derive(Serialize)]
 struct Data {
     generated_clash_filename: String,
+    monitor_name: String,
 }
 
-pub fn generate_verilog_gen_script(generated_clash_filename: String) -> (String, String) {
+pub fn generate_verilog_gen_script(
+    generated_clash_filename: String,
+    monitor_name: String,
+) -> (String, String, String, String) {
     let mut reg = Handlebars::new();
 
     register_template(
@@ -14,15 +18,25 @@ pub fn generate_verilog_gen_script(generated_clash_filename: String) -> (String,
         "src/codegen/scripts/except_script.hbs".to_string(),
         &mut reg,
     );
-
     register_template(
         "gen_verilog".to_string(),
         "src/codegen/scripts/gen_verilog.hbs".to_string(),
         &mut reg,
     );
+    register_template(
+        "dump_waveform".to_string(),
+        "src/codegen/scripts/dump_waveform.hbs".to_string(),
+        &mut reg,
+    );
+    register_template(
+        "open_waveform".to_string(),
+        "src/codegen/scripts/open_waveform.hbs".to_string(),
+        &mut reg,
+    );
 
     let data = Data {
         generated_clash_filename,
+        monitor_name,
     };
 
     let verilog_exp = match reg.render("verilog.exp", &data) {
@@ -39,7 +53,26 @@ pub fn generate_verilog_gen_script(generated_clash_filename: String) -> (String,
             None
         }
     };
-    (verilog_exp.unwrap(), gen_verilog_sh.unwrap())
+    let dump_wv = match reg.render("dump_waveform", &data) {
+        Ok(result) => Some(result),
+        Err(e) => {
+            println!("Rendering error: {}", e);
+            None
+        }
+    };
+    let open_wv = match reg.render("open_waveform", &data) {
+        Ok(result) => Some(result),
+        Err(e) => {
+            println!("Rendering error: {}", e);
+            None
+        }
+    };
+    (
+        verilog_exp.unwrap(),
+        gen_verilog_sh.unwrap(),
+        dump_wv.unwrap(),
+        open_wv.unwrap(),
+    )
 }
 
 fn register_template(name: String, path: String, handlebars: &mut Handlebars) {
