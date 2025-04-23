@@ -22,6 +22,9 @@ module topEntity
     , output wire  result_0_2_1
     , output wire [7:0] result_1_0
     , output wire  result_1_1
+    , output wire  result_1_2
+    , output wire  result_1_3
+    , output wire  result_1_4
     );
   wire [135:0] result_2;
   // simple.hs:148:1-82
@@ -45,7 +48,7 @@ module topEntity
   reg signed [63:0] result_8 = (64'sd0);
   // simple.hs:148:1-82
   wire  timer2Over;
-  wire [204:0] result_9;
+  wire [205:0] result_9;
   reg  c$app_arg = 1'b0;
   wire [71:0] result_10;
   // simple.hs:327:1-178
@@ -166,7 +169,7 @@ module topEntity
   wire [1:0] i_3;
   // simple.hs:201:1-70
   wire [11:0] ws_3;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   reg [7:0] outputPhaseTag = 8'd9;
   // simple.hs:201:1-70
   wire [224:0] c$ws_app_arg_9;
@@ -230,35 +233,35 @@ module topEntity
   // simple.hs:294:1-119
   wire [143:0] t_1;
   wire [143:0] result_26;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   reg  c$out1_app_arg = 1'b0;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   reg [7:0] c$outputPhaseTag_app_arg = 8'd9;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   reg [7:0] c$out2Tag_app_arg = 8'd9;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   reg [7:0] c$sw0Tag_app_arg = 8'd9;
   // simple.hs:299:1-111
   reg [71:0] result_27 = {8'd9,   64'sd0};
   // simple.hs:299:1-111
   wire [71:0] c$result_app_arg_1;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   wire  input1HasData;
   wire [7:0] result_28;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   wire  b;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   wire [7:0] f1;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   reg [7:0] t_2 = 8'd1;
   wire [7:0] result_29;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   wire  b_0;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   wire  p0;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   wire  p3;
-  // simple.hs:209:1-106
+  // simple.hs:209:1-112
   wire  p2;
   wire [136:0] result_30;
   reg [134:0] c$app_arg_11 = {{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   {1'b0,   1'b0},   {1'b0,   1'b0,
@@ -306,6 +309,8 @@ module topEntity
   reg signed [63:0] c$cursor_case_alt_4;
   // simple.hs:86:1-78
   wire signed [63:0] c$cursor_case_alt_5;
+  // simple.hs:395:1-124
+  wire  qPopValid;
   wire [129:0] inputs;
   wire signed [63:0] x_projection_9;
   wire signed [63:0] x1_projection;
@@ -327,12 +332,12 @@ module topEntity
   wire [215:0] t_projection_7;
   wire [404:0] c$buffer_case_alt_sel_alt_t_1;
   wire signed [63:0] c$tte_rhs;
-  wire [203:0] result;
+  wire [206:0] result;
   wire [194:0] result_0;
   wire [64:0] result_0_0;
   wire [64:0] result_0_1;
   wire [64:0] result_0_2;
-  wire [8:0] result_1;
+  wire [11:0] result_1;
 
   assign inputs = {{inputs_0_0,   inputs_0_1},
                    {inputs_1_0,   inputs_1_1}};
@@ -399,7 +404,7 @@ module topEntity
                       {{$signed(result_19[63:0]),   c$app_arg_7},
                        {$signed(result_18[63:0]),   c$app_arg_4},
                        {$signed(result_11[63:0]),   c$app_arg}}},
-                     {t_2,   1'b1}};
+                     {t_2,   1'b1,   qPopValid}};
 
   // delay begin
   always @(posedge clk) begin : c$app_arg_delay
@@ -1533,7 +1538,7 @@ module topEntity
 
   assign c$cursor_case_alt_3 = pop ? c$cursor_case_alt_4 : cursor;
 
-  assign pop = result_9[204:204];
+  assign pop = result_9[205:205];
 
   always @(*) begin
     case(x_6)
@@ -1544,12 +1549,16 @@ module topEntity
 
   assign c$cursor_case_alt_5 = (x_6 - 64'sd1);
 
-  assign result = {result_9[203:9],
-                   result_9[8:0]};
+  assign result = {result_9[204:10],
+                   {result_9[9:2],   result_9[1:1],
+                    result_9[0:0],   result_30[136:136],
+                    qPopValid}};
 
-  assign result_0 = result[203:9];
+  assign qPopValid = result_30[135:135];
 
-  assign result_1 = result[8:0];
+  assign result_0 = result[206:12];
+
+  assign result_1 = result[11:0];
 
   assign result_0_0 = result_0[194:130];
 
@@ -1569,9 +1578,15 @@ module topEntity
 
   assign result_0_2_1 = result_0_2[0:0];
 
-  assign result_1_0 = result_1[8:1];
+  assign result_1_0 = result_1[11:4];
 
-  assign result_1_1 = result_1[0:0];
+  assign result_1_1 = result_1[3:3];
+
+  assign result_1_2 = result_1[2:2];
+
+  assign result_1_3 = result_1[1:1];
+
+  assign result_1_4 = result_1[0:0];
 
 
 endmodule

@@ -1,0 +1,2 @@
+input a : Int
+output b := a

@@ -16,8 +16,11 @@ module testbench;
     {{/each}}
 
     {{#if debug}}
-    wire signed [63:0] tag;
-    wire toPop;
+    wire signed [63:0] llc_tag;
+    wire llc_to_pop;
+    wire llc_is_valid_event;
+    wire q_push_valid;
+    wire q_pop_valid;
     {{/if}}
 
     topEntity monitor (
@@ -29,7 +32,7 @@ module testbench;
                         output_{{@index}}, output_{{@index}}_aktv{{#unless @last}},{{/unless}}
                         {{/each}}
                         {{#if debug}}
-                        ,tag, toPop
+                        ,llc_tag, llc_to_pop, llc_is_valid_event, q_push_valid, q_pop_valid 
                         {{/if}}
                        );
 

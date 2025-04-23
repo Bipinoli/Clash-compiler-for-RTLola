@@ -1,33 +1,52 @@
-module {{spec_name}} where
+module VerySimple where
 
 import Clash.Prelude
 
 ---------------------------------------------------------------
 
-{{{spec}}}
+-- input a : Int
+-- output b := a
+-- 
 
 ---------------------------------------------------------------
 
 -- Evaluation Order
-{{{eval_order}}}
+-- a
+-- b
 
 -- Memory Window
-{{{required_memory}}}
+-- window a = 1
+-- window b = 1
 
 -- Pipeline Visualization
-{{{pipeline_visualization}}}
+-- a | a | a | a | a | a | a | a | a | a
+-- -------------------------------------
+--   | b | b | b | b | b | b | b | b | b
+-- -------------------------------------
 
-{{#each stream_names}}
--- {{{this}}}
-{{/each}}
-
----------------------------------------------------------------
-
-{{{data_types}}}
+-- input0 = a
+-- output0 = b
 
 ---------------------------------------------------------------
 
-type QMemSize = {{queue_size}}
+
+type HasInput0 = (Int, Bool)
+type Inputs = HasInput0
+
+type HasOutput0 = (Int, Bool)
+type Outputs = HasOutput0
+
+type Pacings = Bool
+
+type Event = (Inputs, Pacings)
+
+nullEvent :: Event
+nullEvent = ((0, False), False)
+
+
+---------------------------------------------------------------
+
+type QMemSize = 2
 
 type QData = Event
 type QMem = Vec QMemSize QData
@@ -101,21 +120,117 @@ queue input = output
 
 ---------------------------------------------------------------
 
-{{{hlc}}}
+
+
+hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Event)
+hlc inputs = out
+    where 
+        out = bundle (newEvent, event)
+        newEvent = pacing0
+        event = bundle (inputs, pacings)
+
+        pacings = pacing0
+
+        (_, hasInput0) = unbundle inputs
+
+        pacing0 = hasInput0
+
+
+
+
 
 ---------------------------------------------------------------
 
-{{{llc}}}
+type Tag = Unsigned 8
+-- maxTag must be at least the size of the sliding window to avoid duplicate tags in the window
+maxTag = 10 :: Tag
+invalidTag = maxTag + 1
+
+getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
+getOffset win tag offset dflt = out
+    where 
+        offsetTag = if tag > offset then tag - offset else tag - offset + maxTag
+        out = case findIndex (\(t, _) -> t == offsetTag) win of
+            Just i -> let (_, v) = win !! i in (tag, v)
+            Nothing -> (tag, dflt) 
+
+getMatchingTag :: KnownNat n => Vec n (Tag, a) -> Tag -> a -> (Tag, a)
+getMatchingTag win tag dflt = out
+    where 
+        out = case findIndex (\(t, _) -> t == tag) win of
+            Just i -> let (_, v) = win !! i in (tag, v)
+            Nothing -> (tag, dflt)
+
+
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Tag, Bool, Bool))
+llc event = bundle (bundle (toPop, outputs), debugSignals)
+    where 
+        (isValidEvent, poppedEvent) = unbundle event
+
+        toPop = pure True
+
+        (inputs, pacings) = unbundle poppedEvent
+        input0 = inputs
+        (input0Data, input0HasData) = unbundle input0
+        p0 = pacings
+
+        outputs = output0
+
+        tag = genTag (p0)
+
+        in0Tag = tag
+        out0Tag = delay invalidTag tag
+
+        enIn0 = input0HasData
+        enOut0 = delay False p0
+
+        outputPhaseTag = delay invalidTag (delay invalidTag tag)
+        output0Aktv = delay False (delay False p0)
+
+        output0 = bundle (output0Data, output0Aktv)
+        (_, output0Data) = unbundle out0
+
+        input0Win = input0Window enIn0 (bundle (in0Tag, input0Data))
+
+        out0 = outputStream0 enOut0 out0Data0 
+        out0Data0 = input0Win
+
+
+        debugSignals = bundle (tag, toPop, isValidEvent)
+
+        genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
+        genTag en = t
+            where 
+                t = register 1 (mux en next_t t)
+                next_t = mux (t .==. (pure maxTag)) (pure 1) (t + 1)
+
+
+
+
+
+input0Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
+input0Window en td = result
+    where result = register (invalidTag, 0) (mux en td result)
+
+
+
+outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
+outputStream0 en in0WithTag = result
+    where
+        result = register (invalidTag, 0) (mux en nextValWithTag result)
+        nextValWithTag = bundle (tag, nextVal)
+        nextVal = in0
+        (tag, in0) = unbundle in0WithTag
+
+
+
+
+
 
 ---------------------------------------------------------------
 
-{{#if debug}}
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (Tag, Bool, Bool, QPushValid, QPopValid))
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (Tag, Bool, Bool, QPushValid, QPopValid, Bool, Bool, Bool))
 monitor inputs = bundle (outputs, debugSignals)
-{{else}}
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom Outputs
-monitor inputs = outputs
-{{/if}}
     where 
         (newEvent, event) = unbundle (hlc inputs)
 
@@ -124,24 +239,15 @@ monitor inputs = outputs
         qPop = toPop
         qInptData = event
 
-        {{#if debug}}
         (llcOutput, llcDebug) = unbundle (llc (bundle (qPopValid, qPopData)))
         (toPop, outputs) = unbundle llcOutput
 
         (llcTag, llcToPop, llcIsValidEvent) = unbundle llcDebug
-        debugSignals = bundle (llcTag, llcToPop, llcIsValidEvent, qPushValid, qPopValid)
-        {{else}}
-        (toPop, outputs) = unbundle (llc (bundle (qPopValid, qPopData)))
-        {{/if}}
+        debugSignals = bundle (llcTag, llcToPop, llcIsValidEvent, qPushValid, qPopValid, newEvent, qPush, qPop)
 
 
 ---------------------------------------------------------------
 
-{{#if debug}}
 topEntity :: Clock System -> Reset System -> Enable System -> 
-    Signal System Inputs -> Signal System (Outputs, (Tag, Bool, Bool, QPushValid, QPopValid))
-{{else}}
-topEntity :: Clock System -> Reset System -> Enable System -> 
-    Signal System Inputs -> Signal System Outputs
-{{/if}}
+    Signal System Inputs -> Signal System (Outputs, (Tag, Bool, Bool, QPushValid, QPopValid, Bool, Bool, Bool))
 topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en

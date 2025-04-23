@@ -20,7 +20,7 @@ getMatchingTag win tag dflt = out
 
 
 {{#if debug}}
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Tag, Bool))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Tag, Bool, Bool))
 llc event = bundle (bundle (toPop, outputs), debugSignals)
 {{else}}
 llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool, Outputs)
@@ -124,7 +124,7 @@ llc event = bundle (toPop, outputs)
         {{/each}}
 
         {{#if debug}}
-        debugSignals = bundle (tag, toPop)
+        debugSignals = bundle (tag, toPop, isValidEvent)
         {{/if}}
 
         genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
