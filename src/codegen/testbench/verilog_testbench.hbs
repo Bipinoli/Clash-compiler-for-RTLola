@@ -38,7 +38,7 @@ module testbench;
     end
 
     initial begin
-        clk = 0;
+        clk = 1;
         rst = 0;
         en = 1;
         
@@ -47,13 +47,15 @@ module testbench;
 
         {{#each trace_data}}
         #{{this.time}};
+        @(posedge clk);
             {{#each this.inputs}}
         new_input_{{@index}} = {{this.new_input}};
         input_{{@index}} = {{this.input_value}};
             {{/each}}
-        #2;
+        @(posedge clk);
             {{#each this.inputs}}
         new_input_{{@index}} = 0;
+        input_{{@index}} = 0;
             {{/each}}
 
         {{/each}}

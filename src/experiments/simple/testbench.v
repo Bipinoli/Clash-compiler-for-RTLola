@@ -35,48 +35,60 @@ module testbench;
     end
 
     initial begin
-        clk = 0;
+        clk = 1;
         rst = 0;
         en = 1;
         
         $printtimescale(testbench);
         $dumpvars(0, testbench);
 
-        #0.001;
+        #1000;
+        @(posedge clk);
         new_input_0 = 1;
         input_0 = 1;
         new_input_1 = 1;
         input_1 = 1;
-        #2;
+        @(posedge clk);
         new_input_0 = 0;
+        input_0 = 0;
         new_input_1 = 0;
+        input_1 = 0;
 
-        #0.002;
+        #998;
+        @(posedge clk);
         new_input_0 = 1;
         input_0 = 2;
         new_input_1 = 1;
         input_1 = 2;
-        #2;
+        @(posedge clk);
         new_input_0 = 0;
+        input_0 = 0;
         new_input_1 = 0;
+        input_1 = 0;
 
-        #0.003;
+        #998;
+        @(posedge clk);
         new_input_0 = 1;
         input_0 = 3;
         new_input_1 = 1;
         input_1 = 3;
-        #2;
+        @(posedge clk);
         new_input_0 = 0;
+        input_0 = 0;
         new_input_1 = 0;
+        input_1 = 0;
 
-        #0.004;
+        #998;
+        @(posedge clk);
         new_input_0 = 1;
         input_0 = 4;
         new_input_1 = 1;
         input_1 = 4;
-        #2;
+        @(posedge clk);
         new_input_0 = 0;
+        input_0 = 0;
         new_input_1 = 0;
+        input_1 = 0;
 
 
         #40;

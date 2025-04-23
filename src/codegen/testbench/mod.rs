@@ -105,8 +105,22 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
 fn get_trace_data(trace_data: Vec<StringRecord>) -> Vec<TraceData> {
     trace_data
         .iter()
-        .map(|d| TraceData {
-            time: d.get(0).unwrap().to_string(),
+        .enumerate()
+        .map(|(i, d)| TraceData {
+            time: {
+                if i == 0 {
+                    let seconds = d.get(0).unwrap().to_string().parse::<f64>().expect("Failed to parse time from trace data");
+                    let microseconds = seconds * 1e6;
+                    format!("{}", microseconds)
+                } else {
+                    let prev_row_time = trace_data.get(i-1).unwrap().get(0).unwrap().to_string().parse::<f64>().expect("Failed to parse time from previous row");
+                    let cur_row_time = d.get(0).unwrap().to_string().parse::<f64>().expect("Failed to parse time from trace data");
+                    let seconds = cur_row_time - prev_row_time;
+                    // #2 from one cycle delay caused by putting input to zero in the impulse input
+                    let microseconds = seconds * 1e6 - 2 as f64;
+                    format!("{}", microseconds)
+                }
+            },
             inputs: d
                 .iter()
                 .enumerate()
