@@ -110,7 +110,8 @@ fn get_trace_data(trace_data: Vec<StringRecord>) -> Vec<TraceData> {
             time: {
                 if i == 0 {
                     let seconds = d.get(0).unwrap().to_string().parse::<f64>().expect("Failed to parse time from trace data");
-                    let microseconds = seconds * 1e6;
+                    // Initial reset signal for #2
+                    let microseconds = seconds * 1e6 - 2 as f64;
                     format!("{}", microseconds)
                 } else {
                     let prev_row_time = trace_data.get(i-1).unwrap().get(0).unwrap().to_string().parse::<f64>().expect("Failed to parse time from previous row");

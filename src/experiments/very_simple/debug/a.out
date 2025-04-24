@@ -1,0 +1,170 @@
+#! /usr/local/Cellar/icarus-verilog/12.0/bin/vvp
+:ivl_version "12.0 (stable)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 13;
+:vpi_module "/usr/local/Cellar/icarus-verilog/12.0/lib/ivl/system.vpi";
+:vpi_module "/usr/local/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_sys.vpi";
+:vpi_module "/usr/local/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_textio.vpi";
+:vpi_module "/usr/local/Cellar/icarus-verilog/12.0/lib/ivl/v2005_math.vpi";
+:vpi_module "/usr/local/Cellar/icarus-verilog/12.0/lib/ivl/va_math.vpi";
+S_0x7faf43f060d0 .scope module, "testbench" "testbench" 2 2;
+ .timescale -6 -9;
+v0x7faf43f174e0_0 .var "clk", 0 0;
+v0x7faf43f17570_0 .net/s "cursor", 63 0, L_0x7faf43f18310;  1 drivers
+v0x7faf43f17600_0 .var "en", 0 0;
+v0x7faf43f17690_0 .var "pop", 0 0;
+v0x7faf43f17740_0 .var "push", 0 0;
+v0x7faf43f17810_0 .var "rst", 0 0;
+E_0x7faf43f05cc0 .event posedge, v0x7faf43f16c10_0;
+S_0x7faf43f06240 .scope module, "monitor" "topEntity" 2 11, 3 6 0, S_0x7faf43f060d0;
+ .timescale -13 -13;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "rst";
+    .port_info 2 /INPUT 1 "en";
+    .port_info 3 /INPUT 1 "input_0";
+    .port_info 4 /INPUT 1 "input_1";
+    .port_info 5 /OUTPUT 64 "cursor";
+L_0x7faf43f17ee0 .functor BUFZ 64, v0x7faf43f16dc0_0, C4<0000000000000000000000000000000000000000000000000000000000000000>, C4<0000000000000000000000000000000000000000000000000000000000000000>, C4<0000000000000000000000000000000000000000000000000000000000000000>;
+L_0x7faf43f18310 .functor BUFZ 64, v0x7faf43f16dc0_0, C4<0000000000000000000000000000000000000000000000000000000000000000>, C4<0000000000000000000000000000000000000000000000000000000000000000>, C4<0000000000000000000000000000000000000000000000000000000000000000>;
+L_0x7faf44963050 .functor BUFT 1, C4<0000000000000000000000000000000000000000000000000000000000000001>, C4<0>, C4<0>, C4<0>;
+v0x7faf43f06700_0 .net/2s *"_ivl_14", 63 0, L_0x7faf44963050;  1 drivers
+v0x7faf43f167c0_0 .net/s *"_ivl_16", 63 0, L_0x7faf43f17fd0;  1 drivers
+L_0x7faf44963008 .functor BUFT 1, C4<0000000000000000000000000000000000000000000000000000000000000001>, C4<0>, C4<0>, C4<0>;
+v0x7faf43f16860_0 .net/2s *"_ivl_6", 63 0, L_0x7faf44963008;  1 drivers
+v0x7faf43f16910_0 .net/s *"_ivl_8", 63 0, L_0x7faf43f17c70;  1 drivers
+v0x7faf43f169c0_0 .net/s "c$cursor_case_alt", 63 0, L_0x7faf43f17a20;  1 drivers
+v0x7faf43f16ab0_0 .net/s "c$cursor_case_alt_0", 63 0, L_0x7faf43f17d90;  1 drivers
+v0x7faf43f16b60_0 .net/s "c$cursor_case_alt_1", 63 0, L_0x7faf43f180d0;  1 drivers
+v0x7faf43f16c10_0 .net "clk", 0 0, v0x7faf43f174e0_0;  1 drivers
+v0x7faf43f16cb0_0 .net/s "cursor", 63 0, L_0x7faf43f18310;  alias, 1 drivers
+v0x7faf43f16dc0_0 .var/s "cursor_1", 63 0;
+v0x7faf43f16e70_0 .net "en", 0 0, v0x7faf43f17600_0;  1 drivers
+v0x7faf43f16f10_0 .net "input_0", 0 0, v0x7faf43f17740_0;  1 drivers
+v0x7faf43f16fb0_0 .net "input_1", 0 0, v0x7faf43f17690_0;  1 drivers
+v0x7faf43f17050_0 .net "pop", 0 0, L_0x7faf43f18270;  1 drivers
+v0x7faf43f170f0_0 .net "push", 0 0, L_0x7faf43f17b00;  1 drivers
+v0x7faf43f17190_0 .net "r_input", 1 0, L_0x7faf43f178c0;  1 drivers
+v0x7faf43f17240_0 .net "rst", 0 0, v0x7faf43f17810_0;  1 drivers
+v0x7faf43f173d0_0 .net/s "x", 63 0, L_0x7faf43f17ee0;  1 drivers
+E_0x7faf43f064d0 .event posedge, v0x7faf43f17240_0, v0x7faf43f16c10_0;
+L_0x7faf43f178c0 .concat [ 1 1 0 0], v0x7faf43f17690_0, v0x7faf43f17740_0;
+L_0x7faf43f17a20 .functor MUXZ 64, L_0x7faf43f180d0, L_0x7faf43f17d90, L_0x7faf43f17b00, C4<>;
+L_0x7faf43f17b00 .part L_0x7faf43f178c0, 1, 1;
+L_0x7faf43f17c70 .arith/sum 64, L_0x7faf43f17ee0, L_0x7faf44963008;
+L_0x7faf43f17d90 .functor MUXZ 64, v0x7faf43f16dc0_0, L_0x7faf43f17c70, L_0x7faf43f18270, C4<>;
+L_0x7faf43f17fd0 .arith/sub 64, L_0x7faf43f17ee0, L_0x7faf44963050;
+L_0x7faf43f180d0 .functor MUXZ 64, v0x7faf43f16dc0_0, L_0x7faf43f17fd0, L_0x7faf43f18270, C4<>;
+L_0x7faf43f18270 .part L_0x7faf43f178c0, 0, 1;
+S_0x7faf43f06530 .scope begin, "cursor_1_register" "cursor_1_register" 3 36, 3 36 0, S_0x7faf43f06240;
+ .timescale -13 -13;
+    .scope S_0x7faf43f06240;
+T_0 ;
+    %pushi/vec4 0, 0, 64;
+    %store/vec4 v0x7faf43f16dc0_0, 0, 64;
+    %end;
+    .thread T_0;
+    .scope S_0x7faf43f06240;
+T_1 ;
+    %wait E_0x7faf43f064d0;
+    %fork t_1, S_0x7faf43f06530;
+    %jmp t_0;
+    .scope S_0x7faf43f06530;
+t_1 ;
+    %load/vec4 v0x7faf43f17240_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.0, 8;
+    %pushi/vec4 0, 0, 64;
+    %assign/vec4 v0x7faf43f16dc0_0, 0;
+    %jmp T_1.1;
+T_1.0 ;
+    %load/vec4 v0x7faf43f16e70_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.2, 8;
+    %load/vec4 v0x7faf43f169c0_0;
+    %assign/vec4 v0x7faf43f16dc0_0, 0;
+T_1.2 ;
+T_1.1 ;
+    %end;
+    .scope S_0x7faf43f06240;
+t_0 %join;
+    %jmp T_1;
+    .thread T_1;
+    .scope S_0x7faf43f060d0;
+T_2 ;
+    %delay 10000000, 0;
+    %load/vec4 v0x7faf43f174e0_0;
+    %inv;
+    %store/vec4 v0x7faf43f174e0_0, 0, 1;
+    %jmp T_2;
+    .thread T_2;
+    .scope S_0x7faf43f060d0;
+T_3 ;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x7faf43f174e0_0, 0, 1;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x7faf43f17810_0, 0, 1;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x7faf43f17600_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17740_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17690_0, 0, 1;
+    %delay 10000000, 0;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17810_0, 0, 1;
+    %vpi_call 2 30 "$printtimescale", S_0x7faf43f060d0 {0 0 0};
+    %vpi_call 2 31 "$dumpvars", 32'sb00000000000000000000000000000000, S_0x7faf43f060d0 {0 0 0};
+    %delay 100000000, 0;
+    %wait E_0x7faf43f05cc0;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x7faf43f17740_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17690_0, 0, 1;
+    %wait E_0x7faf43f05cc0;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17740_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17690_0, 0, 1;
+    %delay 100000000, 0;
+    %wait E_0x7faf43f05cc0;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x7faf43f17740_0, 0, 1;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x7faf43f17690_0, 0, 1;
+    %wait E_0x7faf43f05cc0;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17740_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17690_0, 0, 1;
+    %delay 100000000, 0;
+    %wait E_0x7faf43f05cc0;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17740_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17690_0, 0, 1;
+    %wait E_0x7faf43f05cc0;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17740_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17690_0, 0, 1;
+    %delay 100000000, 0;
+    %wait E_0x7faf43f05cc0;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17740_0, 0, 1;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x7faf43f17690_0, 0, 1;
+    %wait E_0x7faf43f05cc0;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17740_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x7faf43f17690_0, 0, 1;
+    %delay 400000000, 0;
+    %vpi_call 2 66 "$finish" {0 0 0};
+    %end;
+    .thread T_3;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "testbench.v";
+    "./verilog/Debug.topEntity/topEntity.v";

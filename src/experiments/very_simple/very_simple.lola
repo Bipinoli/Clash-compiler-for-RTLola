@@ -1,2 +1,4 @@
-input a : Int
-output b := a
+input x : Int
+input y : Int
+
+output a := x.offset(by: -1).defaults(to: 10) + y

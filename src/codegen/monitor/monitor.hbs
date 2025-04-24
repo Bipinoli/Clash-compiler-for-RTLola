@@ -63,15 +63,16 @@ queue input = output
         nextBuffer buf ((push, pop, qData), cur) = out
             where 
                 out = case (push, pop) of
-                    (True, False) -> if cur /= length buf then qData +>> buf else buf
-                    (_, _) -> buf
+                    (True, True) -> qData +>> buf 
+                    (True, False) -> if cur == length buf then buf else qData +>> buf
+                    (False, _) -> buf
 
         nextCursor :: QCursor -> (QInput, QMem) -> QCursor
         nextCursor cur ((push, pop, _), buf) = out
             where 
                 out = case (push, pop) of
-                    (True, False) -> if cur /= length buf then cur + 1 else cur
-                    (False, True) -> if cur /= 0 then cur - 1 else 0
+                    (True, False) -> if cur == length buf then cur else cur + 1
+                    (False, True) -> if cur == 0 then 0 else cur - 1
                     (_, _) -> cur
 
         nextOutData :: (QInput, QCursor, QMem) -> QData
@@ -87,8 +88,8 @@ queue input = output
             where 
                 out = case (push, pop) of
                     (True, True) -> True
-                    (True, _) -> cur /= length buf
-                    (_, _) -> False
+                    (True, False) -> cur /= length buf
+                    (False, _) -> False
 
         nextPopValid :: (QInput, QCursor) -> QPop
         nextPopValid ((push, pop, _), cur) = out
@@ -96,7 +97,7 @@ queue input = output
                 out = case (push, pop) of
                     (True, True) -> True
                     (False, True) -> cur /= 0
-                    (_, _) -> False
+                    (_, False) -> False
 
 
 ---------------------------------------------------------------
@@ -110,7 +111,7 @@ queue input = output
 ---------------------------------------------------------------
 
 {{#if debug}}
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (Tag, Bool, Bool, QPushValid, QPopValid))
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (Tag, QPush, QPop, QPushValid, QPopValid))
 monitor inputs = bundle (outputs, debugSignals)
 {{else}}
 monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom Outputs
@@ -128,8 +129,8 @@ monitor inputs = outputs
         (llcOutput, llcDebug) = unbundle (llc (bundle (qPopValid, qPopData)))
         (toPop, outputs) = unbundle llcOutput
 
-        (llcTag, llcToPop, llcIsValidEvent) = unbundle llcDebug
-        debugSignals = bundle (llcTag, llcToPop, llcIsValidEvent, qPushValid, qPopValid)
+        llcTag = llcDebug
+        debugSignals = bundle (llcTag, qPush, qPop, qPushValid, qPopValid)
         {{else}}
         (toPop, outputs) = unbundle (llc (bundle (qPopValid, qPopData)))
         {{/if}}
@@ -139,7 +140,7 @@ monitor inputs = outputs
 
 {{#if debug}}
 topEntity :: Clock System -> Reset System -> Enable System -> 
-    Signal System Inputs -> Signal System (Outputs, (Tag, Bool, Bool, QPushValid, QPopValid))
+    Signal System Inputs -> Signal System (Outputs, (Tag, QPush, QPop, QPushValid, QPopValid))
 {{else}}
 topEntity :: Clock System -> Reset System -> Enable System -> 
     Signal System Inputs -> Signal System Outputs

@@ -17,8 +17,8 @@ module testbench;
 
     {{#if debug}}
     wire signed [63:0] llc_tag;
-    wire llc_to_pop;
-    wire llc_is_valid_event;
+    wire q_push;
+    wire q_pop;
     wire q_push_valid;
     wire q_pop_valid;
     {{/if}}
@@ -32,7 +32,7 @@ module testbench;
                         output_{{@index}}, output_{{@index}}_aktv{{#unless @last}},{{/unless}}
                         {{/each}}
                         {{#if debug}}
-                        ,llc_tag, llc_to_pop, llc_is_valid_event, q_push_valid, q_pop_valid 
+                        ,llc_tag, q_push, q_pop, q_push_valid, q_pop_valid 
                         {{/if}}
                        );
 
@@ -42,8 +42,14 @@ module testbench;
 
     initial begin
         clk = 1;
-        rst = 0;
+        rst = 1;
         en = 1;
+        {{#each this.inputs}}
+        new_input_{{@index}} = 0;
+        {{/each}}
+
+        #2;
+        rst = 0;
         
         $printtimescale(testbench);
         $dumpvars(0, testbench);
