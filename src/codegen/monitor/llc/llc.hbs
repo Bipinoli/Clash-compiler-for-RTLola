@@ -18,6 +18,12 @@ getMatchingTag win tag dflt = out
             Just i -> let (_, v) = win !! i in (tag, v)
             Nothing -> (tag, dflt)
 
+getOffsetFromNonVec :: (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
+getOffsetFromNonVec (winTag, winData) tag offset dflt = out
+    where 
+        offsetTag = if tag > offset then tag - offset else tag - offset + maxTag
+        out = if offsetTag == winTag then (tag, winData) else (tag, dflt)
+
 
 {{#if debug}}
 llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), Tag)
@@ -107,7 +113,11 @@ llc event = bundle (toPop, outputs)
         {{/if}}
         {{/if}}
         {{#if this.is_offset_access}}
+            {{#if this.memory_more_than_one}}
         out{{../idx}}Data{{@index}} = getOffset <$> {{this.source}} <*> out{{../idx}}Tag <*> (pure {{this.offset}}) <*> (pure {{this.default_value}})
+            {{else}}
+        out{{../idx}}Data{{@index}} = getOffsetFromNonVec <$> {{this.source}} <*> out{{../idx}}Tag <*> (pure {{this.offset}}) <*> (pure {{this.default_value}})
+            {{/if}}
         {{/if}}
         {{/each}}
 
@@ -122,7 +132,6 @@ llc event = bundle (toPop, outputs)
         {{/if}}
 
         {{/each}}
-
         {{#if debug}}
         debugSignals = tag
         {{/if}}

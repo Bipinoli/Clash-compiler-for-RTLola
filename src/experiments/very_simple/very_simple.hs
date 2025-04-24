@@ -7,24 +7,21 @@ import Clash.Prelude
 -- input x : Int
 -- input y : Int
 -- 
--- output a := x.offset(by: -1).defaults(to: 10) + y
+-- output a := x.offset(by: -1).defaults(to: 10) + y.offset(by: -1).defaults(to: 20) 
 
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- y, x
--- a
+-- x, y, a
 
 -- Memory Window
+-- window x = 1
 -- window y = 1
--- window x = 2
 -- window a = 1
 
 -- Pipeline Visualization
--- y,x | y,x | y,x | y,x | y,x | y,x | y,x | y,x | y,x | y,x
--- ---------------------------------------------------------
---     | a   | a   | a   | a   | a   | a   | a   | a   | a  
--- ---------------------------------------------------------
+-- x,y,a | x,y,a | x,y,a | x,y,a | x,y,a | x,y,a | x,y,a | x,y,a | x,y,a | x,y,a
+-- -----------------------------------------------------------------------------
 
 -- input0 = x
 -- input1 = y
@@ -168,6 +165,12 @@ getMatchingTag win tag dflt = out
             Just i -> let (_, v) = win !! i in (tag, v)
             Nothing -> (tag, dflt)
 
+getOffsetFromNonVec :: (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
+getOffsetFromNonVec (winTag, winData) tag offset dflt = out
+    where 
+        offsetTag = if tag > offset then tag - offset else tag - offset + maxTag
+        out = if offsetTag == winTag then (tag, winData) else (tag, dflt)
+
 
 llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), Tag)
 llc event = bundle (bundle (toPop, outputs), debugSignals)
@@ -186,16 +189,16 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         tag = genTag (p0)
 
-        in1Tag = tag
         in0Tag = tag
-        out0Tag = delay invalidTag tag
+        in1Tag = tag
+        out0Tag = tag
 
-        enIn1 = input1HasData
         enIn0 = input0HasData
-        enOut0 = delay False p0
+        enIn1 = input1HasData
+        enOut0 = p0
 
-        outputPhaseTag = delay invalidTag (delay invalidTag tag)
-        output0Aktv = delay False (delay False p0)
+        outputPhaseTag = delay invalidTag tag
+        output0Aktv = delay False p0
 
         output0 = bundle (output0Data, output0Aktv)
         (_, output0Data) = unbundle out0
@@ -204,9 +207,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         input1Win = input1Window enIn1 (bundle (in1Tag, input1Data))
 
         out0 = outputStream0 enOut0 out0Data0 out0Data1 
-        out0Data0 = getOffset <$> input0Win <*> out0Tag <*> (pure 1) <*> (pure 10)
-        out0Data1 = input1Win
-
+        out0Data0 = getOffsetFromNonVec <$> input0Win <*> out0Tag <*> (pure 1) <*> (pure 10)
+        out0Data1 = getOffsetFromNonVec <$> input1Win <*> out0Tag <*> (pure 1) <*> (pure 20)
 
         debugSignals = tag
 
@@ -220,9 +222,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
 
 
-input0Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Vec 2 (Tag, Int))
+input0Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
 input0Window en td = result
-    where result = register (repeat (invalidTag, 0)) (mux en ((<<+) <$> result <*> td) result)
+    where result = register (invalidTag, 0) (mux en td result)
 
 
 input1Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)

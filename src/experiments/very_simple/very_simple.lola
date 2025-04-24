@@ -1,4 +1,4 @@
 input x : Int
 input y : Int
 
-output a := x.offset(by: -1).defaults(to: 10) + y
+output a := x.offset(by: -1).defaults(to: 10) + y.offset(by: -1).defaults(to: 20) 
