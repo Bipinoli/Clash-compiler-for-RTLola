@@ -149,7 +149,9 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
                         Node::SlidingWindow(x) => {
                             let name1 = format!("enSw{}", x.clone());
                             let pacing1 = match ir.mir.sliding_windows[x.clone()].caller {
-                                StreamReference::Out(out_idx) => format!("slide{} .||. p{}", x.clone(), out_idx.clone()),
+                                StreamReference::Out(out_idx) => {
+                                    format!("slide{} .||. p{}", x.clone(), out_idx.clone())
+                                }
                                 _ => unreachable!(),
                             };
                             let name2 = format!("sld{}", x.clone());
@@ -179,7 +181,6 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
                                 name3,
                                 surround_with_delay(i, "False".to_string(), pacing3)
                             ),
-
                         ]
                     } else {
                         vec![format!(

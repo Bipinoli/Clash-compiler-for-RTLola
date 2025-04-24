@@ -34,6 +34,12 @@ module testbench;
         #1 clk = ~clk;
     end
 
+    always @(posedge clk) begin
+        if (output_0_aktv == 1'b1 || output_1_aktv == 1'b1) begin
+            $display("Time %0t: Active outputs: (%b, %b), Outputs: (%0d, %0d)", $time, output_0_aktv, output_1_aktv, output_0, output_1);
+        end
+    end
+
     initial begin
         clk = 1;
         rst = 1;

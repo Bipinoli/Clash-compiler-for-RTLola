@@ -40,6 +40,12 @@ module testbench;
         #1 clk = ~clk;
     end
 
+    always @(posedge clk) begin
+        if ({{#each outputs}}output_{{@index}}_aktv == 1'b1{{#unless @last}} || {{/unless}}{{/each}}) begin
+            $display("Time %0t: Active outputs: ({{#each outputs}}%b{{#unless @last}}, {{/unless}}{{/each}}), Outputs: ({{#each outputs}}%0d{{#unless @last}}, {{/unless}}{{/each}})", $time, {{#each outputs}}output_{{@index}}_aktv, {{/each}}{{#each outputs}}output_{{@index}}{{#unless @last}}, {{/unless}}{{/each}});
+        end
+    end
+
     initial begin
         clk = 1;
         rst = 1;

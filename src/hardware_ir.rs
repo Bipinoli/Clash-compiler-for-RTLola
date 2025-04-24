@@ -275,21 +275,28 @@ fn window_size(
     eval_order: &Vec<Vec<Node>>,
     _mir: &RtLolaMir,
 ) -> usize {
-    let propagation_time = level_distance(node, child, eval_order);
-    let window = if propagation_time < 0 {
-        let propagation_time = -propagation_time;
-        let time_left_after_propagation = (pipeline_wait + 1) * offset + propagation_time as usize;
-        let num_of_evals =
-            ((time_left_after_propagation as f32) / (pipeline_wait as f32 + 1.0)).ceil();
-        num_of_evals as usize
+    // TODO: refactor this function
+    if offset > 0 {
+        offset
     } else {
-        let time_left_after_propagation = (pipeline_wait + 1) * offset - propagation_time as usize;
-        let num_of_evals =
-            ((time_left_after_propagation as f32) / (pipeline_wait as f32 + 1.0)).ceil();
-        num_of_evals as usize
-    };
-    // println!("window {} due to child {} = {}, offset = {}, prop_time = {}", node.prettify(mir), child.prettify(mir), window, offset, propagation_time);
-    window
+        let propagation_time = level_distance(node, child, eval_order);
+        let window = if propagation_time < 0 {
+            let propagation_time = -propagation_time;
+            let time_left_after_propagation =
+                (pipeline_wait + 1) * offset + propagation_time as usize;
+            let num_of_evals =
+                ((time_left_after_propagation as f32) / (pipeline_wait as f32 + 1.0)).ceil();
+            num_of_evals as usize
+        } else {
+            let time_left_after_propagation =
+                (pipeline_wait + 1) * offset - propagation_time as usize;
+            let num_of_evals =
+                ((time_left_after_propagation as f32) / (pipeline_wait as f32 + 1.0)).ceil();
+            num_of_evals as usize
+        };
+        // println!("window {} due to child {} = {}, offset = {}, prop_time = {}", node.prettify(mir), child.prettify(mir), window, offset, propagation_time);
+        window
+    }
 }
 
 fn calculate_pipeline_wait(

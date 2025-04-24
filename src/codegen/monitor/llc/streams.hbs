@@ -23,7 +23,7 @@ outputStream{{@index}} en {{#each this.inputs}}{{this}}WithTag {{/each}}= result
     where
         {{#if (gt this.memory 1)}}
         result = register (repeat (invalidTag, {{this.default_value}})) (mux en next result)
-        next = (<<+) <$> next <*> nextValWithTag
+        next = (<<+) <$> result <*> nextValWithTag
         {{else}}
         result = register (invalidTag, {{this.default_value}}) (mux en nextValWithTag result)
         {{/if}}
