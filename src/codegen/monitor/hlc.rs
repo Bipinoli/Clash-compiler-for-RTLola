@@ -206,7 +206,7 @@ fn get_all_periods(ir: &HardwareIR) -> Vec<String> {
         .mir
         .sliding_windows
         .iter()
-        .map(|win| format!("{}", win.duration.as_nanos()))
+        .map(|win| format!("{}", win.bucket_size.as_nanos()))
         .collect();
     let mut all_periods: Vec<String> = output_periods
         .union(&sliding_periods)
@@ -228,7 +228,7 @@ fn get_slides(ir: &HardwareIR, all_pacings: &Vec<String>) -> Vec<String> {
         .iter()
         .enumerate()
         .map(|(i, sw)| {
-            let period = format!("{}", sw.duration.as_nanos());
+            let period = format!("{}", sw.bucket_size.as_nanos());
             let indx = all_pacings.iter().position(|p| *p == period).unwrap();
             format!("slide{} = timer{}Over", i, indx)
         })

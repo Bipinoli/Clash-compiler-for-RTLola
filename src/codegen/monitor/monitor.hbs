@@ -139,10 +139,10 @@ monitor inputs = outputs
 ---------------------------------------------------------------
 
 {{#if debug}}
-topEntity :: Clock System -> Reset System -> Enable System -> 
-    Signal System Inputs -> Signal System (Outputs, (Tag, QPush, QPop, QPushValid, QPopValid))
+topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
+    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (Tag, QPush, QPop, QPushValid, QPopValid))
 {{else}}
-topEntity :: Clock System -> Reset System -> Enable System -> 
-    Signal System Inputs -> Signal System Outputs
+topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
+    Signal TestDomain Inputs -> Signal TestDomain Outputs
 {{/if}}
 topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en

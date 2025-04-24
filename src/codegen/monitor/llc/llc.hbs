@@ -1,5 +1,6 @@
 type Tag = Unsigned 8
 -- maxTag must be at least the size of the sliding window to avoid duplicate tags in the window
+-- default arbitrary value of 5 otherwise
 maxTag = {{max_tag}} :: Tag
 invalidTag = maxTag + 1
 
@@ -123,7 +124,7 @@ llc event = bundle (toPop, outputs)
 
         {{/each}}
         {{#each sliding_windows}}
-        sw{{this.idx}} = slidingWindow{{this.idx}} enSw{{this.idx}} slide{{this.idx}} (bundle (sw{{this.idx}}Tag, sw{{this.idx}}Data))
+        sw{{this.idx}} = slidingWindow{{this.idx}} enSw{{this.idx}} sld{{this.idx}} (bundle (sw{{this.idx}}Tag, sw{{this.idx}}Data))
         sw{{this.idx}}Data = bundle (sw{{this.idx}}DataVal, sw{{this.idx}}DataPacing)
         {{#if this.input_memory_more_than_one}}
         (_, sw{{this.idx}}DataVal) = unbundle (getMatchingTag <$> {{this.input_data}} <*> sw{{this.idx}}Tag <*> (pure {{this.input_data_default}}))

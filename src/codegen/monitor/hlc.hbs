@@ -1,6 +1,10 @@
+-- Clock domain with 2 microseconds period (500 kHz)
+-- It has been arbitrarily chosen for both monitor and the verilog testbench simulation
+createDomain vSystem{vName="TestDomain", vPeriod=2000} -- period in nanoseconds
+
 {{#if has_periodic_pacing}}
 systemClockPeriodNs :: Int
-systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @System)
+systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @TestDomain)
 {{/if}}
 
 

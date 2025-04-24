@@ -12,6 +12,8 @@ module testbench;
 
     wire signed [63:0] output_0;
     wire output_0_aktv;
+    wire signed [63:0] output_1;
+    wire output_1_aktv;
 
     wire signed [63:0] llc_tag;
     wire q_push;
@@ -23,7 +25,8 @@ module testbench;
                         clk, rst, en,
                         input_0, new_input_0,
                         input_1, new_input_1,
-                        output_0, output_0_aktv
+                        output_0, output_0_aktv,
+                        output_1, output_1_aktv
                         ,llc_tag, q_push, q_pop, q_push_valid, q_pop_valid 
                        );
 
@@ -86,6 +89,42 @@ module testbench;
         input_0 = 4;
         new_input_1 = 1;
         input_1 = 4;
+        @(posedge clk);
+        new_input_0 = 0;
+        input_0 = 0;
+        new_input_1 = 0;
+        input_1 = 0;
+
+        #998;
+        @(posedge clk);
+        new_input_0 = 1;
+        input_0 = 5;
+        new_input_1 = 1;
+        input_1 = 5;
+        @(posedge clk);
+        new_input_0 = 0;
+        input_0 = 0;
+        new_input_1 = 0;
+        input_1 = 0;
+
+        #1998;
+        @(posedge clk);
+        new_input_0 = 1;
+        input_0 = 7;
+        new_input_1 = 1;
+        input_1 = 7;
+        @(posedge clk);
+        new_input_0 = 0;
+        input_0 = 0;
+        new_input_1 = 0;
+        input_1 = 0;
+
+        #998;
+        @(posedge clk);
+        new_input_0 = 1;
+        input_0 = 8;
+        new_input_1 = 1;
+        input_1 = 8;
         @(posedge clk);
         new_input_0 = 0;
         input_0 = 0;

@@ -68,8 +68,7 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
             .iter()
             .map(|sw| sw.window_size.clone())
             .max()
-            .unwrap_or(5)
-            * 2,
+            .unwrap_or(5),
         has_pipeline_wait: ir.pipeline_wait > 0,
         has_sliding_window: ir.mir.sliding_windows.len() > 0,
         inputs: ir.mir.inputs.iter().map(|_| ()).collect(),
@@ -88,6 +87,12 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
     }
 }
 
+/// Example:
+/// [
+///   "in0Tag = tag",
+///   "out0Tag = delay invalidTag tag",
+///   "sw0Tag = delay invalidTag (delay invalidTag tag)"
+/// ]
 fn get_tags(ir: &HardwareIR) -> Vec<String> {
     ir.evaluation_order
         .iter()
@@ -106,6 +111,14 @@ fn get_tags(ir: &HardwareIR) -> Vec<String> {
         .collect()
 }
 
+/// Example:
+/// [
+///     "enIn0 = input0HasData",
+///     "enOut0 = delay False p0",
+///     "enSw0 = delay False (delay False (slide0 .||. p1))",
+///     "sld0 = delay False (delay False slide0)",
+///     ...
+/// ]
 fn get_enables(ir: &HardwareIR) -> Vec<String> {
     ir.evaluation_order
         .iter()
@@ -114,11 +127,13 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
             order
                 .iter()
                 .map(move |nd| {
-                    let (has_two, name1, pacing1, name2, pacing2) = match nd {
+                    let (has_three, name1, pacing1, name2, pacing2, name3, pacing3) = match nd {
                         Node::InputStream(x) => (
                             false,
                             format!("enIn{}", x.clone()),
                             format!("input{}HasData", x.clone()),
+                            String::new(),
+                            String::new(),
                             String::new(),
                             String::new(),
                         ),
@@ -128,22 +143,26 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
                             format!("p{}", x.clone()),
                             String::new(),
                             String::new(),
+                            String::new(),
+                            String::new(),
                         ),
                         Node::SlidingWindow(x) => {
                             let name1 = format!("enSw{}", x.clone());
                             let pacing1 = match ir.mir.sliding_windows[x.clone()].caller {
-                                StreamReference::Out(x) => format!("p{}", x.clone()),
+                                StreamReference::Out(out_idx) => format!("slide{} .||. p{}", x.clone(), out_idx.clone()),
                                 _ => unreachable!(),
                             };
-                            let name2 = format!("sw{}DataPacing", x.clone());
-                            let pacing2 = match ir.mir.sliding_windows[x.clone()].target {
+                            let name2 = format!("sld{}", x.clone());
+                            let pacing2 = format!("slide{}", x.clone());
+                            let name3 = format!("sw{}DataPacing", x.clone());
+                            let pacing3 = match ir.mir.sliding_windows[x.clone()].target {
                                 StreamReference::In(x) => format!("input{}HasData", x.clone()),
                                 StreamReference::Out(x) => format!("p{}", x.clone()),
                             };
-                            (true, name1, pacing1, name2, pacing2)
+                            (true, name1, pacing1, name2, pacing2, name3, pacing3)
                         }
                     };
-                    if has_two {
+                    if has_three {
                         vec![
                             format!(
                                 "{} = {}",
@@ -155,6 +174,12 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
                                 name2,
                                 surround_with_delay(i, "False".to_string(), pacing2)
                             ),
+                            format!(
+                                "{} = {}",
+                                name3,
+                                surround_with_delay(i, "False".to_string(), pacing3)
+                            ),
+
                         ]
                     } else {
                         vec![format!(
@@ -170,6 +195,12 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
         .collect()
 }
 
+/// Example:
+/// [
+///     "outputPhaseTag = delay invalidTag (delay invalidTag (delay invalidTag (delay invalidTag tag)))",
+///     "output0Aktv = delay False (delay False (delay False (delay False p0)))",
+///     ...
+/// ]
 fn get_output_phase_enables(ir: &HardwareIR) -> Vec<String> {
     let eval_levels = ir.evaluation_order.len();
     let output_phase_tag = vec![format!(

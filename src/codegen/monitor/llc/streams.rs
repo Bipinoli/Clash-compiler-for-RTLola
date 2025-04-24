@@ -284,15 +284,8 @@ fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<Sl
 }
 
 fn get_sliding_window_size(window_idx: usize, ir: &HardwareIR) -> usize {
-    // In RTLola sliding-window aggregation, the span of window is inlclusive in the right but exclusive to the left
-    // For example:
-    //      output b @1kHz := x.aggregate(over: 0.003s, using: sum)
-    // Here, in the output b, data at the exact time 0.001s won't be included in the aggregation at time 0.003s
-    // To deal with this we need one more bucket such that this extreme data can be put into it
-    // Also we must not mix this extreme data into the bucket aggregation
-    // Also note, when we have both new data and time to slide the window, first we must update the window and then slide it
     match ir.mir.sliding_windows[window_idx].num_buckets {
-        MemorizationBound::Bounded(x) => (x + 1) as usize,
+        MemorizationBound::Bounded(x) => x as usize,
         _ => unimplemented!(),
     }
 }

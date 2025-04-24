@@ -76,9 +76,10 @@ slidingWindow{{@index}} en slide hasInputWithTag = window
                 (dta, hasData) = inpt
                 out = case (toSlide, hasData) of
                     (False, False) -> win
-                    (False, True) -> updatedWin
+                    (False, True) -> lastBucketUpdated
                     (True, False) -> win <<+ {{this.default_value}}
-                updatedWin = replace lastIndx (windowBucketFunc{{@index}} (last win) dta) win
+                    (True, True) -> win <<+ dta
+                lastBucketUpdated = replace lastIndx (windowBucketFunc{{@index}} (last win) dta) win
                 lastIndx = length win - 1       
 
 
