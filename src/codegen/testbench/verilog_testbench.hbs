@@ -16,7 +16,7 @@ module testbench;
     {{/each}}
 
     {{#if debug}}
-    wire signed [63:0] llc_tag;
+    wire signed [7:0] llc_tag;
     wire q_push;
     wire q_pop;
     wire q_push_valid;
@@ -60,6 +60,7 @@ module testbench;
     end
 
     initial begin
+        #0; // important to make sure that assignments happens before evaluation to avoid undefined values in the beginning
         clk = 1;
         rst = 1;
         en = 1;

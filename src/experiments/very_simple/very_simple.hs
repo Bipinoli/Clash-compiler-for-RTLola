@@ -214,7 +214,7 @@ getOffsetFromNonVec (winTag, winData) tag offset dflt = out
         out = if offsetTag == winTag then (tag, winData) else (tag, dflt)
 
 
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Tag, (Bool, Bool, Bool), Bool, (Tag, (Vec 3 Int)), (Tag, Int), (Tag, Int), (Vec 3 (Tag, Int))))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Tag, (Bool, Bool, Bool), Bool))
 llc event = bundle (bundle (toPop, outputs), debugSignals)
     where 
         (isValidEvent, poppedEvent) = unbundle event
@@ -279,7 +279,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         sw0Data = bundle (sw0DataVal, sw0DataPacing)
         (_, sw0DataVal) = unbundle (getMatchingTag <$> out1 <*> sw0Tag <*> (pure 0))
 
-        debugSignals = bundle (tag, pacings, slides, sw0, out0Data0, out0Data1, out0)
+        debugSignals = bundle (tag, pacings, slides)
 
         genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
         genTag en = t
@@ -366,7 +366,7 @@ slidingWindow0 en slide hasInputWithTag = window
 
 ---------------------------------------------------------------
 
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (Tag, QPush, QPop, QPushValid, QPopValid, (Bool, Bool, Bool), Bool, (Tag, (Vec 3 Int)), (Tag, Int), (Tag, Int), (Vec 3 (Tag, Int))))
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (Tag, QPush, QPop, QPushValid, QPopValid, (Bool, Bool, Bool), Bool))
 monitor inputs = bundle (outputs, debugSignals)
     where 
         (newEvent, event) = unbundle (hlc inputs)
@@ -379,12 +379,12 @@ monitor inputs = bundle (outputs, debugSignals)
         (llcOutput, llcDebug) = unbundle (llc (bundle (qPopValid, qPopData)))
         (toPop, outputs) = unbundle llcOutput
 
-        (llcTag, llcPacings, llcSlides, llcSw0, out0Data0, out0Data1, out0) = unbundle llcDebug
-        debugSignals = bundle (llcTag, qPush, qPop, qPushValid, qPopValid, llcPacings, llcSlides, llcSw0, out0Data0, out0Data1, out0)
+        (llcTag, llcPacings, llcSlides) = unbundle llcDebug
+        debugSignals = bundle (llcTag, qPush, qPop, qPushValid, qPopValid, llcPacings, llcSlides)
 
 
 ---------------------------------------------------------------
 
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (Tag, QPush, QPop, QPushValid, QPopValid, (Bool, Bool, Bool), Bool, (Tag, (Vec 3 Int)), (Tag, Int), (Tag, Int),(Vec 3 (Tag, Int)) ))
+    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (Tag, QPush, QPop, QPushValid, QPopValid, (Bool, Bool, Bool), Bool))
 topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en

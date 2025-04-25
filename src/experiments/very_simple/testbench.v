@@ -17,7 +17,7 @@ module testbench;
     wire signed [63:0] output_2;
     wire output_2_aktv;
 
-    wire signed [63:0] llc_tag;
+    wire signed [7:0] llc_tag;
     wire q_push;
     wire q_pop;
     wire q_push_valid;
@@ -27,23 +27,6 @@ module testbench;
     wire pacing_1;
     wire pacing_2;
     wire slide_0;
-
-    wire signed [63:0] sw0_tag;
-    wire signed [63:0] sw0_v1;
-    wire signed [63:0] sw0_v2;
-    wire signed [63:0] sw0_v3;
-
-    wire signed [63:0] out0_data0_tag;
-    wire signed [63:0] out0_data0_int;
-    wire signed [63:0] out0_data1_tag;
-    wire signed [63:0] out0_data1_int;
-
-    wire signed [63:0] out0_tag1;
-    wire signed [63:0] out0_v1;
-    wire signed [63:0] out0_tag2;
-    wire signed [63:0] out0_v2;
-    wire signed [63:0] out0_tag3;
-    wire signed [63:0] out0_v3;
 
     topEntity monitor (
                         clk, rst, en
@@ -57,9 +40,6 @@ module testbench;
                         ,pacing_1
                         ,pacing_2
                         ,slide_0
-                        ,sw0_tag, sw0_v1, sw0_v2, sw0_v3
-                        ,out0_data0_tag, out0_data0_int, out0_data1_tag, out0_data1_int
-                        ,out0_tag1, out0_v1, out0_tag2, out0_v2, out0_tag3, out0_v3
                        );
 
     always begin
@@ -73,6 +53,7 @@ module testbench;
     end
 
     initial begin
+        #0; // important to make sure that assignments happens before evaluation to avoid undefined values in the beginning
         clk = 1;
         rst = 1;
         en = 1;
