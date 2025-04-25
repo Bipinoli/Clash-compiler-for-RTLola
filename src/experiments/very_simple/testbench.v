@@ -14,6 +14,8 @@ module testbench;
     wire output_0_aktv;
     wire signed [63:0] output_1;
     wire output_1_aktv;
+    wire signed [63:0] output_2;
+    wire output_2_aktv;
 
     wire signed [63:0] llc_tag;
     wire q_push;
@@ -21,13 +23,23 @@ module testbench;
     wire q_push_valid;
     wire q_pop_valid;
 
+    wire pacing_0;
+    wire pacing_1;
+    wire pacing_2;
+    wire slide_0;
+
     topEntity monitor (
-                        clk, rst, en,
-                        input_0, new_input_0,
-                        input_1, new_input_1,
-                        output_0, output_0_aktv,
-                        output_1, output_1_aktv
-                        ,llc_tag, q_push, q_pop, q_push_valid, q_pop_valid 
+                        clk, rst, en
+                        ,input_0, new_input_0
+                        ,input_1, new_input_1
+                        ,output_0, output_0_aktv
+                        ,output_1, output_1_aktv
+                        ,output_2, output_2_aktv
+                        ,llc_tag, q_push, q_pop, q_push_valid, q_pop_valid
+                        ,pacing_0
+                        ,pacing_1
+                        ,pacing_2
+                        ,slide_0
                        );
 
     always begin
@@ -35,8 +47,8 @@ module testbench;
     end
 
     always @(posedge clk) begin
-        if (output_0_aktv == 1'b1 || output_1_aktv == 1'b1) begin
-            $display("Time %0t: Active outputs: (%b, %b), Outputs: (%0d, %0d)", $time, output_0_aktv, output_1_aktv, output_0, output_1);
+        if (output_0_aktv == 1'b1 || output_1_aktv == 1'b1 || output_2_aktv == 1'b1) begin
+            $display("Time %0t: Active outputs: (%b, %b, %b), Outputs: (%0d, %0d, %0d)", $time, output_0_aktv, output_1_aktv, output_2_aktv, output_0, output_1, output_2);
         end
     end
 

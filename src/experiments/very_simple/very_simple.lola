@@ -1,5 +1,6 @@
 input x : Int
 input y : Int
 
-output a := x.offset(by: -2).defaults(to: 10) + b.offset(by: -3).defaults(to: 100)
-output b := x + y
+output a := x + b.offset(by: -3).defaults(to: 2)
+output b := a + y
+output c @1kHz := a.hold(or: 1) + b.aggregate(over: 0.003s, using: sum)

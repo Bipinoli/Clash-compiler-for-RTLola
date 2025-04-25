@@ -4,6 +4,7 @@ use crate::hardware_ir::{
 use handlebars::{
     Context, Handlebars, Helper, Output, RenderContext, RenderError, RenderErrorReason,
 };
+use llc::{get_pacings_type, get_slides_type};
 use serde::Serialize;
 
 mod datatypes;
@@ -23,6 +24,9 @@ struct Data {
     data_types: String,
     hlc: String,
     llc: String,
+    has_sliding_window: bool,
+    pacings_type: String,
+    slides_type: String,
 }
 
 pub fn generate_clash(hard_ir: HardwareIR) -> Option<String> {
@@ -54,6 +58,9 @@ pub fn generate_clash(hard_ir: HardwareIR) -> Option<String> {
             queue_size: hard_ir.pipeline_wait + 2,
             hlc: hlc.unwrap(),
             llc: llc.unwrap(),
+            has_sliding_window: hard_ir.mir.sliding_windows.len() > 0,
+            pacings_type: get_pacings_type(&hard_ir),
+            slides_type: get_slides_type(&hard_ir),
         };
         match reg.render("monitor", &data) {
             Ok(result) => Some(result),

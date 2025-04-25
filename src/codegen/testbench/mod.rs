@@ -11,6 +11,7 @@ struct Data {
     inputs: Vec<Input>,
     outputs: Vec<Output>,
     trace_data: Vec<TraceData>,
+    sliding_windows: Vec<()>,
 }
 
 #[derive(Serialize)]
@@ -52,6 +53,7 @@ pub fn generate_verilog_testbench(
         inputs: get_inputs(&hard_ir),
         outputs: get_outputs(&hard_ir),
         trace_data: get_trace_data(trace_data),
+        sliding_windows: get_sliding_windows(&hard_ir),
     };
     match reg.render("testbench", &data) {
         Ok(result) => Some(result),
@@ -154,4 +156,8 @@ fn get_trace_data(trace_data: Vec<StringRecord>) -> Vec<TraceData> {
                 .collect(),
         })
         .collect()
+}
+
+fn get_sliding_windows(ir: &HardwareIR) -> Vec<()> {
+    ir.mir.sliding_windows.iter().map(|_| ()).collect()
 }

@@ -27,7 +27,11 @@ getOffsetFromNonVec (winTag, winData) tag offset dflt = out
 
 
 {{#if debug}}
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), Tag)
+    {{#if has_sliding_window}}
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Tag, {{pacings_type}}, {{slides_type}}))
+    {{else}}
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Tag, {{pacings_type}}))
+    {{/if}}
 llc event = bundle (bundle (toPop, outputs), debugSignals)
 {{else}}
 llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool, Outputs)
@@ -134,7 +138,11 @@ llc event = bundle (toPop, outputs)
 
         {{/each}}
         {{#if debug}}
-        debugSignals = tag
+            {{#if has_sliding_window}}
+        debugSignals = bundle (tag, pacings, slides)
+            {{else}}
+        debugSignals = bundle (tag, pacings)
+            {{/if}}
         {{/if}}
 
         genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag

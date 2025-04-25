@@ -25,6 +25,8 @@ struct Data {
     tags: Vec<String>,
     enables: Vec<String>,
     output_phase_enables: Vec<String>,
+    pacings_type: String,
+    slides_type: String,
 }
 
 #[derive(Serialize)]
@@ -77,6 +79,8 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         tags: get_tags(ir),
         enables: get_enables(ir),
         output_phase_enables: get_output_phase_enables(ir),
+        pacings_type: get_pacings_type(ir),
+        slides_type: get_slides_type(ir),
     };
     match handlebars.render("llc", &data) {
         Ok(result) => Some(result),
@@ -462,5 +466,23 @@ fn get_default_value(expr: &Expression) -> String {
             _ => unimplemented!(),
         },
         _ => unimplemented!(),
+    }
+}
+
+pub fn get_pacings_type(ir: &HardwareIR) -> String {
+    let pacings: Vec<String> = ir.mir.outputs.iter().map(|_| "Bool".to_string()).collect();
+    if pacings.len() > 1 {
+        format!("({})", pacings.join(", "))
+    } else {
+        format!("{}", pacings.join(", "))
+    }
+}
+
+pub fn get_slides_type(ir: &HardwareIR) -> String {
+    let pacings: Vec<String> = ir.mir.sliding_windows.iter().map(|_| "Bool".to_string()).collect();
+    if pacings.len() > 1 {
+        format!("({})", pacings.join(", "))
+    } else {
+        format!("{}", pacings.join(", "))
     }
 }

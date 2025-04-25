@@ -21,18 +21,31 @@ module testbench;
     wire q_pop;
     wire q_push_valid;
     wire q_pop_valid;
+
+    {{#each outputs}}
+    wire pacing_{{@index}};
+    {{/each}}
+    {{#each sliding_windows}}
+    wire slide_{{@index}};
+    {{/each}}
     {{/if}}
 
     topEntity monitor (
-                        clk, rst, en,
+                        clk, rst, en
                         {{#each inputs}}
-                        input_{{@index}}, new_input_{{@index}},
+                        ,input_{{@index}}, new_input_{{@index}}
                         {{/each}}
                         {{#each outputs}}
-                        output_{{@index}}, output_{{@index}}_aktv{{#unless @last}},{{/unless}}
+                        ,output_{{@index}}, output_{{@index}}_aktv
                         {{/each}}
                         {{#if debug}}
-                        ,llc_tag, q_push, q_pop, q_push_valid, q_pop_valid 
+                        ,llc_tag, q_push, q_pop, q_push_valid, q_pop_valid
+                            {{#each outputs}}
+                        ,pacing_{{@index}}
+                            {{/each}}
+                            {{#each sliding_windows}}
+                        ,slide_{{@index}}
+                            {{/each}}
                         {{/if}}
                        );
 
