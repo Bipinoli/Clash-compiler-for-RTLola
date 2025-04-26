@@ -303,7 +303,7 @@ fn calculate_pipeline_wait(
     wait
 }
 
-fn level_distance(a: &Node, b: &Node, eval_order: &Vec<Vec<Node>>) -> i32 {
+pub fn level_distance(a: &Node, b: &Node, eval_order: &Vec<Vec<Node>>) -> i32 {
     let level_a = find_level(a, eval_order) as i32;
     let level_b = find_level(b, eval_order) as i32;
     level_a - level_b
@@ -607,7 +607,7 @@ fn remove_reachable_roots(roots: Vec<Node>, mir: &RtLolaMir) -> Vec<Node> {
         .collect()
 }
 
-fn find_level(node: &Node, eval_order: &Vec<Vec<Node>>) -> usize {
+pub fn find_level(node: &Node, eval_order: &Vec<Vec<Node>>) -> usize {
     for (i, nodes) in eval_order.iter().enumerate() {
         if nodes.contains(node) {
             return i;

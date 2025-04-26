@@ -45,19 +45,23 @@
             "sha256": "460702d8afc7479b65dad3acb826f56baf7e34f11fea519fb6f597a0c8340150"
         },
         {
+            "name": "topEntity_shim.cpp",
+            "sha256": "460702d8afc7479b65dad3acb826f56baf7e34f11fea519fb6f597a0c8340150"
+        },
+        {
             "name": "topEntity.sdc",
             "sha256": "5931af56eff7648c501fd106363fb26420b398eeea306d9edd80c5a89a153fc1"
         },
         {
             "name": "topEntity.v",
-            "sha256": "4b0c8634a4b1a9d8c4077b9112b96bfe7986bff72f0932a0bd79b45842760d48"
+            "sha256": "6a3905e60c864da2e262156af37e8f112d6cb28ed39c86fbe0ac6d18f1360cdb"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "6e95b3cfd3ae2a1c9e60d54fb42d1cd60ac9f6f7da63a6b91d7f44c9e23bbee1",
+    "hash": "d37c7c7e52ee5af41c6a1a8aa7f39368c92bbe4e1c5b5c48d8c3ec29da9db860",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -159,8 +163,8 @@
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_1_0",
-                "type_name": "[7:0]",
-                "width": 8
+                "type_name": "",
+                "width": 1
             },
             {
                 "direction": "out",
@@ -186,28 +190,28 @@
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4",
+                "name": "result_1_4_0",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_5_0",
+                "name": "result_1_4_1",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_5_1",
+                "name": "result_1_4_2",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_5_2",
+                "name": "result_1_5",
                 "type_name": "",
                 "width": 1
             },
@@ -215,8 +219,43 @@
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_1_6",
-                "type_name": "",
-                "width": 1
+                "type_name": "[7:0]",
+                "width": 8
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_7",
+                "type_name": "[7:0]",
+                "width": 8
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_8",
+                "type_name": "[7:0]",
+                "width": 8
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_9",
+                "type_name": "[7:0]",
+                "width": 8
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_10",
+                "type_name": "[7:0]",
+                "width": 8
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_11",
+                "type_name": "[7:0]",
+                "width": 8
             }
         ]
     },

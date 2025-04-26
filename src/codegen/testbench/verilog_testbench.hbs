@@ -16,7 +16,6 @@ module testbench;
     {{/each}}
 
     {{#if debug}}
-    wire signed [7:0] llc_tag;
     wire q_push;
     wire q_pop;
     wire q_push_valid;
@@ -28,7 +27,19 @@ module testbench;
     {{#each sliding_windows}}
     wire slide_{{@index}};
     {{/each}}
+
+    {{#each inputs}}
+    wire signed [7:0] tag_in_{{@index}};
+    {{/each}}
+    {{#each outputs}}
+    wire signed [7:0] tag_out_{{@index}};
+    {{/each}}
+    {{#each sliding_windows}}
+    wire signed [7:0] tag_sw_{{@index}};
+    {{/each}}
+
     {{/if}}
+    
 
     topEntity monitor (
                         clk, rst, en
@@ -39,13 +50,22 @@ module testbench;
                         ,output_{{@index}}, output_{{@index}}_aktv
                         {{/each}}
                         {{#if debug}}
-                        ,llc_tag, q_push, q_pop, q_push_valid, q_pop_valid
+                        ,q_push, q_pop, q_push_valid, q_pop_valid
                             {{#each outputs}}
                         ,pacing_{{@index}}
                             {{/each}}
                             {{#each sliding_windows}}
                         ,slide_{{@index}}
                             {{/each}}
+                        {{#each inputs}}
+                        ,tag_in_{{@index}}
+                        {{/each}}
+                        {{#each outputs}}
+                        ,tag_out_{{@index}}
+                        {{/each}}
+                        {{#each sliding_windows}}
+                        ,tag_sw_{{@index}}
+                        {{/each}}
                         {{/if}}
                        );
 

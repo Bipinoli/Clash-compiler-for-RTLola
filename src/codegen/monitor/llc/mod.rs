@@ -1,3 +1,5 @@
+use std::cmp::max;
+
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
     Constant, Expression, ExpressionKind, Offset, OutputStream, StreamAccessKind, StreamReference,
@@ -5,7 +7,7 @@ use rtlola_frontend::mir::{
 };
 use serde::Serialize;
 
-use crate::hardware_ir::Node;
+use crate::hardware_ir::{self, Node};
 use crate::{codegen::monitor::register_template, hardware_ir::HardwareIR};
 
 use super::datatypes;
@@ -27,6 +29,8 @@ struct Data {
     output_phase_enables: Vec<String>,
     pacings_type: String,
     slides_type: String,
+    all_tags_names: String,
+    all_tags_types: String,
 }
 
 #[derive(Serialize)]
@@ -43,17 +47,21 @@ struct SlidingWindow {
     input_data: String,
     input_data_default: String,
     input_memory_more_than_one: bool,
+    tag: String,
+    source_tag: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 struct Dependency {
     is_offset_access: bool,
     is_sync_access: bool,
     is_sliding_window_access: bool,
     default_value: String,
     offset: usize,
-    source: String,
+    source_name: String,
+    source_tag: String,
     memory_more_than_one: bool,
+    source_node: Node,
     node: Node,
 }
 
@@ -66,11 +74,7 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
     let data = Data {
         debug: ir.debug,
         streams: streams::render(ir, handlebars).unwrap(),
-        max_tag: streams::get_sliding_windows(ir)
-            .iter()
-            .map(|sw| sw.window_size.clone())
-            .max()
-            .unwrap_or(5),
+        max_tag: get_max_tag(ir),
         has_pipeline_wait: ir.pipeline_wait > 0,
         has_sliding_window: ir.mir.sliding_windows.len() > 0,
         inputs: ir.mir.inputs.iter().map(|_| ()).collect(),
@@ -81,6 +85,8 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         output_phase_enables: get_output_phase_enables(ir),
         pacings_type: get_pacings_type(ir),
         slides_type: get_slides_type(ir),
+        all_tags_names: get_all_tags_names(ir),
+        all_tags_types: get_all_tags_types(ir),
     };
     match handlebars.render("llc", &data) {
         Ok(result) => Some(result),
@@ -93,26 +99,44 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
 
 /// Example:
 /// [
-///   "in0Tag = tag",
-///   "out0Tag = delay invalidTag tag",
-///   "sw0Tag = delay invalidTag (delay invalidTag tag)"
+///     "tagIn0 = genTag input0HasData",
+///     "tagOut0 = genTag p0",
+///     "tagSw0 = genTag p1",
+///     "tagOut1 = genTag p1",
+///     "tagOutputPhase0 = earlierTag <$> tagOut0 <*> pure (4 :: Tag)",
+///     "tagOutputPhase1 = earlierTag <$> tagOut1 <*> pure (4 :: Tag)",
 /// ]
 fn get_tags(ir: &HardwareIR) -> Vec<String> {
-    ir.evaluation_order
+    let stream_tags: Vec<String> = ir
+        .evaluation_order
         .iter()
-        .enumerate()
-        .map(|(i, order)| {
-            order.iter().map(move |nd| {
-                let tag = surround_with_delay(i, "invalidTag".to_string(), "tag".to_string());
-                match nd {
-                    Node::InputStream(x) => format!("in{}Tag = {}", x.clone(), tag),
-                    Node::OutputStream(x) => format!("out{}Tag = {}", x.clone(), tag),
-                    Node::SlidingWindow(x) => format!("sw{}Tag = {}", x.clone(), tag),
+        .map(|order| {
+            order.iter().map(move |nd| match nd {
+                Node::InputStream(x) => {
+                    format!("tagIn{} = genTag input{}HasData", x.clone(), x.clone())
                 }
+                Node::OutputStream(x) => format!("tagOut{} = genTag p{}", x.clone(), x.clone()),
+                Node::SlidingWindow(x) => format!("tagSw{} = genTag p{}", x.clone(), x.clone()),
             })
         })
         .flatten()
-        .collect()
+        .collect();
+    let total_eval_layers = ir.evaluation_order.len();
+    let output_phase_tags: Vec<String> = ir
+        .mir
+        .outputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| {
+            format!(
+                "tagOutputPhase{} = earlierTag <$> tagOut{} <*> pure ({} :: Tag)",
+                i,
+                i,
+                total_eval_layers.clone()
+            )
+        })
+        .collect();
+    vec![&stream_tags[..], &output_phase_tags[..]].concat()
 }
 
 /// Example:
@@ -202,18 +226,12 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
 
 /// Example:
 /// [
-///     "outputPhaseTag = delay invalidTag (delay invalidTag (delay invalidTag (delay invalidTag tag)))",
 ///     "output0Aktv = delay False (delay False (delay False (delay False p0)))",
 ///     ...
 /// ]
 fn get_output_phase_enables(ir: &HardwareIR) -> Vec<String> {
     let eval_levels = ir.evaluation_order.len();
-    let output_phase_tag = vec![format!(
-        "outputPhaseTag = {}",
-        surround_with_delay(eval_levels, "invalidTag".to_string(), "tag".to_string())
-    )];
-    let output_aktvs: Vec<String> = ir
-        .mir
+    ir.mir
         .outputs
         .iter()
         .enumerate()
@@ -224,8 +242,7 @@ fn get_output_phase_enables(ir: &HardwareIR) -> Vec<String> {
                 surround_with_delay(eval_levels, "False".to_string(), format!("p{}", i.clone()))
             )
         })
-        .collect();
-    vec![&output_phase_tag[..], &output_aktvs[..]].concat()
+        .collect()
 }
 
 fn surround_with_delay(times: usize, default_value: String, data: String) -> String {
@@ -265,6 +282,27 @@ fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
                 };
                 ir.required_memory.get(&node).unwrap().clone() > 1
             },
+            tag: {
+                let node = Node::SlidingWindow(i.clone());
+                let level = hardware_ir::find_level(&node, &ir.evaluation_order);
+                if level > 0 {
+                    format!("earlierTag <$> tagSw{} <*> pure ({} :: Tag)", i.clone(), level)
+                } else {
+                    format!("tagSw{}", i)
+                }
+            },
+            source_tag: {
+                let source_node = match sw.target {
+                    StreamReference::In(x) => Node::InputStream(x.clone()),
+                    StreamReference::Out(x) => Node::OutputStream(x.clone()),
+                };
+               let tag = match sw.target {
+                    StreamReference::In(x) => format!("tagIn{}", x.clone()),
+                    StreamReference::Out(x) => format!("tagOut{}", x.clone()),
+               };
+               let dist = hardware_ir::level_distance(&source_node, &Node::SlidingWindow(i.clone()), &ir.evaluation_order).abs() as usize;
+                format!("(earlierTag <$> {} <*> pure ({} :: Tag))", tag, dist)
+            },
         })
         .collect()
 }
@@ -285,6 +323,7 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
                 > 1,
             deps: {
                 let mut deps = get_dependencies_from_expression(
+                    Node::OutputStream(i),
                     &out.eval.clauses.first().unwrap().expression,
                     ir,
                 );
@@ -295,23 +334,36 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
         .collect()
 }
 
-fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<Dependency> {
+fn get_dependencies_from_expression(
+    node: Node,
+    expr: &Expression,
+    ir: &HardwareIR,
+) -> Vec<Dependency> {
     // default values of offsets, hold etc. can only be accessed from the expression
     match &expr.kind {
         ExpressionKind::StreamAccess {
-            target,
+            target: source,
             parameters: _,
             access_kind,
         } => {
-            let source = match target {
-                StreamReference::In(x) => format!("input{}Win", x),
-                StreamReference::Out(x) => format!("out{}", x),
+            let source_name = match source {
+                StreamReference::In(x) => format!("input{}Win", x.clone()),
+                StreamReference::Out(x) => format!("out{}", x.clone()),
             };
-            let node = match target {
+            let source_node = match source {
                 StreamReference::In(x) => Node::InputStream(x.clone()),
                 StreamReference::Out(x) => Node::OutputStream(x.clone()),
             };
-            let memory_more_than_one = match target {
+            let source_tag = {
+                let dist = hardware_ir::level_distance(&node, &source_node, &ir.evaluation_order)
+                    .abs() as usize;
+                let tag = match source {
+                    StreamReference::In(x) => format!("tagIn{}", x.clone()),
+                    StreamReference::Out(x) => format!("tagOut{}", x.clone()),
+                };
+                format!("(earlierTag <$> {} <*> pure ({} :: Tag))", tag, dist)
+            };
+            let memory_more_than_one = match source {
                 StreamReference::In(x) => {
                     ir.required_memory
                         .get(&Node::InputStream(x.clone()))
@@ -333,10 +385,12 @@ fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<D
                     is_offset_access: false,
                     is_sliding_window_access: false,
                     offset: 0,
-                    source,
                     node,
+                    source_name,
+                    source_node,
+                    source_tag,
                     memory_more_than_one,
-                    default_value: match target {
+                    default_value: match source {
                         StreamReference::In(x) => {
                             datatypes::get_default_for_type(&ir.mir.inputs[x.clone()].ty)
                         }
@@ -350,8 +404,10 @@ fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<D
                     is_offset_access: false,
                     is_sliding_window_access: false,
                     offset: 0,
-                    source,
                     node,
+                    source_name,
+                    source_node,
+                    source_tag,
                     memory_more_than_one,
                     default_value: String::new(),
                 },
@@ -359,8 +415,10 @@ fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<D
                     is_offset_access: true,
                     is_sync_access: false,
                     is_sliding_window_access: false,
-                    source,
                     node,
+                    source_name,
+                    source_node,
+                    source_tag,
                     memory_more_than_one,
                     default_value: String::new(),
                     offset: match off {
@@ -369,7 +427,7 @@ fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<D
                     },
                 },
                 StreamAccessKind::SlidingWindow(sw) => {
-                    let (default_value, source, memory) = match sw {
+                    let (default_value, source_name, memory) = match sw {
                         WindowReference::Sliding(x) => {
                             let default_value = format!(
                                 "(repeat {})",
@@ -377,17 +435,17 @@ fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<D
                                     &ir.mir.sliding_windows[x.clone()].ty,
                                 )
                             );
-                            let source = format!("sw{}", x);
+                            let source_name = format!("sw{}", x);
                             let memory = ir
                                 .required_memory
                                 .get(&Node::SlidingWindow(x.clone()))
                                 .unwrap()
                                 .clone();
-                            (default_value, source, memory)
+                            (default_value, source_name, memory)
                         }
                         _ => unimplemented!(),
                     };
-                    let node = match sw {
+                    let source_node = match sw {
                         WindowReference::Sliding(x) => Node::SlidingWindow(x.clone()),
                         _ => unimplemented!(),
                     };
@@ -397,8 +455,10 @@ fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<D
                         is_sync_access: false,
                         offset: 0,
                         default_value,
-                        source,
                         node,
+                        source_name,
+                        source_node,
+                        source_tag,
                         memory_more_than_one: memory > 1,
                     }
                 }
@@ -407,7 +467,7 @@ fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<D
             vec![dep]
         }
         ExpressionKind::Default { expr, default } => {
-            let deps = get_dependencies_from_expression(&expr, ir);
+            let deps = get_dependencies_from_expression(node, &expr, ir);
             let default_value = get_default_value(&default);
             deps.iter()
                 .map(|dep| Dependency {
@@ -415,8 +475,10 @@ fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<D
                     is_sliding_window_access: dep.is_sliding_window_access,
                     is_sync_access: dep.is_sync_access,
                     offset: dep.offset,
-                    source: dep.source.clone(),
                     node: dep.node.clone(),
+                    source_name: dep.source_name.clone(),
+                    source_node: dep.source_node.clone(),
+                    source_tag: dep.source_tag.clone(),
                     memory_more_than_one: dep.memory_more_than_one,
                     default_value: default_value.clone(),
                 })
@@ -424,7 +486,7 @@ fn get_dependencies_from_expression(expr: &Expression, ir: &HardwareIR) -> Vec<D
         }
         ExpressionKind::ArithLog(_, exprs) => exprs
             .iter()
-            .map(|expr| get_dependencies_from_expression(expr, ir))
+            .map(|expr| get_dependencies_from_expression(node.clone(), expr, ir))
             .reduce(|acc, lst| {
                 let mut acc = acc;
                 acc.extend(lst);
@@ -441,7 +503,7 @@ fn order_dependencies_according_to_access_list(deps: &mut Vec<Dependency>, out: 
             .accesses
             .iter()
             .map(|access| {
-                let node = match access.0 {
+                let source_node = match access.0 {
                     StreamReference::In(x) => Node::InputStream(x.clone()),
                     StreamReference::Out(x) => Node::OutputStream(x.clone()),
                 };
@@ -450,11 +512,14 @@ fn order_dependencies_according_to_access_list(deps: &mut Vec<Dependency>, out: 
                         WindowReference::Sliding(x) => Node::SlidingWindow(x.clone()),
                         _ => unimplemented!(),
                     },
-                    _ => node,
+                    _ => source_node,
                 }
             })
             .collect();
-        let index = accesses.iter().position(|node| *node == dep.node).unwrap();
+        let index = accesses
+            .iter()
+            .position(|source_node| *source_node == dep.source_node)
+            .unwrap();
         index
     });
 }
@@ -479,10 +544,87 @@ pub fn get_pacings_type(ir: &HardwareIR) -> String {
 }
 
 pub fn get_slides_type(ir: &HardwareIR) -> String {
-    let pacings: Vec<String> = ir.mir.sliding_windows.iter().map(|_| "Bool".to_string()).collect();
+    let pacings: Vec<String> = ir
+        .mir
+        .sliding_windows
+        .iter()
+        .map(|_| "Bool".to_string())
+        .collect();
     if pacings.len() > 1 {
         format!("({})", pacings.join(", "))
     } else {
         format!("{}", pacings.join(", "))
     }
+}
+
+fn get_max_tag(ir: &HardwareIR) -> usize {
+    let max_window_size = streams::get_sliding_windows(ir)
+        .iter()
+        .map(|sw| sw.window_size.clone())
+        .max()
+        .unwrap_or(0);
+    let max_offset = get_max_offset(ir);
+    max(max_window_size, max_offset) + 1
+}
+
+fn get_max_offset(ir: &HardwareIR) -> usize {
+    ir.mir
+        .outputs
+        .iter()
+        .map(|out| {
+            out.accesses
+                .iter()
+                .map(|access| match access.1.first().unwrap().1 {
+                    StreamAccessKind::Offset(off) => match off {
+                        Offset::Past(x) => x.clone() as usize,
+                        _ => unreachable!(),
+                    },
+                    _ => 0,
+                })
+                .max()
+                .unwrap_or(0)
+        })
+        .max()
+        .unwrap_or(0)
+}
+
+pub fn get_all_tags_names(ir: &HardwareIR) -> String {
+    let inputs: Vec<String> = ir
+        .mir
+        .inputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("tagIn{}", i.clone()))
+        .collect();
+    let outputs: Vec<String> = ir
+        .mir
+        .outputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("tagOut{}", i.clone()))
+        .collect();
+    let slidings: Vec<String> = ir
+        .mir
+        .sliding_windows
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("tagSw{}", i.clone()))
+        .collect();
+    vec![&inputs[..], &outputs[..], &slidings[..]]
+        .concat()
+        .join(", ")
+}
+
+pub fn get_all_tags_types(ir: &HardwareIR) -> String {
+    let inputs: Vec<String> = ir.mir.inputs.iter().map(|_| "Tag".to_string()).collect();
+    let outputs: Vec<String> = ir.mir.outputs.iter().map(|_| "Tag".to_string()).collect();
+    let slidings: Vec<String> = ir
+        .mir
+        .sliding_windows
+        .iter()
+        .map(|_| "Tag".to_string())
+        .collect();
+    vec![&inputs[..], &outputs[..], &slidings[..]]
+        .concat()
+        .join(", ")
 }

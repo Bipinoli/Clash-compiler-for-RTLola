@@ -17,7 +17,6 @@ module testbench;
     wire signed [63:0] output_2;
     wire output_2_aktv;
 
-    wire signed [7:0] llc_tag;
     wire q_push;
     wire q_pop;
     wire q_push_valid;
@@ -28,6 +27,15 @@ module testbench;
     wire pacing_2;
     wire slide_0;
 
+    wire signed [7:0] tag_in_0;
+    wire signed [7:0] tag_in_1;
+    wire signed [7:0] tag_out_0;
+    wire signed [7:0] tag_out_1;
+    wire signed [7:0] tag_out_2;
+    wire signed [7:0] tag_sw_0;
+
+    
+
     topEntity monitor (
                         clk, rst, en
                         ,input_0, new_input_0
@@ -35,11 +43,17 @@ module testbench;
                         ,output_0, output_0_aktv
                         ,output_1, output_1_aktv
                         ,output_2, output_2_aktv
-                        ,llc_tag, q_push, q_pop, q_push_valid, q_pop_valid
+                        ,q_push, q_pop, q_push_valid, q_pop_valid
                         ,pacing_0
                         ,pacing_1
                         ,pacing_2
                         ,slide_0
+                        ,tag_in_0
+                        ,tag_in_1
+                        ,tag_out_0
+                        ,tag_out_1
+                        ,tag_out_2
+                        ,tag_sw_0
                        );
 
     always begin

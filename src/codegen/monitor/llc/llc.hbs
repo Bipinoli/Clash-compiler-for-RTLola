@@ -1,13 +1,13 @@
 type Tag = Unsigned 8
 -- maxTag must be at least the size of the sliding window to avoid duplicate tags in the window
--- default arbitrary value of 5 otherwise
+-- also to avoid having to do modulo operations maxTag must be at least as big as the largest offset
 maxTag = {{max_tag}} :: Tag
 invalidTag = maxTag + 1
 
 getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
 getOffset win tag offset dflt = out
     where 
-        offsetTag = if tag > offset then tag - offset else tag - offset + maxTag
+        offsetTag = earlierTag tag offset
         out = case findIndex (\(t, _) -> t == offsetTag) win of
             Just i -> let (_, v) = win !! i in (tag, v)
             Nothing -> (tag, dflt) 
@@ -22,15 +22,18 @@ getMatchingTag win tag dflt = out
 getOffsetFromNonVec :: (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
 getOffsetFromNonVec (winTag, winData) tag offset dflt = out
     where 
-        offsetTag = if tag > offset then tag - offset else tag - offset + maxTag
+        offsetTag = earlierTag tag offset
         out = if offsetTag == winTag then (tag, winData) else (tag, dflt)
 
+earlierTag :: Tag -> Tag -> Tag
+earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
+     
 
 {{#if debug}}
     {{#if has_sliding_window}}
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Tag, {{pacings_type}}, {{slides_type}}))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), ({{pacings_type}}, {{slides_type}}, {{all_tags_types}}))
     {{else}}
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Tag, {{pacings_type}}))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), ({{pacings_type}}, {{all_tags_types}}))
     {{/if}}
 llc event = bundle (bundle (toPop, outputs), debugSignals)
 {{else}}
@@ -80,8 +83,6 @@ llc event = bundle (toPop, outputs)
         outputs = output0
         {{/if}}
 
-        tag = genTag ({{#each outputs}}p{{@index}}{{#unless @last}} .||. {{/unless}}{{/each}})
-
         {{#each tags}}
         {{{this}}}
         {{/each}}
@@ -97,14 +98,14 @@ llc event = bundle (toPop, outputs)
         {{#each outputs}}
         output{{this.idx}} = bundle (output{{this.idx}}Data, output{{this.idx}}Aktv)
         {{#if this.memory_more_than_one}}
-        (_, output{{this.idx}}Data) = unbundle (getMatchingTag <$> out{{this.idx}} <*> outputPhaseTag <*> (pure {{this.default_value}}))
+        (_, output{{this.idx}}Data) = unbundle (getMatchingTag <$> out{{this.idx}} <*> tagOutputPhase{{@index}} <*> (pure {{this.default_value}}))
         {{else}}
         (_, output{{this.idx}}Data) = unbundle out{{this.idx}}
         {{/if}}
         {{/each}}
 
         {{#each inputs}}
-        input{{@index}}Win = input{{@index}}Window enIn{{@index}} (bundle (in{{@index}}Tag, input{{@index}}Data))
+        input{{@index}}Win = input{{@index}}Window enIn{{@index}} (bundle (tagIn{{@index}}, input{{@index}}Data))
         {{/each}}
 
         {{#each outputs}}
@@ -112,16 +113,16 @@ llc event = bundle (toPop, outputs)
         {{#each this.deps}}
         {{#if (or this.is_sync_access this.is_sliding_window_access)}}
         {{#if this.memory_more_than_one}}
-        out{{../idx}}Data{{@index}} = getMatchingTag <$> {{this.source}} <*> out{{../idx}}Tag <*> (pure {{this.default_value}})
+        out{{../idx}}Data{{@index}} = getMatchingTag <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.default_value}})
         {{else}}
-        out{{../idx}}Data{{@index}} = {{this.source}}
+        out{{../idx}}Data{{@index}} = {{this.source_name}}
         {{/if}}
         {{/if}}
         {{#if this.is_offset_access}}
             {{#if this.memory_more_than_one}}
-        out{{../idx}}Data{{@index}} = getOffset <$> {{this.source}} <*> out{{../idx}}Tag <*> (pure {{this.offset}}) <*> (pure {{this.default_value}})
+        out{{../idx}}Data{{@index}} = getOffset <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.offset}}) <*> (pure {{this.default_value}})
             {{else}}
-        out{{../idx}}Data{{@index}} = getOffsetFromNonVec <$> {{this.source}} <*> out{{../idx}}Tag <*> (pure {{this.offset}}) <*> (pure {{this.default_value}})
+        out{{../idx}}Data{{@index}} = getOffsetFromNonVec <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.offset}}) <*> (pure {{this.default_value}})
             {{/if}}
         {{/if}}
         {{/each}}
@@ -129,9 +130,10 @@ llc event = bundle (toPop, outputs)
         {{/each}}
         {{#each sliding_windows}}
         sw{{this.idx}} = slidingWindow{{this.idx}} enSw{{this.idx}} sld{{this.idx}} (bundle (sw{{this.idx}}Tag, sw{{this.idx}}Data))
+        sw{{this.idx}}Tag = {{{this.tag}}}
         sw{{this.idx}}Data = bundle (sw{{this.idx}}DataVal, sw{{this.idx}}DataPacing)
         {{#if this.input_memory_more_than_one}}
-        (_, sw{{this.idx}}DataVal) = unbundle (getMatchingTag <$> {{this.input_data}} <*> sw{{this.idx}}Tag <*> (pure {{this.input_data_default}}))
+        (_, sw{{this.idx}}DataVal) = unbundle (getMatchingTag <$> {{this.input_data}} <*> {{{this.source_tag}}} <*> (pure {{this.input_data_default}}))
         {{else}}
         (_, sw{{this.idx}}DataVal) = unbundle {{this.input_data}}
         {{/if}}
@@ -139,9 +141,9 @@ llc event = bundle (toPop, outputs)
         {{/each}}
         {{#if debug}}
             {{#if has_sliding_window}}
-        debugSignals = bundle (tag, pacings, slides)
+        debugSignals = bundle (pacings, slides, {{all_tags_names}})
             {{else}}
-        debugSignals = bundle (tag, pacings)
+        debugSignals = bundle (pacings, {{all_tags_names}})
             {{/if}}
         {{/if}}
 

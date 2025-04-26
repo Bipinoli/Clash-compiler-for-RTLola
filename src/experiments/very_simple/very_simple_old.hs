@@ -215,9 +215,9 @@ getOffsetFromNonVec (winTag, winData) tag offset dflt = out
 
 earlierTag :: Tag -> Tag -> Tag
 earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
-     
+    
 
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), ((Bool, Bool, Bool), Bool, Tag, Tag, Tag, Tag, Tag, Tag))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), ((Bool, Bool, Bool), Bool))
 llc event = bundle (bundle (toPop, outputs), debugSignals)
     where 
         (isValidEvent, poppedEvent) = unbundle event
@@ -237,11 +237,12 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tagIn1 = genTag input1HasData
         tagOut0 = genTag p0
         tagOut1 = genTag p1
-        tagSw0 = genTag p0
+        tagSw0 = genTag p2
         tagOut2 = genTag p2
-        tagOutputPhase0 = earlierTag <$> tagOut0 <*> pure (5 :: Tag)
-        tagOutputPhase1 = earlierTag <$> tagOut1 <*> pure (5 :: Tag)
-        tagOutputPhase2 = earlierTag <$> tagOut2 <*> pure (5 :: Tag)
+
+        tagOuputPhase0 = earlierTag <$> tagOut0 <*> pure (5 :: Tag)
+        tagOuputPhase1 = earlierTag <$> tagOut1 <*> pure (5 :: Tag)
+        tagOuputPhase2 = earlierTag <$> tagOut2 <*> pure (5 :: Tag)
 
         enIn0 = input0HasData
         enIn1 = input1HasData
@@ -257,9 +258,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         output2Aktv = delay False (delay False (delay False (delay False (delay False p2))))
 
         output0 = bundle (output0Data, output0Aktv)
-        (_, output0Data) = unbundle (getMatchingTag <$> out0 <*> tagOutputPhase0 <*> (pure 0))
+        (_, output0Data) = unbundle (getMatchingTag <$> out0 <*> tagOuputPhase0 <*> (pure 0))
         output1 = bundle (output1Data, output1Aktv)
-        (_, output1Data) = unbundle (getMatchingTag <$> out1 <*> tagOutputPhase1 <*> (pure 0))
+        (_, output1Data) = unbundle (getMatchingTag <$> out1 <*> tagOuputPhase1 <*> (pure 0))
         output2 = bundle (output2Data, output2Aktv)
         (_, output2Data) = unbundle out2
 
@@ -278,8 +279,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         out2Data0 = getMatchingTag <$> out0 <*> (earlierTag <$> tagOut0 <*> pure (3 :: Tag)) <*> (pure 1)
         out2Data1 = sw0
 
-        sw0 = slidingWindow0 enSw0 sld0 (bundle (sw0Tag, sw0Data))
-        sw0Tag = earlierTag <$> tagSw0 <*> pure (3 :: Tag)
+        sw0 = slidingWindow0 enSw0 sld0 (bundle ((earlierTag <$> tagSw0 <*> pure (3 :: Tag)), sw0Data))
         sw0Data = bundle (sw0DataVal, sw0DataPacing)
         (_, sw0DataVal) = unbundle (getMatchingTag <$> out1 <*> (earlierTag <$> tagOut1 <*> pure (1 :: Tag)) <*> (pure 0))
 
@@ -370,7 +370,7 @@ slidingWindow0 en slide hasInputWithTag = window
 
 ---------------------------------------------------------------
 
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, (Bool, Bool, Bool), Bool, Tag, Tag, Tag, Tag, Tag, Tag))
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, (Bool, Bool, Bool), Bool))
 monitor inputs = bundle (outputs, debugSignals)
     where 
         (newEvent, event) = unbundle (hlc inputs)
@@ -383,12 +383,12 @@ monitor inputs = bundle (outputs, debugSignals)
         (llcOutput, llcDebug) = unbundle (llc (bundle (qPopValid, qPopData)))
         (toPop, outputs) = unbundle llcOutput
 
-        (llcPacings, llcSlides, tagIn0, tagIn1, tagOut0, tagOut1, tagOut2, tagSw0) = unbundle llcDebug
-        debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcPacings, llcSlides, tagIn0, tagIn1, tagOut0, tagOut1, tagOut2, tagSw0)
+        (llcPacings, llcSlides) = unbundle llcDebug
+        debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcPacings, llcSlides)
 
 
 ---------------------------------------------------------------
 
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, (Bool, Bool, Bool), Bool, Tag, Tag, Tag, Tag, Tag, Tag))
+    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, (Bool, Bool, Bool), Bool))
 topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en
