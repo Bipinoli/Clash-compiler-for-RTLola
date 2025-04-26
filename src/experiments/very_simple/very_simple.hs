@@ -272,16 +272,16 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         out1 = outputStream1 enOut1 out1Data0 out1Data1 
         out1Data0 = getMatchingTag <$> input1Win <*> (earlierTag <$> tagIn1 <*> pure (2 :: Tag)) <*> (pure 0)
-        out1Data1 = getMatchingTag <$> out0 <*> (earlierTag <$> tagOut0 <*> pure (1 :: Tag)) <*> (pure 0)
+        out1Data1 = getMatchingTag <$> out0 <*> (earlierTag <$> tagOut0 <*> pure (2 :: Tag)) <*> (pure 0)
 
         out2 = outputStream2 enOut2 out2Data0 out2Data1 
-        out2Data0 = getMatchingTag <$> out0 <*> (earlierTag <$> tagOut0 <*> pure (3 :: Tag)) <*> (pure 1)
+        out2Data0 = getMatchingTag <$> out0 <*> (earlierTag <$> tagOut0 <*> pure (4 :: Tag)) <*> (pure 1)
         out2Data1 = sw0
 
         sw0 = slidingWindow0 enSw0 sld0 (bundle (sw0Tag, sw0Data))
         sw0Tag = earlierTag <$> tagSw0 <*> pure (3 :: Tag)
         sw0Data = bundle (sw0DataVal, sw0DataPacing)
-        (_, sw0DataVal) = unbundle (getMatchingTag <$> out1 <*> (earlierTag <$> tagOut1 <*> pure (1 :: Tag)) <*> (pure 0))
+        (_, sw0DataVal) = unbundle (getMatchingTag <$> out1 <*> (earlierTag <$> tagOut1 <*> pure (3 :: Tag)) <*> (pure 0))
 
         debugSignals = bundle (pacings, slides, tagIn0, tagIn1, tagOut0, tagOut1, tagOut2, tagSw0)
 

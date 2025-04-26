@@ -41,27 +41,19 @@
             "sha256": "460702d8afc7479b65dad3acb826f56baf7e34f11fea519fb6f597a0c8340150"
         },
         {
-            "name": "topEntity_shim.cpp",
-            "sha256": "460702d8afc7479b65dad3acb826f56baf7e34f11fea519fb6f597a0c8340150"
-        },
-        {
-            "name": "topEntity_shim.cpp",
-            "sha256": "460702d8afc7479b65dad3acb826f56baf7e34f11fea519fb6f597a0c8340150"
-        },
-        {
             "name": "topEntity.sdc",
             "sha256": "5931af56eff7648c501fd106363fb26420b398eeea306d9edd80c5a89a153fc1"
         },
         {
             "name": "topEntity.v",
-            "sha256": "6a3905e60c864da2e262156af37e8f112d6cb28ed39c86fbe0ac6d18f1360cdb"
+            "sha256": "5ba83b4d2ce1d478aa596b5e25804a0d3d79aa9cd1c603565c8994d81f9f8217"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "d37c7c7e52ee5af41c6a1a8aa7f39368c92bbe4e1c5b5c48d8c3ec29da9db860",
+    "hash": "b74262d207c1e1902d2383b51c9df108e5f05e8a98573f75718a43db8f122d84",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [

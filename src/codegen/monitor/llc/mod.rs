@@ -265,44 +265,47 @@ fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
         .sliding_windows
         .iter()
         .enumerate()
-        .map(|(i, sw)| SlidingWindow {
-            idx: i.clone(),
-            input_data: match sw.target {
-                StreamReference::In(x) => format!("input{}Win", x.clone()),
-                StreamReference::Out(x) => format!("out{}", x.clone()),
-            },
-            input_data_default: match sw.target {
-                StreamReference::In(x) => datatypes::get_default_for_type(&ir.mir.inputs[x].ty),
-                StreamReference::Out(x) => datatypes::get_default_for_type(&ir.mir.outputs[x].ty),
-            },
-            input_memory_more_than_one: {
-                let node = match sw.target {
-                    StreamReference::In(x) => Node::InputStream(x.clone()),
-                    StreamReference::Out(x) => Node::OutputStream(x.clone()),
-                };
-                ir.required_memory.get(&node).unwrap().clone() > 1
-            },
-            tag: {
-                let node = Node::SlidingWindow(i.clone());
-                let level = hardware_ir::find_level(&node, &ir.evaluation_order);
-                if level > 0 {
-                    format!("earlierTag <$> tagSw{} <*> pure ({} :: Tag)", i.clone(), level)
-                } else {
-                    format!("tagSw{}", i)
-                }
-            },
-            source_tag: {
-                let source_node = match sw.target {
-                    StreamReference::In(x) => Node::InputStream(x.clone()),
-                    StreamReference::Out(x) => Node::OutputStream(x.clone()),
-                };
-               let tag = match sw.target {
-                    StreamReference::In(x) => format!("tagIn{}", x.clone()),
-                    StreamReference::Out(x) => format!("tagOut{}", x.clone()),
-               };
-               let dist = hardware_ir::level_distance(&source_node, &Node::SlidingWindow(i.clone()), &ir.evaluation_order).abs() as usize;
-                format!("(earlierTag <$> {} <*> pure ({} :: Tag))", tag, dist)
-            },
+        .map(|(i, sw)| {
+            let node = Node::SlidingWindow(i.clone());
+            SlidingWindow {
+                idx: i.clone(),
+                input_data: match sw.target {
+                    StreamReference::In(x) => format!("input{}Win", x.clone()),
+                    StreamReference::Out(x) => format!("out{}", x.clone()),
+                },
+                input_data_default: match sw.target {
+                    StreamReference::In(x) => datatypes::get_default_for_type(&ir.mir.inputs[x].ty),
+                    StreamReference::Out(x) => {
+                        datatypes::get_default_for_type(&ir.mir.outputs[x].ty)
+                    }
+                },
+                input_memory_more_than_one: {
+                    let node = match sw.target {
+                        StreamReference::In(x) => Node::InputStream(x.clone()),
+                        StreamReference::Out(x) => Node::OutputStream(x.clone()),
+                    };
+                    ir.required_memory.get(&node).unwrap().clone() > 1
+                },
+                tag: {
+                    let level = hardware_ir::find_level(&node, &ir.evaluation_order);
+                    if level > 0 {
+                        format!(
+                            "earlierTag <$> tagSw{} <*> pure ({} :: Tag)",
+                            i.clone(),
+                            level
+                        )
+                    } else {
+                        format!("tagSw{}", i)
+                    }
+                },
+                source_tag: {
+                    let source_node = match sw.target {
+                        StreamReference::In(x) => Node::InputStream(x.clone()),
+                        StreamReference::Out(x) => Node::OutputStream(x.clone()),
+                    };
+                    get_source_tag(&node, &source_node, ir)
+                },
+            }
         })
         .collect()
 }
@@ -354,15 +357,7 @@ fn get_dependencies_from_expression(
                 StreamReference::In(x) => Node::InputStream(x.clone()),
                 StreamReference::Out(x) => Node::OutputStream(x.clone()),
             };
-            let source_tag = {
-                let dist = hardware_ir::level_distance(&node, &source_node, &ir.evaluation_order)
-                    .abs() as usize;
-                let tag = match source {
-                    StreamReference::In(x) => format!("tagIn{}", x.clone()),
-                    StreamReference::Out(x) => format!("tagOut{}", x.clone()),
-                };
-                format!("(earlierTag <$> {} <*> pure ({} :: Tag))", tag, dist)
-            };
+            let source_tag = get_source_tag(&node, &source_node, ir);
             let memory_more_than_one = match source {
                 StreamReference::In(x) => {
                     ir.required_memory
@@ -627,4 +622,14 @@ pub fn get_all_tags_types(ir: &HardwareIR) -> String {
     vec![&inputs[..], &outputs[..], &slidings[..]]
         .concat()
         .join(", ")
+}
+
+fn get_source_tag(node: &Node, source_node: &Node, ir: &HardwareIR) -> String {
+    let node_level = hardware_ir::find_level(&node, &ir.evaluation_order);
+    let tag = match &source_node {
+        Node::InputStream(x) => format!("tagIn{}", x.clone()),
+        Node::OutputStream(x) => format!("tagOut{}", x.clone()),
+        _ => unreachable!(),
+    };
+    format!("(earlierTag <$> {} <*> pure ({} :: Tag))", tag, node_level)
 }
