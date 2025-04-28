@@ -21,7 +21,7 @@ struct Data {
     max_tag: usize,
     has_pipeline_wait: bool,
     has_sliding_window: bool,
-    inputs: Vec<()>,
+    inputs: Vec<Input>,
     outputs: Vec<Output>,
     sliding_windows: Vec<SlidingWindow>,
     tags: Vec<String>,
@@ -30,7 +30,15 @@ struct Data {
     pacings_type: String,
     slides_type: String,
     all_tags_names: String,
-    all_tags_types: String,
+    all_tags_defaults: String,
+    cur_tags_levels: Vec<CurTagsLevel>,
+    output_level: usize,
+    extracted_tags_for_outputs: String,
+}
+
+#[derive(Serialize)]
+struct Input {
+    default_value: String,
 }
 
 #[derive(Serialize)]
@@ -39,6 +47,8 @@ struct Output {
     default_value: String,
     memory_more_than_one: bool,
     deps: Vec<Dependency>,
+    level: usize,
+    extracted_tags_of_depending: String,
 }
 
 #[derive(Serialize)]
@@ -49,9 +59,17 @@ struct SlidingWindow {
     input_memory_more_than_one: bool,
     tag: String,
     source_tag: String,
+    level: usize,
+    extracted_tags_of_depending: String,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize)]
+struct CurTagsLevel {
+    level: usize,
+    delayed_tags: String,
+}
+
+#[derive(Serialize, Debug, Clone)]
 struct Dependency {
     is_offset_access: bool,
     is_sync_access: bool,
@@ -77,7 +95,7 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         max_tag: get_max_tag(ir),
         has_pipeline_wait: ir.pipeline_wait > 0,
         has_sliding_window: ir.mir.sliding_windows.len() > 0,
-        inputs: ir.mir.inputs.iter().map(|_| ()).collect(),
+        inputs: get_inputs(ir),
         outputs: get_outputs(ir),
         sliding_windows: get_sliding_windows(ir),
         tags: get_tags(ir),
@@ -86,7 +104,10 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         pacings_type: get_pacings_type(ir),
         slides_type: get_slides_type(ir),
         all_tags_names: get_all_tags_names(ir),
-        all_tags_types: get_all_tags_types(ir),
+        all_tags_defaults: get_all_tags_defaults(ir),
+        cur_tags_levels: get_cur_tags_levels(ir),
+        output_level: ir.evaluation_order.len(),
+        extracted_tags_for_outputs: get_extracted_tags_for_outputs(ir),
     };
     match handlebars.render("llc", &data) {
         Ok(result) => Some(result),
@@ -103,12 +124,9 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
 ///     "tagOut0 = genTag p0",
 ///     "tagSw0 = genTag p1",
 ///     "tagOut1 = genTag p1",
-///     "tagOutputPhase0 = earlierTag <$> tagOut0 <*> pure (4 :: Tag)",
-///     "tagOutputPhase1 = earlierTag <$> tagOut1 <*> pure (4 :: Tag)",
 /// ]
 fn get_tags(ir: &HardwareIR) -> Vec<String> {
-    let stream_tags: Vec<String> = ir
-        .evaluation_order
+    ir.evaluation_order
         .iter()
         .map(|order| {
             order.iter().map(move |nd| match nd {
@@ -120,23 +138,7 @@ fn get_tags(ir: &HardwareIR) -> Vec<String> {
             })
         })
         .flatten()
-        .collect();
-    let total_eval_layers = ir.evaluation_order.len();
-    let output_phase_tags: Vec<String> = ir
-        .mir
-        .outputs
-        .iter()
-        .enumerate()
-        .map(|(i, _)| {
-            format!(
-                "tagOutputPhase{} = earlierTag <$> tagOut{} <*> pure ({} :: Tag)",
-                i,
-                i,
-                total_eval_layers.clone()
-            )
-        })
-        .collect();
-    vec![&stream_tags[..], &output_phase_tags[..]].concat()
+        .collect()
 }
 
 /// Example:
@@ -151,7 +153,7 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
     ir.evaluation_order
         .iter()
         .enumerate()
-        .map(|(i, order)| {
+        .map(|(level, order)| {
             order
                 .iter()
                 .map(move |nd| {
@@ -197,24 +199,24 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
                             format!(
                                 "{} = {}",
                                 name1,
-                                surround_with_delay(i, "False".to_string(), pacing1)
+                                surround_with_delay(level + 1, "False".to_string(), pacing1)
                             ),
                             format!(
                                 "{} = {}",
                                 name2,
-                                surround_with_delay(i, "False".to_string(), pacing2)
+                                surround_with_delay(level + 1, "False".to_string(), pacing2)
                             ),
                             format!(
                                 "{} = {}",
                                 name3,
-                                surround_with_delay(i, "False".to_string(), pacing3)
+                                surround_with_delay(level + 1, "False".to_string(), pacing3)
                             ),
                         ]
                     } else {
                         vec![format!(
                             "{} = {}",
                             name1,
-                            surround_with_delay(i, "False".to_string(), pacing1)
+                            surround_with_delay(level + 1, "False".to_string(), pacing1)
                         )]
                     }
                 })
@@ -239,7 +241,11 @@ fn get_output_phase_enables(ir: &HardwareIR) -> Vec<String> {
             format!(
                 "output{}Aktv = {}",
                 i.clone(),
-                surround_with_delay(eval_levels, "False".to_string(), format!("p{}", i.clone()))
+                surround_with_delay(
+                    eval_levels + 1,
+                    "False".to_string(),
+                    format!("p{}", i.clone())
+                )
             )
         })
         .collect()
@@ -267,6 +273,7 @@ fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
         .enumerate()
         .map(|(i, sw)| {
             let node = Node::SlidingWindow(i.clone());
+            let level = hardware_ir::find_level(&node, &ir.evaluation_order);
             SlidingWindow {
                 idx: i.clone(),
                 input_data: match sw.target {
@@ -288,15 +295,7 @@ fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
                 },
                 tag: {
                     let level = hardware_ir::find_level(&node, &ir.evaluation_order);
-                    if level > 0 {
-                        format!(
-                            "earlierTag <$> tagSw{} <*> pure ({} :: Tag)",
-                            i.clone(),
-                            level
-                        )
-                    } else {
-                        format!("tagSw{}", i)
-                    }
+                    format!("level{}TagSw{}", level, i.clone())
                 },
                 source_tag: {
                     let source_node = match sw.target {
@@ -305,7 +304,21 @@ fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
                     };
                     get_source_tag(&node, &source_node, ir)
                 },
+                level: level.clone(),
+                extracted_tags_of_depending: get_extracted_tags_for_sliding_window(
+                    &node, level, ir,
+                ),
             }
+        })
+        .collect()
+}
+
+fn get_inputs(ir: &HardwareIR) -> Vec<Input> {
+    ir.mir
+        .inputs
+        .iter()
+        .map(|inpt| Input {
+            default_value: datatypes::get_default_for_type(&inpt.ty),
         })
         .collect()
 }
@@ -315,16 +328,9 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
         .outputs
         .iter()
         .enumerate()
-        .map(|(i, out)| Output {
-            idx: i,
-            default_value: datatypes::get_default_for_type(&out.ty),
-            memory_more_than_one: ir
-                .required_memory
-                .get(&Node::OutputStream(i.clone()))
-                .unwrap()
-                .clone()
-                > 1,
-            deps: {
+        .map(|(i, out)| {
+            let node = Node::OutputStream(i.clone());
+            let deps: Vec<Dependency> = {
                 let mut deps = get_dependencies_from_expression(
                     Node::OutputStream(i),
                     &out.eval.clauses.first().unwrap().expression,
@@ -332,7 +338,16 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
                 );
                 order_dependencies_according_to_access_list(&mut deps, out);
                 deps
-            },
+            };
+            let level = hardware_ir::find_level(&Node::OutputStream(i), &ir.evaluation_order);
+            Output {
+                idx: i,
+                default_value: datatypes::get_default_for_type(&out.ty),
+                memory_more_than_one: ir.required_memory.get(&node).unwrap().clone() > 1,
+                deps: deps.clone(),
+                level: level.clone(),
+                extracted_tags_of_depending: get_extracted_tags_of_dependencies(deps, level, ir),
+            }
         })
         .collect()
 }
@@ -583,7 +598,7 @@ fn get_max_offset(ir: &HardwareIR) -> usize {
         .unwrap_or(0)
 }
 
-pub fn get_all_tags_names(ir: &HardwareIR) -> String {
+fn get_all_tags_names(ir: &HardwareIR) -> String {
     let inputs: Vec<String> = ir
         .mir
         .inputs
@@ -605,31 +620,175 @@ pub fn get_all_tags_names(ir: &HardwareIR) -> String {
         .enumerate()
         .map(|(i, _)| format!("tagSw{}", i.clone()))
         .collect();
-    vec![&inputs[..], &outputs[..], &slidings[..]]
-        .concat()
-        .join(", ")
+    let all_tags: Vec<String> = vec![&inputs[..], &outputs[..], &slidings[..]].concat();
+    if all_tags.len() > 1 {
+        format!("bundle ({})", all_tags.join(", "))
+    } else {
+        format!("{}", all_tags.join(", "))
+    }
 }
 
-pub fn get_all_tags_types(ir: &HardwareIR) -> String {
-    let inputs: Vec<String> = ir.mir.inputs.iter().map(|_| "Tag".to_string()).collect();
-    let outputs: Vec<String> = ir.mir.outputs.iter().map(|_| "Tag".to_string()).collect();
+pub fn get_all_tags_defaults(ir: &HardwareIR) -> String {
+    let inputs: Vec<String> = ir
+        .mir
+        .inputs
+        .iter()
+        .map(|_| "invalidTag".to_string())
+        .collect();
+    let outputs: Vec<String> = ir
+        .mir
+        .outputs
+        .iter()
+        .map(|_| "invalidTag".to_string())
+        .collect();
     let slidings: Vec<String> = ir
         .mir
         .sliding_windows
         .iter()
-        .map(|_| "Tag".to_string())
+        .map(|_| "invalidTag".to_string())
         .collect();
-    vec![&inputs[..], &outputs[..], &slidings[..]]
-        .concat()
-        .join(", ")
+    let all_defaults = vec![&inputs[..], &outputs[..], &slidings[..]].concat();
+    if all_defaults.len() > 1 {
+        format!("({})", all_defaults.join(", "))
+    } else {
+        format!("{}", all_defaults.join(", "))
+    }
 }
 
 fn get_source_tag(node: &Node, source_node: &Node, ir: &HardwareIR) -> String {
     let node_level = hardware_ir::find_level(&node, &ir.evaluation_order);
-    let tag = match &source_node {
-        Node::InputStream(x) => format!("tagIn{}", x.clone()),
-        Node::OutputStream(x) => format!("tagOut{}", x.clone()),
+    match &source_node {
+        Node::InputStream(x) => format!("level{}TagIn{}", node_level.clone(), x.clone()),
+        Node::OutputStream(x) => format!("level{}TagOut{}", node_level.clone(), x.clone()),
+        _ => unreachable!(),
+    }
+}
+
+fn get_cur_tags_levels(ir: &HardwareIR) -> Vec<CurTagsLevel> {
+    ir.evaluation_order
+        .iter()
+        .enumerate()
+        .map(|(level, _)| CurTagsLevel {
+            level: level + 1,
+            delayed_tags: surround_with_delay(
+                level + 1,
+                "tagsDefault".to_string(),
+                "curTags".to_string(),
+            ),
+        })
+        .collect()
+}
+
+/// Example:
+/// (_, _, _, level1TagOut1, _, _) = unbundle curTagsLevel1
+fn get_extracted_tags_of_dependencies(
+    deps: Vec<Dependency>,
+    level: usize,
+    ir: &HardwareIR,
+) -> String {
+    let extracted: Vec<String> = get_all_streams(ir)
+        .iter()
+        .map(|node| {
+            let dep = deps.iter().find(|&dep| dep.source_node == *node);
+            match dep {
+                Some(d) => {
+                    if d.memory_more_than_one {
+                        match d.source_node {
+                            Node::InputStream(x) => format!("level{}TagIn{}", level, x),
+                            Node::OutputStream(x) => format!("level{}TagOut{}", level, x),
+                            Node::SlidingWindow(x) => format!("level{}TagSw{}", level, x),
+                        }
+                    } else {
+                        "_".to_string()
+                    }
+                }
+                None => "_".to_string(),
+            }
+        })
+        .collect();
+    if extracted.len() > 1 {
+        format!(
+            "({}) = unbundle curTagsLevel{}",
+            extracted.join(", "),
+            level
+        )
+    } else {
+        format!("{} = curTagsLevel{}", extracted.join(", "), level)
+    }
+}
+
+fn get_extracted_tags_for_sliding_window(node: &Node, level: usize, ir: &HardwareIR) -> String {
+    let deps: Vec<Node> = match node {
+        Node::SlidingWindow(x) => {
+            let dep = Node::from_stream(&ir.mir.sliding_windows[x.clone()].target);
+            vec![node.clone(), dep]
+        }
         _ => unreachable!(),
     };
-    format!("(earlierTag <$> {} <*> pure ({} :: Tag))", tag, node_level)
+    let extracted: Vec<String> = get_all_streams(ir)
+        .iter()
+        .map(|node| {
+            let dep = deps.iter().find(|&dep| *dep == *node);
+            match dep {
+                Some(d) => match d {
+                    Node::InputStream(x) => format!("level{}TagIn{}", level, x),
+                    Node::OutputStream(x) => format!("level{}TagOut{}", level, x),
+                    Node::SlidingWindow(x) => format!("level{}TagSw{}", level, x),
+                },
+                None => "_".to_string(),
+            }
+        })
+        .collect();
+    format!(
+        "({}) = unbundle curTagsLevel{}",
+        extracted.join(", "),
+        level
+    )
+}
+
+fn get_all_streams(ir: &HardwareIR) -> Vec<Node> {
+    let inputs: Vec<Node> = ir
+        .mir
+        .inputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| Node::InputStream(i.clone()))
+        .collect();
+    let outputs: Vec<Node> = ir
+        .mir
+        .outputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| Node::OutputStream(i.clone()))
+        .collect();
+    let slidings: Vec<Node> = ir
+        .mir
+        .sliding_windows
+        .iter()
+        .enumerate()
+        .map(|(i, _)| Node::SlidingWindow(i.clone()))
+        .collect();
+    [&inputs[..], &outputs[..], &slidings[..]].concat()
+}
+
+fn get_extracted_tags_for_outputs(ir: &HardwareIR) -> String {
+    let level = ir.evaluation_order.len();
+    let extracted: Vec<String> = get_all_streams(ir)
+        .iter()
+        .map(|node| match node {
+            Node::OutputStream(x) => {
+                format!("level{}TagOut{}", level.clone(), x)
+            }
+            _ => "_".to_string(),
+        })
+        .collect();
+    if extracted.len() > 1 {
+        format!(
+            "({}) = unbundle curTagsLevel{}",
+            extracted.join(", "),
+            level
+        )
+    } else {
+        format!("{} = curTagsLevel{}", extracted.join(", "), level)
+    }
 }

@@ -27,17 +27,6 @@ module testbench;
     {{#each sliding_windows}}
     wire slide_{{@index}};
     {{/each}}
-
-    {{#each inputs}}
-    wire signed [7:0] tag_in_{{@index}};
-    {{/each}}
-    {{#each outputs}}
-    wire signed [7:0] tag_out_{{@index}};
-    {{/each}}
-    {{#each sliding_windows}}
-    wire signed [7:0] tag_sw_{{@index}};
-    {{/each}}
-
     {{/if}}
     
 
@@ -57,15 +46,6 @@ module testbench;
                             {{#each sliding_windows}}
                         ,slide_{{@index}}
                             {{/each}}
-                        {{#each inputs}}
-                        ,tag_in_{{@index}}
-                        {{/each}}
-                        {{#each outputs}}
-                        ,tag_out_{{@index}}
-                        {{/each}}
-                        {{#each sliding_windows}}
-                        ,tag_sw_{{@index}}
-                        {{/each}}
                         {{/if}}
                        );
 

@@ -31,9 +31,9 @@ earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBe
 
 {{#if debug}}
     {{#if has_sliding_window}}
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), ({{pacings_type}}, {{slides_type}}, {{all_tags_types}}))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), ({{pacings_type}}, {{slides_type}}))
     {{else}}
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), ({{pacings_type}}, {{all_tags_types}}))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), ({{pacings_type}}))
     {{/if}}
 llc event = bundle (bundle (toPop, outputs), debugSignals)
 {{else}}
@@ -62,7 +62,7 @@ llc event = bundle (toPop, outputs)
         input0 = inputs
         {{/if}}
         {{#each inputs}}
-        (input{{@index}}Data, input{{@index}}HasData) = unbundle input{{@index}}
+        (_, input{{@index}}HasData) = unbundle input{{@index}}
         {{/each}}
         {{#if has_sliding_window}}
             {{#if (gt (len sliding_windows) 1)}}
@@ -77,14 +77,20 @@ llc event = bundle (toPop, outputs)
         p0 = pacings
         {{/if}}
 
-        {{#if (gt (len outputs) 1)}}
-        outputs = bundle ({{#each outputs}}output{{this.idx}}{{#unless @last}}, {{/unless}}{{/each}})
-        {{else}}
-        outputs = output0
-        {{/if}}
-
         {{#each tags}}
         {{{this}}}
+        {{/each}}
+
+        -- tag generation takes 1 cycle so we need to delay the input data
+        {{#each inputs}}
+        (input{{@index}}Data, _) = unbundle (delay ({{this.default_value}}, False) input{{@index}})
+        {{/each}}
+
+        -- delayed tags to be used in different levels 
+        tagsDefault = {{all_tags_defaults}}
+        curTags = {{all_tags_names}}
+        {{#each cur_tags_levels}}
+        curTagsLevel{{this.level}} = {{this.delayed_tags}}
         {{/each}}
 
         {{#each enables}}
@@ -95,20 +101,14 @@ llc event = bundle (toPop, outputs)
         {{{this}}}
         {{/each}}
 
-        {{#each outputs}}
-        output{{this.idx}} = bundle (output{{this.idx}}Data, output{{this.idx}}Aktv)
-        {{#if this.memory_more_than_one}}
-        (_, output{{this.idx}}Data) = unbundle (getMatchingTag <$> out{{this.idx}} <*> tagOutputPhase{{@index}} <*> (pure {{this.default_value}}))
-        {{else}}
-        (_, output{{this.idx}}Data) = unbundle out{{this.idx}}
-        {{/if}}
-        {{/each}}
-
+        -- level 0
         {{#each inputs}}
         input{{@index}}Win = input{{@index}}Window enIn{{@index}} (bundle (tagIn{{@index}}, input{{@index}}Data))
         {{/each}}
 
         {{#each outputs}}
+        -- level {{this.level}}
+        {{{this.extracted_tags_of_depending}}}
         out{{this.idx}} = outputStream{{this.idx}} enOut{{this.idx}} {{#each this.deps}}out{{../idx}}Data{{@index}} {{/each}}
         {{#each this.deps}}
         {{#if (or this.is_sync_access this.is_sliding_window_access)}}
@@ -129,8 +129,9 @@ llc event = bundle (toPop, outputs)
 
         {{/each}}
         {{#each sliding_windows}}
-        sw{{this.idx}} = slidingWindow{{this.idx}} enSw{{this.idx}} sld{{this.idx}} (bundle (sw{{this.idx}}Tag, sw{{this.idx}}Data))
-        sw{{this.idx}}Tag = {{{this.tag}}}
+        -- level {{this.level}}
+        {{{this.extracted_tags_of_depending}}}
+        sw{{this.idx}} = slidingWindow{{this.idx}} enSw{{this.idx}} sld{{this.idx}} (bundle ({{this.tag}}, sw{{this.idx}}Data))
         sw{{this.idx}}Data = bundle (sw{{this.idx}}DataVal, sw{{this.idx}}DataPacing)
         {{#if this.input_memory_more_than_one}}
         (_, sw{{this.idx}}DataVal) = unbundle (getMatchingTag <$> {{this.input_data}} <*> {{{this.source_tag}}} <*> (pure {{this.input_data_default}}))
@@ -139,11 +140,28 @@ llc event = bundle (toPop, outputs)
         {{/if}}
 
         {{/each}}
+        -- level {{output_level}}
+        {{{extracted_tags_for_outputs}}}
+        {{#each outputs}}
+        output{{this.idx}} = bundle (output{{this.idx}}Data, output{{this.idx}}Aktv)
+        {{#if this.memory_more_than_one}}
+        (_, output{{this.idx}}Data) = unbundle (getMatchingTag <$> out{{this.idx}} <*> level{{../output_level}}TagOut{{@index}} <*> (pure {{this.default_value}}))
+        {{else}}
+        (_, output{{this.idx}}Data) = unbundle out{{this.idx}}
+        {{/if}}
+        {{/each}}
+
+        {{#if (gt (len outputs) 1)}}
+        outputs = bundle ({{#each outputs}}output{{this.idx}}{{#unless @last}}, {{/unless}}{{/each}})
+        {{else}}
+        outputs = output0
+        {{/if}}
+
         {{#if debug}}
             {{#if has_sliding_window}}
-        debugSignals = bundle (pacings, slides, {{all_tags_names}})
+        debugSignals = bundle (pacings, slides)
             {{else}}
-        debugSignals = bundle (pacings, {{all_tags_names}})
+        debugSignals = bundle (pacings)
             {{/if}}
         {{/if}}
 

@@ -23,7 +23,7 @@ pub enum Node {
     SlidingWindow(usize),
 }
 impl Node {
-    fn from_stream(stream_ref: &StreamReference) -> Node {
+    pub fn from_stream(stream_ref: &StreamReference) -> Node {
         match stream_ref {
             StreamReference::In(x) => Node::InputStream(x.clone()),
             StreamReference::Out(x) => Node::OutputStream(x.clone()),
