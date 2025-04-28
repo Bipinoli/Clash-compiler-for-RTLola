@@ -27,12 +27,19 @@ module testbench;
     wire pacing_2;
     wire slide_0;
 
+    wire signed [7:0] sw_t;
+    wire signed [63:0] sw_v1;
+    wire signed [63:0] sw_v2;
+    wire signed [63:0] sw_v3;
+    
+    wire signed [7:0] out_0_t1;
+
     wire signed [7:0] tag_in_0;
-    wire signed [7:0] tag_in_1;
-    wire signed [7:0] tag_out_0;
-    wire signed [7:0] tag_out_1;
-    wire signed [7:0] tag_out_2;
-    wire signed [7:0] tag_sw_0;
+    wire signed [63:0] out_0_v1;
+    wire signed [7:0] out_0_t2;
+    wire signed [63:0] out_0_v2;
+    wire signed [7:0] out_0_t3;
+    wire signed [63:0] out_0_v3;
 
     
 
@@ -49,11 +56,13 @@ module testbench;
                         ,pacing_2
                         ,slide_0
                         ,tag_in_0
-                        ,tag_in_1
-                        ,tag_out_0
-                        ,tag_out_1
-                        ,tag_out_2
-                        ,tag_sw_0
+                        ,sw_t, sw_v1, sw_v2, sw_v3
+                        ,out_0_t1
+                        ,out_0_v1
+                        ,out_0_t2
+                        ,out_0_v2
+                        ,out_0_t3
+                        ,out_0_v3
                        );
 
     always begin
