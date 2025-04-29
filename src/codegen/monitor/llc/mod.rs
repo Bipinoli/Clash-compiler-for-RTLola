@@ -1,4 +1,5 @@
 use std::cmp::max;
+use std::fmt::format;
 
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
@@ -503,6 +504,7 @@ fn get_dependencies_from_expression(
                 acc
             })
             .unwrap(),
+        ExpressionKind::LoadConstant(_) => Vec::new(),
         _ => unimplemented!(),
     }
 }
@@ -539,6 +541,9 @@ fn get_default_value(expr: &Expression) -> String {
         ExpressionKind::LoadConstant(x) => match x {
             Constant::Int(x) => format!("{}", x),
             _ => unimplemented!(),
+        },
+        ExpressionKind::ArithLog(_, _) => {
+            "0".to_string()
         },
         _ => unimplemented!(),
     }

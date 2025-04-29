@@ -1,0 +1,8 @@
+#!/usr/bin/expect -f
+
+spawn stack exec -- clashi spec.hs
+
+expect "clashi> "
+send ":verilog\r"
+
+expect "clashi> "

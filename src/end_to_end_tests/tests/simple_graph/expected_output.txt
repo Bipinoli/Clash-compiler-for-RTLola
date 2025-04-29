@@ -1,0 +1,11 @@
+[0.004500000][Output][d][Value] = 8
+[0.005000000][Input][x][Value] = 5
+[0.005000000][Output][a][Value] = 13
+[0.005000000][Output][b][Value] = 14
+[0.005000000][Output][c][Value] = 10
+[0.005000000][Output][d][Value] = 11
+[0.000600000][Input][x][Value] = 6
+[0.000600000][Output][a][Value] = 17
+[0.000600000][Output][b][Value] = 18
+[0.000600000][Output][c][Value] = 14
+[0.000600000][Output][d][Value] = 15
