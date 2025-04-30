@@ -269,7 +269,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         input1Win = input1Window enIn1 (bundle (tagIn1, input1Data))
 
         -- level 1
-        (_, _, _, level1TagOut1, _, _) = unbundle curTagsLevel1
+        (level1TagIn0, _, _, level1TagOut1, _, _) = unbundle curTagsLevel1
         out0 = outputStream0 enOut0 out0Data0 out0Data1 
         out0Data0 = input0Win
         out0Data1 = getOffset <$> out1 <*> level1TagOut1 <*> (pure 3) <*> (pure 2)
@@ -281,7 +281,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         out1Data1 = getMatchingTag <$> out0 <*> level2TagOut0 <*> (pure 0)
 
         -- level 4
-        (_, _, level4TagOut0, _, _, _) = unbundle curTagsLevel4
+        (_, _, level4TagOut0, _, _, level4TagSw0) = unbundle curTagsLevel4
         out2 = outputStream2 enOut2 out2Data0 out2Data1 
         out2Data0 = getMatchingTag <$> out0 <*> level4TagOut0 <*> (pure 1)
         out2Data1 = sw0

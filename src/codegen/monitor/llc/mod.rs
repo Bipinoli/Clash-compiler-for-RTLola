@@ -21,6 +21,7 @@ struct Data {
     streams: String,
     max_tag: usize,
     has_pipeline_wait: bool,
+    pipeline_wait: usize,
     has_sliding_window: bool,
     inputs: Vec<Input>,
     outputs: Vec<Output>,
@@ -95,6 +96,7 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         streams: streams::render(ir, handlebars).unwrap(),
         max_tag: get_max_tag(ir),
         has_pipeline_wait: ir.pipeline_wait > 0,
+        pipeline_wait: ir.pipeline_wait,
         has_sliding_window: ir.mir.sliding_windows.len() > 0,
         inputs: get_inputs(ir),
         outputs: get_outputs(ir),
@@ -697,7 +699,7 @@ fn get_extracted_tags_of_dependencies(
             let dep = deps.iter().find(|&dep| dep.source_node == *node);
             match dep {
                 Some(d) => {
-                    if d.memory_more_than_one {
+                    if d.memory_more_than_one || true {
                         match d.source_node {
                             Node::InputStream(x) => format!("level{}TagIn{}", level, x),
                             Node::OutputStream(x) => format!("level{}TagOut{}", level, x),

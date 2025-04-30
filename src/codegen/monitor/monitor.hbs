@@ -137,7 +137,7 @@ monitor inputs = outputs
         (llcPacings, llcSlides) = unbundle llcDebug
         debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcPacings, llcSlides)
         {{else}}
-        (llcTag, llcPacings) = unbundle llcDebug
+        llcPacings = llcDebug
         debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcPacings)
         {{/if}}
         {{else}}

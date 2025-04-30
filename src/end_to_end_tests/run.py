@@ -27,7 +27,7 @@ def read_expected_output(test_dir):
 
 def read_actual_output(test_dir):
     def parse(line):
-            pattern = r'Time (\d+): Active outputs: \((\d+), (\d+), (\d+)\), Outputs: \((\d+), (\d+), (\d+)\)'
+            pattern = r'Time (\d+): Active outputs: \(([^)]+)\), Outputs: \(([^)]+)\)'
             match = re.match(pattern, line)
             if match:
                 groups = match.groups()
@@ -40,13 +40,12 @@ def read_actual_output(test_dir):
         actual = list(filter(lambda data: len(data) > 0, actual))
         grouped = []
         for data in actual:
-            num_outputs = (len(data) - 1) // 2
+            has_output = list(data[1].split(', '))
+            output = list(data[2].split(', '))
             group = []
-            for i in range(num_outputs):
-                has_output = data[i + 1]
-                value = data[i + 1 + num_outputs]
-                if has_output == "1":
-                    group.append(value)
+            for i in range(len(has_output)):
+                if has_output[i] == '1':
+                    group.append(output[i])
             grouped.append(group)
         return grouped
 

@@ -161,7 +161,7 @@ llc event = bundle (toPop, outputs)
             {{#if has_sliding_window}}
         debugSignals = bundle (pacings, slides)
             {{else}}
-        debugSignals = bundle (pacings)
+        debugSignals = pacings
             {{/if}}
         {{/if}}
 

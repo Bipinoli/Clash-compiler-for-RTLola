@@ -21,9 +21,9 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- x, y, a, b, e
+-- x, y, a, e, b
 -- sw(x,f), c
--- f, d
+-- d, f
 -- sw(d,h), g
 -- h
 
@@ -31,22 +31,22 @@ import Clash.Prelude
 -- window x = 2
 -- window y = 1
 -- window a = 1
--- window b = 1
 -- window e = 1
+-- window b = 1
 -- window sw(x,f) = 1
 -- window c = 1
--- window f = 1
 -- window d = 1
+-- window f = 1
 -- window sw(d,h) = 1
 -- window g = 1
 -- window h = 1
 
 -- Pipeline Visualization
--- x,y,a,b,e |           |           | x,y,a,b,e |           |           | x,y,a,b,e |           |           | x,y,a,b,e
+-- x,y,a,e,b |           |           | x,y,a,e,b |           |           | x,y,a,e,b |           |           | x,y,a,e,b
 -- ---------------------------------------------------------------------------------------------------------------------
 --           | sw(x,f),c |           |           | sw(x,f),c |           |           | sw(x,f),c |           |          
 -- ---------------------------------------------------------------------------------------------------------------------
---           |           | f,d       |           |           | f,d       |           |           | f,d       |          
+--           |           | d,f       |           |           | d,f       |           |           | d,f       |          
 -- ---------------------------------------------------------------------------------------------------------------------
 --           |           |           | sw(d,h),g |           |           | sw(d,h),g |           |           | sw(d,h),g
 -- ---------------------------------------------------------------------------------------------------------------------
@@ -269,12 +269,12 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tagIn0 = genTag input0HasData
         tagIn1 = genTag input1HasData
         tagOut0 = genTag p0
-        tagOut1 = genTag p1
         tagOut4 = genTag p4
+        tagOut1 = genTag p1
         tagSw0 = genTag p0
         tagOut2 = genTag p2
-        tagOut5 = genTag p5
         tagOut3 = genTag p3
+        tagOut5 = genTag p5
         tagSw1 = genTag p1
         tagOut6 = genTag p6
         tagOut7 = genTag p7
@@ -295,14 +295,14 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enIn0 = delay False input0HasData
         enIn1 = delay False input1HasData
         enOut0 = delay False p0
-        enOut1 = delay False p1
         enOut4 = delay False p4
+        enOut1 = delay False p1
         enSw0 = delay False (delay False slide0 .||. p5)
         sld0 = delay False (delay False slide0)
         sw0DataPacing = delay False (delay False input0HasData)
         enOut2 = delay False (delay False p2)
-        enOut5 = delay False (delay False (delay False p5))
         enOut3 = delay False (delay False (delay False p3))
+        enOut5 = delay False (delay False (delay False p5))
         enSw1 = delay False (delay False (delay False (delay False slide1 .||. p7)))
         sld1 = delay False (delay False (delay False (delay False slide1)))
         sw1DataPacing = delay False (delay False (delay False (delay False p3)))
@@ -323,7 +323,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         input1Win = input1Window enIn1 (bundle (tagIn1, input1Data))
 
         -- level 0
-        (level0TagIn0, _, _, _, _, _, _, _, _, _, _, _) = unbundle curTagsLevel0
+        (level0TagIn0, _, _, _, _, level0TagOut3, _, _, _, _, _, _) = unbundle curTagsLevel0
         out0 = outputStream0 enOut0 out0Data0 out0Data1 
         out0Data0 = getOffset <$> input0Win <*> level0TagIn0 <*> (pure 1) <*> (pure 0)
         out0Data1 = getOffsetFromNonVec <$> out3 <*> level0TagOut3 <*> (pure 1) <*> (pure 11)
@@ -334,7 +334,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         out1Data0 = getOffset <$> input0Win <*> level0TagIn0 <*> (pure 2) <*> (pure 100)
 
         -- level 1
-        (level1TagIn0, _, _, _, _, _, _, _, _, _, _, _) = unbundle curTagsLevel1
+        (level1TagIn0, level1TagIn1, level1TagOut0, level1TagOut1, _, _, _, _, _, _, _, _) = unbundle curTagsLevel1
         out2 = outputStream2 enOut2 out2Data0 out2Data1 out2Data2 out2Data3 
         out2Data0 = getMatchingTag <$> input0Win <*> level1TagIn0 <*> (pure 0)
         out2Data1 = input1Win
@@ -342,30 +342,30 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         out2Data3 = out1
 
         -- level 2
-        (_, _, _, _, _, _, _, _, _, _, _, _) = unbundle curTagsLevel2
+        (_, _, level2TagOut0, _, level2TagOut2, _, _, _, _, _, _, _) = unbundle curTagsLevel2
         out3 = outputStream3 enOut3 out3Data0 out3Data1 
         out3Data0 = out0
         out3Data1 = out2
 
         -- level 0
-        (_, _, _, _, _, _, _, _, _, _, _, _) = unbundle curTagsLevel0
+        (_, _, _, _, _, _, level0TagOut4, _, _, _, _, _) = unbundle curTagsLevel0
         out4 = outputStream4 enOut4 out4Data0 
         out4Data0 = getOffsetFromNonVec <$> out4 <*> level0TagOut4 <*> (pure 1) <*> (pure 0)
 
         -- level 2
-        (_, _, _, _, _, _, _, _, _, _, _, _) = unbundle curTagsLevel2
+        (_, _, _, _, _, _, _, _, _, _, level2TagSw0, _) = unbundle curTagsLevel2
         out5 = outputStream5 enOut5 out5Data0 
         out5Data0 = sw0
 
         -- level 3
-        (_, _, _, _, _, _, _, _, _, _, _, _) = unbundle curTagsLevel3
+        (_, _, _, _, _, level3TagOut3, level3TagOut4, level3TagOut5, _, _, _, _) = unbundle curTagsLevel3
         out6 = outputStream6 enOut6 out6Data0 out6Data1 out6Data2 
         out6Data0 = out3
         out6Data1 = out4
         out6Data2 = out5
 
         -- level 4
-        (_, _, _, _, _, _, _, _, _, _, _, _) = unbundle curTagsLevel4
+        (_, _, _, _, _, _, _, _, _, _, _, level4TagSw1) = unbundle curTagsLevel4
         out7 = outputStream7 enOut7 out7Data0 
         out7Data0 = sw1
 
@@ -414,7 +414,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 pipelineReady :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
 pipelineReady rst = toWait .==. pure 0 
     where 
-        waitTime = pure  :: Signal dom Int
+        waitTime = pure 2 :: Signal dom Int
         toWait = register (0 :: Int) next
         next = mux rst waitTime (mux (toWait .>. pure 0) (toWait - 1) toWait)
 

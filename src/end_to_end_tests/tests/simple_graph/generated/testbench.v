@@ -81,7 +81,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #97.99999999999996;
+        #98;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 3;
@@ -97,7 +97,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #498.00000000000045;
+        #498;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 5;
@@ -105,7 +105,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #-4402;
+        #1598;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 6;

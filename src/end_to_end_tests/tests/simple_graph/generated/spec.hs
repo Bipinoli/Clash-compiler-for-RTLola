@@ -239,23 +239,23 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         input0Win = input0Window enIn0 (bundle (tagIn0, input0Data))
 
         -- level 1
-        (_, _, _, _, _) = unbundle curTagsLevel1
+        (level1TagIn0, _, _, _, level1TagOut3) = unbundle curTagsLevel1
         out0 = outputStream0 enOut0 out0Data0 out0Data1 
         out0Data0 = input0Win
         out0Data1 = getOffsetFromNonVec <$> out3 <*> level1TagOut3 <*> (pure 1) <*> (pure 0)
 
         -- level 2
-        (_, _, _, _, _) = unbundle curTagsLevel2
+        (_, level2TagOut0, _, _, _) = unbundle curTagsLevel2
         out1 = outputStream1 enOut1 out1Data0 
         out1Data0 = out0
 
         -- level 1
-        (_, _, _, _, _) = unbundle curTagsLevel1
+        (_, _, level1TagOut1, _, _) = unbundle curTagsLevel1
         out2 = outputStream2 enOut2 out2Data0 
         out2Data0 = getOffsetFromNonVec <$> out1 <*> level1TagOut1 <*> (pure 1) <*> (pure 0)
 
         -- level 2
-        (_, _, _, _, _) = unbundle curTagsLevel2
+        (_, _, _, level2TagOut2, _) = unbundle curTagsLevel2
         out3 = outputStream3 enOut3 out3Data0 
         out3Data0 = out2
 
@@ -272,7 +272,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         outputs = bundle (output0, output1, output2, output3)
 
-        debugSignals = bundle (pacings)
+        debugSignals = pacings
 
         genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
         genTag en = t
@@ -284,7 +284,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 pipelineReady :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
 pipelineReady rst = toWait .==. pure 0 
     where 
-        waitTime = pure  :: Signal dom Int
+        waitTime = pure 1 :: Signal dom Int
         toWait = register (0 :: Int) next
         next = mux rst waitTime (mux (toWait .>. pure 0) (toWait - 1) toWait)
 
@@ -352,7 +352,7 @@ monitor inputs = bundle (outputs, debugSignals)
         (llcOutput, llcDebug) = unbundle (llc (bundle (qPopValid, qPopData)))
         (toPop, outputs) = unbundle llcOutput
 
-        (llcTag, llcPacings) = unbundle llcDebug
+        llcPacings = llcDebug
         debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcPacings)
 
 

@@ -111,7 +111,7 @@ fn get_trace_data(trace_data: Vec<StringRecord>) -> Vec<TraceData> {
         .map(|(i, d)| TraceData {
             time: {
                 if i == 0 {
-                    let seconds = d
+                    let seconds: f64 = d
                         .get(0)
                         .unwrap()
                         .to_string()
@@ -135,9 +135,8 @@ fn get_trace_data(trace_data: Vec<StringRecord>) -> Vec<TraceData> {
                         .to_string()
                         .parse::<f64>()
                         .expect("Failed to parse time from trace data");
-                    let seconds = cur_row_time - prev_row_time;
                     // #2 from one cycle delay caused by putting input to zero in the impulse input
-                    let microseconds = seconds * 1e6 - 2 as f64;
+                    let microseconds = cur_row_time * 1e6 - prev_row_time * 1e6 - 2 as f64;
                     format!("{}", microseconds)
                 }
             },

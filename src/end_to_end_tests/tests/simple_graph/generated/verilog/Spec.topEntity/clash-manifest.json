@@ -46,14 +46,14 @@
         },
         {
             "name": "topEntity.v",
-            "sha256": "02d0eacf4ec6c5d653c2c7fd78b76ef96c05b5539f8c03aaceee1fb4866a1da7"
+            "sha256": "b26b032965d0c24ed6e58f50b0d3f31c4b9e3e00ed1c18eb4c1922c6231028c3"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "1f091439ee30681b95fe0237aa034989703af61e3f1eecf9932d16a86c82876a",
+    "hash": "efff915c64763f3e0d0c4aadcd6d6c8708a6d7323f375a82a592983a6a40226f",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -84,28 +84,14 @@
             {
                 "direction": "in",
                 "is_clock": false,
-                "name": "inputs_0_0",
+                "name": "inputs_0",
                 "type_name": "signed [63:0]",
                 "width": 64
             },
             {
                 "direction": "in",
                 "is_clock": false,
-                "name": "inputs_0_1",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "in",
-                "is_clock": false,
-                "name": "inputs_1_0",
-                "type_name": "signed [63:0]",
-                "width": 64
-            },
-            {
-                "direction": "in",
-                "is_clock": false,
-                "name": "inputs_1_1",
+                "name": "inputs_1",
                 "type_name": "",
                 "width": 1
             },
@@ -148,6 +134,20 @@
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_0_2_1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_3_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_3_1",
                 "type_name": "",
                 "width": 1
             },
@@ -203,7 +203,7 @@
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_5",
+                "name": "result_1_4_3",
                 "type_name": "",
                 "width": 1
             }

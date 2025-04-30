@@ -281,13 +281,13 @@ module topEntity
   // spec.hs:220:1-121
   wire [7:0] level2TagOut0;
   // spec.hs:220:1-121
-  wire [7:0] level3TagOut1;
-  // spec.hs:220:1-121
   wire  p2;
   // spec.hs:220:1-121
-  wire  p3;
+  wire [7:0] level3TagOut1;
   // spec.hs:220:1-121
   wire [7:0] level3TagSw0;
+  // spec.hs:220:1-121
+  wire  p3;
   // spec.hs:220:1-121
   wire [7:0] level5TagOut0;
   // spec.hs:220:1-121
@@ -1450,13 +1450,13 @@ module topEntity
 
   assign level2TagOut0 = c$ds3_case_scrut[31:24];
 
-  assign level3TagOut1 = c$ds4_case_scrut[23:16];
-
   assign p2 = pacings[1:1];
 
-  assign p3 = pacings[0:0];
+  assign level3TagOut1 = c$ds4_case_scrut[23:16];
 
   assign level3TagSw0 = c$ds4_case_scrut[7:0];
+
+  assign p3 = pacings[0:0];
 
   assign level5TagOut0 = c$ds5_case_scrut[31:24];
 
