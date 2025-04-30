@@ -1,10 +1,8 @@
 use std::cmp::max;
-use std::fmt::format;
 
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
-    Constant, Expression, ExpressionKind, Offset, OutputStream, StreamAccessKind, StreamReference,
-    WindowReference,
+    ArithLogOp, Constant, Expression, ExpressionKind, Offset, OutputStream, StreamAccessKind, StreamReference, WindowReference
 };
 use serde::Serialize;
 
@@ -298,7 +296,11 @@ fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
                 },
                 tag: {
                     let level = hardware_ir::find_level(&node, &ir.evaluation_order);
-                    format!("level{}TagSw{}", level, i.clone())
+                    if level > 0 {
+                        format!("{}Level{}TagSw{}", get_node_name(&node), level, i.clone())
+                    } else {
+                        format!("tagSw{}", i.clone())
+                    }
                 },
                 source_tag: {
                     let source_node = match sw.target {
@@ -349,7 +351,7 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
                 memory_more_than_one: ir.required_memory.get(&node).unwrap().clone() > 1,
                 deps: deps.clone(),
                 level: level.clone(),
-                extracted_tags_of_depending: get_extracted_tags_of_dependencies(deps, level, ir),
+                extracted_tags_of_depending: get_extracted_tags_of_dependencies(&node, deps, level, ir),
             }
         })
         .collect()
@@ -539,13 +541,22 @@ fn order_dependencies_according_to_access_list(deps: &mut Vec<Dependency>, out: 
 }
 
 fn get_default_value(expr: &Expression) -> String {
+    dbg!(&expr);
     match &expr.kind {
+        ExpressionKind::StreamAccess { target, parameters, access_kind } => {
+            "0".to_string()
+        },
         ExpressionKind::LoadConstant(x) => match x {
             Constant::Int(x) => format!("{}", x),
             _ => unimplemented!(),
         },
-        ExpressionKind::ArithLog(_, _) => {
-            "0".to_string()
+        ExpressionKind::ArithLog(op, exprs) => {
+            match op {
+                ArithLogOp::Add => {
+                    "1000".to_string()
+                },
+                _ => unimplemented!(),
+            }
         },
         _ => unimplemented!(),
     }
@@ -664,9 +675,14 @@ pub fn get_all_tags_defaults(ir: &HardwareIR) -> String {
 
 fn get_source_tag(node: &Node, source_node: &Node, ir: &HardwareIR) -> String {
     let node_level = hardware_ir::find_level(&node, &ir.evaluation_order);
+    let prefix = if node_level > 0 {
+        format!("{}Level{}Tag", get_node_name(node), node_level)
+    } else {
+        "tag".to_string()
+    };
     match &source_node {
-        Node::InputStream(x) => format!("level{}TagIn{}", node_level.clone(), x.clone()),
-        Node::OutputStream(x) => format!("level{}TagOut{}", node_level.clone(), x.clone()),
+        Node::InputStream(x) => format!("{}In{}", prefix, x.clone()),
+        Node::OutputStream(x) => format!("{}Out{}", prefix, x.clone()),
         _ => unreachable!(),
     }
 }
@@ -689,10 +705,12 @@ fn get_cur_tags_levels(ir: &HardwareIR) -> Vec<CurTagsLevel> {
 /// Example:
 /// (_, _, _, level1TagOut1, _, _) = unbundle curTagsLevel1
 fn get_extracted_tags_of_dependencies(
+    node: &Node,
     deps: Vec<Dependency>,
     level: usize,
     ir: &HardwareIR,
 ) -> String {
+    let node_name = get_node_name(node);
     let extracted: Vec<String> = get_all_streams(ir)
         .iter()
         .map(|node| {
@@ -701,9 +719,9 @@ fn get_extracted_tags_of_dependencies(
                 Some(d) => {
                     if d.memory_more_than_one || true {
                         match d.source_node {
-                            Node::InputStream(x) => format!("level{}TagIn{}", level, x),
-                            Node::OutputStream(x) => format!("level{}TagOut{}", level, x),
-                            Node::SlidingWindow(x) => format!("level{}TagSw{}", level, x),
+                            Node::InputStream(x) => format!("{}Level{}TagIn{}", node_name, level, x),
+                            Node::OutputStream(x) => format!("{}Level{}TagOut{}", node_name, level, x),
+                            Node::SlidingWindow(x) => format!("{}Level{}TagSw{}", node_name, level, x),
                         }
                     } else {
                         "_".to_string()
@@ -725,6 +743,7 @@ fn get_extracted_tags_of_dependencies(
 }
 
 fn get_extracted_tags_for_sliding_window(node: &Node, level: usize, ir: &HardwareIR) -> String {
+    let node_name = get_node_name(node);
     let deps: Vec<Node> = match node {
         Node::SlidingWindow(x) => {
             let dep = Node::from_stream(&ir.mir.sliding_windows[x.clone()].target);
@@ -738,9 +757,9 @@ fn get_extracted_tags_for_sliding_window(node: &Node, level: usize, ir: &Hardwar
             let dep = deps.iter().find(|&dep| *dep == *node);
             match dep {
                 Some(d) => match d {
-                    Node::InputStream(x) => format!("level{}TagIn{}", level, x),
-                    Node::OutputStream(x) => format!("level{}TagOut{}", level, x),
-                    Node::SlidingWindow(x) => format!("level{}TagSw{}", level, x),
+                    Node::InputStream(x) => format!("{}Level{}TagIn{}", node_name, level, x),
+                    Node::OutputStream(x) => format!("{}Level{}TagOut{}", node_name, level, x),
+                    Node::SlidingWindow(x) => format!("{}Level{}TagSw{}", node_name, level, x),
                 },
                 None => "_".to_string(),
             }
@@ -797,5 +816,13 @@ fn get_extracted_tags_for_outputs(ir: &HardwareIR) -> String {
         )
     } else {
         format!("{} = curTagsLevel{}", extracted.join(", "), level)
+    }
+}
+
+fn get_node_name(node: &Node) -> String {
+    match node {
+        Node::OutputStream(x) => format!("out{}", x),
+        Node::SlidingWindow(x) => format!("sw{}", x),
+        _ => unreachable!(),
     }
 }

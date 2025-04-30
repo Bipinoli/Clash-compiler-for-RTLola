@@ -108,7 +108,9 @@ llc event = bundle (toPop, outputs)
 
         {{#each outputs}}
         -- level {{this.level}}
+        {{#if (gt this.level 0)}}
         {{{this.extracted_tags_of_depending}}}
+        {{/if}}
         out{{this.idx}} = outputStream{{this.idx}} enOut{{this.idx}} {{#each this.deps}}out{{../idx}}Data{{@index}} {{/each}}
         {{#each this.deps}}
         {{#if (or this.is_sync_access this.is_sliding_window_access)}}
@@ -130,7 +132,9 @@ llc event = bundle (toPop, outputs)
         {{/each}}
         {{#each sliding_windows}}
         -- level {{this.level}}
+        {{#if (gt this.level 0)}}
         {{{this.extracted_tags_of_depending}}}
+        {{/if}}
         sw{{this.idx}} = slidingWindow{{this.idx}} enSw{{this.idx}} sld{{this.idx}} (bundle ({{this.tag}}, sw{{this.idx}}Data))
         sw{{this.idx}}Data = bundle (sw{{this.idx}}DataVal, sw{{this.idx}}DataPacing)
         {{#if this.input_memory_more_than_one}}

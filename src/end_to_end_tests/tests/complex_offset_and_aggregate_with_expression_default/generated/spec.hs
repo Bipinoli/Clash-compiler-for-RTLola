@@ -7,51 +7,54 @@ import Clash.Prelude
 -- input x : Int
 -- input y : Int
 -- 
--- output a := x.offset(by: -1).defaults(to: 5 + 5) +  1 + d.offset(by: -1).defaults(to: 11)
--- output b := x.offset(by: -2).defaults(to: 100) + 1
--- output c := a + b + x + y
--- output d := a * c 
+-- output a := x.offset(by: -1).defaults(to: x + y) +  1 + d.offset(by: -1).defaults(to: x)
+-- output b := x.offset(by: -2).defaults(to: y) + 1
+-- output c := a * b + x + y
+-- output d := a + c 
 -- 
 -- output e @2kHz := e.offset(by: -1).defaults(to: 0) + 1
 -- output f @1kHz := x.aggregate(over: 0.003s, using: sum) 
--- output g := e + f + d.hold(or: 100)
+-- output g := e + f + d.hold(or: 2)
 -- output h @1kHz := d.aggregate(over: 0.004s, using: sum) 
 -- 
 
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- x, y, a, e, b
--- sw(x,f), c
--- d, f
+-- x, y, e
+-- sw(x,f), a, b
+-- c, f
+-- d
 -- sw(d,h), g
 -- h
 
 -- Memory Window
 -- window x = 2
 -- window y = 1
--- window a = 1
--- window e = 1
--- window b = 1
+-- window e = 2
 -- window sw(x,f) = 1
+-- window a = 1
+-- window b = 1
 -- window c = 1
--- window d = 1
 -- window f = 1
+-- window d = 1
 -- window sw(d,h) = 1
 -- window g = 1
 -- window h = 1
 
 -- Pipeline Visualization
--- x,y,a,e,b |           |           | x,y,a,e,b |           |           | x,y,a,e,b |           |           | x,y,a,e,b
--- ---------------------------------------------------------------------------------------------------------------------
---           | sw(x,f),c |           |           | sw(x,f),c |           |           | sw(x,f),c |           |          
--- ---------------------------------------------------------------------------------------------------------------------
---           |           | d,f       |           |           | d,f       |           |           | d,f       |          
--- ---------------------------------------------------------------------------------------------------------------------
---           |           |           | sw(d,h),g |           |           | sw(d,h),g |           |           | sw(d,h),g
--- ---------------------------------------------------------------------------------------------------------------------
---           |           |           |           | h         |           |           | h         |           |          
--- ---------------------------------------------------------------------------------------------------------------------
+-- x,y,e       |             |             | x,y,e       |             |             | x,y,e       |             |             | x,y,e      
+-- -----------------------------------------------------------------------------------------------------------------------------------------
+--             | sw(x,f),a,b |             |             | sw(x,f),a,b |             |             | sw(x,f),a,b |             |            
+-- -----------------------------------------------------------------------------------------------------------------------------------------
+--             |             | c,f         |             |             | c,f         |             |             | c,f         |            
+-- -----------------------------------------------------------------------------------------------------------------------------------------
+--             |             |             | d           |             |             | d           |             |             | d          
+-- -----------------------------------------------------------------------------------------------------------------------------------------
+--             |             |             |             | sw(d,h),g   |             |             | sw(d,h),g   |             |            
+-- -----------------------------------------------------------------------------------------------------------------------------------------
+--             |             |             |             |             | h           |             |             | h           |            
+-- -----------------------------------------------------------------------------------------------------------------------------------------
 
 -- input0 = x
 -- input1 = y
@@ -192,7 +195,7 @@ hlc inputs = out
         (_, hasInput1) = unbundle input1
 
         pacing0 = hasInput0 .&&. hasInput1
-        pacing1 = hasInput0
+        pacing1 = hasInput0 .&&. hasInput1
         pacing2 = hasInput0 .&&. hasInput1
         pacing3 = hasInput0 .&&. hasInput1
         pacing4 = timer0Over
@@ -268,13 +271,13 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         tagIn0 = genTag input0HasData
         tagIn1 = genTag input1HasData
-        tagOut0 = genTag p0
         tagOut4 = genTag p4
-        tagOut1 = genTag p1
         tagSw0 = genTag p0
+        tagOut0 = genTag p0
+        tagOut1 = genTag p1
         tagOut2 = genTag p2
-        tagOut3 = genTag p3
         tagOut5 = genTag p5
+        tagOut3 = genTag p3
         tagSw1 = genTag p1
         tagOut6 = genTag p6
         tagOut7 = genTag p7
@@ -291,98 +294,98 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel3 = delay tagsDefault (delay tagsDefault (delay tagsDefault curTags))
         curTagsLevel4 = delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault curTags)))
         curTagsLevel5 = delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault curTags))))
+        curTagsLevel6 = delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault curTags)))))
 
         enIn0 = delay False input0HasData
         enIn1 = delay False input1HasData
-        enOut0 = delay False p0
         enOut4 = delay False p4
-        enOut1 = delay False p1
         enSw0 = delay False (delay False slide0 .||. p5)
         sld0 = delay False (delay False slide0)
         sw0DataPacing = delay False (delay False input0HasData)
-        enOut2 = delay False (delay False p2)
-        enOut3 = delay False (delay False (delay False p3))
+        enOut0 = delay False (delay False p0)
+        enOut1 = delay False (delay False p1)
+        enOut2 = delay False (delay False (delay False p2))
         enOut5 = delay False (delay False (delay False p5))
-        enSw1 = delay False (delay False (delay False (delay False slide1 .||. p7)))
-        sld1 = delay False (delay False (delay False (delay False slide1)))
-        sw1DataPacing = delay False (delay False (delay False (delay False p3)))
-        enOut6 = delay False (delay False (delay False (delay False p6)))
-        enOut7 = delay False (delay False (delay False (delay False (delay False p7))))
+        enOut3 = delay False (delay False (delay False (delay False p3)))
+        enSw1 = delay False (delay False (delay False (delay False (delay False slide1 .||. p7))))
+        sld1 = delay False (delay False (delay False (delay False (delay False slide1))))
+        sw1DataPacing = delay False (delay False (delay False (delay False (delay False p3))))
+        enOut6 = delay False (delay False (delay False (delay False (delay False p6))))
+        enOut7 = delay False (delay False (delay False (delay False (delay False (delay False p7)))))
 
-        output0Aktv = delay False (delay False (delay False (delay False (delay False (delay False p0)))))
-        output1Aktv = delay False (delay False (delay False (delay False (delay False (delay False p1)))))
-        output2Aktv = delay False (delay False (delay False (delay False (delay False (delay False p2)))))
-        output3Aktv = delay False (delay False (delay False (delay False (delay False (delay False p3)))))
-        output4Aktv = delay False (delay False (delay False (delay False (delay False (delay False p4)))))
-        output5Aktv = delay False (delay False (delay False (delay False (delay False (delay False p5)))))
-        output6Aktv = delay False (delay False (delay False (delay False (delay False (delay False p6)))))
-        output7Aktv = delay False (delay False (delay False (delay False (delay False (delay False p7)))))
+        output0Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p0))))))
+        output1Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p1))))))
+        output2Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p2))))))
+        output3Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p3))))))
+        output4Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p4))))))
+        output5Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p5))))))
+        output6Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p6))))))
+        output7Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p7))))))
 
         -- level 0
         input0Win = input0Window enIn0 (bundle (tagIn0, input0Data))
         input1Win = input1Window enIn1 (bundle (tagIn1, input1Data))
 
-        -- level 0
-        (level0TagIn0, _, _, _, _, level0TagOut3, _, _, _, _, _, _) = unbundle curTagsLevel0
+        -- level 1
+        (out0Level1TagIn0, _, _, _, _, out0Level1TagOut3, _, _, _, _, _, _) = unbundle curTagsLevel1
         out0 = outputStream0 enOut0 out0Data0 out0Data1 
-        out0Data0 = getOffset <$> input0Win <*> level0TagIn0 <*> (pure 1) <*> (pure 0)
-        out0Data1 = getOffsetFromNonVec <$> out3 <*> level0TagOut3 <*> (pure 1) <*> (pure 11)
-
-        -- level 0
-        (level0TagIn0, _, _, _, _, _, _, _, _, _, _, _) = unbundle curTagsLevel0
-        out1 = outputStream1 enOut1 out1Data0 
-        out1Data0 = getOffset <$> input0Win <*> level0TagIn0 <*> (pure 2) <*> (pure 100)
+        out0Data0 = getOffset <$> input0Win <*> out0Level1TagIn0 <*> (pure 1) <*> (pure 1000)
+        out0Data1 = getOffsetFromNonVec <$> out3 <*> out0Level1TagOut3 <*> (pure 1) <*> (pure 0)
 
         -- level 1
-        (level1TagIn0, level1TagIn1, level1TagOut0, level1TagOut1, _, _, _, _, _, _, _, _) = unbundle curTagsLevel1
+        (out1Level1TagIn0, _, _, _, _, _, _, _, _, _, _, _) = unbundle curTagsLevel1
+        out1 = outputStream1 enOut1 out1Data0 
+        out1Data0 = getOffset <$> input0Win <*> out1Level1TagIn0 <*> (pure 2) <*> (pure 0)
+
+        -- level 2
+        (out2Level2TagIn0, out2Level2TagIn1, out2Level2TagOut0, out2Level2TagOut1, _, _, _, _, _, _, _, _) = unbundle curTagsLevel2
         out2 = outputStream2 enOut2 out2Data0 out2Data1 out2Data2 out2Data3 
-        out2Data0 = getMatchingTag <$> input0Win <*> level1TagIn0 <*> (pure 0)
+        out2Data0 = getMatchingTag <$> input0Win <*> out2Level2TagIn0 <*> (pure 0)
         out2Data1 = input1Win
         out2Data2 = out0
         out2Data3 = out1
 
-        -- level 2
-        (_, _, level2TagOut0, _, level2TagOut2, _, _, _, _, _, _, _) = unbundle curTagsLevel2
+        -- level 3
+        (_, _, out3Level3TagOut0, _, out3Level3TagOut2, _, _, _, _, _, _, _) = unbundle curTagsLevel3
         out3 = outputStream3 enOut3 out3Data0 out3Data1 
         out3Data0 = out0
         out3Data1 = out2
 
         -- level 0
-        (_, _, _, _, _, _, level0TagOut4, _, _, _, _, _) = unbundle curTagsLevel0
         out4 = outputStream4 enOut4 out4Data0 
-        out4Data0 = getOffsetFromNonVec <$> out4 <*> level0TagOut4 <*> (pure 1) <*> (pure 0)
+        out4Data0 = getOffset <$> out4 <*> tagOut4 <*> (pure 1) <*> (pure 0)
 
         -- level 2
-        (_, _, _, _, _, _, _, _, _, _, level2TagSw0, _) = unbundle curTagsLevel2
+        (_, _, _, _, _, _, _, _, _, _, out5Level2TagSw0, _) = unbundle curTagsLevel2
         out5 = outputStream5 enOut5 out5Data0 
         out5Data0 = sw0
 
-        -- level 3
-        (_, _, _, _, _, level3TagOut3, level3TagOut4, level3TagOut5, _, _, _, _) = unbundle curTagsLevel3
+        -- level 4
+        (_, _, _, _, _, out6Level4TagOut3, out6Level4TagOut4, out6Level4TagOut5, _, _, _, _) = unbundle curTagsLevel4
         out6 = outputStream6 enOut6 out6Data0 out6Data1 out6Data2 
         out6Data0 = out3
-        out6Data1 = out4
+        out6Data1 = getMatchingTag <$> out4 <*> out6Level4TagOut4 <*> (pure 0)
         out6Data2 = out5
 
-        -- level 4
-        (_, _, _, _, _, _, _, _, _, _, _, level4TagSw1) = unbundle curTagsLevel4
+        -- level 5
+        (_, _, _, _, _, _, _, _, _, _, _, out7Level5TagSw1) = unbundle curTagsLevel5
         out7 = outputStream7 enOut7 out7Data0 
         out7Data0 = sw1
 
         -- level 1
-        (level1TagIn0, _, _, _, _, _, _, _, _, _, level1TagSw0, _) = unbundle curTagsLevel1
-        sw0 = slidingWindow0 enSw0 sld0 (bundle (level1TagSw0, sw0Data))
+        (sw0Level1TagIn0, _, _, _, _, _, _, _, _, _, sw0Level1TagSw0, _) = unbundle curTagsLevel1
+        sw0 = slidingWindow0 enSw0 sld0 (bundle (sw0Level1TagSw0, sw0Data))
         sw0Data = bundle (sw0DataVal, sw0DataPacing)
-        (_, sw0DataVal) = unbundle (getMatchingTag <$> input0Win <*> level1TagIn0 <*> (pure 0))
+        (_, sw0DataVal) = unbundle (getMatchingTag <$> input0Win <*> sw0Level1TagIn0 <*> (pure 0))
 
-        -- level 3
-        (_, _, _, _, _, level3TagOut3, _, _, _, _, _, level3TagSw1) = unbundle curTagsLevel3
-        sw1 = slidingWindow1 enSw1 sld1 (bundle (level3TagSw1, sw1Data))
+        -- level 4
+        (_, _, _, _, _, sw1Level4TagOut3, _, _, _, _, _, sw1Level4TagSw1) = unbundle curTagsLevel4
+        sw1 = slidingWindow1 enSw1 sld1 (bundle (sw1Level4TagSw1, sw1Data))
         sw1Data = bundle (sw1DataVal, sw1DataPacing)
         (_, sw1DataVal) = unbundle out3
 
-        -- level 5
-        (_, _, level5TagOut0, level5TagOut1, level5TagOut2, level5TagOut3, level5TagOut4, level5TagOut5, level5TagOut6, level5TagOut7, _, _) = unbundle curTagsLevel5
+        -- level 6
+        (_, _, level6TagOut0, level6TagOut1, level6TagOut2, level6TagOut3, level6TagOut4, level6TagOut5, level6TagOut6, level6TagOut7, _, _) = unbundle curTagsLevel6
         output0 = bundle (output0Data, output0Aktv)
         (_, output0Data) = unbundle out0
         output1 = bundle (output1Data, output1Aktv)
@@ -392,7 +395,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         output3 = bundle (output3Data, output3Aktv)
         (_, output3Data) = unbundle out3
         output4 = bundle (output4Data, output4Aktv)
-        (_, output4Data) = unbundle out4
+        (_, output4Data) = unbundle (getMatchingTag <$> out4 <*> level6TagOut4 <*> (pure 0))
         output5 = bundle (output5Data, output5Aktv)
         (_, output5Data) = unbundle out5
         output6 = bundle (output6Data, output6Aktv)
@@ -431,23 +434,25 @@ input1Window en td = result
 
 
 
-outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
-outputStream0 en in0WithTag out3WithTag = result
+outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
+outputStream0 en in0WithTag in1WithTag out3WithTag = result
     where
         result = register (invalidTag, 0) (mux en nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in0 + 1 + out3
         (tag, in0) = unbundle in0WithTag
+        (_, in1) = unbundle in1WithTag
         (_, out3) = unbundle out3WithTag
 
 
-outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
-outputStream1 en in0WithTag = result
+outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
+outputStream1 en in0WithTag in1WithTag = result
     where
         result = register (invalidTag, 0) (mux en nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in0 + 1
         (tag, in0) = unbundle in0WithTag
+        (_, in1) = unbundle in1WithTag
 
 
 outputStream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
@@ -455,7 +460,7 @@ outputStream2 en in0WithTag in1WithTag out0WithTag out1WithTag = result
     where
         result = register (invalidTag, 0) (mux en nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out0 + out1 + in0 + in1
+        nextVal = out0 * out1 + in0 + in1
         (tag, in0) = unbundle in0WithTag
         (_, in1) = unbundle in1WithTag
         (_, out0) = unbundle out0WithTag
@@ -467,15 +472,16 @@ outputStream3 en out0WithTag out2WithTag = result
     where
         result = register (invalidTag, 0) (mux en nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out0 * out2
+        nextVal = out0 + out2
         (tag, out0) = unbundle out0WithTag
         (_, out2) = unbundle out2WithTag
 
 
-outputStream4 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
+outputStream4 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Vec 2 (Tag, Int))
 outputStream4 en out4WithTag = result
     where
-        result = register (invalidTag, 0) (mux en nextValWithTag result)
+        result = register (repeat (invalidTag, 0)) (mux en next result)
+        next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out4 + 1
         (tag, out4) = unbundle out4WithTag
