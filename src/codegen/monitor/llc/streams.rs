@@ -116,10 +116,11 @@ fn get_output_streams(ir: &HardwareIR) -> Vec<OutputStream> {
                 })
                 .count()
                 > 0;
+            let node = Node::OutputStream(i.clone());
             OutputStream {
                 is_sliding_window_based,
-                inputs: get_inputs(out),
-                input_types: get_input_types(out, ir),
+                inputs: get_inputs(&node, ir),
+                input_types: get_input_types(&node, ir),
                 output_type: datatypes::get_type(&out.ty),
                 default_value: datatypes::get_default_for_type(&out.ty),
                 expression: get_expression(&out.eval.clauses.first().unwrap().expression, ir),
@@ -216,42 +217,26 @@ fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
     }
 }
 
-fn get_inputs(out: &MIR::OutputStream) -> Vec<String> {
-    out.accesses
-        .iter()
-        .map(|access| {
-            let stream_ref = match access.0 {
-                StreamReference::In(x) => format!("in{}", x),
-                StreamReference::Out(x) => format!("out{}", x),
-            };
-            match access.1.first().unwrap().1 {
-                StreamAccessKind::Sync => stream_ref,
-                StreamAccessKind::Hold => stream_ref,
-                StreamAccessKind::Offset(_) => stream_ref,
-                StreamAccessKind::SlidingWindow(sw) => format!("sw{}", sw.idx()),
-                _ => unimplemented!(),
-            }
-        })
-        .collect::<Vec<_>>()
+fn get_inputs(output_node: &Node, ir: &HardwareIR) -> Vec<String> {
+    super::get_dependencies_of_output_stream(output_node, ir).iter().map(|dep| {
+        match dep.source_node {
+            Node::InputStream(x) => format!("in{}", x),
+            Node::OutputStream(x) => format!("out{}", x),
+            Node::SlidingWindow(x) => format!("sw{}", x),
+        }
+    }).collect()
 }
 
-fn get_input_types(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<String> {
-    out.accesses
+fn get_input_types(output_node: &Node, ir: &HardwareIR) -> Vec<String> {
+    super::get_dependencies_of_output_stream(output_node, ir)
         .iter()
-        .map(|access| {
-            let stream_data_type = match access.0 {
-                StreamReference::In(x) => datatypes::get_type(&ir.mir.inputs[x].ty),
-                StreamReference::Out(x) => datatypes::get_type(&ir.mir.outputs[x].ty),
-            };
-            match access.1.first().unwrap().1 {
-                StreamAccessKind::Sync => stream_data_type,
-                StreamAccessKind::Hold => stream_data_type,
-                StreamAccessKind::Offset(_) => stream_data_type,
-                StreamAccessKind::SlidingWindow(sw) => {
-                    let window_size = get_sliding_window_size(sw.idx(), ir);
-                    format!("(Vec {} {})", window_size, stream_data_type)
-                }
-                _ => unimplemented!(),
+        .map(|dep| match dep.source_node {
+            Node::InputStream(x) => datatypes::get_type(&ir.mir.inputs[x].ty),
+            Node::OutputStream(x) => datatypes::get_type(&ir.mir.outputs[x].ty),
+            Node::SlidingWindow(x) => {
+                let stream_data_type = datatypes::get_type(&ir.mir.outputs[x].ty);
+                let window_size = get_sliding_window_size(x.clone(), ir);
+                format!("(Vec {} {})", window_size, stream_data_type)
             }
         })
         .collect()

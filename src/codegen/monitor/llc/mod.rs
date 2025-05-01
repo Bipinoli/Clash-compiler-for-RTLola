@@ -2,7 +2,8 @@ use std::cmp::max;
 
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
-    ArithLogOp, Constant, Expression, ExpressionKind, Offset, OutputStream, StreamAccessKind, StreamReference, WindowReference
+    ArithLogOp, Constant, Expression, ExpressionKind, Offset, OutputStream, StreamAccessKind,
+    StreamReference, WindowReference,
 };
 use serde::Serialize;
 
@@ -80,7 +81,7 @@ struct Dependency {
     source_tag: String,
     memory_more_than_one: bool,
     source_node: Node,
-    node: Node,
+    target_node: Node,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
@@ -335,15 +336,7 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
         .enumerate()
         .map(|(i, out)| {
             let node = Node::OutputStream(i.clone());
-            let deps: Vec<Dependency> = {
-                let mut deps = get_dependencies_from_expression(
-                    Node::OutputStream(i),
-                    &out.eval.clauses.first().unwrap().expression,
-                    ir,
-                );
-                order_dependencies_according_to_access_list(&mut deps, out);
-                deps
-            };
+            let deps = get_dependencies_of_output_stream(&node, ir);
             let level = hardware_ir::find_level(&Node::OutputStream(i), &ir.evaluation_order);
             Output {
                 idx: i,
@@ -351,14 +344,32 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
                 memory_more_than_one: ir.required_memory.get(&node).unwrap().clone() > 1,
                 deps: deps.clone(),
                 level: level.clone(),
-                extracted_tags_of_depending: get_extracted_tags_of_dependencies(&node, deps, level, ir),
+                extracted_tags_of_depending: get_extracted_tags_of_dependencies(
+                    &node, deps, level, ir,
+                ),
             }
         })
         .collect()
 }
 
+fn get_dependencies_of_output_stream(node: &Node, ir: &HardwareIR) -> Vec<Dependency> {
+    match node {
+        Node::OutputStream(x) => {
+            let out = &ir.mir.outputs[x.clone()];
+            let mut deps = get_dependencies_from_expression(
+                node,
+                &out.eval.clauses.first().unwrap().expression,
+                ir,
+            );
+            order_dependencies_according_to_access_list(&mut deps, &out);
+            deps
+        }
+        _ => unreachable!(),
+    }
+}
+
 fn get_dependencies_from_expression(
-    node: Node,
+    node: &Node,
     expr: &Expression,
     ir: &HardwareIR,
 ) -> Vec<Dependency> {
@@ -400,7 +411,7 @@ fn get_dependencies_from_expression(
                     is_offset_access: false,
                     is_sliding_window_access: false,
                     offset: 0,
-                    node,
+                    target_node: node.clone(),
                     source_name,
                     source_node,
                     source_tag,
@@ -419,7 +430,7 @@ fn get_dependencies_from_expression(
                     is_offset_access: false,
                     is_sliding_window_access: false,
                     offset: 0,
-                    node,
+                    target_node: node.clone(),
                     source_name,
                     source_node,
                     source_tag,
@@ -430,7 +441,7 @@ fn get_dependencies_from_expression(
                     is_offset_access: true,
                     is_sync_access: false,
                     is_sliding_window_access: false,
-                    node,
+                    target_node: node.clone(),
                     source_name,
                     source_node,
                     source_tag,
@@ -470,7 +481,7 @@ fn get_dependencies_from_expression(
                         is_sync_access: false,
                         offset: 0,
                         default_value,
-                        node,
+                        target_node: node.clone(),
                         source_name,
                         source_node,
                         source_tag,
@@ -490,7 +501,7 @@ fn get_dependencies_from_expression(
                     is_sliding_window_access: dep.is_sliding_window_access,
                     is_sync_access: dep.is_sync_access,
                     offset: dep.offset,
-                    node: dep.node.clone(),
+                    target_node: dep.target_node.clone(),
                     source_name: dep.source_name.clone(),
                     source_node: dep.source_node.clone(),
                     source_tag: dep.source_tag.clone(),
@@ -501,7 +512,7 @@ fn get_dependencies_from_expression(
         }
         ExpressionKind::ArithLog(_, exprs) => exprs
             .iter()
-            .map(|expr| get_dependencies_from_expression(node.clone(), expr, ir))
+            .map(|expr| get_dependencies_from_expression(node, expr, ir))
             .reduce(|acc, lst| {
                 let mut acc = acc;
                 acc.extend(lst);
@@ -541,22 +552,19 @@ fn order_dependencies_according_to_access_list(deps: &mut Vec<Dependency>, out: 
 }
 
 fn get_default_value(expr: &Expression) -> String {
-    dbg!(&expr);
     match &expr.kind {
-        ExpressionKind::StreamAccess { target, parameters, access_kind } => {
-            "0".to_string()
-        },
+        ExpressionKind::StreamAccess {
+            target,
+            parameters,
+            access_kind,
+        } => "0".to_string(),
         ExpressionKind::LoadConstant(x) => match x {
             Constant::Int(x) => format!("{}", x),
             _ => unimplemented!(),
         },
-        ExpressionKind::ArithLog(op, exprs) => {
-            match op {
-                ArithLogOp::Add => {
-                    "1000".to_string()
-                },
-                _ => unimplemented!(),
-            }
+        ExpressionKind::ArithLog(op, exprs) => match op {
+            ArithLogOp::Add => "1000".to_string(),
+            _ => unimplemented!(),
         },
         _ => unimplemented!(),
     }
@@ -719,9 +727,15 @@ fn get_extracted_tags_of_dependencies(
                 Some(d) => {
                     if d.memory_more_than_one || true {
                         match d.source_node {
-                            Node::InputStream(x) => format!("{}Level{}TagIn{}", node_name, level, x),
-                            Node::OutputStream(x) => format!("{}Level{}TagOut{}", node_name, level, x),
-                            Node::SlidingWindow(x) => format!("{}Level{}TagSw{}", node_name, level, x),
+                            Node::InputStream(x) => {
+                                format!("{}Level{}TagIn{}", node_name, level, x)
+                            }
+                            Node::OutputStream(x) => {
+                                format!("{}Level{}TagOut{}", node_name, level, x)
+                            }
+                            Node::SlidingWindow(x) => {
+                                format!("{}Level{}TagSw{}", node_name, level, x)
+                            }
                         }
                     } else {
                         "_".to_string()

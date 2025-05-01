@@ -2,11 +2,12 @@ input x : Int
 input y : Int
 
 output a := x.offset(by: -1).defaults(to: x + y) +  1 + d.offset(by: -1).defaults(to: x)
-output b := x.offset(by: -2).defaults(to: y) + 1
-output c := a * b + x + y
-output d := a + c 
+//output b := x.offset(by: -2).defaults(to: y) + 1
+//output c := a * b + x + y
+//output d := a + c 
+output d := y
 
-output e @2kHz := e.offset(by: -1).defaults(to: 0) + 1
-output f @1kHz := x.aggregate(over: 0.003s, using: sum) 
-output g := e + f + d.hold(or: 2)
-output h @1kHz := d.aggregate(over: 0.004s, using: sum) 
+//output e @2kHz := e.offset(by: -1).defaults(to: 0) + 1
+//output f @1kHz := x.aggregate(over: 0.003s, using: sum) 
+//output g := e + f + d.hold(or: 2)
+//output h @1kHz := d.aggregate(over: 0.004s, using: sum) 
