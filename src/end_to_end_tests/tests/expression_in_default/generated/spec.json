@@ -35,6 +35,23 @@
               "Sync"
             ]
           ]
+        ],
+        [
+          {
+            "Out": 3
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "Offset": {
+                  "Past": 1
+                }
+              }
+            ]
+          ]
         ]
       ],
       "aggregated_by": [],
@@ -264,6 +281,19 @@
                 }
               }
             ],
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ],
+        [
+          {
+            "Out": 3
+          },
+          [
             [
               {
                 "Eval": 0
@@ -567,7 +597,21 @@
           ]
         ]
       ],
-      "accessed_by": [],
+      "accessed_by": [
+        [
+          {
+            "Out": 3
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ]
+      ],
       "aggregated_by": [],
       "memory_bound": {
         "Bounded": 1
@@ -728,6 +772,191 @@
         "Out": 2
       },
       "params": []
+    },
+    {
+      "name": "d",
+      "kind": {
+        "NamedOutput": "d"
+      },
+      "ty": {
+        "Int": "Int64"
+      },
+      "spawn": {
+        "expression": null,
+        "pacing": "Constant",
+        "condition": null
+      },
+      "eval": {
+        "clauses": [
+          {
+            "condition": null,
+            "expression": {
+              "kind": {
+                "ArithLog": [
+                  "Add",
+                  [
+                    {
+                      "kind": {
+                        "Default": {
+                          "expr": {
+                            "kind": {
+                              "StreamAccess": {
+                                "target": {
+                                  "In": 0
+                                },
+                                "parameters": [],
+                                "access_kind": {
+                                  "Offset": {
+                                    "Past": 1
+                                  }
+                                }
+                              }
+                            },
+                            "ty": {
+                              "Option": {
+                                "Int": "Int64"
+                              }
+                            }
+                          },
+                          "default": {
+                            "kind": {
+                              "StreamAccess": {
+                                "target": {
+                                  "Out": 0
+                                },
+                                "parameters": [],
+                                "access_kind": "Sync"
+                              }
+                            },
+                            "ty": {
+                              "Int": "Int64"
+                            }
+                          }
+                        }
+                      },
+                      "ty": {
+                        "Int": "Int64"
+                      }
+                    },
+                    {
+                      "kind": {
+                        "StreamAccess": {
+                          "target": {
+                            "Out": 1
+                          },
+                          "parameters": [],
+                          "access_kind": "Sync"
+                        }
+                      },
+                      "ty": {
+                        "Int": "Int64"
+                      }
+                    }
+                  ]
+                ]
+              },
+              "ty": {
+                "Int": "Int64"
+              }
+            },
+            "pacing": {
+              "Event": {
+                "Conjunction": [
+                  {
+                    "Stream": {
+                      "In": 0
+                    }
+                  },
+                  {
+                    "Stream": {
+                      "In": 1
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "eval_pacing": {
+          "Event": {
+            "Conjunction": [
+              {
+                "Stream": {
+                  "In": 0
+                }
+              },
+              {
+                "Stream": {
+                  "In": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "close": {
+        "condition": null,
+        "pacing": "Constant",
+        "has_self_reference": false
+      },
+      "accesses": [
+        [
+          {
+            "In": 0
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "Offset": {
+                  "Past": 1
+                }
+              }
+            ]
+          ]
+        ],
+        [
+          {
+            "Out": 0
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ],
+        [
+          {
+            "Out": 1
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ]
+      ],
+      "accessed_by": [],
+      "aggregated_by": [],
+      "memory_bound": {
+        "Bounded": 1
+      },
+      "layer": {
+        "spawn": 0,
+        "evaluation": 4
+      },
+      "reference": {
+        "Out": 3
+      },
+      "params": []
     }
   ],
   "time_driven": [],
@@ -778,6 +1007,25 @@
         "Stream": {
           "In": 1
         }
+      }
+    },
+    {
+      "reference": {
+        "Out": 3
+      },
+      "ac": {
+        "Conjunction": [
+          {
+            "Stream": {
+              "In": 0
+            }
+          },
+          {
+            "Stream": {
+              "In": 1
+            }
+          }
+        ]
       }
     }
   ],

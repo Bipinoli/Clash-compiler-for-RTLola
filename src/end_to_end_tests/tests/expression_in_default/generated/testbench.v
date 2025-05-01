@@ -16,6 +16,8 @@ module testbench;
     wire output_1_aktv;
     wire signed [63:0] output_2;
     wire output_2_aktv;
+    wire signed [63:0] output_3;
+    wire output_3_aktv;
 
     wire q_push;
     wire q_pop;
@@ -25,6 +27,7 @@ module testbench;
     wire pacing_0;
     wire pacing_1;
     wire pacing_2;
+    wire pacing_3;
     
 
     topEntity monitor (
@@ -34,10 +37,12 @@ module testbench;
                         ,output_0, output_0_aktv
                         ,output_1, output_1_aktv
                         ,output_2, output_2_aktv
+                        ,output_3, output_3_aktv
                         ,q_push, q_pop, q_push_valid, q_pop_valid
                         ,pacing_0
                         ,pacing_1
                         ,pacing_2
+                        ,pacing_3
                        );
 
     always begin
@@ -45,8 +50,8 @@ module testbench;
     end
 
     always @(posedge clk) begin
-        if (output_0_aktv == 1'b1 || output_1_aktv == 1'b1 || output_2_aktv == 1'b1) begin
-            $display("Time %0t: Active outputs: (%b, %b, %b), Outputs: (%0d, %0d, %0d)", $time, output_0_aktv, output_1_aktv, output_2_aktv, output_0, output_1, output_2);
+        if (output_0_aktv == 1'b1 || output_1_aktv == 1'b1 || output_2_aktv == 1'b1 || output_3_aktv == 1'b1) begin
+            $display("Time %0t: Active outputs: (%b, %b, %b, %b), Outputs: (%0d, %0d, %0d, %0d)", $time, output_0_aktv, output_1_aktv, output_2_aktv, output_3_aktv, output_0, output_1, output_2, output_3);
         end
     end
 

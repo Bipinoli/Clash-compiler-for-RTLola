@@ -42,26 +42,30 @@ impl Node {
         match self {
             Node::InputStream(x) => {
                 for child in &mir.inputs[x.clone()].accessed_by {
-                    let offset = match child.1.first().unwrap().1 {
-                        StreamAccessKind::Offset(off) => match off {
-                            Offset::Past(x) => x as usize,
-                            _ => unreachable!(),
-                        },
-                        _ => 0,
-                    };
-                    children.push((Node::from_access(child), offset));
+                    for (_, access_kind) in &child.1 {
+                        let offset = match access_kind {
+                            StreamAccessKind::Offset(off) => match off {
+                                Offset::Past(x) => x.clone() as usize,
+                                _ => unreachable!(),
+                            },
+                            _ => 0,
+                        };
+                        children.push((Node::from_access(child), offset));
+                    }
                 }
             }
             Node::OutputStream(x) => {
                 for child in &mir.outputs[x.clone()].accessed_by {
-                    let offset = match child.1.first().unwrap().1 {
-                        StreamAccessKind::Offset(off) => match off {
-                            Offset::Past(x) => x as usize,
-                            _ => unreachable!(),
-                        },
-                        _ => 0,
-                    };
-                    children.push((Node::from_access(child), offset));
+                    for (_, access_kind) in &child.1 {
+                        let offset = match access_kind {
+                            StreamAccessKind::Offset(off) => match off {
+                                Offset::Past(x) => x.clone() as usize,
+                                _ => unreachable!(),
+                            },
+                            _ => 0,
+                        };
+                        children.push((Node::from_access(child), offset));
+                    }
                 }
             }
             Node::SlidingWindow(x) => {
@@ -69,6 +73,10 @@ impl Node {
             }
         }
         children
+            .into_iter()
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>()
     }
 
     fn get_non_offset_children(&self, mir: &RtLolaMir) -> Vec<Node> {
@@ -76,10 +84,12 @@ impl Node {
         match self {
             Node::InputStream(x) => {
                 for child in &mir.inputs[x.clone()].accessed_by {
-                    match child.1.first().unwrap().1 {
-                        StreamAccessKind::Offset(_) => {}
-                        _ => {
-                            children.push(Node::from_access(child));
+                    for (_, access_kind) in &child.1 {
+                        match access_kind {
+                            StreamAccessKind::Offset(_) => {}
+                            _ => {
+                                children.push(Node::from_access(child));
+                            }
                         }
                     }
                 }
@@ -101,6 +111,10 @@ impl Node {
             }
         }
         children
+            .into_iter()
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>()
     }
 
     fn get_offset_parents(&self, mir: &RtLolaMir) -> Vec<(Node, usize)> {
@@ -582,7 +596,6 @@ fn dag_eval_order(roots: Vec<Node>, mir: &RtLolaMir) -> Vec<Vec<Node>> {
         cur_level = remove_reachable_roots(next_level, mir);
         next_level = vec![];
     }
-    dbg!(&order);
     order
 }
 
