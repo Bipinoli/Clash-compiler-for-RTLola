@@ -86,10 +86,12 @@ impl Node {
             }
             Node::OutputStream(x) => {
                 for child in &mir.outputs[x.clone()].accessed_by {
-                    match child.1.first().unwrap().1 {
-                        StreamAccessKind::Offset(_) => {}
-                        _ => {
-                            children.push(Node::from_access(child));
+                    for (_, access_kind) in &child.1 {
+                        match access_kind {
+                            StreamAccessKind::Offset(_) => {}
+                            _ => {
+                                children.push(Node::from_access(child));
+                            }
                         }
                     }
                 }
@@ -580,6 +582,7 @@ fn dag_eval_order(roots: Vec<Node>, mir: &RtLolaMir) -> Vec<Vec<Node>> {
         cur_level = remove_reachable_roots(next_level, mir);
         next_level = vec![];
     }
+    dbg!(&order);
     order
 }
 

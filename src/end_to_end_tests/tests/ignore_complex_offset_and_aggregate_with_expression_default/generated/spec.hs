@@ -240,8 +240,10 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         -- level 1
         (out0Level1TagIn0, _, _, out0Level1TagOut1) = unbundle curTagsLevel1
         out0 = outputStream0 enOut0 out0Data0 out0Data1 
-        out0Data0 = getOffsetFromNonVec <$> input0Win <*> out0Level1TagIn0 <*> (pure 1) <*> (pure 1000)
-        out0Data1 = getOffsetFromNonVec <$> out1 <*> out0Level1TagOut1 <*> (pure 1) <*> (pure 0)
+        out0Data0 = getOffsetFromNonVec <$> input0Win <*> out0Level1TagIn0 <*> (pure 1) <*> (level1Input0Data + level1Input1Data)
+        out0Data1 = getOffsetFromNonVec <$> out1 <*> out0Level1TagOut1 <*> (pure 1) <*> (level1Input0Data)
+        level1Input0Data = delay 0 input0Data
+        level1Input1Data = delay 0 input1Data
 
         -- level 1
         (_, out1Level1TagIn1, _, _) = unbundle curTagsLevel1

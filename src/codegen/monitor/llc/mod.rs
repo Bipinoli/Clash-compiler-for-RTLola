@@ -557,7 +557,7 @@ fn get_default_value(expr: &Expression) -> String {
             target,
             parameters,
             access_kind,
-        } => "0".to_string(),
+        } => "2000".to_string(),
         ExpressionKind::LoadConstant(x) => match x {
             Constant::Int(x) => format!("{}", x),
             _ => unimplemented!(),

@@ -218,13 +218,14 @@ fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
 }
 
 fn get_inputs(output_node: &Node, ir: &HardwareIR) -> Vec<String> {
-    super::get_dependencies_of_output_stream(output_node, ir).iter().map(|dep| {
-        match dep.source_node {
+    super::get_dependencies_of_output_stream(output_node, ir)
+        .iter()
+        .map(|dep| match dep.source_node {
             Node::InputStream(x) => format!("in{}", x),
             Node::OutputStream(x) => format!("out{}", x),
             Node::SlidingWindow(x) => format!("sw{}", x),
-        }
-    }).collect()
+        })
+        .collect()
 }
 
 fn get_input_types(output_node: &Node, ir: &HardwareIR) -> Vec<String> {
