@@ -292,7 +292,13 @@ fn window_size(
     _mir: &RtLolaMir,
 ) -> usize {
     if offset > 0 {
-        offset
+        let parent_level = find_level(node, eval_order);
+        let child_level = find_level(child, eval_order);
+        if child_level > parent_level {
+            child_level - parent_level + offset
+        } else {
+            offset
+        }
     } else {
         let propagation_time = level_distance(node, child, eval_order).abs() as usize;
         let number_of_evals = ((propagation_time as f32) / (pipeline_wait as f32 + 1.0)).ceil();
