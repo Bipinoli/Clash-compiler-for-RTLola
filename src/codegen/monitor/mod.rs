@@ -2,7 +2,7 @@ use crate::hardware_ir::{
     prettify_eval_order, prettify_required_memory, visualize_pipeline, HardwareIR, Node,
 };
 use handlebars::{
-    Context, Handlebars, Helper, Output, RenderContext, RenderError, RenderErrorReason,
+    Context, Handlebars, Helper, HelperResult, Output, RenderContext, RenderError, RenderErrorReason, Renderable
 };
 use llc::{get_pacings_type, get_slides_type};
 use serde::Serialize;
@@ -85,72 +85,61 @@ fn register_template(name: String, path: String, handlebars: &mut Handlebars) {
 }
 
 fn register_helpers(handlebars: &mut Handlebars) {
-    handlebars.register_helper("first", Box::new(first));
-    handlebars.register_helper("build_tuple", Box::new(build_tuple));
+    handlebars.register_helper("replace", Box::new(ReplaceHelper));
 }
 
-fn first(
-    h: &Helper,
-    _: &Handlebars,
-    _: &Context,
-    _: &mut RenderContext,
-    out: &mut dyn Output,
-) -> Result<(), RenderError> {
-    let param = h
-        .param(0)
-        .ok_or_else(|| RenderError::from(RenderErrorReason::ParamNotFoundForIndex("first", 0)))?
-        .value();
-    let arr = param.as_array().ok_or_else(|| {
-        RenderError::from(RenderErrorReason::ParamTypeMismatchForName(
-            "first",
-            param.to_string(),
-            "array".to_string(),
-        ))
-    })?;
-    if let Some(first) = arr.first() {
-        if let Some(s) = first.as_str() {
-            out.write(s)?;
-        } else {
-            return Err(RenderError::from(
-                RenderErrorReason::ParamTypeMismatchForName(
-                    "first",
-                    first.to_string(),
-                    "string".to_string(),
-                ),
-            ));
-        }
-    } else {
-        return Err(RenderError::from(RenderErrorReason::Other(
-            "Array is empty".to_string(),
-        )));
+struct ReplaceHelper;
+impl handlebars::HelperDef for ReplaceHelper {
+    fn call<'reg: 'rc, 'rc>(
+        &self,
+        h: &Helper<'rc>,
+        r: &'reg Handlebars<'reg>,
+        ctx: &'rc Context,
+        rc: &mut RenderContext<'reg, 'rc>,
+        out: &mut dyn Output,
+    ) -> HelperResult {
+        replace_helper(h, r, ctx, rc, out)
     }
-    Ok(())
 }
 
-fn build_tuple(
-    h: &Helper,
-    _: &Handlebars,
-    _: &Context,
-    _: &mut RenderContext,
+fn replace_helper<'reg: 'rc, 'rc>(
+    h: &Helper<'rc>,
+    r: &'reg Handlebars<'reg>,
+    ctx: &'rc Context,
+    rc: &mut RenderContext<'reg, 'rc>,
     out: &mut dyn Output,
 ) -> Result<(), RenderError> {
-    let param = h.param(0).map(|v| v.value()).ok_or_else(|| {
-        RenderError::from(RenderErrorReason::ParamNotFoundForIndex("build_tuple", 0))
+    let targets = h.param(0)
+        .ok_or(RenderError::from(RenderErrorReason::ParamNotFoundForIndex("target list", 0)))?
+        .value()
+        .as_array()
+        .ok_or(RenderError::from(RenderErrorReason::InvalidParamType("must be an array")))?;
+
+    let replacements = h.param(1)
+        .ok_or(RenderError::from(RenderErrorReason::ParamNotFoundForIndex("replacement list", 1)))?
+        .value()
+        .as_array()
+        .ok_or(RenderError::from(RenderErrorReason::InvalidParamType("must be an array")))?;
+    
+    if targets.len() != replacements.len() {
+        return Err(RenderError::from(RenderErrorReason::InvalidParamType("Size of target and replacement lists don't match")));
+    }
+
+    let template = h.template().ok_or_else(|| {
+        RenderError::from(RenderErrorReason::TemplateNotFound("Block content for replace helper not found".to_string()))
     })?;
-    let str_val = param.as_str().ok_or_else(|| {
-        RenderError::from(RenderErrorReason::ParamTypeMismatchForName(
-            "build_tuple",
-            param.to_string(),
-            "string".to_string(),
-        ))
-    })?;
-    let commas = str_val.matches(',').count();
-    let tuple_val = if commas > 0 {
-        format!("({})", str_val)
-    } else {
-        str_val.to_string()
-    };
-    out.write(&tuple_val)?;
+    
+    let block_content = template.renders(r, ctx, rc)?;
+    
+    // Perform replacements
+    let mut result = block_content;
+    for (target, replacement) in targets.iter().zip(replacements.iter()) {
+        let tgt_str = target.as_str().ok_or(RenderError::from(RenderErrorReason::InvalidParamType("Target must be a string")))?;
+        let repl_str = replacement.as_str().ok_or(RenderError::from(RenderErrorReason::InvalidParamType("Replacement must be a string")))?;
+        result = result.replace(tgt_str, repl_str);
+    }
+
+    out.write(&result)?;
     Ok(())
 }
 
