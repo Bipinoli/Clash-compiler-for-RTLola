@@ -101,13 +101,13 @@ llc event = bundle (toPop, outputs)
         {{{this}}}
         {{/each}}
 
-        -- level 0
+        -- Evaluation of input windows: level 0
         {{#each inputs}}
         input{{@index}}Win = input{{@index}}Window enIn{{@index}} (bundle (tagIn{{@index}}, input{{@index}}Data))
         {{/each}}
 
         {{#each outputs}}
-        -- level {{this.level}}
+        -- Evaluation of output {{@index}}: level {{this.level}}
         {{#if (gt this.level 0)}}
         {{{this.extracted_tags_of_depending}}}
         {{/if}}
@@ -131,7 +131,7 @@ llc event = bundle (toPop, outputs)
 
         {{/each}}
         {{#each sliding_windows}}
-        -- level {{this.level}}
+        -- Evaluation of sliding window {{@index}}: level {{this.level}}
         {{#if (gt this.level 0)}}
         {{{this.extracted_tags_of_depending}}}
         {{/if}}
@@ -144,7 +144,7 @@ llc event = bundle (toPop, outputs)
         {{/if}}
 
         {{/each}}
-        -- level {{output_level}}
+        -- Outputing all results: level {{output_level}}
         {{{extracted_tags_for_outputs}}}
         {{#each outputs}}
         output{{this.idx}} = bundle (output{{this.idx}}Data, output{{this.idx}}Aktv)

@@ -60,6 +60,14 @@ fn get_has_periodic_pacing(ir: &HardwareIR) -> bool {
 }
 
 fn get_new_event_condition(ir: &HardwareIR) -> String {
+    let inputs = ir
+        .mir
+        .inputs
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format!("hasInput{}", i))
+        .collect::<Vec<_>>()
+        .join(" .||. ");
     let slides = ir
         .mir
         .sliding_windows
@@ -68,18 +76,10 @@ fn get_new_event_condition(ir: &HardwareIR) -> String {
         .map(|(i, _)| format!("slide{}", i))
         .collect::<Vec<_>>()
         .join(" .||. ");
-    let pacings = ir
-        .mir
-        .outputs
-        .iter()
-        .enumerate()
-        .map(|(i, _)| format!("pacing{}", i))
-        .collect::<Vec<_>>()
-        .join(" .||. ");
     if slides.len() > 0 {
-        format!("{} .||. {}", slides, pacings)
+        format!("{} .||. {}", inputs, slides)
     } else {
-        pacings
+        inputs
     }
 }
 
