@@ -1,13 +1,11 @@
 use crate::hardware_ir::{
     prettify_eval_order, prettify_required_memory, visualize_pipeline, HardwareIR, Node,
 };
-use handlebars::{
-    Context, Handlebars, Helper, HelperResult, Output, RenderContext, RenderError, RenderErrorReason, Renderable
-};
-use llc::{get_pacings_type, get_slides_type};
+use handlebars::Handlebars;
 use serde::Serialize;
 
 mod datatypes;
+mod handlebars_helpers;
 mod hlc;
 mod llc;
 
@@ -31,7 +29,8 @@ struct Data {
 
 pub fn generate_clash(hard_ir: HardwareIR) -> Option<String> {
     let mut reg = Handlebars::new();
-    register_helpers(&mut reg);
+    handlebars_helpers::register_helpers(&mut reg);
+
     register_template(
         "monitor".to_string(),
         "src/codegen/monitor/monitor.hbs".to_string(),
@@ -82,65 +81,6 @@ fn register_template(name: String, path: String, handlebars: &mut Handlebars) {
             return;
         }
     }
-}
-
-fn register_helpers(handlebars: &mut Handlebars) {
-    handlebars.register_helper("replace", Box::new(ReplaceHelper));
-}
-
-struct ReplaceHelper;
-impl handlebars::HelperDef for ReplaceHelper {
-    fn call<'reg: 'rc, 'rc>(
-        &self,
-        h: &Helper<'rc>,
-        r: &'reg Handlebars<'reg>,
-        ctx: &'rc Context,
-        rc: &mut RenderContext<'reg, 'rc>,
-        out: &mut dyn Output,
-    ) -> HelperResult {
-        replace_helper(h, r, ctx, rc, out)
-    }
-}
-
-fn replace_helper<'reg: 'rc, 'rc>(
-    h: &Helper<'rc>,
-    r: &'reg Handlebars<'reg>,
-    ctx: &'rc Context,
-    rc: &mut RenderContext<'reg, 'rc>,
-    out: &mut dyn Output,
-) -> Result<(), RenderError> {
-    let targets = h.param(0)
-        .ok_or(RenderError::from(RenderErrorReason::ParamNotFoundForIndex("target list", 0)))?
-        .value()
-        .as_array()
-        .ok_or(RenderError::from(RenderErrorReason::InvalidParamType("must be an array")))?;
-
-    let replacements = h.param(1)
-        .ok_or(RenderError::from(RenderErrorReason::ParamNotFoundForIndex("replacement list", 1)))?
-        .value()
-        .as_array()
-        .ok_or(RenderError::from(RenderErrorReason::InvalidParamType("must be an array")))?;
-    
-    if targets.len() != replacements.len() {
-        return Err(RenderError::from(RenderErrorReason::InvalidParamType("Size of target and replacement lists don't match")));
-    }
-
-    let template = h.template().ok_or_else(|| {
-        RenderError::from(RenderErrorReason::TemplateNotFound("Block content for replace helper not found".to_string()))
-    })?;
-    
-    let block_content = template.renders(r, ctx, rc)?;
-    
-    // Perform replacements
-    let mut result = block_content;
-    for (target, replacement) in targets.iter().zip(replacements.iter()) {
-        let tgt_str = target.as_str().ok_or(RenderError::from(RenderErrorReason::InvalidParamType("Target must be a string")))?;
-        let repl_str = replacement.as_str().ok_or(RenderError::from(RenderErrorReason::InvalidParamType("Replacement must be a string")))?;
-        result = result.replace(tgt_str, repl_str);
-    }
-
-    out.write(&result)?;
-    Ok(())
 }
 
 fn get_spec(ir: &HardwareIR) -> String {
