@@ -1,4 +1,5 @@
 use std::cmp::max;
+use std::collections::HashSet;
 
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
@@ -82,6 +83,9 @@ struct Dependency {
     memory_more_than_one: bool,
     source_node: Node,
     target_node: Node,
+    has_default_expr: bool,
+    default_expr_statements: Vec<String>,
+    depending_tags_from_default_expr: Vec<Node>,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
@@ -405,6 +409,9 @@ fn get_dependencies_from_expression(
                         > 1
                 }
             };
+            let default_expr_statements = Vec::new();
+            let depending_tags_from_default_expr = Vec::new();
+            let has_default_expr = false;
             let dep = match access_kind {
                 StreamAccessKind::Sync => Dependency {
                     is_sync_access: true,
@@ -416,14 +423,20 @@ fn get_dependencies_from_expression(
                     source_node,
                     source_tag,
                     memory_more_than_one,
-                    default_value: match source {
-                        StreamReference::In(x) => {
-                            datatypes::get_default_for_type(&ir.mir.inputs[x.clone()].ty)
+                    default_value: format!(
+                        "(pure {})",
+                        match source {
+                            StreamReference::In(x) => {
+                                datatypes::get_default_for_type(&ir.mir.inputs[x.clone()].ty)
+                            }
+                            StreamReference::Out(x) => {
+                                datatypes::get_default_for_type(&ir.mir.outputs[x.clone()].ty)
+                            }
                         }
-                        StreamReference::Out(x) => {
-                            datatypes::get_default_for_type(&ir.mir.outputs[x.clone()].ty)
-                        }
-                    },
+                    ),
+                    has_default_expr,
+                    default_expr_statements,
+                    depending_tags_from_default_expr,
                 },
                 StreamAccessKind::Hold => Dependency {
                     is_sync_access: true,
@@ -436,6 +449,9 @@ fn get_dependencies_from_expression(
                     source_tag,
                     memory_more_than_one,
                     default_value: String::new(),
+                    default_expr_statements,
+                    depending_tags_from_default_expr,
+                    has_default_expr,
                 },
                 StreamAccessKind::Offset(off) => Dependency {
                     is_offset_access: true,
@@ -451,6 +467,9 @@ fn get_dependencies_from_expression(
                         Offset::Past(x) => x.clone() as usize,
                         _ => unimplemented!(),
                     },
+                    has_default_expr,
+                    default_expr_statements,
+                    depending_tags_from_default_expr,
                 },
                 StreamAccessKind::SlidingWindow(sw) => {
                     let (default_value, source_name, memory) = match sw {
@@ -486,6 +505,9 @@ fn get_dependencies_from_expression(
                         source_node,
                         source_tag,
                         memory_more_than_one: memory > 1,
+                        has_default_expr: false,
+                        default_expr_statements: Vec::new(),
+                        depending_tags_from_default_expr: Vec::new(),
                     }
                 }
                 _ => unimplemented!(),
@@ -494,7 +516,7 @@ fn get_dependencies_from_expression(
         }
         ExpressionKind::Default { expr, default } => {
             let deps = get_dependencies_from_expression(node, &expr, ir);
-            let default_value = get_default_value(&default);
+            let (default_expr_statements, depending_tags_from_default_expr) = get_default_expr_statements_and_depending_tags(&default);
             deps.iter()
                 .map(|dep| Dependency {
                     is_offset_access: dep.is_offset_access,
@@ -506,7 +528,10 @@ fn get_dependencies_from_expression(
                     source_node: dep.source_node.clone(),
                     source_tag: dep.source_tag.clone(),
                     memory_more_than_one: dep.memory_more_than_one,
-                    default_value: default_value.clone(),
+                    default_value: format!("_default_expr_"),
+                    has_default_expr: true,
+                    default_expr_statements: default_expr_statements.clone(),
+                    depending_tags_from_default_expr: depending_tags_from_default_expr.clone(),
                 })
                 .collect()
         }
@@ -551,23 +576,17 @@ fn order_dependencies_according_to_access_list(deps: &mut Vec<Dependency>, out: 
     });
 }
 
-fn get_default_value(expr: &Expression) -> String {
-    match &expr.kind {
-        ExpressionKind::StreamAccess {
-            target,
-            parameters,
-            access_kind,
-        } => "2000".to_string(),
-        ExpressionKind::LoadConstant(x) => match x {
-            Constant::Int(x) => format!("{}", x),
-            _ => unimplemented!(),
-        },
-        ExpressionKind::ArithLog(op, exprs) => match op {
-            ArithLogOp::Add => "1000".to_string(),
-            _ => unimplemented!(),
-        },
-        _ => unimplemented!(),
-    }
+
+fn get_default_expr_statements_and_depending_tags(expr: &Expression) -> (Vec<String>, Vec<Node>) {
+    let mut depending_tags: Vec<Node> = vec![Node::OutputStream(0)];
+    let mut statements = vec![
+        "_name_ = _name_Data0 + _name_Data1".to_string(),
+        "(_, _name_Data0) = unbundle (getOffset <$> input1Win <*> _tagprefix_In1 <*> (pure 1) <*> (pure 10))".to_string(),
+        "(_, _name_Data1) = unbundle (getOffsetFromNonVec <$> out0 <*> _tagprefix_Out0 <*> (pure 1) <*> _name_Data1Dflt)".to_string(),
+        "(_, _name_Data1Dflt) = unbundle (getOffset <$> input0Win <*> _tagprefix_In0 <*> (pure 1) <*> (pure 20))".to_string(),
+    ];
+    let depending_tags: Vec<Node> = depending_tags.into_iter().collect::<HashSet<_>>().into_iter().collect();
+    (statements, depending_tags)
 }
 
 pub fn get_pacings_type(ir: &HardwareIR) -> String {
@@ -719,14 +738,30 @@ fn get_extracted_tags_of_dependencies(
     ir: &HardwareIR,
 ) -> String {
     let node_name = get_node_name(node);
+    let depending_tags_from_all_default_exprs: Vec<Node> = deps.iter().fold(Vec::new(), |acc, dep| {
+        [&acc[..], &dep.depending_tags_from_default_expr[..]].concat()
+    });
+
     let extracted: Vec<String> = get_all_streams(ir)
         .iter()
         .map(|node| {
             let dep = deps.iter().find(|&dep| dep.source_node == *node);
             match dep {
-                Some(d) => {
-                    if d.memory_more_than_one || true {
-                        match d.source_node {
+                Some(d) => match d.source_node {
+                    Node::InputStream(x) => {
+                        format!("{}Level{}TagIn{}", node_name, level, x)
+                    }
+                    Node::OutputStream(x) => {
+                        format!("{}Level{}TagOut{}", node_name, level, x)
+                    }
+                    Node::SlidingWindow(x) => {
+                        format!("{}Level{}TagSw{}", node_name, level, x)
+                    }
+                },
+                None => {
+                    let dep = depending_tags_from_all_default_exprs.iter().find(|&dep| dep == node);
+                    match dep {
+                        Some(d) => match d {
                             Node::InputStream(x) => {
                                 format!("{}Level{}TagIn{}", node_name, level, x)
                             }
@@ -736,12 +771,10 @@ fn get_extracted_tags_of_dependencies(
                             Node::SlidingWindow(x) => {
                                 format!("{}Level{}TagSw{}", node_name, level, x)
                             }
-                        }
-                    } else {
-                        "_".to_string()
+                        },
+                        None => "_".to_string(),
                     }
                 }
-                None => "_".to_string(),
             }
         })
         .collect();

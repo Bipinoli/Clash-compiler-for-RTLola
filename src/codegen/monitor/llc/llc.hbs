@@ -115,17 +115,37 @@ llc event = bundle (toPop, outputs)
         {{#each this.deps}}
         {{#if (or this.is_sync_access this.is_sliding_window_access)}}
         {{#if this.memory_more_than_one}}
-        out{{../idx}}Data{{@index}} = getMatchingTag <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.default_value}})
+        {{#replace
+            (array "_default_expr_") 
+            (array (eval "out{{../idx}}Data{{@index}}Dflt"))
+        }}
+        out{{../idx}}Data{{@index}} = getMatchingTag <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{this.default_value}}
+        {{/replace}}
         {{else}}
         out{{../idx}}Data{{@index}} = {{this.source_name}}
         {{/if}}
         {{/if}}
         {{#if this.is_offset_access}}
+        {{#replace
+            (array "_default_expr_") 
+            (array (eval "out{{../idx}}Data{{@index}}Dflt"))
+        }}
             {{#if this.memory_more_than_one}}
-        out{{../idx}}Data{{@index}} = getOffset <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.offset}}) <*> (pure {{this.default_value}})
+        out{{../idx}}Data{{@index}} = getOffset <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.offset}}) <*> {{this.default_value}}
             {{else}}
-        out{{../idx}}Data{{@index}} = getOffsetFromNonVec <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.offset}}) <*> (pure {{this.default_value}})
+        out{{../idx}}Data{{@index}} = getOffsetFromNonVec <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.offset}}) <*> {{this.default_value}}
             {{/if}}
+        {{/replace}}
+        {{/if}}
+        {{#if has_default_expr}}
+        {{#replace
+           (array "_name_" "_tagprefix_") 
+           (array (eval "out{{../idx}}Data{{@index}}Dflt") (eval "out{{../idx}}Level{{../level}}Tag"))
+        }}
+        {{#each default_expr_statements}}
+        {{{this}}}
+        {{/each}}
+        {{/replace}}
         {{/if}}
         {{/each}}
 
