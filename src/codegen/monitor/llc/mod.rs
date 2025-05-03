@@ -516,7 +516,12 @@ fn get_dependencies_from_expression(
         }
         ExpressionKind::Default { expr, default } => {
             let deps = get_dependencies_from_expression(node, &expr, ir);
-            let (default_expr_statements, depending_tags_from_default_expr) = get_default_expr_statements_and_depending_tags(&default);
+            let (default_expr_statements, depending_tags_from_default_expr) =
+                get_default_expr_statements_and_depending_tags(
+                    &default,
+                    String::from("_name_"),
+                    ir,
+                );
             deps.iter()
                 .map(|dep| Dependency {
                     is_offset_access: dep.is_offset_access,
@@ -576,8 +581,101 @@ fn order_dependencies_according_to_access_list(deps: &mut Vec<Dependency>, out: 
     });
 }
 
+/// Example: get_default_expr_statements_and_depending_tags(expr, String::from("_name_"))
+/// (
+///     vec![
+///          "_name_ = _name_Data0 + _name_Data1".to_string(),
+///          "(_, _name_Data0) = unbundle (getOffset <$> input1Win <*> _tagprefix_In1 <*> (pure 1) <*> (pure 10))".to_string(),
+///          "(_, _name_Data1) = unbundle (getOffsetFromNonVec <$> out0 <*> _tagprefix_Out0 <*> (pure 1) <*> _name_Data1Dflt)".to_string(),
+///          "(_, _name_Data1Dflt) = unbundle (getOffset <$> input0Win <*> _tagprefix_In0 <*> (pure 1) <*> (pure 20))".to_string(),
+///      ],
+///     vec![ Node::OutputStream(0)]
+/// )
+fn get_default_expr_statements_and_depending_tags(
+    expr: &Expression,
+    name_prefix: String,
+    ir: &HardwareIR,
+) -> (Vec<String>, Vec<Node>) {
+    let mut statements: Vec<String> = Vec::new();
+    let mut depending_tags: Vec<Node> = Vec::new();
+    match &expr.kind {
+        ExpressionKind::ArithLog(op, exprs) => match op {
+            ArithLogOp::Add => {
+                assert_eq!(exprs.len(), 2);
+                statements.push(format!(
+                    "{} = {}Data0 + {}Data1",
+                    name_prefix, name_prefix, name_prefix
+                ));
+                exprs.iter().enumerate().for_each(|(i, child_expr)| {
+                    let (child_statements, child_tags) =
+                        get_default_expr_statements_and_depending_tags(
+                            child_expr,
+                            format!("{}Data{}", name_prefix, i),
+                            ir,
+                        );
+                    statements.extend(child_statements);
+                    depending_tags.extend(child_tags);
+                });
+            }
+            _ => unimplemented!(),
+        },
+        ExpressionKind::Default { expr, default } => {
+            todo!()
+        }
+        ExpressionKind::StreamAccess {
+            target,
+            parameters,
+            access_kind,
+        } => {
+            let (target_name, tag, dflt_val) = match target {
+                StreamReference::In(x) => (
+                    format!("input{}Win", x.clone()),
+                    format!("_tagprefix_In{}", x.clone()),
+                    datatypes::get_default_for_type(&ir.mir.inputs[x.clone()].ty),
+                ),
+                StreamReference::Out(x) => (
+                    format!("out{}", x.clone()),
+                    format!("_tagprefix_Out{}", x.clone()),
+                    datatypes::get_default_for_type(&ir.mir.outputs[x.clone()].ty),
+                ),
+            };
+            match access_kind {
+                StreamAccessKind::Sync => {
+                    statements.push(format!(
+                        "(_, {}) = getMatchingTag <$> {} <*> {} <*> (pure {})",
+                        name_prefix, target_name, tag, dflt_val
+                    ));
+                }
+                StreamAccessKind::Offset(off) => match off {
+                    Offset::Past(x) => {
+                        let node = Node::from_stream(target);
+                        depending_tags.push(node.clone());
+                        let target_keeps_multiple_values = {
+                            let memory = ir.required_memory.get(&node).unwrap().clone();
+                            memory > 1
+                        };
+                        if target_keeps_multiple_values {
+                            let statement = format!("(_, {}) = unbundle (getOffset <$> {} <*> {} <*> (pure {}) <*> (pure {}))", name_prefix, target_name, tag, x, dflt_val);
+                            statements.push(statement);
+                        } else {
+                            let statement = format!("(_, {}) = unbundle (getOffsetFromNonVec <$> {} <*> {} <*> (pure {}) <*> (pure {}))", name_prefix, target_name, tag, x, dflt_val);
+                            statements.push(statement);
+                        }
+                    }
+                    _ => unimplemented!(),
+                },
+                _ => unimplemented!(),
+            }
+        }
+        ExpressionKind::LoadConstant(constant) => match constant {
+            Constant::Int(x) => {
+                statements.push(format!("{}Dflt = pure {}", name_prefix, x));
+            }
+            _ => unimplemented!(),
+        },
+        _ => unimplemented!(),
+    };
 
-fn get_default_expr_statements_and_depending_tags(expr: &Expression) -> (Vec<String>, Vec<Node>) {
     let mut depending_tags: Vec<Node> = vec![Node::OutputStream(0)];
     let mut statements = vec![
         "_name_ = _name_Data0 + _name_Data1".to_string(),
@@ -585,7 +683,11 @@ fn get_default_expr_statements_and_depending_tags(expr: &Expression) -> (Vec<Str
         "(_, _name_Data1) = unbundle (getOffsetFromNonVec <$> out0 <*> _tagprefix_Out0 <*> (pure 1) <*> _name_Data1Dflt)".to_string(),
         "(_, _name_Data1Dflt) = unbundle (getOffset <$> input0Win <*> _tagprefix_In0 <*> (pure 1) <*> (pure 20))".to_string(),
     ];
-    let depending_tags: Vec<Node> = depending_tags.into_iter().collect::<HashSet<_>>().into_iter().collect();
+    let depending_tags: Vec<Node> = depending_tags
+        .into_iter()
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect();
     (statements, depending_tags)
 }
 
@@ -738,9 +840,10 @@ fn get_extracted_tags_of_dependencies(
     ir: &HardwareIR,
 ) -> String {
     let node_name = get_node_name(node);
-    let depending_tags_from_all_default_exprs: Vec<Node> = deps.iter().fold(Vec::new(), |acc, dep| {
-        [&acc[..], &dep.depending_tags_from_default_expr[..]].concat()
-    });
+    let depending_tags_from_all_default_exprs: Vec<Node> =
+        deps.iter().fold(Vec::new(), |acc, dep| {
+            [&acc[..], &dep.depending_tags_from_default_expr[..]].concat()
+        });
 
     let extracted: Vec<String> = get_all_streams(ir)
         .iter()
@@ -759,7 +862,9 @@ fn get_extracted_tags_of_dependencies(
                     }
                 },
                 None => {
-                    let dep = depending_tags_from_all_default_exprs.iter().find(|&dep| dep == node);
+                    let dep = depending_tags_from_all_default_exprs
+                        .iter()
+                        .find(|&dep| dep == node);
                     match dep {
                         Some(d) => match d {
                             Node::InputStream(x) => {
