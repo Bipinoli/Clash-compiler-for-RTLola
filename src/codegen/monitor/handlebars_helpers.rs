@@ -1,11 +1,12 @@
 use handlebars::{
     Context, Handlebars, Helper, HelperResult, Output, RenderContext, RenderError,
-    RenderErrorReason, Renderable, ScopedJson, HelperDef
+    RenderErrorReason, Renderable, ScopedJson, HelperDef, Template, StringOutput
 };
 
 pub fn register_helpers(handlebars: &mut Handlebars) {
     handlebars.register_helper("replace", Box::new(ReplaceHelper));
     handlebars.register_helper("eval", Box::new(EvaluateHelper));
+    handlebars.register_helper("array", Box::new(ArrayHelper));
 }
 
 /// Example:
@@ -42,7 +43,7 @@ fn replace_helper<'reg: 'rc, 'rc>(
         .value()
         .as_array()
         .ok_or(RenderError::from(RenderErrorReason::InvalidParamType(
-            "must be an array",
+            "array",
         )))?;
 
     let replacements = h
@@ -54,12 +55,12 @@ fn replace_helper<'reg: 'rc, 'rc>(
         .value()
         .as_array()
         .ok_or(RenderError::from(RenderErrorReason::InvalidParamType(
-            "must be an array",
+            "array",
         )))?;
 
     if targets.len() != replacements.len() {
-        return Err(RenderError::from(RenderErrorReason::InvalidParamType(
-            "Size of target and replacement lists don't match",
+        return Err(RenderError::from(RenderErrorReason::Other(
+            "Size of target and replacement lists don't match".to_string(),
         )));
     }
 
@@ -102,19 +103,80 @@ impl HelperDef for EvaluateHelper {
         ctx: &'rc Context,
         rc: &mut RenderContext<'reg, 'rc>,
     ) -> Result<ScopedJson<'rc>, RenderError> {
-        let Some(template_param) = h.param(0) else {
-            return Err(RenderErrorReason::MissingVariable("template string".into()).into());
-        };
-        let template_str = template_param
-            .value()
-            .as_str()
-            .ok_or(RenderErrorReason::InvalidParamType("Expected a string"))?;
+        let template_str = h.param(0)
+            .and_then(|v| v.value().as_str())
+            .ok_or_else(|| RenderError::from(RenderErrorReason::InvalidParamType("string")))?;
 
-        // Compile and render the dynamic string as a template
-        let compiled = reg.compile_template(template_str)?;
-        let mut output = StringOutput::new();
-        compiled.render(ctx, rc, &mut output)?;
+        let re = regex::Regex::new(r"\{\{\s*(.*?)\s*\}\}").unwrap();
+        let variables: Vec<String> = re.captures_iter(template_str)
+            .filter_map(|cap| cap.get(1).map(|m| m.as_str().to_string()))
+            .collect();
 
-        Ok(ScopedJson::Derived(Value::String(output.into_string()?)))
+        dbg!(&template_str);
+        dbg!(&variables);
+        // dbg!(&ctx);
+
+        let mut result = String::from(template_str);
+        variables.iter().for_each(|var| {
+            let var_str = format!("{{{{{}}}}}", var);
+            if let Some(block_ctx) = rc.block() {
+                dbg!(&block_ctx);
+                dbg!(&var);
+                dbg!(&block_ctx.get_local_var(&var));
+                let val = if var.starts_with("@") {
+                    // local variable
+                    match block_ctx.get_local_var(&var[1..]) {
+                        Some(val) => {
+                            if val.is_number() {
+                                format!("{}", val.as_number().unwrap())
+                            } else {
+                                format!("{}", val.as_str().unwrap())
+                            } 
+                        }, 
+                        None => String::new(),
+                    }
+                } else {
+                    // context variable
+                    match rc.evaluate(ctx, &var) {
+                        Ok(scoped_json) => {
+                            dbg!(&scoped_json);
+                            match scoped_json {
+                                ScopedJson::Context(val, _) => {
+                                    if val.is_number() {
+                                        format!("{}", val.as_number().unwrap())
+                                    } else {
+                                        format!("{}", val.as_str().unwrap())
+                                    } 
+                                },
+                                _ => String::new()
+                            }
+                        },
+                        _ => String::new()
+                    }
+                };
+                result = result.replace(&var_str, &val);
+            }
+        }); 
+
+        Ok(ScopedJson::Derived(serde_json::Value::String(result)))
+    }
+}
+
+struct ArrayHelper;
+impl HelperDef for ArrayHelper {
+    fn call_inner<'reg: 'rc, 'rc>(
+        &self,
+        h: &Helper<'rc>,
+        _reg: &'reg Handlebars<'reg>,
+        _ctx: &'rc Context,
+        _rc: &mut RenderContext<'reg, 'rc>,
+    ) -> Result<ScopedJson<'rc>, RenderError> {
+        // Collect all parameters into an array
+        let mut array = Vec::new();
+        for param in h.params() {
+            array.push(param.value().clone());
+        }
+        
+        Ok(ScopedJson::Derived(serde_json::Value::Array(array)))
     }
 }
