@@ -1,6 +1,6 @@
 use handlebars::{
-    Context, Handlebars, Helper, HelperResult, Output, RenderContext, RenderError,
-    RenderErrorReason, Renderable, ScopedJson, HelperDef, Template, StringOutput
+    Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderError,
+    RenderErrorReason, Renderable, ScopedJson,
 };
 
 pub fn register_helpers(handlebars: &mut Handlebars) {
@@ -94,35 +94,39 @@ fn replace_helper<'reg: 'rc, 'rc>(
     Ok(())
 }
 
+/// Evaluates dynamic template before passing as an agrugment to another helper
+///
+/// Example:
+/// {{#replace
+///     (array "_default_expr_")
+///     (array (eval "out{{../idx}}Data{{@index}}Dflt"))
+/// }}
+/// output{{../idx}}Data{{@index}} = _default_expr_
+/// {{/replace}}
 struct EvaluateHelper;
 impl HelperDef for EvaluateHelper {
     fn call_inner<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'rc>,
-        reg: &'reg Handlebars<'reg>,
+        _reg: &'reg Handlebars<'reg>,
         ctx: &'rc Context,
         rc: &mut RenderContext<'reg, 'rc>,
     ) -> Result<ScopedJson<'rc>, RenderError> {
-        let template_str = h.param(0)
+        let template_str = h
+            .param(0)
             .and_then(|v| v.value().as_str())
             .ok_or_else(|| RenderError::from(RenderErrorReason::InvalidParamType("string")))?;
 
         let re = regex::Regex::new(r"\{\{\s*(.*?)\s*\}\}").unwrap();
-        let variables: Vec<String> = re.captures_iter(template_str)
+        let variables: Vec<String> = re
+            .captures_iter(template_str)
             .filter_map(|cap| cap.get(1).map(|m| m.as_str().to_string()))
             .collect();
-
-        dbg!(&template_str);
-        dbg!(&variables);
-        // dbg!(&ctx);
 
         let mut result = String::from(template_str);
         variables.iter().for_each(|var| {
             let var_str = format!("{{{{{}}}}}", var);
             if let Some(block_ctx) = rc.block() {
-                dbg!(&block_ctx);
-                dbg!(&var);
-                dbg!(&block_ctx.get_local_var(&var));
                 let val = if var.starts_with("@") {
                     // local variable
                     match block_ctx.get_local_var(&var[1..]) {
@@ -131,32 +135,29 @@ impl HelperDef for EvaluateHelper {
                                 format!("{}", val.as_number().unwrap())
                             } else {
                                 format!("{}", val.as_str().unwrap())
-                            } 
-                        }, 
+                            }
+                        }
                         None => String::new(),
                     }
                 } else {
                     // context variable
                     match rc.evaluate(ctx, &var) {
-                        Ok(scoped_json) => {
-                            dbg!(&scoped_json);
-                            match scoped_json {
-                                ScopedJson::Context(val, _) => {
-                                    if val.is_number() {
-                                        format!("{}", val.as_number().unwrap())
-                                    } else {
-                                        format!("{}", val.as_str().unwrap())
-                                    } 
-                                },
-                                _ => String::new()
+                        Ok(scoped_json) => match scoped_json {
+                            ScopedJson::Context(val, _) => {
+                                if val.is_number() {
+                                    format!("{}", val.as_number().unwrap())
+                                } else {
+                                    format!("{}", val.as_str().unwrap())
+                                }
                             }
+                            _ => String::new(),
                         },
-                        _ => String::new()
+                        _ => String::new(),
                     }
                 };
                 result = result.replace(&var_str, &val);
             }
-        }); 
+        });
 
         Ok(ScopedJson::Derived(serde_json::Value::String(result)))
     }
@@ -176,7 +177,7 @@ impl HelperDef for ArrayHelper {
         for param in h.params() {
             array.push(param.value().clone());
         }
-        
+
         Ok(ScopedJson::Derived(serde_json::Value::Array(array)))
     }
 }
