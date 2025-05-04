@@ -157,7 +157,7 @@ hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Even
 hlc inputs = out
     where 
         out = bundle (newEvent, event)
-        newEvent = slide0 .||. pacing0 .||. pacing1 .||. pacing2
+        newEvent = hasInput0 .||. hasInput1 .||. slide0
         event = bundle (inputs, slides, pacings)
 
         slides = slide0
@@ -187,7 +187,7 @@ hlc inputs = out
 ---------------------------------------------------------------
 
 type Tag = Unsigned 8
--- maxTag must be at least the size of the sliding window to avoid duplicate tags in the window
+-- maxTag must be at least the size of the maximum window to avoid duplicate tags in the window
 -- also to avoid having to do modulo operations maxTag must be at least as big as the largest offset
 maxTag = 4 :: Tag
 invalidTag = maxTag + 1
@@ -264,35 +264,37 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         output1Aktv = delay False (delay False (delay False (delay False (delay False (delay False p1)))))
         output2Aktv = delay False (delay False (delay False (delay False (delay False (delay False p2)))))
 
-        -- level 0
-        input0Win = input0Window enIn0 (bundle (tagIn0, input0Data))
-        input1Win = input1Window enIn1 (bundle (tagIn1, input1Data))
+        -- Evaluation of input windows: level 0
+        input0Win = input0Window enIn0 tagIn0 input0Data
+        input1Win = input1Window enIn1 tagIn1 input1Data
 
-        -- level 1
-        (level1TagIn0, _, _, level1TagOut1, _, _) = unbundle curTagsLevel1
-        out0 = outputStream0 enOut0 out0Data0 out0Data1 
+        -- Evaluation of output 0: level 1
+        (out0Level1TagIn0, _, out0Level1TagOut0, out0Level1TagOut1, _, _) = unbundle curTagsLevel1
+        out0 = outputStream0 enOut0 out0Level1TagOut0 out0Data0 out0Data1 
         out0Data0 = input0Win
-        out0Data1 = getOffset <$> out1 <*> level1TagOut1 <*> (pure 3) <*> (pure 2)
+        out0Data1 = getOffset <$> out1 <*> out0Level1TagOut1 <*> (pure 3) <*> out0Data1Dflt
+        out0Data1Dflt = pure 2
 
-        -- level 2
-        (_, level2TagIn1, level2TagOut0, _, _, _) = unbundle curTagsLevel2
-        out1 = outputStream1 enOut1 out1Data0 out1Data1 
-        out1Data0 = getMatchingTag <$> input1Win <*> level2TagIn1 <*> (pure 0)
-        out1Data1 = getMatchingTag <$> out0 <*> level2TagOut0 <*> (pure 0)
+        -- Evaluation of output 1: level 2
+        (_, out1Level2TagIn1, out1Level2TagOut0, out1Level2TagOut1, _, _) = unbundle curTagsLevel2
+        out1 = outputStream1 enOut1 out1Level2TagOut1 out1Data0 out1Data1 
+        out1Data0 = getMatchingTag <$> input1Win <*> out1Level2TagIn1 <*> (pure 0)
+        out1Data1 = getMatchingTag <$> out0 <*> out1Level2TagOut0 <*> (pure 0)
 
-        -- level 4
-        (_, _, level4TagOut0, _, _, level4TagSw0) = unbundle curTagsLevel4
-        out2 = outputStream2 enOut2 out2Data0 out2Data1 
-        out2Data0 = getMatchingTag <$> out0 <*> level4TagOut0 <*> (pure 1)
+        -- Evaluation of output 2: level 4
+        (_, _, out2Level4TagOut0, _, out2Level4TagOut2, out2Level4TagSw0) = unbundle curTagsLevel4
+        out2 = outputStream2 enOut2 out2Level4TagOut2 out2Data0 out2Data1 
+        out2Data0 = getMatchingTag <$> out0 <*> out2Level4TagOut0 <*> out2Data0Dflt
+        out2Data0Dflt = pure 1
         out2Data1 = sw0
 
-        -- level 3
-        (_, _, _, level3TagOut1, _, level3TagSw0) = unbundle curTagsLevel3
-        sw0 = slidingWindow0 enSw0 sld0 (bundle (level3TagSw0, sw0Data))
+        -- Evaluation of sliding window 0: level 3
+        (_, _, _, sw0Level3TagOut1, _, sw0Level3TagSw0) = unbundle curTagsLevel3
+        sw0 = slidingWindow0 enSw0 sld0 (bundle (sw0Level3TagSw0, sw0Data))
         sw0Data = bundle (sw0DataVal, sw0DataPacing)
-        (_, sw0DataVal) = unbundle (getMatchingTag <$> out1 <*> level3TagOut1 <*> (pure 0))
+        (_, sw0DataVal) = unbundle (getMatchingTag <$> out1 <*> sw0Level3TagOut1 <*> (pure 0))
 
-        -- level 5
+        -- Outputing all results: level 5
         (_, _, level5TagOut0, level5TagOut1, level5TagOut2, _) = unbundle curTagsLevel5
         output0 = bundle (output0Data, output0Aktv)
         (_, output0Data) = unbundle (getMatchingTag <$> out0 <*> level5TagOut0 <*> (pure 0))
@@ -315,46 +317,46 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
 
 
-input0Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
-input0Window en td = result
-    where result = register (invalidTag, 0) (mux en td result)
+input0Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+input0Window en tag val = result
+    where result = register (invalidTag, 0) (mux en (bundle (tag, val)) result)
 
 
-input1Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Vec 2 (Tag, Int))
-input1Window en td = result
-    where result = register (repeat (invalidTag, 0)) (mux en ((<<+) <$> result <*> td) result)
+input1Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 2 (Tag, Int))
+input1Window en tag val = result
+    where result = register (repeat (invalidTag, 0)) (mux en ((<<+) <$> result <*> (bundle (tag, val))) result)
 
 
 
-outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Vec 3 (Tag, Int))
-outputStream0 en in0WithTag out1WithTag = result
+outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Vec 3 (Tag, Int))
+outputStream0 en tag in0WithTag out1WithTag = result
     where
         result = register (repeat (invalidTag, 0)) (mux en next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in0 + out1
-        (tag, in0) = unbundle in0WithTag
+        (_, in0) = unbundle in0WithTag
         (_, out1) = unbundle out1WithTag
 
 
-outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Vec 3 (Tag, Int))
-outputStream1 en in1WithTag out0WithTag = result
+outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Vec 3 (Tag, Int))
+outputStream1 en tag in1WithTag out0WithTag = result
     where
         result = register (repeat (invalidTag, 0)) (mux en next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out0 + in1
-        (tag, in1) = unbundle in1WithTag
+        (_, in1) = unbundle in1WithTag
         (_, out0) = unbundle out0WithTag
 
 
-outputStream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, Int) -> Signal dom (Tag, (Vec 3 Int)) -> Signal dom (Tag, Int)
-outputStream2 en out0WithTag sw0WithTag = result
+outputStream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, Int) -> Signal dom (Tag, (Vec 3 Int)) -> Signal dom (Tag, Int)
+outputStream2 en tag out0WithTag sw0WithTag = result
     where
         result = register (invalidTag, 0) (mux en nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out0 + (merge0 <$> sw0)
-        (tag, out0) = unbundle out0WithTag
+        (_, out0) = unbundle out0WithTag
         (_, sw0) = unbundle sw0WithTag
         merge0 :: Vec 3 Int -> Int
         merge0 win = fold windowBucketFunc0 win

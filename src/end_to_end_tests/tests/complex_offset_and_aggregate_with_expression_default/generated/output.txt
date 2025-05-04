@@ -1,0 +1,13 @@
+Time scale of (testbench) is 1us / 1ns
+VCD info: dumpfile dump.vcd opened for output.
+Time 10180000000: Active outputs: (1, 1, 1, 1, 1, 1, 1, 1), Outputs: (4, 2, 10, 14, 1, 1, 16, 14)
+Time 20180000000: Active outputs: (0, 0, 0, 0, 1, 1, 1, 1), Outputs: (4, 2, 10, 14, 2, 3, 19, 14)
+Time 30180000000: Active outputs: (1, 1, 1, 1, 1, 1, 1, 1), Outputs: (17, 2, 40, 71, 3, 6, 80, 85)
+Time 35180000000: Active outputs: (0, 0, 0, 0, 1, 0, 0, 0), Outputs: (17, 2, 40, 71, 4, 6, 80, 85)
+Time 40180000000: Active outputs: (0, 0, 0, 0, 1, 1, 1, 1), Outputs: (17, 2, 40, 71, 5, 5, 81, 85)
+Time 50180000000: Active outputs: (0, 0, 0, 0, 1, 1, 1, 1), Outputs: (17, 2, 40, 71, 6, 3, 80, 71)
+Time 55180000000: Active outputs: (1, 1, 1, 1, 1, 0, 0, 0), Outputs: (77, 4, 320, 468, 7, 3, 80, 71)
+Time 60180000000: Active outputs: (0, 0, 0, 0, 1, 1, 1, 1), Outputs: (77, 4, 320, 468, 8, 0, 476, 71)
+Time 70180000000: Active outputs: (1, 1, 1, 1, 1, 1, 1, 1), Outputs: (475, 6, 2864, 3807, 9, 7, 3823, 3807)
+Time 80180000000: Active outputs: (1, 1, 1, 1, 1, 1, 1, 1), Outputs: (3815, 7, 26721, 34343, 10, 15, 34368, 38150)
+testbench.v:194: $finish called at 80420000000 (100fs)

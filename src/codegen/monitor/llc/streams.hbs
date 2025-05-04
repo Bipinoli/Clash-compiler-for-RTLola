@@ -1,13 +1,13 @@
 
 {{#each input_streams}}
 {{#if (gt this.memory 1)}}
-input{{@index}}Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, {{this.data_type}}) -> Signal dom (Vec {{this.memory}} (Tag, {{this.data_type}}))
-input{{@index}}Window en td = result
-    where result = register (repeat (invalidTag, {{this.default_value}})) (mux en ((<<+) <$> result <*> td) result)
+input{{@index}}Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom {{this.data_type}} -> Signal dom (Vec {{this.memory}} (Tag, {{this.data_type}}))
+input{{@index}}Window en tag val = result
+    where result = register (repeat (invalidTag, {{this.default_value}})) (mux en ((<<+) <$> result <*> (bundle (tag, val))) result)
 {{else}}
-input{{@index}}Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom (Tag, {{this.data_type}}) -> Signal dom (Tag, {{this.data_type}})
-input{{@index}}Window en td = result
-    where result = register (invalidTag, {{this.default_value}}) (mux en td result)
+input{{@index}}Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom {{this.data_type}} -> Signal dom (Tag, {{this.data_type}})
+input{{@index}}Window en tag val = result
+    where result = register (invalidTag, {{this.default_value}}) (mux en (bundle (tag, val)) result)
 {{/if}}
 
 
@@ -15,11 +15,11 @@ input{{@index}}Window en td = result
 
 {{#each output_streams}}
 {{#if (gt this.memory 1) }}
-outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> {{#each this.input_types}}Signal dom (Tag, {{this}}){{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom (Vec {{this.memory}} (Tag, {{this.output_type}}))
+outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> {{#each this.input_types}}Signal dom (Tag, {{this}}){{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom (Vec {{this.memory}} (Tag, {{this.output_type}}))
 {{else}}
-outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> {{#each this.input_types}}Signal dom (Tag, {{this}}){{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom (Tag, {{this.output_type}})
+outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> {{#each this.input_types}}Signal dom (Tag, {{this}}){{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom (Tag, {{this.output_type}})
 {{/if}}
-outputStream{{@index}} en {{#each this.inputs}}{{this}}WithTag {{/each}}= result
+outputStream{{@index}} en tag {{#each this.inputs}}{{this}}WithTag {{/each}}= result
     where
         {{#if (gt this.memory 1)}}
         result = register (repeat (invalidTag, {{this.default_value}})) (mux en next result)
@@ -30,7 +30,7 @@ outputStream{{@index}} en {{#each this.inputs}}{{this}}WithTag {{/each}}= result
         nextValWithTag = bundle (tag, nextVal)
         nextVal = {{{this.expression}}}
         {{#each this.inputs}}
-        ({{#if @first}}tag{{else}}_{{/if}}, {{this}}) = unbundle {{this}}WithTag
+        (_, {{this}}) = unbundle {{this}}WithTag
         {{/each}}
         {{#if this.is_sliding_window_based}}
         {{#each this.sliding_window_inputs}}

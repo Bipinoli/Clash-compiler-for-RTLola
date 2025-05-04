@@ -37,12 +37,14 @@ module topEntity
   wire [7:0] result_4;
   wire [7:0] c$app_arg_0;
   wire [71:0] result_5;
-  // spec.hs:264:1-137
-  reg [71:0] result_6 = {8'd4,   64'sd0};
-  // spec.hs:264:1-137
+  // spec.hs:264:1-155
+  reg [71:0] result_6 = {8'd5,   64'sd0};
+  // spec.hs:264:1-155
   wire [71:0] t;
   wire signed [63:0] x;
   wire signed [63:0] y;
+  // spec.hs:187:1-101
+  wire [7:0] out0Level1TagOut0;
   // spec.hs:170:1-70
   wire [147:0] c$ws_app_arg;
   // spec.hs:170:1-70
@@ -102,7 +104,7 @@ module topEntity
   // spec.hs:187:1-101
   wire [7:0] out0Level1TagIn2;
   // spec.hs:187:1-101
-  reg [23:0] ds2 = {8'd4,   8'd4,   8'd4};
+  reg [23:0] ds2 = {8'd5,   8'd5,   8'd5};
   // spec.hs:187:1-101
   reg  c$out0_app_arg = 1'b0;
   // spec.hs:187:1-101
@@ -117,18 +119,18 @@ module topEntity
   wire [7:0] result_15;
   // spec.hs:187:1-101
   wire  pacings;
-  // spec.hs:258:1-119
-  reg [143:0] result_16 = {{8'd4,   64'sd0},   {8'd4,   64'sd0}};
-  // spec.hs:258:1-119
+  // spec.hs:258:1-130
+  reg [143:0] result_16 = {{8'd5,   64'sd0},   {8'd5,   64'sd0}};
+  // spec.hs:258:1-130
   wire [143:0] t_1;
   wire [143:0] result_17;
   // spec.hs:187:1-101
   reg [64:0] c$input1Win_case_scrut = {64'sd0,   1'b0};
   // spec.hs:187:1-101
   reg  c$input1Win_app_arg = 1'b0;
-  // spec.hs:253:1-119
-  reg [215:0] result_18 = {{8'd4,   64'sd0},   {8'd4,   64'sd0},   {8'd4,   64'sd0}};
-  // spec.hs:253:1-119
+  // spec.hs:253:1-130
+  reg [215:0] result_18 = {{8'd5,   64'sd0},   {8'd5,   64'sd0},   {8'd5,   64'sd0}};
+  // spec.hs:253:1-130
   wire [215:0] t_2;
   wire [215:0] result_19;
   // spec.hs:187:1-101
@@ -254,31 +256,33 @@ module topEntity
 
   assign winData = $signed(result_6[63:0]);
 
-  assign c$case_alt = (result_4 == winTag) ? {ds2[7:0],
-                                              winData} : {ds2[7:0],
+  assign c$case_alt = (result_4 == winTag) ? {out0Level1TagOut0,
+                                              winData} : {out0Level1TagOut0,
                                                           $signed(result_10[63:0])};
 
-  assign result_4 = (ds2[7:0] > 8'd1) ? c$app_arg_0 : (c$app_arg_0 + 8'd3);
+  assign result_4 = (out0Level1TagOut0 > 8'd1) ? c$app_arg_0 : (c$app_arg_0 + 8'd4);
 
-  assign c$app_arg_0 = ds2[7:0] - 8'd1;
+  assign c$app_arg_0 = out0Level1TagOut0 - 8'd1;
 
   assign result_5 = c$out0_app_arg ? t : result_6;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_6_register
     if ( rst) begin
-      result_6 <= {8'd4,   64'sd0};
+      result_6 <= {8'd5,   64'sd0};
     end else if (en) begin
       result_6 <= result_5;
     end
   end
   // register end
 
-  assign t = {result_8[71:64],   (x + y)};
+  assign t = {out0Level1TagOut0,   (x + y)};
 
   assign x = $signed(result_7[63:0]);
 
   assign y = $signed(result_8[63:0]);
+
+  assign out0Level1TagOut0 = ds2[7:0];
 
   assign c$vec2 = (ws[4-1 : 0]);
 
@@ -416,7 +420,7 @@ module topEntity
                                            $signed(c$case_scrut_1[63:0])} : {out0Level1TagIn0,
                                                                              eta3};
 
-  assign result_9 = (out0Level1TagIn0 > 8'd2) ? c$app_arg_1 : (c$app_arg_1 + 8'd3);
+  assign result_9 = (out0Level1TagIn0 > 8'd2) ? c$app_arg_1 : (c$app_arg_1 + 8'd4);
 
   assign c$app_arg_1 = out0Level1TagIn0 - 8'd2;
 
@@ -493,7 +497,7 @@ module topEntity
                                             $signed(c$case_scrut_3[63:0])} : {out0Level1TagIn0,
                                                                               64'sd20};
 
-  assign result_11 = (out0Level1TagIn0 > 8'd1) ? c$app_arg_2 : (c$app_arg_2 + 8'd3);
+  assign result_11 = (out0Level1TagIn0 > 8'd1) ? c$app_arg_2 : (c$app_arg_2 + 8'd4);
 
   assign c$app_arg_2 = out0Level1TagIn0 - 8'd1;
 
@@ -568,7 +572,7 @@ module topEntity
                                             $signed(c$case_scrut_5[63:0])} : {out0Level1TagIn2,
                                                                               64'sd10};
 
-  assign result_13 = (out0Level1TagIn2 > 8'd1) ? c$app_arg_3 : (c$app_arg_3 + 8'd3);
+  assign result_13 = (out0Level1TagIn2 > 8'd1) ? c$app_arg_3 : (c$app_arg_3 + 8'd4);
 
   assign c$app_arg_3 = out0Level1TagIn2 - 8'd1;
 
@@ -614,7 +618,7 @@ module topEntity
 
   assign result_14 = pacings ? result_15 : t_0;
 
-  assign b = t_0 == 8'd3;
+  assign b = t_0 == 8'd4;
 
   assign f1 = t_0 + 8'd1;
 
@@ -625,7 +629,7 @@ module topEntity
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_16_register
     if ( rst) begin
-      result_16 <= {{8'd4,   64'sd0},   {8'd4,   64'sd0}};
+      result_16 <= {{8'd5,   64'sd0},   {8'd5,   64'sd0}};
     end else if (en) begin
       result_16 <= result_17;
     end
@@ -657,7 +661,7 @@ module topEntity
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_18_register
     if ( rst) begin
-      result_18 <= {{8'd4,   64'sd0},   {8'd4,   64'sd0},   {8'd4,   64'sd0}};
+      result_18 <= {{8'd5,   64'sd0},   {8'd5,   64'sd0},   {8'd5,   64'sd0}};
     end else if (en) begin
       result_18 <= result_19;
     end
@@ -698,7 +702,7 @@ module topEntity
 
   assign result_20 = input1HasData ? result_21 : t_3;
 
-  assign b_0 = t_3 == 8'd3;
+  assign b_0 = t_3 == 8'd4;
 
   assign f1_0 = t_3 + 8'd1;
 
@@ -720,7 +724,7 @@ module topEntity
 
   assign result_22 = input0HasData ? result_23 : t_4;
 
-  assign b_1 = t_4 == 8'd3;
+  assign b_1 = t_4 == 8'd4;
 
   assign f1_1 = t_4 + 8'd1;
 

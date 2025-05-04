@@ -1,5 +1,5 @@
 type Tag = Unsigned 8
--- maxTag must be at least the size of the sliding window to avoid duplicate tags in the window
+-- maxTag must be at least the size of the maximum window to avoid duplicate tags in the window
 -- also to avoid having to do modulo operations maxTag must be at least as big as the largest offset
 maxTag = {{max_tag}} :: Tag
 invalidTag = maxTag + 1
@@ -24,6 +24,9 @@ getOffsetFromNonVec (winTag, winData) tag offset dflt = out
     where 
         offsetTag = earlierTag tag offset
         out = if offsetTag == winTag then (tag, winData) else (tag, dflt)
+
+getMatchingTagFromNonVec :: (Tag, a) -> Tag -> a -> (Tag, a)
+getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then (tag, dta) else (tagToMatch, dflt)
 
 earlierTag :: Tag -> Tag -> Tag
 earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
@@ -103,50 +106,60 @@ llc event = bundle (toPop, outputs)
 
         -- Evaluation of input windows: level 0
         {{#each inputs}}
-        input{{@index}}Win = input{{@index}}Window enIn{{@index}} (bundle (tagIn{{@index}}, input{{@index}}Data))
+        input{{@index}}Win = input{{@index}}Window enIn{{@index}} tagIn{{@index}} input{{@index}}Data
         {{/each}}
 
         {{#each outputs}}
         -- Evaluation of output {{@index}}: level {{this.level}}
         {{#if (gt this.level 0)}}
         {{{this.extracted_tags_of_depending}}}
-        {{/if}}
-        out{{this.idx}} = outputStream{{this.idx}} enOut{{this.idx}} {{#each this.deps}}out{{../idx}}Data{{@index}} {{/each}}
-        {{#each this.deps}}
-        {{#if (or this.is_sync_access this.is_sliding_window_access)}}
-        {{#if this.memory_more_than_one}}
-        {{#replace
-            (array "_default_expr_") 
-            (array (eval "out{{../idx}}Data{{@index}}Dflt"))
-        }}
-        out{{../idx}}Data{{@index}} = getMatchingTag <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{this.default_value}}
-        {{/replace}}
+        out{{this.idx}} = outputStream{{this.idx}} enOut{{this.idx}} out{{this.idx}}Level{{this.level}}TagOut{{this.idx}} {{#each this.deps}}out{{../idx}}Data{{@index}} {{/each}}
         {{else}}
-        out{{../idx}}Data{{@index}} = {{this.source_name}}
+        out{{this.idx}} = outputStream{{this.idx}} enOut{{this.idx}} tagOut{{this.idx}} {{#each this.deps}}out{{../idx}}Data{{@index}} {{/each}}
         {{/if}}
-        {{/if}}
-        {{#if this.is_offset_access}}
+
+        {{~#each this.deps}}
         {{#replace
             (array "_default_expr_") 
             (array (eval "out{{../idx}}Data{{@index}}Dflt"))
         }}
+
+        {{~#if this.is_sync_access}}
+            {{#if this.memory_more_than_one}}
+        out{{../idx}}Data{{@index}} = getMatchingTag <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{this.default_value}}
+            {{else}}
+        out{{../idx}}Data{{@index}} = getMatchingTagFromNonVec <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{this.default_value}}
+            {{/if}}
+        {{/if}}
+
+        {{~#if this.is_sliding_window_access}}
+            {{#if this.memory_more_than_one}}
+        out{{../idx}}Data{{@index}} = getMatchingTag <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{this.default_value}}
+            {{else}}
+        out{{../idx}}Data{{@index}} = {{this.source_name}}
+            {{/if}}
+        {{/if}}
+
+        {{~#if this.is_offset_access}} 
             {{#if this.memory_more_than_one}}
         out{{../idx}}Data{{@index}} = getOffset <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.offset}}) <*> {{this.default_value}}
             {{else}}
         out{{../idx}}Data{{@index}} = getOffsetFromNonVec <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.offset}}) <*> {{this.default_value}}
             {{/if}}
-        {{/replace}}
         {{/if}}
-        {{#if has_default_expr}}
-        {{#replace
-           (array "_name_" "_tagprefix_") 
-           (array (eval "out{{../idx}}Data{{@index}}Dflt") (eval "out{{../idx}}Level{{../level}}Tag"))
-        }}
-        {{#each default_expr_statements}}
+
+        {{~#if has_default_expr}}
+            {{#replace
+                (array "_name_" "_tagprefix_") 
+                (array (eval "out{{../idx}}Data{{@index}}Dflt") (eval "out{{../idx}}Level{{../level}}Tag"))
+            }}
+                {{#each default_expr_statements}}
         {{{this}}}
-        {{/each}}
-        {{/replace}}
+                {{/each}}
+            {{/replace}}
         {{/if}}
+
+        {{~/replace}}
         {{/each}}
 
         {{/each}}

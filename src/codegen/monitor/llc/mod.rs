@@ -503,7 +503,7 @@ fn get_dependencies_from_expression(
                         target_node: node.clone(),
                         source_name,
                         source_node,
-                        source_tag,
+                        source_tag: "".to_string(),
                         memory_more_than_one: memory > 1,
                         has_default_expr: false,
                         default_expr_statements: Vec::new(),
@@ -715,6 +715,12 @@ fn get_default_expr_statements_and_depending_tags(
                 _ => unimplemented!(),
             }
         }
+        ExpressionKind::LoadConstant(constant) => match constant {
+            Constant::Int(x) => {
+                statements.push(format!("{} = pure {}", name_prefix, x));
+            }
+            _ => unimplemented!(),
+        },
         _ => unimplemented!(),
     };
     let depending_tags: Vec<Node> = depending_tags
@@ -755,7 +761,8 @@ fn get_max_tag(ir: &HardwareIR) -> usize {
         .max()
         .unwrap_or(0);
     let max_offset = get_max_offset(ir);
-    max(max_window_size, max_offset) + 1
+    let max_memory_window = ir.required_memory.values().max().unwrap_or(&0).clone();
+    max(max(max_window_size, max_offset), max_memory_window) + 1
 }
 
 fn get_max_offset(ir: &HardwareIR) -> usize {
@@ -881,38 +888,35 @@ fn get_extracted_tags_of_dependencies(
 
     let extracted: Vec<String> = get_all_streams(ir)
         .iter()
-        .map(|node| {
-            let dep = deps.iter().find(|&dep| dep.source_node == *node);
-            match dep {
-                Some(d) => match d.source_node {
-                    Node::InputStream(x) => {
-                        format!("{}Level{}TagIn{}", node_name, level, x)
-                    }
-                    Node::OutputStream(x) => {
-                        format!("{}Level{}TagOut{}", node_name, level, x)
-                    }
-                    Node::SlidingWindow(x) => {
-                        format!("{}Level{}TagSw{}", node_name, level, x)
-                    }
-                },
-                None => {
-                    let dep = depending_tags_from_all_default_exprs
-                        .iter()
-                        .find(|&dep| dep == node);
-                    match dep {
-                        Some(d) => match d {
-                            Node::InputStream(x) => {
-                                format!("{}Level{}TagIn{}", node_name, level, x)
-                            }
-                            Node::OutputStream(x) => {
-                                format!("{}Level{}TagOut{}", node_name, level, x)
-                            }
-                            Node::SlidingWindow(x) => {
-                                format!("{}Level{}TagSw{}", node_name, level, x)
-                            }
-                        },
-                        None => "_".to_string(),
-                    }
+        .map(|nd| {
+            if nd == node {
+                let capitalized_name = node_name[0..1].to_uppercase() + &node_name[1..];
+                format!("{}Level{}Tag{}", node_name.clone(), level, capitalized_name)
+            } else {
+                let dep = deps
+                    .iter()
+                    .find(|&dep| dep.source_node == *nd)
+                    .map(|nd| Some(nd.source_node.clone()))
+                    .unwrap_or({
+                        let depending_tag_node = depending_tags_from_all_default_exprs
+                            .iter()
+                            .map(|nd| nd.clone())
+                            .find(|dep| dep == nd);
+                        depending_tag_node
+                    });
+                match dep {
+                    Some(d) => match d {
+                        Node::InputStream(x) => {
+                            format!("{}Level{}TagIn{}", node_name, level, x)
+                        }
+                        Node::OutputStream(x) => {
+                            format!("{}Level{}TagOut{}", node_name, level, x)
+                        }
+                        Node::SlidingWindow(x) => {
+                            format!("{}Level{}TagSw{}", node_name, level, x)
+                        }
+                    },
+                    _ => "_".to_string(),
                 }
             }
         })
