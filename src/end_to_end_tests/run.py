@@ -70,12 +70,10 @@ if __name__ == "__main__":
             results.append(f"{bcolors.OKGREEN}Passed: {test_dir}{bcolors.ENDC}")
         else:
             results.append(f"{bcolors.FAIL}Failed: {test_dir}{bcolors.ENDC}")
-            first_difference = 0
             for i in range(len(actual)):
                 if actual[i] != expected[i]:
-                    first_difference = i
+                    results.append(f"{bcolors.WARNING}expected: {expected[i]}\nactual: {actual[i]}\n{bcolors.ENDC}")
                     break
-            results.append(f"{bcolors.WARNING}expected: {expected[i]}\nactual: {actual[i]}\n{bcolors.ENDC}")
             all_tests_passed = False
 
     print(f"\n\n\n{bcolors.UNDERLINE}{bcolors.OKBLUE}Test results:{bcolors.ENDC}")

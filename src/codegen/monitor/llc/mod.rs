@@ -184,9 +184,12 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
                         ),
                         Node::SlidingWindow(x) => {
                             let name1 = format!("enSw{}", x.clone());
-                            let pacing1 = match ir.mir.sliding_windows[x.clone()].caller {
-                                StreamReference::Out(out_idx) => {
-                                    format!("slide{} .||. p{}", x.clone(), out_idx.clone())
+                            let pacing1 = match ir.mir.sliding_windows[x.clone()].target {
+                                StreamReference::Out(idx) => {
+                                    format!("(slide{} .||. p{})", x.clone(), idx.clone())
+                                }
+                                StreamReference::In(idx) => {
+                                    format!("(slide{} .||. input{}HasData)", x.clone(), idx.clone())
                                 }
                                 _ => unreachable!(),
                             };
