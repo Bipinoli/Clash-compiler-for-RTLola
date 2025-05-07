@@ -21,10 +21,10 @@ import Clash.Prelude
 
 -- Evaluation Order
 -- x, y, e
--- a, sw(x,f), b
+-- a, b, sw(x,f)
 -- c, f
 -- d
--- sw(d,h), g
+-- g, sw(d,h)
 -- h
 
 -- Memory Window
@@ -32,25 +32,25 @@ import Clash.Prelude
 -- window y = 1
 -- window e = 2
 -- window a = 1
--- window sw(x,f) = 1
 -- window b = 1
+-- window sw(x,f) = 1
 -- window c = 1
 -- window f = 1
 -- window d = 1
--- window sw(d,h) = 1
 -- window g = 1
+-- window sw(d,h) = 1
 -- window h = 1
 
 -- Pipeline Visualization
 -- x,y,e       |             |             | x,y,e       |             |             | x,y,e       |             |             | x,y,e      
 -- -----------------------------------------------------------------------------------------------------------------------------------------
---             | a,sw(x,f),b |             |             | a,sw(x,f),b |             |             | a,sw(x,f),b |             |            
+--             | a,b,sw(x,f) |             |             | a,b,sw(x,f) |             |             | a,b,sw(x,f) |             |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
 --             |             | c,f         |             |             | c,f         |             |             | c,f         |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
 --             |             |             | d           |             |             | d           |             |             | d          
 -- -----------------------------------------------------------------------------------------------------------------------------------------
---             |             |             |             | sw(d,h),g   |             |             | sw(d,h),g   |             |            
+--             |             |             |             | g,sw(d,h)   |             |             | g,sw(d,h)   |             |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
 --             |             |             |             |             | h           |             |             | h           |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
@@ -224,7 +224,7 @@ hlc inputs = out
 type Tag = Unsigned 8
 -- maxTag must be at least the size of the maximum window to avoid duplicate tags in the window
 -- also to avoid having to do modulo operations maxTag must be at least as big as the largest offset
-maxTag = 5 :: Tag
+maxTag = 6 :: Tag
 invalidTag = maxTag + 1
 
 getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
@@ -275,13 +275,13 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tagIn1 = genTag input1HasData
         tagOut4 = genTag p4
         tagOut0 = genTag p0
-        tagSw0 = genTag p0
         tagOut1 = genTag p1
+        tagSw0 = genTag p0
         tagOut2 = genTag p2
         tagOut5 = genTag p5
         tagOut3 = genTag p3
-        tagSw1 = genTag p1
         tagOut6 = genTag p6
+        tagSw1 = genTag p1
         tagOut7 = genTag p7
 
         -- tag generation takes 1 cycle so we need to delay the input data
@@ -302,17 +302,17 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enIn1 = delay False input1HasData
         enOut4 = delay False p4
         enOut0 = delay False (delay False p0)
-        enSw0 = delay False (delay False slide0 .||. p5)
+        enOut1 = delay False (delay False p1)
+        enSw0 = delay False (delay False (slide0 .||. input0HasData))
         sld0 = delay False (delay False slide0)
         sw0DataPacing = delay False (delay False input0HasData)
-        enOut1 = delay False (delay False p1)
         enOut2 = delay False (delay False (delay False p2))
         enOut5 = delay False (delay False (delay False p5))
         enOut3 = delay False (delay False (delay False (delay False p3)))
-        enSw1 = delay False (delay False (delay False (delay False (delay False slide1 .||. p7))))
+        enOut6 = delay False (delay False (delay False (delay False (delay False p6))))
+        enSw1 = delay False (delay False (delay False (delay False (delay False (slide1 .||. p3)))))
         sld1 = delay False (delay False (delay False (delay False (delay False slide1))))
         sw1DataPacing = delay False (delay False (delay False (delay False (delay False p3))))
-        enOut6 = delay False (delay False (delay False (delay False (delay False p6))))
         enOut7 = delay False (delay False (delay False (delay False (delay False (delay False p7)))))
 
         output0Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p0))))))
@@ -497,15 +497,15 @@ outputStream4 en tag out4WithTag = result
         (_, out4) = unbundle out4WithTag
 
 
-outputStream5 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, (Vec 3 Int)) -> Signal dom (Tag, Int)
+outputStream5 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, (Vec 4 Int)) -> Signal dom (Tag, Int)
 outputStream5 en tag sw0WithTag = result
     where
         result = register (invalidTag, 0) (mux en nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (merge0 <$> sw0)
         (_, sw0) = unbundle sw0WithTag
-        merge0 :: Vec 3 Int -> Int
-        merge0 win = fold windowBucketFunc0 win
+        merge0 :: Vec 4 Int -> Int
+        merge0 win = fold windowBucketFunc0 (tail win)
 
 
 outputStream6 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
@@ -519,15 +519,15 @@ outputStream6 en tag out3WithTag out4WithTag out5WithTag = result
         (_, out5) = unbundle out5WithTag
 
 
-outputStream7 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, (Vec 4 Int)) -> Signal dom (Tag, Int)
+outputStream7 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, (Vec 5 Int)) -> Signal dom (Tag, Int)
 outputStream7 en tag sw1WithTag = result
     where
         result = register (invalidTag, 0) (mux en nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (merge1 <$> sw1)
         (_, sw1) = unbundle sw1WithTag
-        merge1 :: Vec 4 Int -> Int
-        merge1 win = fold windowBucketFunc1 win
+        merge1 :: Vec 5 Int -> Int
+        merge1 win = fold windowBucketFunc1 (tail win)
 
 
 
@@ -538,29 +538,8 @@ windowBucketFunc1 :: Int -> Int -> Int
 windowBucketFunc1 acc item = acc + item
 
 
-slidingWindow0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Tag, (Int, Bool)) -> Signal dom (Tag, (Vec 3 Int)) 
+slidingWindow0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Tag, (Int, Bool)) -> Signal dom (Tag, (Vec 4 Int)) 
 slidingWindow0 en slide hasInputWithTag = window
-    where
-        window = register (invalidTag, dflt) (mux en next window)
-        next = bundle (tag, nextWindow <$> (snd <$> window) <*> slide <*> hasInput)
-        dflt = repeat 0 :: Vec 3 Int
-        (tag, hasInput) = unbundle hasInputWithTag
-
-        nextWindow :: Vec 3 Int -> Bool -> (Int, Bool) -> Vec 3 Int
-        nextWindow win toSlide inpt = out
-            where
-                (dta, hasData) = inpt
-                out = case (toSlide, hasData) of
-                    (False, False) -> win
-                    (False, True) -> lastBucketUpdated
-                    (True, False) -> win <<+ 0
-                    (True, True) -> win <<+ dta
-                lastBucketUpdated = replace lastIndx (windowBucketFunc0 (last win) dta) win
-                lastIndx = length win - 1       
-
-
-slidingWindow1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Tag, (Int, Bool)) -> Signal dom (Tag, (Vec 4 Int)) 
-slidingWindow1 en slide hasInputWithTag = window
     where
         window = register (invalidTag, dflt) (mux en next window)
         next = bundle (tag, nextWindow <$> (snd <$> window) <*> slide <*> hasInput)
@@ -574,11 +553,28 @@ slidingWindow1 en slide hasInputWithTag = window
                 out = case (toSlide, hasData) of
                     (False, False) -> win
                     (False, True) -> lastBucketUpdated
-                    (True, False) -> win <<+ 0
-                    (True, True) -> win <<+ dta
-                lastBucketUpdated = replace lastIndx (windowBucketFunc1 (last win) dta) win
-                lastIndx = length win - 1       
+                    (True, False) -> 0 +>> win
+                    (True, True) -> 0 +>> lastBucketUpdated
+                lastBucketUpdated = replace 0 (windowBucketFunc0 (head win) dta) win
 
+slidingWindow1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Tag, (Int, Bool)) -> Signal dom (Tag, (Vec 5 Int)) 
+slidingWindow1 en slide hasInputWithTag = window
+    where
+        window = register (invalidTag, dflt) (mux en next window)
+        next = bundle (tag, nextWindow <$> (snd <$> window) <*> slide <*> hasInput)
+        dflt = repeat 0 :: Vec 5 Int
+        (tag, hasInput) = unbundle hasInputWithTag
+
+        nextWindow :: Vec 5 Int -> Bool -> (Int, Bool) -> Vec 5 Int
+        nextWindow win toSlide inpt = out
+            where
+                (dta, hasData) = inpt
+                out = case (toSlide, hasData) of
+                    (False, False) -> win
+                    (False, True) -> lastBucketUpdated
+                    (True, False) -> 0 +>> win
+                    (True, True) -> 0 +>> lastBucketUpdated
+                lastBucketUpdated = replace 0 (windowBucketFunc1 (head win) dta) win
 
 
 

@@ -46,14 +46,14 @@
         },
         {
             "name": "topEntity.v",
-            "sha256": "ab4eabc5dea1f74bf7be2b348774597695727a5e37137e337097f4d8ba4f4623"
+            "sha256": "c83af4238782cf8f7371a68e07d39d27d33995e1e5aba417e0ce82f5d45f7d6f"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "57f8481df6407d7c1b010f05b084a809ea9a4e014a46dc9486c66ae471edd8a3",
+    "hash": "65314de2f0d86da57cac99a72d806e16a99cb075d8d8ea362f483dd3605352d4",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -84,28 +84,14 @@
             {
                 "direction": "in",
                 "is_clock": false,
-                "name": "inputs_0_0",
+                "name": "inputs_0",
                 "type_name": "signed [63:0]",
                 "width": 64
             },
             {
                 "direction": "in",
                 "is_clock": false,
-                "name": "inputs_0_1",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "in",
-                "is_clock": false,
-                "name": "inputs_1_0",
-                "type_name": "signed [63:0]",
-                "width": 64
-            },
-            {
-                "direction": "in",
-                "is_clock": false,
-                "name": "inputs_1_1",
+                "name": "inputs_1",
                 "type_name": "",
                 "width": 1
             },
@@ -168,62 +154,6 @@
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_0_4_0",
-                "type_name": "signed [63:0]",
-                "width": 64
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_0_4_1",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_0_5_0",
-                "type_name": "signed [63:0]",
-                "width": 64
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_0_5_1",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_0_6_0",
-                "type_name": "signed [63:0]",
-                "width": 64
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_0_6_1",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_0_7_0",
-                "type_name": "signed [63:0]",
-                "width": 64
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_0_7_1",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
                 "name": "result_1_0",
                 "type_name": "",
                 "width": 1
@@ -274,48 +204,6 @@
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_1_4_3",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_4_4",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_4_5",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_4_6",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_4_7",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_5_0",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_5_1",
                 "type_name": "",
                 "width": 1
             }

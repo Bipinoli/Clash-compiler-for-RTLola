@@ -191,7 +191,6 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
                                 StreamReference::In(idx) => {
                                     format!("(slide{} .||. input{}HasData)", x.clone(), idx.clone())
                                 }
-                                _ => unreachable!(),
                             };
                             let name2 = format!("sld{}", x.clone());
                             let pacing2 = format!("slide{}", x.clone());

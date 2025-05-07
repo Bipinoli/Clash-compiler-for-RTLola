@@ -35,7 +35,7 @@ outputStream{{@index}} en tag {{#each this.inputs}}{{this}}WithTag {{/each}}= re
         {{#if this.is_sliding_window_based}}
         {{#each this.sliding_window_inputs}}
         merge{{this.window_idx}} :: Vec {{this.window_size}} {{this.data_type}} -> {{this.data_type}}
-        merge{{this.window_idx}} win = fold windowBucketFunc{{this.window_idx}} win
+        merge{{this.window_idx}} win = fold windowBucketFunc{{this.window_idx}} (tail win)
         {{/each}}
         {{/if}}
 
@@ -77,11 +77,9 @@ slidingWindow{{@index}} en slide hasInputWithTag = window
                 out = case (toSlide, hasData) of
                     (False, False) -> win
                     (False, True) -> lastBucketUpdated
-                    (True, False) -> win <<+ {{this.default_value}}
-                    (True, True) -> win <<+ dta
-                lastBucketUpdated = replace lastIndx (windowBucketFunc{{@index}} (last win) dta) win
-                lastIndx = length win - 1       
-
+                    (True, False) -> {{this.default_value}} +>> win
+                    (True, True) -> {{this.default_value}} +>> lastBucketUpdated
+                lastBucketUpdated = replace 0 (windowBucketFunc{{@index}} (head win) dta) win
 
 {{/each}}
 {{/if}}
