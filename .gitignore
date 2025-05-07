@@ -5,6 +5,7 @@ scratch/
 # Added by cargo
 
 /target
+.stack-work/
 
 *.o
 *.hi
