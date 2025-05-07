@@ -21,8 +21,8 @@ import Clash.Prelude
 
 -- Evaluation Order
 -- x, y, e
--- b, a, sw(x,f)
--- f, c
+-- a, sw(x,f), b
+-- c, f
 -- d
 -- sw(d,h), g
 -- h
@@ -31,11 +31,11 @@ import Clash.Prelude
 -- window x = 3
 -- window y = 1
 -- window e = 2
--- window b = 1
 -- window a = 1
 -- window sw(x,f) = 1
--- window f = 1
+-- window b = 1
 -- window c = 1
+-- window f = 1
 -- window d = 1
 -- window sw(d,h) = 1
 -- window g = 1
@@ -44,9 +44,9 @@ import Clash.Prelude
 -- Pipeline Visualization
 -- x,y,e       |             |             | x,y,e       |             |             | x,y,e       |             |             | x,y,e      
 -- -----------------------------------------------------------------------------------------------------------------------------------------
---             | b,a,sw(x,f) |             |             | b,a,sw(x,f) |             |             | b,a,sw(x,f) |             |            
+--             | a,sw(x,f),b |             |             | a,sw(x,f),b |             |             | a,sw(x,f),b |             |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
---             |             | f,c         |             |             | f,c         |             |             | f,c         |            
+--             |             | c,f         |             |             | c,f         |             |             | c,f         |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
 --             |             |             | d           |             |             | d           |             |             | d          
 -- -----------------------------------------------------------------------------------------------------------------------------------------
@@ -274,11 +274,11 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tagIn0 = genTag input0HasData
         tagIn1 = genTag input1HasData
         tagOut4 = genTag p4
-        tagOut1 = genTag p1
         tagOut0 = genTag p0
         tagSw0 = genTag p0
-        tagOut5 = genTag p5
+        tagOut1 = genTag p1
         tagOut2 = genTag p2
+        tagOut5 = genTag p5
         tagOut3 = genTag p3
         tagSw1 = genTag p1
         tagOut6 = genTag p6
@@ -301,13 +301,13 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enIn0 = delay False input0HasData
         enIn1 = delay False input1HasData
         enOut4 = delay False p4
-        enOut1 = delay False (delay False p1)
         enOut0 = delay False (delay False p0)
         enSw0 = delay False (delay False slide0 .||. p5)
         sld0 = delay False (delay False slide0)
         sw0DataPacing = delay False (delay False input0HasData)
-        enOut5 = delay False (delay False (delay False p5))
+        enOut1 = delay False (delay False p1)
         enOut2 = delay False (delay False (delay False p2))
+        enOut5 = delay False (delay False (delay False p5))
         enOut3 = delay False (delay False (delay False (delay False p3)))
         enSw1 = delay False (delay False (delay False (delay False (delay False slide1 .||. p7))))
         sld1 = delay False (delay False (delay False (delay False (delay False slide1))))

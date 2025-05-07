@@ -156,7 +156,7 @@ hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Even
 hlc inputs = out
     where 
         out = bundle (newEvent, event)
-        newEvent = hasInput0 .||. hasInput1
+        newEvent = hasInput0 .||. hasInput1 .||. pacing0 .||. pacing1 .||. pacing2 .||. pacing3
         event = bundle (inputs, pacings)
 
         pacings = bundle (pacing0, pacing1, pacing2, pacing3)
@@ -202,6 +202,9 @@ getOffsetFromNonVec (winTag, winData) tag offset dflt = out
     where 
         offsetTag = earlierTag tag offset
         out = if offsetTag == winTag then (tag, winData) else (tag, dflt)
+
+getMatchingTagFromNonVec :: (Tag, a) -> Tag -> a -> (Tag, a)
+getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then (tag, dta) else (tagToMatch, dflt)
 
 earlierTag :: Tag -> Tag -> Tag
 earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
@@ -285,7 +288,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         out3 = outputStream3 enOut3 out3Level4TagOut3 out3Data0 out3Data1 
         out3Data0 = getOffset <$> input0Win <*> out3Level4TagIn0 <*> (pure 1) <*> out3Data0Dflt
         (_, out3Data0Dflt) = unbundle (getMatchingTag <$> out0 <*> out3Level4TagOut0 <*> (pure 0))
-        out3Data1 = out1
+        out3Data1 = getMatchingTagFromNonVec <$> out1 <*> out3Level4TagOut1 <*> (pure 0)
 
         -- Outputing all results: level 5
         (_, _, level5TagOut0, level5TagOut1, level5TagOut2, level5TagOut3) = unbundle curTagsLevel5

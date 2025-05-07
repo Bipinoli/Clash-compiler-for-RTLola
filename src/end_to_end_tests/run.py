@@ -49,7 +49,13 @@ def read_actual_output(test_dir):
             grouped.append(group)
         return grouped
 
-
+class bcolors:
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    UNDERLINE = '\033[4m'
 
 if __name__ == "__main__":
     all_tests_passed = True
@@ -61,12 +67,18 @@ if __name__ == "__main__":
         expected = read_expected_output(f"tests/{test_dir}")
         actual = read_actual_output(f"tests/{test_dir}")
         if actual == expected:
-            results.append(f"Passed: {test_dir}")
+            results.append(f"{bcolors.OKGREEN}Passed: {test_dir}{bcolors.ENDC}")
         else:
-            results.append(f"Failed: {test_dir}")
+            results.append(f"{bcolors.FAIL}Failed: {test_dir}{bcolors.ENDC}")
+            first_difference = 0
+            for i in range(len(actual)):
+                if actual[i] != expected[i]:
+                    first_difference = i
+                    break
+            results.append(f"{bcolors.WARNING}expected: {expected[i]}\nactual: {actual[i]}\n{bcolors.ENDC}")
             all_tests_passed = False
 
-    print("\n\n\nTest results:")
+    print(f"\n\n\n{bcolors.UNDERLINE}{bcolors.OKBLUE}Test results:{bcolors.ENDC}")
     for result in results:
         print(result)
 

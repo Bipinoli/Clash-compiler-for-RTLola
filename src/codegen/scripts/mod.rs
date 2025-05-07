@@ -15,7 +15,7 @@ pub fn generate_verilog_gen_script(
 
     register_template(
         "verilog.exp".to_string(),
-        "src/codegen/scripts/except_script.hbs".to_string(),
+        "src/codegen/scripts/expect_script.hbs".to_string(),
         &mut reg,
     );
     register_template(

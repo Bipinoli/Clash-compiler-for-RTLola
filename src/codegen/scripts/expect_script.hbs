@@ -17,4 +17,6 @@ send ":l {{generated_clash_filename}}\r"
 wait_for_prompt
 send ":verilog\r"
 
+# CTRL + D to exit
 wait_for_prompt
+send "/004"
