@@ -1,6 +1,9 @@
 #!/usr/bin/expect -f
 
-spawn stack exec -- clashi spec.hs
+spawn stack exec -- clashi
+
+expect "clashi> "
+send ":l spec.hs\r"
 
 expect "clashi> "
 send ":verilog\r"

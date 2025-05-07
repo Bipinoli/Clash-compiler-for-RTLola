@@ -21,8 +21,8 @@ import Clash.Prelude
 
 -- Evaluation Order
 -- x, y, e
--- b, sw(x,f), a
--- c, f
+-- b, a, sw(x,f)
+-- f, c
 -- d
 -- sw(d,h), g
 -- h
@@ -32,10 +32,10 @@ import Clash.Prelude
 -- window y = 1
 -- window e = 2
 -- window b = 1
--- window sw(x,f) = 1
 -- window a = 1
--- window c = 1
+-- window sw(x,f) = 1
 -- window f = 1
+-- window c = 1
 -- window d = 1
 -- window sw(d,h) = 1
 -- window g = 1
@@ -44,9 +44,9 @@ import Clash.Prelude
 -- Pipeline Visualization
 -- x,y,e       |             |             | x,y,e       |             |             | x,y,e       |             |             | x,y,e      
 -- -----------------------------------------------------------------------------------------------------------------------------------------
---             | b,sw(x,f),a |             |             | b,sw(x,f),a |             |             | b,sw(x,f),a |             |            
+--             | b,a,sw(x,f) |             |             | b,a,sw(x,f) |             |             | b,a,sw(x,f) |             |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
---             |             | c,f         |             |             | c,f         |             |             | c,f         |            
+--             |             | f,c         |             |             | f,c         |             |             | f,c         |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
 --             |             |             | d           |             |             | d           |             |             | d          
 -- -----------------------------------------------------------------------------------------------------------------------------------------
@@ -183,7 +183,7 @@ hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Even
 hlc inputs = out
     where 
         out = bundle (newEvent, event)
-        newEvent = hasInput0 .||. hasInput1 .||. slide0 .||. slide1
+        newEvent = hasInput0 .||. hasInput1 .||. pacing0 .||. pacing1 .||. pacing2 .||. pacing3 .||. pacing4 .||. pacing5 .||. pacing6 .||. pacing7 .||. slide0 .||. slide1
         event = bundle (inputs, slides, pacings)
 
         slides = bundle (slide0, slide1)
@@ -275,10 +275,10 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tagIn1 = genTag input1HasData
         tagOut4 = genTag p4
         tagOut1 = genTag p1
-        tagSw0 = genTag p0
         tagOut0 = genTag p0
-        tagOut2 = genTag p2
+        tagSw0 = genTag p0
         tagOut5 = genTag p5
+        tagOut2 = genTag p2
         tagOut3 = genTag p3
         tagSw1 = genTag p1
         tagOut6 = genTag p6
@@ -302,12 +302,12 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enIn1 = delay False input1HasData
         enOut4 = delay False p4
         enOut1 = delay False (delay False p1)
+        enOut0 = delay False (delay False p0)
         enSw0 = delay False (delay False slide0 .||. p5)
         sld0 = delay False (delay False slide0)
         sw0DataPacing = delay False (delay False input0HasData)
-        enOut0 = delay False (delay False p0)
-        enOut2 = delay False (delay False (delay False p2))
         enOut5 = delay False (delay False (delay False p5))
+        enOut2 = delay False (delay False (delay False p2))
         enOut3 = delay False (delay False (delay False (delay False p3)))
         enSw1 = delay False (delay False (delay False (delay False (delay False slide1 .||. p7))))
         sld1 = delay False (delay False (delay False (delay False (delay False slide1))))

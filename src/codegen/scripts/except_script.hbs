@@ -1,6 +1,9 @@
 #!/usr/bin/expect -f
 
-spawn stack exec -- clashi {{generated_clash_filename}}
+spawn stack exec -- clashi
+
+expect "clashi> "
+send ":l {{generated_clash_filename}}\r"
 
 expect "clashi> "
 send ":verilog\r"
