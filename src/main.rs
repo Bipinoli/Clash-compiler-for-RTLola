@@ -65,7 +65,6 @@ fn main() {
                     args.output.clone(),
                 );
             };
-            // hardware_ir::display_analysis(&mir);
             let hard_ir = hardware_ir::HardwareIR::new(
                 mir,
                 spec,

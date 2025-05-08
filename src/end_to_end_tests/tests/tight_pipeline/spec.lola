@@ -1,0 +1,5 @@
+input x : Int
+output a := x + 1
+output b := x + 10
+output c := a + 1
+output d := b + c

@@ -100,7 +100,7 @@ fn get_eval_order(ir: &HardwareIR) -> String {
 }
 
 fn get_required_memory(ir: &HardwareIR) -> String {
-    prettify_required_memory(&ir.evaluation_order, &ir.mir)
+    prettify_required_memory(&ir)
         .iter()
         .map(|s| format!("-- {}", s))
         .collect::<Vec<_>>()

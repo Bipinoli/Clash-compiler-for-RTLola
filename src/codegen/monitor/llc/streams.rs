@@ -278,12 +278,12 @@ fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<Sl
 ///   x1      x2      x3       x4     |       x5      x6      x7      | x8
 ///   ------------------------------------------------------------------------
 ///
-///   If we need to work with the data within the window of 3 buckets 
+///   If we need to work with the data within the window of 3 buckets
 ///   Then at the instant of slide4 we need to aggregate the data [x2, x3, x4, x5, x6]
 ///   x1 was the data that came exactly at the instant when we were about to slide1
 ///   this falls outside the window of 3 buckets at instant of slide4
 ///   However x2 & x6 will be included in the aggregate
-/// 
+///
 ///   So the semantic for a bucket is to be right inclusive and left exclusive
 ///   i.e in bkt1 aggregation x2 & x3 are included whereas x1 is excluded
 ///
@@ -310,4 +310,3 @@ fn get_sliding_window_size(window_idx: usize, ir: &HardwareIR) -> usize {
         _ => unimplemented!(),
     }
 }
-

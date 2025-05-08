@@ -11,9 +11,10 @@ def read_expected_output(test_dir):
                 groups = match.groups()
                 return groups
             else:
-                raise f"couldn't parse the line {line}"
+                raise Exception(f"couldn't parse the line {line}")
     with open(f"{test_dir}/expected_output.txt", 'r') as f:
-        content = f.read().split("\n")
+        content = f.read().strip().split("\n")
+        content = list(filter(lambda data: len(data) > 0, content))
         expected = list(map(parse, content))
         expected = list(filter(lambda data: data[1] != "Input", expected))
         grouped = {}

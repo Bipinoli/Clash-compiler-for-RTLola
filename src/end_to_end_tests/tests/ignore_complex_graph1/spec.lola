@@ -1,0 +1,11 @@
+input x : Int
+
+output a := x.offset(by: -2).defaults(to: 0) + g.offset(by: -1).defaults(to: 0) + c.offset(by: -1).defaults(to: 0)
+output b := a + 1
+output c := b + 1
+output d := b + 1
+output e := b + 1
+output f := d.offset(by: -1).defaults(to: 0) + e.offset(by: -1).defaults(to: 0)
+output g := f + g.offset(by: -1).defaults(to: 0) + h + i
+output h := x + 1
+output i := x.offset(by: -1).defaults(to: 0) + 1

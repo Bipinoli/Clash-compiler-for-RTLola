@@ -192,18 +192,18 @@ impl HardwareIR {
     }
 }
 
-pub fn display_analysis(mir: &RtLolaMir) {
-    let eval_order = find_eval_order(mir, DISPLAY_ALL_COMBINATIONS);
+pub fn display_analysis(ir: &HardwareIR) {
+    let eval_order = find_eval_order(&ir.mir, DISPLAY_ALL_COMBINATIONS);
     println!("\n------- The best pipeline --------");
-    println!("{}\n", prettify_eval_order(&eval_order, mir).join("\n"));
+    println!("{}\n", prettify_eval_order(&eval_order, &ir.mir).join("\n"));
     println!(
         "{}\n",
-        prettify_required_memory(&eval_order, mir).join("\n")
+        prettify_required_memory(ir).join("\n")
     );
-    let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, mir);
+    let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, &ir.mir);
     println!(
         "{}\n",
-        visualize_pipeline(&eval_order, pipeline_wait, 10, mir).join("\n")
+        visualize_pipeline(&eval_order, pipeline_wait, 10, &ir.mir).join("\n")
     );
 }
 
@@ -256,30 +256,29 @@ fn calculate_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> Ha
             .get_children(mir)
             .into_iter()
             .map(|(child, offset)| {
-                window_size(&node, &child, pipeline_wait, offset, eval_order, mir)
+                window_size(
+                    &node,
+                    &child,
+                    pipeline_wait.clone(),
+                    offset,
+                    eval_order,
+                    mir,
+                )
             })
             .max()
             .unwrap_or(1);
-        needed_memory.insert(node, window);
+        let until_output = window_size_to_remember_until_output(&node, pipeline_wait, eval_order);
+        let needed = cmp::max(window, until_output);
+        needed_memory.insert(node, needed);
     });
     needed_memory
 }
 
-pub fn prettify_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> Vec<String> {
-    let pipeline_wait = calculate_necessary_pipeline_wait(eval_order, mir);
-    let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
+pub fn prettify_required_memory(ir: &HardwareIR) -> Vec<String> {
     let mut retval: Vec<String> = Vec::new();
-    all_nodes.into_iter().for_each(|node| {
-        let window = node
-            .get_children(mir)
-            .into_iter()
-            .map(|(child, offset)| {
-                window_size(&node, &child, pipeline_wait, offset, eval_order, mir)
-            })
-            .max()
-            .unwrap_or(1);
-        retval.push(format!("window {} = {}", node.prettify(mir), window));
-    });
+    for (nd, mem) in &ir.required_memory {
+        retval.push(format!("window {} = {}", nd.prettify(&ir.mir), mem));
+    }
     retval
 }
 
@@ -303,6 +302,22 @@ fn window_size(
         let propagation_time = level_distance(node, child, eval_order).abs() as usize;
         let number_of_evals = ((propagation_time as f32) / (pipeline_wait as f32 + 1.0)).ceil();
         number_of_evals as usize
+    }
+}
+
+fn window_size_to_remember_until_output(
+    node: &Node,
+    pipeline_wait: usize,
+    eval_order: &Vec<Vec<Node>>,
+) -> usize {
+    match node {
+        Node::OutputStream(_) => {
+            let time_until_output = eval_order.len() - find_level(node, eval_order);
+            let num_of_pipeline_evals_until_output =
+                ((time_until_output as f32) / (pipeline_wait as f32 + 1.0)).ceil();
+            num_of_pipeline_evals_until_output as usize
+        }
+        _ => 0,
     }
 }
 
@@ -394,10 +409,6 @@ fn find_eval_order(mir: &RtLolaMir, display_all_combinations: bool) -> Vec<Vec<N
         all_combinations.iter().for_each(|eval_order| {
             println!();
             println!("{}\n", prettify_eval_order(&eval_order, mir).join("\n"));
-            println!(
-                "{}\n",
-                prettify_required_memory(&eval_order, mir).join("\n")
-            );
             let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, mir);
             visualize_pipeline(&eval_order, pipeline_wait, 10, mir);
         });
