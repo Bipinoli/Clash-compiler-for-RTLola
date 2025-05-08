@@ -185,6 +185,12 @@ getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then 
 
 earlierTag :: Tag -> Tag -> Tag
 earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
+
+delayFor :: forall dom n a . (HiddenClockResetEnable dom, KnownNat n, NFDataX a) => SNat n -> a -> Signal dom a -> Signal dom a
+delayFor n initVal sig = last delayedVec
+    where
+      delayedVec :: Vec (n + 1) (Signal dom a)
+      delayedVec = iterateI (delay initVal) sig
      
 
 llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Bool))
@@ -211,14 +217,14 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         -- delayed tags to be used in different levels 
         tagsDefault = (invalidTag, invalidTag, invalidTag)
         curTags = bundle (tagIn0, tagIn1, tagOut0)
-        curTagsLevel1 = delay tagsDefault curTags
-        curTagsLevel2 = delay tagsDefault (delay tagsDefault curTags)
+        curTagsLevel1 = delayFor d1 tagsDefault curTags
+        curTagsLevel2 = delayFor d2 tagsDefault curTags
 
-        enIn1 = delay False input1HasData
-        enIn0 = delay False input0HasData
-        enOut0 = delay False (delay False p0)
+        enIn1 = delayFor d1 False input1HasData
+        enIn0 = delayFor d1 False input0HasData
+        enOut0 = delayFor d2 False p0
 
-        output0Aktv = delay False (delay False (delay False p0))
+        output0Aktv = delayFor d3 False p0
 
         -- Evaluation of input windows: level 0
         input0Win = input0Window enIn0 tagIn0 input0Data
@@ -272,6 +278,7 @@ outputStream0 en tag in0WithTag in1WithTag = result
         nextVal = in1 + in0
         (_, in0) = unbundle in0WithTag
         (_, in1) = unbundle in1WithTag
+
 
 
 

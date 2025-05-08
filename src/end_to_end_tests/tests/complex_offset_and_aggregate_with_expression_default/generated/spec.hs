@@ -21,7 +21,7 @@ import Clash.Prelude
 
 -- Evaluation Order
 -- x, y, e
--- a, b, sw(x,f)
+-- a, sw(x,f), b
 -- c, f
 -- d
 -- g, sw(d,h)
@@ -32,8 +32,8 @@ import Clash.Prelude
 -- window y = 1
 -- window e = 2
 -- window a = 1
--- window b = 1
 -- window sw(x,f) = 1
+-- window b = 1
 -- window c = 1
 -- window f = 1
 -- window d = 1
@@ -44,7 +44,7 @@ import Clash.Prelude
 -- Pipeline Visualization
 -- x,y,e       |             |             | x,y,e       |             |             | x,y,e       |             |             | x,y,e      
 -- -----------------------------------------------------------------------------------------------------------------------------------------
---             | a,b,sw(x,f) |             |             | a,b,sw(x,f) |             |             | a,b,sw(x,f) |             |            
+--             | a,sw(x,f),b |             |             | a,sw(x,f),b |             |             | a,sw(x,f),b |             |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
 --             |             | c,f         |             |             | c,f         |             |             | c,f         |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
@@ -253,6 +253,12 @@ getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then 
 
 earlierTag :: Tag -> Tag -> Tag
 earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
+
+delayFor :: forall dom n a . (HiddenClockResetEnable dom, KnownNat n, NFDataX a) => SNat n -> a -> Signal dom a -> Signal dom a
+delayFor n initVal sig = last delayedVec
+    where
+      delayedVec :: Vec (n + 1) (Signal dom a)
+      delayedVec = iterateI (delay initVal) sig
      
 
 llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), ((Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool), (Bool, Bool)))
@@ -275,8 +281,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tagIn1 = genTag input1HasData
         tagOut4 = genTag p4
         tagOut0 = genTag p0
-        tagOut1 = genTag p1
         tagSw0 = genTag p0
+        tagOut1 = genTag p1
         tagOut2 = genTag p2
         tagOut5 = genTag p5
         tagOut3 = genTag p3
@@ -291,38 +297,38 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         -- delayed tags to be used in different levels 
         tagsDefault = (invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag)
         curTags = bundle (tagIn0, tagIn1, tagOut0, tagOut1, tagOut2, tagOut3, tagOut4, tagOut5, tagOut6, tagOut7, tagSw0, tagSw1)
-        curTagsLevel1 = delay tagsDefault curTags
-        curTagsLevel2 = delay tagsDefault (delay tagsDefault curTags)
-        curTagsLevel3 = delay tagsDefault (delay tagsDefault (delay tagsDefault curTags))
-        curTagsLevel4 = delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault curTags)))
-        curTagsLevel5 = delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault curTags))))
-        curTagsLevel6 = delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault curTags)))))
+        curTagsLevel1 = delayFor d1 tagsDefault curTags
+        curTagsLevel2 = delayFor d2 tagsDefault curTags
+        curTagsLevel3 = delayFor d3 tagsDefault curTags
+        curTagsLevel4 = delayFor d4 tagsDefault curTags
+        curTagsLevel5 = delayFor d5 tagsDefault curTags
+        curTagsLevel6 = delayFor d6 tagsDefault curTags
 
-        enIn0 = delay False input0HasData
-        enIn1 = delay False input1HasData
-        enOut4 = delay False p4
-        enOut0 = delay False (delay False p0)
-        enOut1 = delay False (delay False p1)
-        enSw0 = delay False (delay False (slide0 .||. input0HasData))
-        sld0 = delay False (delay False slide0)
-        sw0DataPacing = delay False (delay False input0HasData)
-        enOut2 = delay False (delay False (delay False p2))
-        enOut5 = delay False (delay False (delay False p5))
-        enOut3 = delay False (delay False (delay False (delay False p3)))
-        enOut6 = delay False (delay False (delay False (delay False (delay False p6))))
-        enSw1 = delay False (delay False (delay False (delay False (delay False (slide1 .||. p3)))))
-        sld1 = delay False (delay False (delay False (delay False (delay False slide1))))
-        sw1DataPacing = delay False (delay False (delay False (delay False (delay False p3))))
-        enOut7 = delay False (delay False (delay False (delay False (delay False (delay False p7)))))
+        enIn0 = delayFor d1 False input0HasData
+        enIn1 = delayFor d1 False input1HasData
+        enOut4 = delayFor d1 False p4
+        enOut0 = delayFor d2 False p0
+        enSw0 = delayFor d2 False (slide0 .||. input0HasData)
+        sld0 = delayFor d2 False slide0
+        sw0DataPacing = delayFor d2 False input0HasData
+        enOut1 = delayFor d2 False p1
+        enOut2 = delayFor d3 False p2
+        enOut5 = delayFor d3 False p5
+        enOut3 = delayFor d4 False p3
+        enOut6 = delayFor d5 False p6
+        enSw1 = delayFor d5 False (slide1 .||. p3)
+        sld1 = delayFor d5 False slide1
+        sw1DataPacing = delayFor d5 False p3
+        enOut7 = delayFor d6 False p7
 
-        output0Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p0))))))
-        output1Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p1))))))
-        output2Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p2))))))
-        output3Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p3))))))
-        output4Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p4))))))
-        output5Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p5))))))
-        output6Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p6))))))
-        output7Aktv = delay False (delay False (delay False (delay False (delay False (delay False (delay False p7))))))
+        output0Aktv = delayFor d7 False p0
+        output1Aktv = delayFor d7 False p1
+        output2Aktv = delayFor d7 False p2
+        output3Aktv = delayFor d7 False p3
+        output4Aktv = delayFor d7 False p4
+        output5Aktv = delayFor d7 False p5
+        output6Aktv = delayFor d7 False p6
+        output7Aktv = delayFor d7 False p7
 
         -- Evaluation of input windows: level 0
         input0Win = input0Window enIn0 tagIn0 input0Data
@@ -575,6 +581,7 @@ slidingWindow1 en slide hasInputWithTag = window
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
                 lastBucketUpdated = replace 0 (windowBucketFunc1 (head win) dta) win
+
 
 
 

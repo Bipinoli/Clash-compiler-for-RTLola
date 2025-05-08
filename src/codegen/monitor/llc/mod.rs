@@ -150,9 +150,9 @@ fn get_tags(ir: &HardwareIR) -> Vec<String> {
 /// Example:
 /// [
 ///     "enIn0 = input0HasData",
-///     "enOut0 = delay False p0",
-///     "enSw0 = delay False (delay False (slide0 .||. p1))",
-///     "sld0 = delay False (delay False slide0)",
+///     "enOut0 = delayFor d1 False p0",
+///     "enSw0 = delayFor d2 (slide0 .||. p1)",
+///     "sld0 = delayFor d2 slide0",
 ///     ...
 /// ]
 fn get_enables(ir: &HardwareIR) -> Vec<String> {
@@ -236,7 +236,7 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
 
 /// Example:
 /// [
-///     "output0Aktv = delay False (delay False (delay False (delay False p0)))",
+///     "output0Aktv = delayFor d4 False p0",
 ///     ...
 /// ]
 fn get_output_phase_enables(ir: &HardwareIR) -> Vec<String> {
@@ -260,18 +260,7 @@ fn get_output_phase_enables(ir: &HardwareIR) -> Vec<String> {
 }
 
 fn surround_with_delay(times: usize, default_value: String, data: String) -> String {
-    if times > 0 {
-        let surround_left = format!("delay {} (", default_value).repeat(times);
-        let surround_right = ")".repeat(times - 1);
-        format!(
-            "{}{}{}",
-            String::from(&surround_left[..surround_left.len() - 1]),
-            data,
-            surround_right
-        )
-    } else {
-        data
-    }
+    format!("delayFor d{} {} {}", times, default_value, data)
 }
 
 fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {

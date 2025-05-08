@@ -208,6 +208,12 @@ getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then 
 
 earlierTag :: Tag -> Tag -> Tag
 earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
+
+delayFor :: forall dom n a . (HiddenClockResetEnable dom, KnownNat n, NFDataX a) => SNat n -> a -> Signal dom a -> Signal dom a
+delayFor n initVal sig = last delayedVec
+    where
+      delayedVec :: Vec (n + 1) (Signal dom a)
+      delayedVec = iterateI (delay initVal) sig
      
 
 llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), ((Bool, Bool, Bool, Bool)))
@@ -237,23 +243,23 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         -- delayed tags to be used in different levels 
         tagsDefault = (invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag)
         curTags = bundle (tagIn0, tagIn1, tagOut0, tagOut1, tagOut2, tagOut3)
-        curTagsLevel1 = delay tagsDefault curTags
-        curTagsLevel2 = delay tagsDefault (delay tagsDefault curTags)
-        curTagsLevel3 = delay tagsDefault (delay tagsDefault (delay tagsDefault curTags))
-        curTagsLevel4 = delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault curTags)))
-        curTagsLevel5 = delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault (delay tagsDefault curTags))))
+        curTagsLevel1 = delayFor d1 tagsDefault curTags
+        curTagsLevel2 = delayFor d2 tagsDefault curTags
+        curTagsLevel3 = delayFor d3 tagsDefault curTags
+        curTagsLevel4 = delayFor d4 tagsDefault curTags
+        curTagsLevel5 = delayFor d5 tagsDefault curTags
 
-        enIn0 = delay False input0HasData
-        enIn1 = delay False input1HasData
-        enOut2 = delay False (delay False p2)
-        enOut0 = delay False (delay False (delay False p0))
-        enOut1 = delay False (delay False (delay False (delay False p1)))
-        enOut3 = delay False (delay False (delay False (delay False (delay False p3))))
+        enIn0 = delayFor d1 False input0HasData
+        enIn1 = delayFor d1 False input1HasData
+        enOut2 = delayFor d2 False p2
+        enOut0 = delayFor d3 False p0
+        enOut1 = delayFor d4 False p1
+        enOut3 = delayFor d5 False p3
 
-        output0Aktv = delay False (delay False (delay False (delay False (delay False (delay False p0)))))
-        output1Aktv = delay False (delay False (delay False (delay False (delay False (delay False p1)))))
-        output2Aktv = delay False (delay False (delay False (delay False (delay False (delay False p2)))))
-        output3Aktv = delay False (delay False (delay False (delay False (delay False (delay False p3)))))
+        output0Aktv = delayFor d6 False p0
+        output1Aktv = delayFor d6 False p1
+        output2Aktv = delayFor d6 False p2
+        output3Aktv = delayFor d6 False p3
 
         -- Evaluation of input windows: level 0
         input0Win = input0Window enIn0 tagIn0 input0Data
@@ -364,6 +370,7 @@ outputStream3 en tag in0WithTag out1WithTag = result
         nextVal = in0 + out1
         (_, in0) = unbundle in0WithTag
         (_, out1) = unbundle out1WithTag
+
 
 
 

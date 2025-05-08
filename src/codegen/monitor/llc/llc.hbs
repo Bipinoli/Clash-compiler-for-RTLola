@@ -30,6 +30,12 @@ getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then 
 
 earlierTag :: Tag -> Tag -> Tag
 earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
+
+delayFor :: forall dom n a . (HiddenClockResetEnable dom, KnownNat n, NFDataX a) => SNat n -> a -> Signal dom a -> Signal dom a
+delayFor n initVal sig = last delayedVec
+    where
+      delayedVec :: Vec (n + 1) (Signal dom a)
+      delayedVec = iterateI (delay initVal) sig
      
 
 {{#if debug}}
