@@ -66,29 +66,28 @@ fn get_new_event_condition(ir: &HardwareIR) -> String {
         .iter()
         .enumerate()
         .map(|(i, _)| format!("hasInput{}", i))
-        .collect::<Vec<_>>()
-        .join(" .||. ");
+        .collect::<Vec<_>>();
     let pacings = ir
         .mir
         .outputs
         .iter()
         .enumerate()
+        .filter(|(_, out)| match out.eval.eval_pacing {
+            PacingType::GlobalPeriodic(_) => true,
+            _ => false,
+        })
         .map(|(i, _)| format!("pacing{}", i))
-        .collect::<Vec<_>>()
-        .join(" .||. ");
+        .collect::<Vec<_>>();
     let slides = ir
         .mir
         .sliding_windows
         .iter()
         .enumerate()
         .map(|(i, _)| format!("slide{}", i))
-        .collect::<Vec<_>>()
-        .join(" .||. ");
-    if slides.len() > 0 {
-        format!("{} .||. {} .||. {}", inputs, pacings, slides)
-    } else {
-        format!("{} .||. {}", inputs, pacings)
-    }
+        .collect::<Vec<_>>();
+    let all: Vec<String> = vec![&inputs[..], &pacings[..], &slides[..]].concat();
+    let all: Vec<String> = all.into_iter().filter(|item| item.len() > 0).collect();
+    all.join(" .||. ")
 }
 
 fn get_bundled_slides(ir: &HardwareIR) -> String {

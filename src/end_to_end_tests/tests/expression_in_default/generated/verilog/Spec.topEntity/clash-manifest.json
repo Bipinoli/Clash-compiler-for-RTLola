@@ -46,14 +46,14 @@
         },
         {
             "name": "topEntity.v",
-            "sha256": "1a3ee6cb71b6b84fb0b2036a350ac6491321956e18dc44f05a47e7b9fcb65eb0"
+            "sha256": "f51f5f99b6f9847430031d5b6909226dea2290f8764cd10f5ff2d8b873f34498"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "680973d89d5aa52ab6b308789b7a86b4446f254d1a0267d94a2df575f769b398",
+    "hash": "100d0e0b5e971b0c93b6652380e786a60f459efa16c6307cb8794c27ea32d472",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -84,14 +84,28 @@
             {
                 "direction": "in",
                 "is_clock": false,
-                "name": "inputs_0",
+                "name": "inputs_0_0",
                 "type_name": "signed [63:0]",
                 "width": 64
             },
             {
                 "direction": "in",
                 "is_clock": false,
-                "name": "inputs_1",
+                "name": "inputs_0_1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_1_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_1_1",
                 "type_name": "",
                 "width": 1
             },

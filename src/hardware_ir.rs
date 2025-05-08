@@ -196,10 +196,7 @@ pub fn display_analysis(ir: &HardwareIR) {
     let eval_order = find_eval_order(&ir.mir, DISPLAY_ALL_COMBINATIONS);
     println!("\n------- The best pipeline --------");
     println!("{}\n", prettify_eval_order(&eval_order, &ir.mir).join("\n"));
-    println!(
-        "{}\n",
-        prettify_required_memory(ir).join("\n")
-    );
+    println!("{}\n", prettify_required_memory(ir).join("\n"));
     let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, &ir.mir);
     println!(
         "{}\n",
