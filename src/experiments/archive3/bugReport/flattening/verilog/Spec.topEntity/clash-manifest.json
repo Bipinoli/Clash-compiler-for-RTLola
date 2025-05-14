@@ -1,0 +1,101 @@
+{
+    "components": [
+        "myModule"
+    ],
+    "dependencies": {
+        "transitive": []
+    },
+    "domains": {
+        "IntelSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "System": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "XilinxSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Synchronous",
+            "reset_polarity": "ActiveHigh"
+        }
+    },
+    "files": [
+        {
+            "name": "myModule_shim.cpp",
+            "sha256": "d38bdcb1d15b1e5d37d87e42666f9eaf85b27591fd8369b218afb5448106dbe0"
+        },
+        {
+            "name": "myModule.sdc",
+            "sha256": "13d4c1aafcc09a84d81d3b60d513cb901384a10e27e5a5a16572a600f15895f3"
+        },
+        {
+            "name": "myModule.v",
+            "sha256": "a25bd673ed3ccb003accbbad64bb0ad677154cf7f985c1780924d4a924d8e2e4"
+        }
+    ],
+    "flags": [
+        20,
+        20
+    ],
+    "hash": "b167dd0414ab419f69b36e8109fea77995faa2b663a932b73b7a38a16731eedb",
+    "top_component": {
+        "name": "myModule",
+        "ports_flat": [
+            {
+                "direction": "in",
+                "domain": "System",
+                "is_clock": true,
+                "name": "clk",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "System",
+                "is_clock": false,
+                "name": "rst",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "System",
+                "is_clock": false,
+                "name": "en",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "input0_value",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "input0_valid",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "out",
+                "type_name": "signed [63:0]",
+                "width": 64
+            }
+        ]
+    },
+    "version": "unstable"
+}
