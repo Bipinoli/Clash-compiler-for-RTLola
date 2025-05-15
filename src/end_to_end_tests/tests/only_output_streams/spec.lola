@@ -1,0 +1,3 @@
+output a @1kHz := a.offset(by: -1).defaults(to: 0) + b.offset(by: -2).defaults(to: 10)
+output b @2kHz := b.offset(by: -2).defaults(to: 100)   
+

@@ -1,3 +1,6 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+
 module Spec where
 
 import Clash.Prelude
@@ -18,8 +21,8 @@ import Clash.Prelude
 
 -- Memory Window
 -- window y = 2
--- window x = 3
 -- window a = 1
+-- window x = 3
 
 -- Pipeline Visualization
 -- y,x | y,x | y,x | y,x | y,x | y,x | y,x | y,x | y,x | y,x
@@ -33,21 +36,44 @@ import Clash.Prelude
 
 ---------------------------------------------------------------
 
+data ValidInt = ValidInt {
+    value :: Int,
+    valid :: Bool
+} deriving (Generic, NFDataX)
 
-type HasInput0 = (Int, Bool)
-type HasInput1 = (Int, Bool)
-type Inputs = (HasInput0, HasInput1)
 
-type HasOutput0 = (Int, Bool)
-type Outputs = HasOutput0
+data Inputs = Inputs {
+    input0 :: ValidInt,
+    input1 :: ValidInt
+} deriving (Generic, NFDataX)
 
-type Pacings = Bool
+-- using newtype to avoid flattening of data
+-- https://clash-lang.discourse.group/t/how-to-avoid-flattening-of-fields-in-record/79/5
+newtype Outputs = Outputs {
+    output0 :: ValidInt
+} deriving (Generic, NFDataX)
+
+-- using newtype to avoid flattening of data
+-- https://clash-lang.discourse.group/t/how-to-avoid-flattening-of-fields-in-record/79/5
+newtype Pacings = Pacings {
+    pacing0 :: Bool
+} deriving (Generic, NFDataX)
+
+
+type Tag = Unsigned 8
+
+data Tags = Tags {
+    input0 :: Tag,
+    input1 :: Tag,
+    output0 :: Tag
+} deriving (Generic, NFDataX)
 
 type Event = (Inputs, Pacings)
 
 nullEvent :: Event
-nullEvent = (((0, False), (0, False)), False)
-
+nullEvent = (nullInputs, nullPacings)
+nullInputs = Inputs (ValidInt 0 False) (ValidInt 0 False) 
+nullPacings = Pacings False 
 
 ---------------------------------------------------------------
 
@@ -137,15 +163,15 @@ hlc inputs = out
     where 
         out = bundle (newEvent, event)
         newEvent = hasInput0 .||. hasInput1
+
         event = bundle (inputs, pacings)
 
-        pacings = pacing0
+        pacings = Pacings <$> p0
 
-        (input0, input1) = unbundle inputs
-        (_, hasInput0) = unbundle input0
-        (_, hasInput1) = unbundle input1
+        hasInput0 = ((.valid). (.input0)) <$> inputs
+        hasInput1 = ((.valid). (.input1)) <$> inputs
 
-        pacing0 = hasInput0 .&&. hasInput1
+        p0 = hasInput0 .&&. hasInput1
 
 
 
@@ -153,7 +179,6 @@ hlc inputs = out
 
 ---------------------------------------------------------------
 
-type Tag = Unsigned 8
 -- maxTag must be at least the size of the maximum window to avoid duplicate tags in the window
 -- also to avoid having to do modulo operations maxTag must be at least as big as the largest offset
 maxTag = 4 :: Tag
@@ -193,7 +218,7 @@ delayFor n initVal sig = last delayedVec
       delayedVec = iterateI (delay initVal) sig
      
 
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Bool))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Pacings))
 llc event = bundle (bundle (toPop, outputs), debugSignals)
     where 
         (isValidEvent, poppedEvent) = unbundle event
@@ -201,24 +226,29 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         toPop = pure True
 
         (inputs, pacings) = unbundle poppedEvent
-        (input0, input1) = unbundle inputs
-        (_, input0HasData) = unbundle input0
-        (_, input1HasData) = unbundle input1
-        p0 = pacings
 
-        tagIn1 = genTag input1HasData
-        tagIn0 = genTag input0HasData
-        tagOut0 = genTag p0
+        input0 = (.input0) <$> inputs
+        input1 = (.input1) <$> inputs
+        input0HasData = ((.valid). (.input0)) <$> inputs
+        input1HasData = ((.valid). (.input1)) <$> inputs
+
+
+        p0 = (.pacing0) <$> pacings
+        
+        tIn1 = genTag input1HasData
+        tIn0 = genTag input0HasData
+        tOut0 = genTag p0
 
         -- tag generation takes 1 cycle so we need to delay the input data
-        (input0Data, _) = unbundle (delay (0, False) input0)
-        (input1Data, _) = unbundle (delay (0, False) input1)
+        input0Data = delay 0 (((.value). (.input0)) <$> inputs)
+        input1Data = delay 0 (((.value). (.input1)) <$> inputs)
 
         -- delayed tags to be used in different levels 
-        tagsDefault = (invalidTag, invalidTag, invalidTag)
-        curTags = bundle (tagIn0, tagIn1, tagOut0)
+        tagsDefault = Tags nullT nullT nullT 
+        curTags = Tags <$> tIn0 <*> tIn1 <*> tOut0
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
+        nullT = invalidTag
 
         enIn1 = delayFor d1 False input1HasData
         enIn0 = delayFor d1 False input0HasData
@@ -227,25 +257,23 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         output0Aktv = delayFor d3 False p0
 
         -- Evaluation of input windows: level 0
-        input0Win = input0Window enIn0 tagIn0 input0Data
-        input1Win = input1Window enIn1 tagIn1 input1Data
+        input0Win = input0Window enIn0 tIn0 input0Data
+        input1Win = input1Window enIn1 tIn1 input1Data
 
         -- Evaluation of output 0: level 1
-        (out0Level1TagIn0, out0Level1TagIn1, out0Level1TagOut0) = unbundle curTagsLevel1
-        out0 = outputStream0 enOut0 out0Level1TagOut0 out0Data0 out0Data1 
-        out0Data0 = getOffset <$> input0Win <*> out0Level1TagIn0 <*> (pure 2) <*> out0Data0Dflt
+        out0 = outputStream0 enOut0 ((.output0) <$> curTagsLevel1) out0Data0 out0Data1 
+        out0Data0 = getOffset <$> input0Win <*> ((.input0) <$> curTagsLevel1) <*> (pure 2) <*> out0Data0Dflt
         out0Data0Dflt = out0Data0DfltData0 + out0Data0DfltData1
-        (_, out0Data0DfltData0) = unbundle (getOffset <$> input1Win <*> out0Level1TagIn1 <*> (pure 1) <*> (pure 10))
-        (_, out0Data0DfltData1) = unbundle (getOffsetFromNonVec <$> out0 <*> out0Level1TagOut0 <*> (pure 1) <*> out0Data0DfltData1Dflt)
-        (_, out0Data0DfltData1Dflt) = unbundle (getOffset <$> input0Win <*> out0Level1TagIn0 <*> (pure 1) <*> (pure 20))
-        out0Data1 = getMatchingTag <$> input1Win <*> out0Level1TagIn1 <*> (pure 0)
+        (_, out0Data0DfltData0) = unbundle (getOffset <$> input1Win <*> ((.input1) <$> curTagsLevel1) <*> (pure (1)) <*> (pure (10)))
+        (_, out0Data0DfltData1) = unbundle (getOffsetFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel1) <*> (pure (1)) <*> out0Data0DfltData1Dflt)
+        (_, out0Data0DfltData1Dflt) = unbundle (getOffset <$> input0Win <*> ((.input0) <$> curTagsLevel1) <*> (pure (1)) <*> (pure (20)))
+        out0Data1 = getMatchingTag <$> input1Win <*> ((.input1) <$> curTagsLevel1) <*> (pure (0))
 
         -- Outputing all results: level 2
-        (_, _, level2TagOut0) = unbundle curTagsLevel2
-        output0 = bundle (output0Data, output0Aktv)
+        output0 = ValidInt <$> output0Data <*> output0Aktv
         (_, output0Data) = unbundle out0
 
-        outputs = output0
+        outputs = Outputs <$> output0
 
         debugSignals = pacings
 
@@ -287,7 +315,7 @@ outputStream0 en tag in0WithTag in1WithTag = result
 
 ---------------------------------------------------------------
 
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Bool))
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
 monitor inputs = bundle (outputs, debugSignals)
     where 
         (newEvent, event) = unbundle (hlc inputs)
@@ -307,5 +335,5 @@ monitor inputs = bundle (outputs, debugSignals)
 ---------------------------------------------------------------
 
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Bool))
+    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
 topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en

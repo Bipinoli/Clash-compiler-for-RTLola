@@ -107,7 +107,7 @@ fn main() {
                         write_to_file(args.output.join("open_waveform.sh"), open_wv);
                     };
                     println!(
-                        "Compilation successful! Ouput at {}",
+                        "Compilation successful! Output at: {}",
                         args.output.to_str().unwrap()
                     );
                 }

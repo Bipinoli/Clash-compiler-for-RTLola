@@ -88,18 +88,14 @@ newtype Tags = Tags {
 } deriving (Generic, NFDataX)
 {{/if}}
 
-{{#if has_sliding_window}}
-type Event = (Inputs, Slides, Pacings)
-{{else}}
-type Event = (Inputs, Pacings)
-{{/if}}
+type Event = ({{#if (gt (len inputs) 0)}}Inputs, {{/if}}{{#if has_sliding_window}}Slides, {{/if}}Pacings)
 
 nullEvent :: Event
-{{#if has_sliding_window}}
-nullEvent = (nullInputs, nullSlides, nullPacings)
-nullSlides = Slides {{#each sliding_windows}}False {{/each}}
-{{else}}
-nullEvent = (nullInputs, nullPacings)
-{{/if}}
+nullEvent = ({{#if (gt (len inputs) 0)}}nullInputs, {{/if}}{{#if has_sliding_window}}nullSlides, {{/if}}nullPacings)
+{{#if (gt (len inputs) 0)}}
 nullInputs = Inputs {{#each inputs}}(Valid{{this.ty}} {{this.default}} False) {{/each}}
+{{/if}}
+{{#if has_sliding_window}}
+nullSlides = Slides {{#each sliding_windows}}False {{/each}}
+{{/if}}
 nullPacings = Pacings {{#each outputs}}False {{/each}}

@@ -8,15 +8,16 @@ systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @TestDomain)
 {{/if}}
 
 
-hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Event)
-hlc inputs = out
+hlc :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs -> {{/if}}Signal dom (Bool, Event)
+hlc {{#if has_input}}inputs {{/if}}= out
     where 
         out = bundle (newEvent, event)
         newEvent = {{new_event_condition}}
-        {{#if has_sliding_window}}
-        event = bundle (inputs, slides, pacings)
+
+        {{#if (and (not has_input) (not has_sliding_window))}}
+        event = (pacings)
         {{else}}
-        event = bundle (inputs, pacings)
+        event = bundle ({{#if has_input}}inputs, {{/if}}{{#if has_sliding_window}}slides, {{/if}}pacings)
         {{/if}}
 
         {{#if has_sliding_window}}

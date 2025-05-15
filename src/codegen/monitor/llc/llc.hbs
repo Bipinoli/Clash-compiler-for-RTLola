@@ -59,10 +59,10 @@ llc event = bundle (toPop, outputs)
         toPop = pure True
         {{/if}}
 
-        {{#if has_sliding_window}}
-        (inputs, slides, pacings) = unbundle poppedEvent
+        {{#if (and (not has_sliding_window) (not has_input))}}
+        pacings = poppedEvent
         {{else}}
-        (inputs, pacings) = unbundle poppedEvent
+        ({{#if has_input}}inputs, {{/if}}{{#if has_sliding_window}}slides, {{/if}}pacings) = unbundle poppedEvent
         {{/if}}
 
         {{#each inputs}}
@@ -128,7 +128,7 @@ llc event = bundle (toPop, outputs)
 
         {{~#if this.is_sync_access}}
             {{#if this.memory_more_than_one}}
-        out{{../idx}}Data{{@index}} = getMatchingTag <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{this.default_value}}
+        out{{../idx}}Data{{@index}} = getMatchingTag <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{{this.default_value}}}
             {{else}}
         out{{../idx}}Data{{@index}} = getMatchingTagFromNonVec <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{{this.default_value}}}
             {{/if}}

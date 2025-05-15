@@ -115,17 +115,17 @@ queue input = output
 
 {{#if debug}}
     {{#if has_sliding_window}}
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings, Slides))
+monitor :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs ->{{/if}}Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings, Slides))
     {{else}}
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
+monitor :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs ->{{/if}} Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
     {{/if}}
-monitor inputs = bundle (outputs, debugSignals)
+monitor {{#if has_input}}inputs {{/if}}= bundle (outputs, debugSignals)
 {{else}}
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom Outputs
-monitor inputs = outputs
+monitor :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs ->{{/if}}Signal dom Outputs
+monitor {{#if has_input}}inputs {{/if}}= outputs
 {{/if}}
     where 
-        (newEvent, event) = unbundle (hlc inputs)
+        (newEvent, event) = unbundle (hlc{{#if has_input}} inputs{{/if}})
 
         (qPushValid, qPopValid, qPopData) = unbundle (queue (bundle (qPush, qPop, qInptData)))
         qPush = newEvent
@@ -153,13 +153,13 @@ monitor inputs = outputs
 {{#if debug}}
     {{#if has_sliding_window}}
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings, Slides))
+    {{#if has_input}}Signal TestDomain Inputs -> {{/if}}Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings, Slides))
     {{else}}
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
+    {{#if has_input}}Signal TestDomain Inputs -> {{/if}}Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
     {{/if}}
 {{else}}
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain Outputs
+    {{#if has_input}}Signal TestDomain Inputs -> {{/if}}Signal TestDomain Outputs
 {{/if}}
-topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en
+topEntity clk rst en {{#if has_input}}inputs {{/if}}= exposeClockResetEnable (monitor {{#if has_input}}inputs{{/if}}) clk rst en

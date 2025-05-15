@@ -1,3 +1,6 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+
 module Spec where
 
 import Clash.Prelude
@@ -20,24 +23,24 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- x, i, f, a
+-- x, f, i, a
 -- h, b
 -- g, e, c, d
 
 -- Memory Window
--- window f = 1
--- window x = 2
--- window a = 1
 -- window e = 1
+-- window x = 2
 -- window d = 1
--- window h = 1
--- window i = 1
+-- window f = 1
 -- window g = 1
+-- window a = 1
 -- window b = 1
 -- window c = 1
+-- window i = 1
+-- window h = 1
 
 -- Pipeline Visualization
--- x,i,f,a |         |         | x,i,f,a |         |         | x,i,f,a |         |         | x,i,f,a
+-- x,f,i,a |         |         | x,f,i,a |         |         | x,f,i,a |         |         | x,f,i,a
 -- -------------------------------------------------------------------------------------------------
 --         | h,b     |         |         | h,b     |         |         | h,b     |         |        
 -- -------------------------------------------------------------------------------------------------
@@ -57,28 +60,64 @@ import Clash.Prelude
 
 ---------------------------------------------------------------
 
+data ValidInt = ValidInt {
+    value :: Int,
+    valid :: Bool
+} deriving (Generic, NFDataX)
 
-type HasInput0 = (Int, Bool)
-type Inputs = HasInput0
 
-type HasOutput0 = (Int, Bool)
-type HasOutput1 = (Int, Bool)
-type HasOutput2 = (Int, Bool)
-type HasOutput3 = (Int, Bool)
-type HasOutput4 = (Int, Bool)
-type HasOutput5 = (Int, Bool)
-type HasOutput6 = (Int, Bool)
-type HasOutput7 = (Int, Bool)
-type HasOutput8 = (Int, Bool)
-type Outputs = (HasOutput0, HasOutput1, HasOutput2, HasOutput3, HasOutput4, HasOutput5, HasOutput6, HasOutput7, HasOutput8)
+-- using newtype to avoid flattening of data
+-- https://clash-lang.discourse.group/t/how-to-avoid-flattening-of-fields-in-record/79/5
+newtype Inputs = Inputs {
+    input0 :: ValidInt
+} deriving (Generic, NFDataX)
 
-type Pacings = (Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool)
+data Outputs = Outputs {
+    output0 :: ValidInt,
+    output1 :: ValidInt,
+    output2 :: ValidInt,
+    output3 :: ValidInt,
+    output4 :: ValidInt,
+    output5 :: ValidInt,
+    output6 :: ValidInt,
+    output7 :: ValidInt,
+    output8 :: ValidInt
+} deriving (Generic, NFDataX)
+
+data Pacings = Pacings {
+    pacing0 :: Bool,
+    pacing1 :: Bool,
+    pacing2 :: Bool,
+    pacing3 :: Bool,
+    pacing4 :: Bool,
+    pacing5 :: Bool,
+    pacing6 :: Bool,
+    pacing7 :: Bool,
+    pacing8 :: Bool
+} deriving (Generic, NFDataX)
+
+
+type Tag = Unsigned 8
+
+data Tags = Tags {
+    input0 :: Tag,
+    output0 :: Tag,
+    output1 :: Tag,
+    output2 :: Tag,
+    output3 :: Tag,
+    output4 :: Tag,
+    output5 :: Tag,
+    output6 :: Tag,
+    output7 :: Tag,
+    output8 :: Tag
+} deriving (Generic, NFDataX)
 
 type Event = (Inputs, Pacings)
 
 nullEvent :: Event
-nullEvent = ((0, False), (False, False, False, False, False, False, False, False, False))
-
+nullEvent = (nullInputs, nullPacings)
+nullInputs = Inputs (ValidInt 0 False) 
+nullPacings = Pacings False False False False False False False False False 
 
 ---------------------------------------------------------------
 
@@ -168,21 +207,22 @@ hlc inputs = out
     where 
         out = bundle (newEvent, event)
         newEvent = hasInput0
+
         event = bundle (inputs, pacings)
 
-        pacings = bundle (pacing0, pacing1, pacing2, pacing3, pacing4, pacing5, pacing6, pacing7, pacing8)
+        pacings = Pacings <$> p0 <*> p1 <*> p2 <*> p3 <*> p4 <*> p5 <*> p6 <*> p7 <*> p8
 
-        (_, hasInput0) = unbundle inputs
+        hasInput0 = ((.valid). (.input0)) <$> inputs
 
-        pacing0 = hasInput0
-        pacing1 = hasInput0
-        pacing2 = hasInput0
-        pacing3 = hasInput0
-        pacing4 = hasInput0
-        pacing5 = hasInput0
-        pacing6 = hasInput0
-        pacing7 = hasInput0
-        pacing8 = hasInput0
+        p0 = hasInput0
+        p1 = hasInput0
+        p2 = hasInput0
+        p3 = hasInput0
+        p4 = hasInput0
+        p5 = hasInput0
+        p6 = hasInput0
+        p7 = hasInput0
+        p8 = hasInput0
 
 
 
@@ -190,7 +230,6 @@ hlc inputs = out
 
 ---------------------------------------------------------------
 
-type Tag = Unsigned 8
 -- maxTag must be at least the size of the maximum window to avoid duplicate tags in the window
 -- also to avoid having to do modulo operations maxTag must be at least as big as the largest offset
 maxTag = 3 :: Tag
@@ -240,34 +279,46 @@ llc event = bundle (toPop, outputs)
         toPop = isPipelineReady .&&. not <$> startNewPipeline
 
         (inputs, pacings) = unbundle poppedEvent
-        input0 = inputs
-        (_, input0HasData) = unbundle input0
-        (p0, p1, p2, p3, p4, p5, p6, p7, p8) = unbundle pacings
 
-        tagIn0 = genTag input0HasData
-        tagOut8 = genTag p8
-        tagOut5 = genTag p5
-        tagOut0 = genTag p0
-        tagOut7 = genTag p7
-        tagOut1 = genTag p1
-        tagOut6 = genTag p6
-        tagOut4 = genTag p4
-        tagOut2 = genTag p2
-        tagOut3 = genTag p3
+        input0 = (.input0) <$> inputs
+        input0HasData = ((.valid). (.input0)) <$> inputs
+
+
+        p0 = (.pacing0) <$> pacings
+        p1 = (.pacing1) <$> pacings
+        p2 = (.pacing2) <$> pacings
+        p3 = (.pacing3) <$> pacings
+        p4 = (.pacing4) <$> pacings
+        p5 = (.pacing5) <$> pacings
+        p6 = (.pacing6) <$> pacings
+        p7 = (.pacing7) <$> pacings
+        p8 = (.pacing8) <$> pacings
+        
+        tIn0 = genTag input0HasData
+        tOut5 = genTag p5
+        tOut8 = genTag p8
+        tOut0 = genTag p0
+        tOut7 = genTag p7
+        tOut1 = genTag p1
+        tOut6 = genTag p6
+        tOut4 = genTag p4
+        tOut2 = genTag p2
+        tOut3 = genTag p3
 
         -- tag generation takes 1 cycle so we need to delay the input data
-        (input0Data, _) = unbundle (delay (0, False) input0)
+        input0Data = delay 0 (((.value). (.input0)) <$> inputs)
 
         -- delayed tags to be used in different levels 
-        tagsDefault = (invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag, invalidTag)
-        curTags = bundle (tagIn0, tagOut0, tagOut1, tagOut2, tagOut3, tagOut4, tagOut5, tagOut6, tagOut7, tagOut8)
+        tagsDefault = Tags nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT 
+        curTags = Tags <$> tIn0 <*> tOut0 <*> tOut1 <*> tOut2 <*> tOut3 <*> tOut4 <*> tOut5 <*> tOut6 <*> tOut7 <*> tOut8
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags
+        nullT = invalidTag
 
         enIn0 = delayFor d1 False input0HasData
-        enOut8 = delayFor d1 False p8
         enOut5 = delayFor d1 False p5
+        enOut8 = delayFor d1 False p8
         enOut0 = delayFor d1 False p0
         enOut7 = delayFor d2 False p7
         enOut1 = delayFor d2 False p1
@@ -287,85 +338,78 @@ llc event = bundle (toPop, outputs)
         output8Aktv = delayFor d4 False p8
 
         -- Evaluation of input windows: level 0
-        input0Win = input0Window enIn0 tagIn0 input0Data
+        input0Win = input0Window enIn0 tIn0 input0Data
 
         -- Evaluation of output 0: level 0
-        out0 = outputStream0 enOut0 tagOut0 out0Data0 out0Data1 out0Data2 
-        out0Data0 = getOffset <$> input0Win <*> tagIn0 <*> (pure 2) <*> out0Data0Dflt
-        out0Data0Dflt = pure 0
-        out0Data1 = getOffsetFromNonVec <$> out2 <*> tagOut2 <*> (pure 1) <*> out0Data1Dflt
-        out0Data1Dflt = pure 0
-        out0Data2 = getOffsetFromNonVec <$> out6 <*> tagOut6 <*> (pure 1) <*> out0Data2Dflt
-        out0Data2Dflt = pure 0
+        out0 = outputStream0 enOut0 tOut0 out0Data0 out0Data1 out0Data2 
+        out0Data0 = getOffset <$> input0Win <*> tIn0 <*> (pure 2) <*> out0Data0Dflt
+        out0Data0Dflt = pure (0)
+        out0Data1 = getOffsetFromNonVec <$> out2 <*> tOut2 <*> (pure 1) <*> out0Data1Dflt
+        out0Data1Dflt = pure (0)
+        out0Data2 = getOffsetFromNonVec <$> out6 <*> tOut6 <*> (pure 1) <*> out0Data2Dflt
+        out0Data2Dflt = pure (0)
 
         -- Evaluation of output 1: level 1
-        (_, out1Level1TagOut0, out1Level1TagOut1, _, _, _, _, _, _, _) = unbundle curTagsLevel1
-        out1 = outputStream1 enOut1 out1Level1TagOut1 out1Data0 
-        out1Data0 = getMatchingTagFromNonVec <$> out0 <*> out1Level1TagOut0 <*> (pure 0)
+        out1 = outputStream1 enOut1 ((.output1) <$> curTagsLevel1) out1Data0 
+        out1Data0 = getMatchingTagFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel1) <*> (pure (0))
 
         -- Evaluation of output 2: level 2
-        (_, _, out2Level2TagOut1, out2Level2TagOut2, _, _, _, _, _, _) = unbundle curTagsLevel2
-        out2 = outputStream2 enOut2 out2Level2TagOut2 out2Data0 
-        out2Data0 = getMatchingTagFromNonVec <$> out1 <*> out2Level2TagOut1 <*> (pure 0)
+        out2 = outputStream2 enOut2 ((.output2) <$> curTagsLevel2) out2Data0 
+        out2Data0 = getMatchingTagFromNonVec <$> out1 <*> ((.output1) <$> curTagsLevel2) <*> (pure (0))
 
         -- Evaluation of output 3: level 2
-        (_, _, out3Level2TagOut1, _, out3Level2TagOut3, _, _, _, _, _) = unbundle curTagsLevel2
-        out3 = outputStream3 enOut3 out3Level2TagOut3 out3Data0 
-        out3Data0 = getMatchingTagFromNonVec <$> out1 <*> out3Level2TagOut1 <*> (pure 0)
+        out3 = outputStream3 enOut3 ((.output3) <$> curTagsLevel2) out3Data0 
+        out3Data0 = getMatchingTagFromNonVec <$> out1 <*> ((.output1) <$> curTagsLevel2) <*> (pure (0))
 
         -- Evaluation of output 4: level 2
-        (_, _, out4Level2TagOut1, _, _, out4Level2TagOut4, _, _, _, _) = unbundle curTagsLevel2
-        out4 = outputStream4 enOut4 out4Level2TagOut4 out4Data0 
-        out4Data0 = getMatchingTagFromNonVec <$> out1 <*> out4Level2TagOut1 <*> (pure 0)
+        out4 = outputStream4 enOut4 ((.output4) <$> curTagsLevel2) out4Data0 
+        out4Data0 = getMatchingTagFromNonVec <$> out1 <*> ((.output1) <$> curTagsLevel2) <*> (pure (0))
 
         -- Evaluation of output 5: level 0
-        out5 = outputStream5 enOut5 tagOut5 out5Data0 out5Data1 
-        out5Data0 = getOffsetFromNonVec <$> out3 <*> tagOut3 <*> (pure 1) <*> out5Data0Dflt
-        out5Data0Dflt = pure 0
-        out5Data1 = getOffsetFromNonVec <$> out4 <*> tagOut4 <*> (pure 1) <*> out5Data1Dflt
-        out5Data1Dflt = pure 0
+        out5 = outputStream5 enOut5 tOut5 out5Data0 out5Data1 
+        out5Data0 = getOffsetFromNonVec <$> out3 <*> tOut3 <*> (pure 1) <*> out5Data0Dflt
+        out5Data0Dflt = pure (0)
+        out5Data1 = getOffsetFromNonVec <$> out4 <*> tOut4 <*> (pure 1) <*> out5Data1Dflt
+        out5Data1Dflt = pure (0)
 
         -- Evaluation of output 6: level 2
-        (_, _, _, _, _, _, out6Level2TagOut5, out6Level2TagOut6, out6Level2TagOut7, out6Level2TagOut8) = unbundle curTagsLevel2
-        out6 = outputStream6 enOut6 out6Level2TagOut6 out6Data0 out6Data1 out6Data2 out6Data3 
-        out6Data0 = getMatchingTagFromNonVec <$> out5 <*> out6Level2TagOut5 <*> (pure 0)
-        out6Data1 = getOffsetFromNonVec <$> out6 <*> out6Level2TagOut6 <*> (pure 1) <*> out6Data1Dflt
-        out6Data1Dflt = pure 0
-        out6Data2 = getMatchingTagFromNonVec <$> out7 <*> out6Level2TagOut7 <*> (pure 0)
-        out6Data3 = getMatchingTagFromNonVec <$> out8 <*> out6Level2TagOut8 <*> (pure 0)
+        out6 = outputStream6 enOut6 ((.output6) <$> curTagsLevel2) out6Data0 out6Data1 out6Data2 out6Data3 
+        out6Data0 = getMatchingTagFromNonVec <$> out5 <*> ((.output5) <$> curTagsLevel2) <*> (pure (0))
+        out6Data1 = getOffsetFromNonVec <$> out6 <*> ((.output6) <$> curTagsLevel2) <*> (pure 1) <*> out6Data1Dflt
+        out6Data1Dflt = pure (0)
+        out6Data2 = getMatchingTagFromNonVec <$> out7 <*> ((.output7) <$> curTagsLevel2) <*> (pure (0))
+        out6Data3 = getMatchingTagFromNonVec <$> out8 <*> ((.output8) <$> curTagsLevel2) <*> (pure (0))
 
         -- Evaluation of output 7: level 1
-        (out7Level1TagIn0, _, _, _, _, _, _, _, out7Level1TagOut7, _) = unbundle curTagsLevel1
-        out7 = outputStream7 enOut7 out7Level1TagOut7 out7Data0 
-        out7Data0 = getMatchingTag <$> input0Win <*> out7Level1TagIn0 <*> (pure 0)
+        out7 = outputStream7 enOut7 ((.output7) <$> curTagsLevel1) out7Data0 
+        out7Data0 = getMatchingTag <$> input0Win <*> ((.input0) <$> curTagsLevel1) <*> (pure (0))
 
         -- Evaluation of output 8: level 0
-        out8 = outputStream8 enOut8 tagOut8 out8Data0 
-        out8Data0 = getOffset <$> input0Win <*> tagIn0 <*> (pure 1) <*> out8Data0Dflt
-        out8Data0Dflt = pure 0
+        out8 = outputStream8 enOut8 tOut8 out8Data0 
+        out8Data0 = getOffset <$> input0Win <*> tIn0 <*> (pure 1) <*> out8Data0Dflt
+        out8Data0Dflt = pure (0)
 
         -- Outputing all results: level 3
-        (_, level3TagOut0, level3TagOut1, level3TagOut2, level3TagOut3, level3TagOut4, level3TagOut5, level3TagOut6, level3TagOut7, level3TagOut8) = unbundle curTagsLevel3
-        output0 = bundle (output0Data, output0Aktv)
+        output0 = ValidInt <$> output0Data <*> output0Aktv
         (_, output0Data) = unbundle out0
-        output1 = bundle (output1Data, output1Aktv)
+        output1 = ValidInt <$> output1Data <*> output1Aktv
         (_, output1Data) = unbundle out1
-        output2 = bundle (output2Data, output2Aktv)
+        output2 = ValidInt <$> output2Data <*> output2Aktv
         (_, output2Data) = unbundle out2
-        output3 = bundle (output3Data, output3Aktv)
+        output3 = ValidInt <$> output3Data <*> output3Aktv
         (_, output3Data) = unbundle out3
-        output4 = bundle (output4Data, output4Aktv)
+        output4 = ValidInt <$> output4Data <*> output4Aktv
         (_, output4Data) = unbundle out4
-        output5 = bundle (output5Data, output5Aktv)
+        output5 = ValidInt <$> output5Data <*> output5Aktv
         (_, output5Data) = unbundle out5
-        output6 = bundle (output6Data, output6Aktv)
+        output6 = ValidInt <$> output6Data <*> output6Aktv
         (_, output6Data) = unbundle out6
-        output7 = bundle (output7Data, output7Aktv)
+        output7 = ValidInt <$> output7Data <*> output7Aktv
         (_, output7Data) = unbundle out7
-        output8 = bundle (output8Data, output8Aktv)
+        output8 = ValidInt <$> output8Data <*> output8Aktv
         (_, output8Data) = unbundle out8
 
-        outputs = bundle (output0, output1, output2, output3, output4, output5, output6, output7, output8)
+        outputs = Outputs <$> output0 <*> output1 <*> output2 <*> output3 <*> output4 <*> output5 <*> output6 <*> output7 <*> output8
 
 
         genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
@@ -484,7 +528,7 @@ outputStream8 en tag in0WithTag = result
 
 ---------------------------------------------------------------
 
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom Outputs
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs ->Signal dom Outputs
 monitor inputs = outputs
     where 
         (newEvent, event) = unbundle (hlc inputs)

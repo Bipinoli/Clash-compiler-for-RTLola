@@ -13,6 +13,7 @@ use crate::{
 #[derive(Serialize)]
 struct Data {
     has_periodic_pacing: bool,
+    has_input: bool,
     has_sliding_window: bool,
     new_event_condition: String,
     inputs: Vec<datatypes::Stream>,
@@ -28,8 +29,9 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         handlebars,
     );
     let data = Data {
+        has_input: ir.mir.inputs.len() > 0,
         has_periodic_pacing: get_has_periodic_pacing(ir),
-        has_sliding_window: get_has_sliding_window(ir),
+        has_sliding_window: ir.mir.sliding_windows.len() > 0,
         new_event_condition: get_new_event_condition(ir),
         inputs: datatypes::get_inputs(ir),
         pacings: get_pacings(ir, &get_all_periods(ir)),
@@ -43,10 +45,6 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
             None
         }
     }
-}
-
-fn get_has_sliding_window(ir: &HardwareIR) -> bool {
-    ir.mir.sliding_windows.len() > 0
 }
 
 fn get_has_periodic_pacing(ir: &HardwareIR) -> bool {
