@@ -1,39 +1,91 @@
+{{#each all_unique_types}}
+data Valid{{this}} = Valid{{this}} {
+    value :: {{this}},
+    valid :: Bool
+} deriving (Generic, NFDataX)
 
-{{#each input_types~}}
-    type HasInput{{@index}} = ({{this}}, Bool)
 {{/each}}
-{{#if (gt (len input_types) 1)~}}
-    type Inputs = ({{#each input_types}}HasInput{{@index}}{{#unless @last}}, {{/unless}}{{/each}})
-{{else~}}
-    type Inputs = HasInput0
+
+{{#if (gt (len inputs) 1)}}
+data Inputs = Inputs {
+    {{#each inputs}}
+    input{{this.index}} :: Valid{{this.ty}}{{#unless @last}},{{/unless}}
+    {{/each}}
+} deriving (Generic, NFDataX)
+{{else}}
+    {{#if (eq (len inputs) 1)}}
+-- using newtype to avoid flattening of data
+-- https://clash-lang.discourse.group/t/how-to-avoid-flattening-of-fields-in-record/79/5
+newtype Inputs = Inputs {
+    {{#each inputs}}
+    input0 :: Valid{{this.ty}}
+    {{/each}}
+} deriving (Generic, NFDataX)
+    {{/if}}
 {{/if}}
 
-{{#each output_types~}}
-    type HasOutput{{@index}} = ({{this}}, Bool)
-{{/each}}
-{{#if (gt (len output_types) 1)~}}
-    type Outputs = ({{#each output_types}}HasOutput{{@index}}{{#unless @last}}, {{/unless}}{{/each}})
-{{else~}}
-    type Outputs = HasOutput0
-{{/if~}}
+{{#if (gt (len outputs) 1)}}
+data Outputs = Outputs {
+    {{#each outputs}}
+    output{{this.index}} :: Valid{{this.ty}}{{#unless @last}},{{/unless}}
+    {{/each}}
+} deriving (Generic, NFDataX)
+{{else}}
+-- using newtype to avoid flattening of data
+-- https://clash-lang.discourse.group/t/how-to-avoid-flattening-of-fields-in-record/79/5
+newtype Outputs = Outputs {
+    {{#each outputs}}
+    output{{this.index}} :: Valid{{this.ty}}
+    {{/each}}
+} deriving (Generic, NFDataX)
+{{/if}}
 
-{{~#*inline "joined_pacings"~}}
-    {{~#each output_types~}}
-        Bool{{#unless @last}}, {{/unless}}
-    {{~/each~}}
-{{~/inline~}}
+{{#if (gt (len outputs) 1)}}
+data Pacings = Pacings {
+    {{#each outputs}}
+    pacing{{this.index}} :: Bool{{#unless @last}},{{/unless}}
+    {{/each}}
+} deriving (Generic, NFDataX)
+{{else}}
+-- using newtype to avoid flattening of data
+-- https://clash-lang.discourse.group/t/how-to-avoid-flattening-of-fields-in-record/79/5
+newtype Pacings = Pacings {
+    {{#each outputs}}
+    pacing{{this.index}} :: Bool
+    {{/each}}
+} deriving (Generic, NFDataX)
+{{/if}}
 
-{{#*inline "pacing_tuples"}}
-    {{~#if (gt (len output_types) 1)~}}
-        ({{>joined_pacings}})
-    {{~else~}}
-        Bool
-    {{~/if~}}
-{{~/inline}}
-
-type Pacings = {{>pacing_tuples}}
 {{#if has_sliding_window}}
-type Slides = {{slide_types}}
+{{#if (gt (len sliding_windows) 1)}}
+data Slides = Slides {
+    {{#each sliding_windows}}
+    slide{{this.index}} :: Bool{{#unless @last}},{{/unless}}
+    {{/each}}
+} deriving (Generic, NFDataX)
+{{else}}
+-- using newtype to avoid flattening of data
+-- https://clash-lang.discourse.group/t/how-to-avoid-flattening-of-fields-in-record/79/5
+newtype Slides = Slides {
+    slide0 :: Bool
+} deriving (Generic, NFDataX)
+{{/if}}
+{{/if}}
+
+type Tag = Unsigned 8
+
+{{#if (gt (len all_streams) 1)}}
+data Tags = Tags {
+    {{#each all_streams}}
+    {{this.stream_type}}{{this.index}} :: Tag{{#unless @last}},{{/unless}}
+    {{/each}}
+} deriving (Generic, NFDataX)
+{{else}}
+newtype Tags = Tags {
+    {{#each all_streams}}
+    {{this.stream_type}}{{this.index}} :: Tag{{#unless @last}},{{/unless}}
+    {{/each}}
+} deriving (Generic, NFDataX)
 {{/if}}
 
 {{#if has_sliding_window}}
@@ -42,51 +94,12 @@ type Event = (Inputs, Slides, Pacings)
 type Event = (Inputs, Pacings)
 {{/if}}
 
-{{#*inline "joined_default_inputs"}}
-    {{~#each input_defaults~}}
-        ({{this}}, False){{#unless @last}}, {{/unless}}
-    {{~/each~}}
-{{~/inline}}
-
-{{~#*inline "default_inputs"~}}
-    {{~#if (gt (len input_defaults) 1)~}}
-        ({{~>joined_default_inputs~}})
-    {{~else~}}
-        {{~>joined_default_inputs~}}
-{{~/if~}}
-{{~/inline~}}
-
-{{#*inline "joined_default_pacings"}}
-    {{~#each output_types~}}
-        False{{#unless @last}}, {{/unless}}
-    {{~/each~}}
-{{~/inline}}
-
-{{~#*inline "default_pacings"~}}
-    {{~#if (gt (len output_types) 1)~}}
-        ({{~>joined_default_pacings~}})
-    {{~else~}}
-        {{~>joined_default_pacings~}}
-{{~/if~}}
-{{~/inline~}}
-
-{{#*inline "joined_default_pacings"}}
-    {{~#each output_types~}}
-        False{{#unless @last}}, {{/unless}}
-    {{~/each~}}
-{{~/inline}}
-
-{{~#*inline "default_pacings"~}}
-    {{~#if (gt (len output_types) 1)~}}
-        ({{~>joined_default_pacings~}})
-    {{~else~}}
-        {{~>joined_default_pacings~}}
-{{~/if~}}
-{{~/inline~}}
-
 nullEvent :: Event
 {{#if has_sliding_window}}
-nullEvent = ({{>default_inputs}}, {{slide_defaults}}, {{>default_pacings}})
+nullEvent = (nullInputs, nullSlides, nullPacings)
+nullSlides = Slides {{#each sliding_windows}}False {{/each}}
 {{else}}
-nullEvent = ({{>default_inputs}}, {{>default_pacings}})
+nullEvent = (nullInputs, nullPacings)
 {{/if}}
+nullInputs = Inputs {{#each inputs}}(Valid{{this.ty}} {{this.default}} False) {{/each}}
+nullPacings = Pacings {{#each outputs}}False {{/each}}

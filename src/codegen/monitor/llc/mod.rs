@@ -1,5 +1,6 @@
 use std::cmp::max;
 use std::collections::HashSet;
+use std::fmt::format;
 
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
@@ -29,13 +30,9 @@ struct Data {
     tags: Vec<String>,
     enables: Vec<String>,
     output_phase_enables: Vec<String>,
-    pacings_type: String,
-    slides_type: String,
-    all_tags_names: String,
-    all_tags_defaults: String,
+    all_tags_names: Vec<String>,
     cur_tags_levels: Vec<CurTagsLevel>,
     output_level: usize,
-    extracted_tags_for_outputs: String,
 }
 
 #[derive(Serialize)]
@@ -46,11 +43,11 @@ struct Input {
 #[derive(Serialize)]
 struct Output {
     idx: usize,
+    ty: String,
     default_value: String,
     memory_more_than_one: bool,
     deps: Vec<Dependency>,
     level: usize,
-    extracted_tags_of_depending: String,
 }
 
 #[derive(Serialize)]
@@ -62,7 +59,6 @@ struct SlidingWindow {
     tag: String,
     source_tag: String,
     level: usize,
-    extracted_tags_of_depending: String,
 }
 
 #[derive(Serialize)]
@@ -107,13 +103,9 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         tags: get_tags(ir),
         enables: get_enables(ir),
         output_phase_enables: get_output_phase_enables(ir),
-        pacings_type: get_pacings_type(ir),
-        slides_type: get_slides_type(ir),
         all_tags_names: get_all_tags_names(ir),
-        all_tags_defaults: get_all_tags_defaults(ir),
         cur_tags_levels: get_cur_tags_levels(ir),
         output_level: ir.evaluation_order.len(),
-        extracted_tags_for_outputs: get_extracted_tags_for_outputs(ir),
     };
     match handlebars.render("llc", &data) {
         Ok(result) => Some(result),
@@ -126,10 +118,10 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
 
 /// Example:
 /// [
-///     "tagIn0 = genTag input0HasData",
-///     "tagOut0 = genTag p0",
-///     "tagSw0 = genTag p1",
-///     "tagOut1 = genTag p1",
+///     "tIn0 = genTag input0HasData",
+///     "tOut0 = genTag p0",
+///     "tSw0 = genTag p1",
+///     "tOut1 = genTag p1",
 /// ]
 fn get_tags(ir: &HardwareIR) -> Vec<String> {
     ir.evaluation_order
@@ -137,10 +129,10 @@ fn get_tags(ir: &HardwareIR) -> Vec<String> {
         .map(|order| {
             order.iter().map(move |nd| match nd {
                 Node::InputStream(x) => {
-                    format!("tagIn{} = genTag input{}HasData", x.clone(), x.clone())
+                    format!("tIn{} = genTag input{}HasData", x.clone(), x.clone())
                 }
-                Node::OutputStream(x) => format!("tagOut{} = genTag p{}", x.clone(), x.clone()),
-                Node::SlidingWindow(x) => format!("tagSw{} = genTag p{}", x.clone(), x.clone()),
+                Node::OutputStream(x) => format!("tOut{} = genTag p{}", x.clone(), x.clone()),
+                Node::SlidingWindow(x) => format!("tSw{} = genTag p{}", x.clone(), x.clone()),
             })
         })
         .flatten()
@@ -293,9 +285,9 @@ fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
                 tag: {
                     let level = hardware_ir::find_level(&node, &ir.evaluation_order);
                     if level > 0 {
-                        format!("{}Level{}TagSw{}", get_node_name(&node), level, i.clone())
+                        format!("((.slide{}) <$> curTagsLevel{})", i, level)
                     } else {
-                        format!("tagSw{}", i.clone())
+                        format!("tSw{}", i.clone())
                     }
                 },
                 source_tag: {
@@ -306,9 +298,6 @@ fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
                     get_source_tag(&node, &source_node, ir)
                 },
                 level: level.clone(),
-                extracted_tags_of_depending: get_extracted_tags_for_sliding_window(
-                    &node, level, ir,
-                ),
             }
         })
         .collect()
@@ -335,13 +324,11 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
             let level = hardware_ir::find_level(&Node::OutputStream(i), &ir.evaluation_order);
             Output {
                 idx: i,
+                ty: datatypes::get_type(&out.ty),
                 default_value: datatypes::get_default_for_type(&out.ty),
                 memory_more_than_one: ir.required_memory.get(&node).unwrap().clone() > 1,
                 deps: deps.clone(),
                 level: level.clone(),
-                extracted_tags_of_depending: get_extracted_tags_of_dependencies(
-                    &node, deps, level, ir,
-                ),
             }
         })
         .collect()
@@ -415,7 +402,7 @@ fn get_dependencies_from_expression(
                     source_tag,
                     memory_more_than_one,
                     default_value: format!(
-                        "(pure {})",
+                        "(pure ({}))",
                         match source {
                             StreamReference::In(x) => {
                                 datatypes::get_default_for_type(&ir.mir.inputs[x.clone()].ty)
@@ -510,7 +497,7 @@ fn get_dependencies_from_expression(
             let (default_expr_statements, depending_tags_from_default_expr) =
                 get_default_expr_statements_and_depending_tags(
                     &default,
-                    String::from("_name_"),
+                    String::from("<name>"),
                     "".to_string(),
                     ir,
                 );
@@ -525,7 +512,7 @@ fn get_dependencies_from_expression(
                     source_node: dep.source_node.clone(),
                     source_tag: dep.source_tag.clone(),
                     memory_more_than_one: dep.memory_more_than_one,
-                    default_value: format!("_default_expr_"),
+                    default_value: format!("<default_expr>"),
                     has_default_expr: true,
                     default_expr_statements: default_expr_statements.clone(),
                     depending_tags_from_default_expr: depending_tags_from_default_expr.clone(),
@@ -573,13 +560,13 @@ fn order_dependencies_according_to_access_list(deps: &mut Vec<Dependency>, out: 
     });
 }
 
-/// Example: get_default_expr_statements_and_depending_tags(expr, String::from("_name_"), ...)
+/// Example: get_default_expr_statements_and_depending_tags(expr, String::from("<name>"), ...)
 /// (
 ///     vec![
-///          "_name_ = _name_Data0 + _name_Data1".to_string(),
-///          "(_, _name_Data0) = unbundle (getOffset <$> input1Win <*> _tagprefix_In1 <*> (pure 1) <*> (pure 10))".to_string(),
-///          "(_, _name_Data1) = unbundle (getOffsetFromNonVec <$> out0 <*> _tagprefix_Out0 <*> (pure 1) <*> _name_Data1Dflt)".to_string(),
-///          "(_, _name_Data1Dflt) = unbundle (getOffset <$> input0Win <*> _tagprefix_In0 <*> (pure 1) <*> (pure 20))".to_string(),
+///          "<name> = <name>Data0 + <name>Data1".to_string(),
+///          "(_, <name>Data0) = unbundle (getOffset <$> input1Win <*> ((.input1) <$> curTagsLevel<level>) <*> (pure 1) <*> (pure 10))".to_string(),
+///          "(_, <name>Data1) = unbundle (getOffsetFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel<level>) <*> (pure 1) <*> <name>Data1Dflt)".to_string(),
+///          "(_, <name>Data1Dflt) = unbundle (getOffset <$> input0Win <*> ((.input0) <$> curTagsLevel<level>) <*> (pure 1) <*> (pure 20))".to_string(),
 ///      ],
 ///     vec![ Node::OutputStream(0)]
 /// )
@@ -616,7 +603,7 @@ fn get_default_expr_statements_and_depending_tags(
         ExpressionKind::Default { expr, default } => {
             if let ExpressionKind::LoadConstant(constant) = &default.kind {
                 let dflt_val = match constant {
-                    Constant::Int(x) => format!("(pure {})", x),
+                    Constant::Int(x) => format!("(pure ({}))", x),
                     _ => unimplemented!(),
                 };
                 let (child_statements, child_tags) = get_default_expr_statements_and_depending_tags(
@@ -661,12 +648,12 @@ fn get_default_expr_statements_and_depending_tags(
             let (target_name, tag, dflt_val) = match target {
                 StreamReference::In(x) => (
                     format!("input{}Win", x.clone()),
-                    format!("_tagprefix_In{}", x.clone()),
+                    format!("((.input{}) <$> curTagsLevel<level>)", x.clone()),
                     datatypes::get_default_for_type(&ir.mir.inputs[x.clone()].ty),
                 ),
                 StreamReference::Out(x) => (
                     format!("out{}", x.clone()),
-                    format!("_tagprefix_Out{}", x.clone()),
+                    format!("((.output{}) <$> curTagsLevel<level>)", x.clone()),
                     datatypes::get_default_for_type(&ir.mir.outputs[x.clone()].ty),
                 ),
             };
@@ -675,40 +662,38 @@ fn get_default_expr_statements_and_depending_tags(
                     depending_tags.push(target_node);
                     if target_keeps_multiple_values {
                         statements.push(format!(
-                            "(_, {}) = unbundle (getMatchingTag <$> {} <*> {} <*> (pure {}))",
+                            "(_, {}) = unbundle (getMatchingTag <$> {} <*> {} <*> (pure ({})))",
                             name_prefix, target_name, tag, dflt_val
                         ));
                     } else {
                         statements.push(format!("(_, {}) = unbundle {}", name_prefix, target_name));
                     };
                 }
-                StreamAccessKind::Offset(off) => {
-                    match off {
-                        Offset::Past(x) => {
-                            let dflt_val = if default_name.is_empty() {
-                                format!("(pure {})", dflt_val)
-                            } else {
-                                default_name
-                            };
-                            depending_tags.push(target_node.clone());
+                StreamAccessKind::Offset(off) => match off {
+                    Offset::Past(x) => {
+                        let dflt_val = if default_name.is_empty() {
+                            format!("(pure ({}))", dflt_val)
+                        } else {
+                            default_name
+                        };
+                        depending_tags.push(target_node.clone());
 
-                            if target_keeps_multiple_values {
-                                let statement = format!("(_, {}) = unbundle (getOffset <$> {} <*> {} <*> (pure {}) <*> {})", name_prefix, target_name, tag, x, dflt_val);
-                                statements.push(statement);
-                            } else {
-                                let statement = format!("(_, {}) = unbundle (getOffsetFromNonVec <$> {} <*> {} <*> (pure {}) <*> {})", name_prefix, target_name, tag, x, dflt_val);
-                                statements.push(statement);
-                            }
+                        if target_keeps_multiple_values {
+                            let statement = format!("(_, {}) = unbundle (getOffset <$> {} <*> {} <*> (pure ({})) <*> {})", name_prefix, target_name, tag, x, dflt_val);
+                            statements.push(statement);
+                        } else {
+                            let statement = format!("(_, {}) = unbundle (getOffsetFromNonVec <$> {} <*> {} <*> (pure ({})) <*> {})", name_prefix, target_name, tag, x, dflt_val);
+                            statements.push(statement);
                         }
-                        _ => unimplemented!(),
                     }
-                }
+                    _ => unimplemented!(),
+                },
                 _ => unimplemented!(),
             }
         }
         ExpressionKind::LoadConstant(constant) => match constant {
             Constant::Int(x) => {
-                statements.push(format!("{} = pure {}", name_prefix, x));
+                statements.push(format!("{} = pure ({})", name_prefix, x));
             }
             _ => unimplemented!(),
         },
@@ -720,29 +705,6 @@ fn get_default_expr_statements_and_depending_tags(
         .into_iter()
         .collect();
     (statements, depending_tags)
-}
-
-pub fn get_pacings_type(ir: &HardwareIR) -> String {
-    let pacings: Vec<String> = ir.mir.outputs.iter().map(|_| "Bool".to_string()).collect();
-    if pacings.len() > 1 {
-        format!("({})", pacings.join(", "))
-    } else {
-        format!("{}", pacings.join(", "))
-    }
-}
-
-pub fn get_slides_type(ir: &HardwareIR) -> String {
-    let pacings: Vec<String> = ir
-        .mir
-        .sliding_windows
-        .iter()
-        .map(|_| "Bool".to_string())
-        .collect();
-    if pacings.len() > 1 {
-        format!("({})", pacings.join(", "))
-    } else {
-        format!("{}", pacings.join(", "))
-    }
 }
 
 fn get_max_tag(ir: &HardwareIR) -> usize {
@@ -777,74 +739,45 @@ fn get_max_offset(ir: &HardwareIR) -> usize {
         .unwrap_or(0)
 }
 
-fn get_all_tags_names(ir: &HardwareIR) -> String {
+fn get_all_tags_names(ir: &HardwareIR) -> Vec<String> {
     let inputs: Vec<String> = ir
         .mir
         .inputs
         .iter()
         .enumerate()
-        .map(|(i, _)| format!("tagIn{}", i.clone()))
+        .map(|(i, _)| format!("tIn{}", i.clone()))
         .collect();
     let outputs: Vec<String> = ir
         .mir
         .outputs
         .iter()
         .enumerate()
-        .map(|(i, _)| format!("tagOut{}", i.clone()))
+        .map(|(i, _)| format!("tOut{}", i.clone()))
         .collect();
     let slidings: Vec<String> = ir
         .mir
         .sliding_windows
         .iter()
         .enumerate()
-        .map(|(i, _)| format!("tagSw{}", i.clone()))
+        .map(|(i, _)| format!("tSw{}", i.clone()))
         .collect();
-    let all_tags: Vec<String> = vec![&inputs[..], &outputs[..], &slidings[..]].concat();
-    if all_tags.len() > 1 {
-        format!("bundle ({})", all_tags.join(", "))
-    } else {
-        format!("{}", all_tags.join(", "))
-    }
-}
-
-pub fn get_all_tags_defaults(ir: &HardwareIR) -> String {
-    let inputs: Vec<String> = ir
-        .mir
-        .inputs
-        .iter()
-        .map(|_| "invalidTag".to_string())
-        .collect();
-    let outputs: Vec<String> = ir
-        .mir
-        .outputs
-        .iter()
-        .map(|_| "invalidTag".to_string())
-        .collect();
-    let slidings: Vec<String> = ir
-        .mir
-        .sliding_windows
-        .iter()
-        .map(|_| "invalidTag".to_string())
-        .collect();
-    let all_defaults = vec![&inputs[..], &outputs[..], &slidings[..]].concat();
-    if all_defaults.len() > 1 {
-        format!("({})", all_defaults.join(", "))
-    } else {
-        format!("{}", all_defaults.join(", "))
-    }
+    vec![&inputs[..], &outputs[..], &slidings[..]].concat()
 }
 
 fn get_source_tag(node: &Node, source_node: &Node, ir: &HardwareIR) -> String {
     let node_level = hardware_ir::find_level(&node, &ir.evaluation_order);
-    let prefix = if node_level > 0 {
-        format!("{}Level{}Tag", get_node_name(node), node_level)
+    if node_level > 0 {
+        match &source_node {
+            Node::InputStream(x) => format!("((.input{}) <$> curTagsLevel{})", x, node_level),
+            Node::OutputStream(x) => format!("((.output{}) <$> curTagsLevel{})", x, node_level),
+            Node::SlidingWindow(x) => format!("((.slide{}) <$> curTagsLevel{})", x, node_level),
+        }
     } else {
-        "tag".to_string()
-    };
-    match &source_node {
-        Node::InputStream(x) => format!("{}In{}", prefix, x.clone()),
-        Node::OutputStream(x) => format!("{}Out{}", prefix, x.clone()),
-        _ => unreachable!(),
+        match &source_node {
+            Node::InputStream(x) => format!("tIn{}", x.clone()),
+            Node::OutputStream(x) => format!("tOut{}", x.clone()),
+            _ => unreachable!(),
+        }
     }
 }
 
@@ -861,149 +794,4 @@ fn get_cur_tags_levels(ir: &HardwareIR) -> Vec<CurTagsLevel> {
             ),
         })
         .collect()
-}
-
-/// Example:
-/// (_, _, _, level1TagOut1, _, _) = unbundle curTagsLevel1
-fn get_extracted_tags_of_dependencies(
-    node: &Node,
-    deps: Vec<Dependency>,
-    level: usize,
-    ir: &HardwareIR,
-) -> String {
-    let node_name = get_node_name(node);
-    let depending_tags_from_all_default_exprs: Vec<Node> =
-        deps.iter().fold(Vec::new(), |acc, dep| {
-            [&acc[..], &dep.depending_tags_from_default_expr[..]].concat()
-        });
-
-    let extracted: Vec<String> = get_all_streams(ir)
-        .iter()
-        .map(|nd| {
-            if nd == node {
-                let capitalized_name = node_name[0..1].to_uppercase() + &node_name[1..];
-                format!("{}Level{}Tag{}", node_name.clone(), level, capitalized_name)
-            } else {
-                let dep = deps
-                    .iter()
-                    .find(|&dep| dep.source_node == *nd)
-                    .map(|nd| Some(nd.source_node.clone()))
-                    .unwrap_or({
-                        let depending_tag_node = depending_tags_from_all_default_exprs
-                            .iter()
-                            .map(|nd| nd.clone())
-                            .find(|dep| dep == nd);
-                        depending_tag_node
-                    });
-                match dep {
-                    Some(d) => match d {
-                        Node::InputStream(x) => {
-                            format!("{}Level{}TagIn{}", node_name, level, x)
-                        }
-                        Node::OutputStream(x) => {
-                            format!("{}Level{}TagOut{}", node_name, level, x)
-                        }
-                        Node::SlidingWindow(x) => {
-                            format!("{}Level{}TagSw{}", node_name, level, x)
-                        }
-                    },
-                    _ => "_".to_string(),
-                }
-            }
-        })
-        .collect();
-    if extracted.len() > 1 {
-        format!(
-            "({}) = unbundle curTagsLevel{}",
-            extracted.join(", "),
-            level
-        )
-    } else {
-        format!("{} = curTagsLevel{}", extracted.join(", "), level)
-    }
-}
-
-fn get_extracted_tags_for_sliding_window(node: &Node, level: usize, ir: &HardwareIR) -> String {
-    let node_name = get_node_name(node);
-    let deps: Vec<Node> = match node {
-        Node::SlidingWindow(x) => {
-            let dep = Node::from_stream(&ir.mir.sliding_windows[x.clone()].target);
-            vec![node.clone(), dep]
-        }
-        _ => unreachable!(),
-    };
-    let extracted: Vec<String> = get_all_streams(ir)
-        .iter()
-        .map(|node| {
-            let dep = deps.iter().find(|&dep| *dep == *node);
-            match dep {
-                Some(d) => match d {
-                    Node::InputStream(x) => format!("{}Level{}TagIn{}", node_name, level, x),
-                    Node::OutputStream(x) => format!("{}Level{}TagOut{}", node_name, level, x),
-                    Node::SlidingWindow(x) => format!("{}Level{}TagSw{}", node_name, level, x),
-                },
-                None => "_".to_string(),
-            }
-        })
-        .collect();
-    format!(
-        "({}) = unbundle curTagsLevel{}",
-        extracted.join(", "),
-        level
-    )
-}
-
-fn get_all_streams(ir: &HardwareIR) -> Vec<Node> {
-    let inputs: Vec<Node> = ir
-        .mir
-        .inputs
-        .iter()
-        .enumerate()
-        .map(|(i, _)| Node::InputStream(i.clone()))
-        .collect();
-    let outputs: Vec<Node> = ir
-        .mir
-        .outputs
-        .iter()
-        .enumerate()
-        .map(|(i, _)| Node::OutputStream(i.clone()))
-        .collect();
-    let slidings: Vec<Node> = ir
-        .mir
-        .sliding_windows
-        .iter()
-        .enumerate()
-        .map(|(i, _)| Node::SlidingWindow(i.clone()))
-        .collect();
-    [&inputs[..], &outputs[..], &slidings[..]].concat()
-}
-
-fn get_extracted_tags_for_outputs(ir: &HardwareIR) -> String {
-    let level = ir.evaluation_order.len();
-    let extracted: Vec<String> = get_all_streams(ir)
-        .iter()
-        .map(|node| match node {
-            Node::OutputStream(x) => {
-                format!("level{}TagOut{}", level.clone(), x)
-            }
-            _ => "_".to_string(),
-        })
-        .collect();
-    if extracted.len() > 1 {
-        format!(
-            "({}) = unbundle curTagsLevel{}",
-            extracted.join(", "),
-            level
-        )
-    } else {
-        format!("{} = curTagsLevel{}", extracted.join(", "), level)
-    }
-}
-
-fn get_node_name(node: &Node) -> String {
-    match node {
-        Node::OutputStream(x) => format!("out{}", x),
-        Node::SlidingWindow(x) => format!("sw{}", x),
-        _ => unreachable!(),
-    }
 }

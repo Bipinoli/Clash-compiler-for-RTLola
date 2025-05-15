@@ -23,8 +23,6 @@ struct Data {
     hlc: String,
     llc: String,
     has_sliding_window: bool,
-    pacings_type: String,
-    slides_type: String,
 }
 
 pub fn generate_clash(hard_ir: HardwareIR) -> Option<String> {
@@ -58,8 +56,6 @@ pub fn generate_clash(hard_ir: HardwareIR) -> Option<String> {
             hlc: hlc.unwrap(),
             llc: llc.unwrap(),
             has_sliding_window: hard_ir.mir.sliding_windows.len() > 0,
-            pacings_type: llc::get_pacings_type(&hard_ir),
-            slides_type: llc::get_slides_type(&hard_ir),
         };
         match reg.render("monitor", &data) {
             Ok(result) => Some(result),

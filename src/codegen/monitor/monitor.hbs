@@ -1,3 +1,6 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+
 module {{spec_name}} where
 
 import Clash.Prelude
@@ -112,9 +115,9 @@ queue input = output
 
 {{#if debug}}
     {{#if has_sliding_window}}
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, {{pacings_type}}, {{slides_type}}))
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings, Slides))
     {{else}}
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, {{pacings_type}}))
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
     {{/if}}
 monitor inputs = bundle (outputs, debugSignals)
 {{else}}
@@ -150,10 +153,10 @@ monitor inputs = outputs
 {{#if debug}}
     {{#if has_sliding_window}}
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, {{pacings_type}}, {{slides_type}}))
+    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings, Slides))
     {{else}}
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, {{pacings_type}}))
+    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
     {{/if}}
 {{else}}
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 

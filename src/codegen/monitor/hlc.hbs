@@ -20,12 +20,12 @@ hlc inputs = out
         {{/if}}
 
         {{#if has_sliding_window}}
-        slides = {{bundled_slides}}
+        slides = Slides <$> {{#each slides}}s{{@index}}{{#unless @last}} <*> {{/unless}}{{/each}}
         {{/if}}
-        pacings = {{bundled_pacings}}
+        pacings = Pacings <$> {{#each pacings}}p{{@index}}{{#unless @last}} <*> {{/unless}}{{/each}}
 
-        {{#each unbundled_inputs}}
-        {{{this}}}
+        {{#each inputs}}
+        hasInput{{this.index}} = ((.valid). (.input{{this.index}})) <$> inputs
         {{/each}}
 
         {{#each pacings}}

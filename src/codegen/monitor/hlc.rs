@@ -6,16 +6,16 @@ use serde::Serialize;
 use uom::num_rational::Ratio;
 use uom::si::rational64::Frequency;
 
-use crate::{codegen::monitor::register_template, hardware_ir::HardwareIR};
+use crate::{
+    codegen::monitor::datatypes, codegen::monitor::register_template, hardware_ir::HardwareIR,
+};
 
 #[derive(Serialize)]
 struct Data {
     has_periodic_pacing: bool,
     has_sliding_window: bool,
     new_event_condition: String,
-    bundled_slides: String,
-    bundled_pacings: String,
-    unbundled_inputs: Vec<String>,
+    inputs: Vec<datatypes::Stream>,
     pacings: Vec<String>,
     periods: Vec<String>,
     slides: Vec<String>,
@@ -31,9 +31,7 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         has_periodic_pacing: get_has_periodic_pacing(ir),
         has_sliding_window: get_has_sliding_window(ir),
         new_event_condition: get_new_event_condition(ir),
-        bundled_slides: get_bundled_slides(ir),
-        bundled_pacings: get_bundled_pacings(ir),
-        unbundled_inputs: get_unbundled_inputs(ir),
+        inputs: datatypes::get_inputs(ir),
         pacings: get_pacings(ir, &get_all_periods(ir)),
         slides: get_slides(ir, &get_all_periods(ir)),
         periods: get_all_periods(ir),
@@ -76,74 +74,18 @@ fn get_new_event_condition(ir: &HardwareIR) -> String {
             PacingType::GlobalPeriodic(_) => true,
             _ => false,
         })
-        .map(|(i, _)| format!("pacing{}", i))
+        .map(|(i, _)| format!("p{}", i))
         .collect::<Vec<_>>();
     let slides = ir
         .mir
         .sliding_windows
         .iter()
         .enumerate()
-        .map(|(i, _)| format!("slide{}", i))
+        .map(|(i, _)| format!("s{}", i))
         .collect::<Vec<_>>();
     let all: Vec<String> = vec![&inputs[..], &pacings[..], &slides[..]].concat();
     let all: Vec<String> = all.into_iter().filter(|item| item.len() > 0).collect();
     all.join(" .||. ")
-}
-
-fn get_bundled_slides(ir: &HardwareIR) -> String {
-    let slides = ir
-        .mir
-        .sliding_windows
-        .iter()
-        .enumerate()
-        .map(|(i, _)| format!("slide{}", i))
-        .collect::<Vec<_>>()
-        .join(", ");
-    if ir.mir.sliding_windows.len() > 1 {
-        format!("bundle ({})", slides)
-    } else {
-        slides
-    }
-}
-
-fn get_bundled_pacings(ir: &HardwareIR) -> String {
-    let pacings = ir
-        .mir
-        .outputs
-        .iter()
-        .enumerate()
-        .map(|(i, _)| format!("pacing{}", i))
-        .collect::<Vec<_>>()
-        .join(", ");
-    if ir.mir.outputs.len() > 1 {
-        format!("bundle ({})", pacings)
-    } else {
-        pacings
-    }
-}
-
-fn get_unbundled_inputs(ir: &HardwareIR) -> Vec<String> {
-    if ir.mir.inputs.len() == 1 {
-        return vec!["(_, hasInput0) = unbundle inputs".to_string()];
-    }
-    let inputs = ir
-        .mir
-        .inputs
-        .iter()
-        .enumerate()
-        .map(|(i, _)| format!("input{}", i))
-        .collect::<Vec<_>>()
-        .join(", ");
-    let mut retval = vec![format!("({}) = unbundle inputs", inputs)];
-    let unbundled: Vec<String> = ir
-        .mir
-        .inputs
-        .iter()
-        .enumerate()
-        .map(|(i, _)| format!("(_, hasInput{}) = unbundle input{}", i, i))
-        .collect();
-    retval.extend(unbundled);
-    retval
 }
 
 fn get_pacings(ir: &HardwareIR, all_periods: &Vec<String>) -> Vec<String> {
@@ -151,13 +93,7 @@ fn get_pacings(ir: &HardwareIR, all_periods: &Vec<String>) -> Vec<String> {
         .outputs
         .iter()
         .enumerate()
-        .map(|(i, output)| {
-            format!(
-                "pacing{} = {}",
-                i,
-                get_pacing_from_output(output, all_periods)
-            )
-        })
+        .map(|(i, output)| format!("p{} = {}", i, get_pacing_from_output(output, all_periods)))
         .collect()
 }
 
@@ -237,7 +173,7 @@ fn get_slides(ir: &HardwareIR, all_pacings: &Vec<String>) -> Vec<String> {
         .map(|(i, sw)| {
             let period = format!("{}", sw.bucket_size.as_nanos());
             let indx = all_pacings.iter().position(|p| *p == period).unwrap();
-            format!("slide{} = timer{}Over", i, indx)
+            format!("s{} = timer{}Over", i, indx)
         })
         .collect()
 }
