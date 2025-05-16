@@ -1,6 +1,6 @@
 #!/bin/sh
 
-test_dir="src/end_to_end_tests/tests/complex_graph1"
+test_dir="src/end_to_end_tests/tests/non_offset_cycle_across_event_based_and_periodic_2"
 
 rm -rf generated
 mkdir generated

@@ -1,0 +1,4 @@
+input x: Int
+
+output a := x + b.hold(or: 4) 
+output b @1Hz := a.hold(or: 0)

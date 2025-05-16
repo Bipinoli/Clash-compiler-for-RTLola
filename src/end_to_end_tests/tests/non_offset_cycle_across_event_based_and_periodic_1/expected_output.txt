@@ -1,0 +1,12 @@
+[0.500000000][Input][x][Value] = 2
+[0.500000000][Output][a][Value] = 6
+[1.000000000][Input][x][Value] = 1
+[1.000000000][Output][a][Value] = 5
+[1.000000000][Output][b][Value] = 5
+[1.100000000][Input][x][Value] = 2
+[1.100000000][Output][a][Value] = 7
+[1.700000000][Input][x][Value] = 3
+[1.700000000][Output][a][Value] = 8
+[2.000000000][Input][x][Value] = 3
+[2.000000000][Output][a][Value] = 8
+[2.000000000][Output][b][Value] = 8

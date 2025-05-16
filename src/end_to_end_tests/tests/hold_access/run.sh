@@ -1,6 +1,6 @@
 #!/bin/sh
 
-test_dir="src/end_to_end_tests/tests/complex_graph1"
+test_dir="src/end_to_end_tests/tests/hold_access"
 
 rm -rf generated
 mkdir generated

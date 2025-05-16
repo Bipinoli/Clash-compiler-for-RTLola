@@ -1,0 +1,6 @@
+input x: Int
+input y: Int
+
+output a := x + b.hold(or: 10)
+output b @1kHz := y.hold(or: 1) + c.hold(or: 2)
+output c := a + 1

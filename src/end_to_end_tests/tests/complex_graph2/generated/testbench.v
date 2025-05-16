@@ -56,6 +56,15 @@ module testbench;
     wire pacing_11;
     wire pacing_12;
     wire pacing_13;
+
+
+    wire signed [7:0] h_t;
+    wire signed [7:0] h_tag;
+    wire signed [63:0] h;
+    wire signed [7:0] g_tag;
+    wire signed [63:0] g;
+    wire signed [7:0] n_tag;
+    wire signed [63:0] n;
     
 
     topEntity monitor (
@@ -90,6 +99,7 @@ module testbench;
                         ,pacing_11
                         ,pacing_12
                         ,pacing_13
+                        ,h_tag, h, g_tag, g, n_tag, n, h_t
                        );
 
     always begin
