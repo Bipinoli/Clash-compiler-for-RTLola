@@ -525,6 +525,15 @@ fn merge_eval_orders(eval_orders: &Vec<Vec<Vec<Node>>>, starts: Vec<usize>) -> V
 fn find_disjoint_eval_orders(mir: &RtLolaMir) -> Vec<Vec<Vec<Node>>> {
     let mut orders: Vec<Vec<Vec<Node>>> = get_roots(mir)
         .into_iter()
+        .map(|roots| {
+            roots.into_iter().fold(vec![], |acc, root| {
+                if has_cycle(&root, mir) {
+                    vec![&acc[..], &break_cycle(&root, mir)[..]].concat()
+                } else {
+                    vec![&acc[..], &vec![root][..]].concat()
+                }
+            })
+        })
         .map(|roots| dag_eval_order(roots, mir))
         .collect();
     orders.sort_by(|a, b| b.len().cmp(&a.len()));
@@ -604,14 +613,7 @@ fn dag_eval_order(roots: Vec<Node>, mir: &RtLolaMir) -> Vec<Vec<Node>> {
         order.push(cur_level.clone());
         for node in &cur_level {
             for child in node.get_non_offset_children(mir) {
-                // Edge from periodic to event-based node must only be considered if that doesn't lead to a cycle
-                if is_periodic(node, mir) && is_event_based(&child, mir) {
-                    if !can_reach_parent(&child, node, mir) {
-                        next_level.push(child);
-                    }
-                } else {
-                    next_level.push(child);
-                }
+                next_level.push(child);
             }
         }
         cur_level = remove_reachable_roots(next_level, mir);
@@ -644,50 +646,28 @@ fn remove_reachable_roots(roots: Vec<Node>, mir: &RtLolaMir) -> Vec<Node> {
         .collect()
 }
 
-fn can_reach_parent(child: &Node, parent: &Node, mir: &RtLolaMir) -> bool {
-    let mut stack: Vec<Node> = vec![child.clone()];
+fn has_cycle(root: &Node, mir: &RtLolaMir) -> bool {
+    let mut stack: Vec<Node> = vec![root.clone()];
     let mut visited: HashSet<Node> = HashSet::new();
     while !stack.is_empty() {
         let node = stack.pop().unwrap();
         visited.insert(node.clone());
-        if node == parent.clone() {
-            return true;
-        }
         for nd in node.get_non_offset_children(mir) {
-            if !visited.contains(&nd) {
-               stack.push(nd); 
+            if visited.contains(&nd) {
+                return true;
             }
+            stack.push(nd);
         }
     }
     false
 }
 
-fn is_periodic(node: &Node, mir: &RtLolaMir) -> bool {
-    match node {
-        Node::OutputStream(x) => {
-            match mir.outputs[x.clone()].eval.eval_pacing {
-                PacingType::GlobalPeriodic(_) => true,
-                PacingType::Event(_) => false,
-                PacingType::Constant => false,
-                _ => unimplemented!()
-            }
-        }
-        _ => false
-    }
-}
+/// Isolate periodic and event-based streams in the subgraph to break the cycle
+/// This will create 2 or more isolated graphs from the subgraph
+/// Roots of such isolated graphs will be returned
+fn break_cycle(root: &Node, mir: &RtLolaMir) -> Vec<Node> {
 
-fn is_event_based(node: &Node, mir: &RtLolaMir) -> bool {
-    match node {
-        Node::OutputStream(x) => {
-            match mir.outputs[x.clone()].eval.eval_pacing {
-                PacingType::Event(_) => true,
-                PacingType::GlobalPeriodic(_) => false,
-                PacingType::Constant => false,
-                _ => unimplemented!()
-            }
-        }
-        _ => false
-    }
+    unimplemented!()
 }
 
 pub fn find_level(node: &Node, eval_order: &Vec<Vec<Node>>) -> usize {
