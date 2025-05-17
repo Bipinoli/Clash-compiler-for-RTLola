@@ -14,13 +14,16 @@ use std::{
 
 use rtlola_frontend::mir::{Offset, Origin, PacingType, RtLolaMir, StreamAccessKind, StreamReference};
 
-static DISPLAY_ALL_COMBINATIONS: bool = false;
+static DISPLAY_ALL_COMBINATIONS: bool = true;
 
 #[derive(PartialEq, Eq, Clone, Debug, Hash, PartialOrd, Ord, Serialize)]
 pub enum Node {
     InputStream(usize),
     OutputStream(usize),
     SlidingWindow(usize),
+    /// Phantom node acts as a placeholder to pad the eval order so that the disjoint order can only start from some offset  
+    /// Node within the `Box<Node>` would be its immediate child  
+    Phantom(Box<Node>),
 }
 impl Node {
     pub fn from_stream(stream_ref: &StreamReference) -> Node {
@@ -71,6 +74,9 @@ impl Node {
             Node::SlidingWindow(x) => {
                 children.push((Node::from_stream(&mir.sliding_windows[x.clone()].caller), 0));
             }
+            Node::Phantom(child) => {
+                children.push((*child.clone(), 0));
+            }
         }
         children
             .into_iter()
@@ -108,6 +114,9 @@ impl Node {
             }
             Node::SlidingWindow(x) => {
                 children.push(Node::from_stream(&mir.sliding_windows[x.clone()].caller));
+            }
+            Node::Phantom(child) => {
+                children.push(*child.clone());
             }
         }
         children
@@ -160,6 +169,7 @@ impl Node {
                 };
                 format!("sw({},{})", target, caller)
             }
+            Node::Phantom(_) => String::new(),
         }
     }
 }
@@ -360,38 +370,45 @@ fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMi
     max_shift.unwrap_or(0)
 }
 
+/// Find the evaluation order of Nodes
+/// 
+/// - First find the eval orders ignoring the offsets  
+/// - This can give us disjointed sub-graphs  
+/// - If we don't want to pipeline then we can run them in parallel
+/// - As in non-pipeline evaluation, the next eval cycle will only run after completely finishing earlier
+/// - This gives us correct evaluation as all past values (offsets) will be available
+/// - However, it might still be possible to pipeline the evaluation
+/// - For this we could check the dependency by offsets and check the maximum pipeline_wait necessary
+/// - The amount of necesary pipeline_wait also depends on when we want to start evaluation of the disjointed graphs
+/// - For this we can try all the possible combinations and choose the one which requires the minimum pipeline_wait
+///
+/// For example:
+/// ```
+/// input x: Int
+/// output a := x + 1
+/// output b := a + 1
+/// output c := b + 1
+/// output d := c.offset(by: -1).defaults(to: 0)
+/// ```
+///
+/// - After removing offsets the isolated graphs with eval orders are `[x, a, b, c]` and `[d]`
+/// - We could try all combinations of eval orders i.e:
+///     - `[(x, d), a, b, c]` 
+///     - `[x, (a, d), b, c]`
+///     - `[x, a, (b, d), c]`
+///     - `[x, a, b, (c, d)]`
+///     - `[x, a, b, c, d]`
+/// - Among them the eval order `[x, a, b, (c, d)]` & `[x, a, b, c, d]` will give the least `pipeline_wait` necessary i.e `0`
+/// - However `[x, a, b, (c, d)]` is more desirable as the total eval layers are smaller and we get to evaluate d as early as possible
+/// - When we look deeper, it makes sense as when evaluating `c` we will already have the past value of `c` availabe
+/// - Whereas if we had tried to evaluate `d` along with `b` then we would need to wait one cycle until the `c` gets evaluated
+/// - It is possible to avoid checking all possbile combinations using this observations
+/// - However for the sake of simplicity we can simpley check all the combinations
+/// - Given the time complexity of `O(n ^ (k + 1))` is acceptable
+/// - where `n` = max length of eval order ~ number of nodes
+///     - `k` = number of disjointed sub-graphs
+///     - here we have `n` choice to start `k` eval-orders and each pipeline_wait calculation takes `O(n)` hence `k + 1` in the exponent
 fn find_eval_order(mir: &RtLolaMir, display_all_combinations: bool) -> Vec<Vec<Node>> {
-    // First find the eval orders ignoring the offsets
-    // This can give us disjointed sub-graphs
-    // If we don't want to pipeline then we can run them in parallel
-    // As in non-pipeline evaluation, the next eval cycle will only run after completely finishing earlier
-    // This gives us correct evaluation as all past values (offsets) will be available
-    // However, it might still be possible to pipeline the evaluation
-    // For this we could check the dependency by offsets and check the maximum pipeline_wait necessary
-    // The amount of necesary pipeline_wait also depends on when we want to start evaluation of the disjointed graphs
-    // For this we can try all the possible combinations and choose the one which requires the minimum pipeline_wait
-    //
-    // For example:
-    // input x: Int
-    // output a := x + 1
-    // output b := a + 1
-    // output c := b + 1
-    // output d := c.offset(by: -1).defaults(to: 0)
-    //
-    // After removing offsets the isolated graphs with eval orders are [x, a, b, c] and [d]
-    // We could try all combinations of eval orders i.e:
-    // [(x, d), a, b, c], [x, (a, d), b, c], [x, a, (b, d), c], [x, a, b, (c, d)], [x, a, b, c, d]
-    // Among them the eval order [x, a, b, (c, d)] & [x, a, b, c, d] will give the least pipeline_wait necessary i.e 0
-    // However [x, a, b, (c, d)] is more desirable as the total eval layers are smaller and we get to evaluate d as early as possible
-    // When we look deeper, it makes sense as when evaluating c we will already have the past value of c availabe
-    // Whereas if we had tried to evaluate d along with b then we would need to wait one cycle until the c gets evaluated
-    // It is possible to avoid checking all possbile combinations using this observations
-    // However for the sake of simplicity we can simpley check all the combinations
-    // Given the time complexity of O(n ^ (k + 1)) is acceptable
-    // where n = max length of eval order ~ number of nodes
-    //       k = number of disjointed sub-graphs
-    //      here we have n choice to start k eval-orders and each pipeline_wait calculation takes O(n) hence k + 1 in the exponent
-
     let eval_orders = find_disjoint_eval_orders(mir);
     let n = eval_orders.first().unwrap().len();
     let all_starts = gen_all_combinations(n, eval_orders.len() - 1);
@@ -400,6 +417,21 @@ fn find_eval_order(mir: &RtLolaMir, display_all_combinations: bool) -> Vec<Vec<N
         .map(|start| merge_eval_orders(&eval_orders, start))
         .collect::<HashSet<_>>()
         .into_iter()
+        .map(|eval_order| {
+            // filter out all phantom nodes
+            eval_order
+                .into_iter()
+                .map(|level| {
+                    level
+                        .into_iter()
+                        .filter(|nd| match nd {
+                            Node::Phantom(_) => false,
+                            _ => true,
+                        })
+                        .collect::<Vec<_>>()
+                })
+                .collect::<Vec<Vec<Node>>>()
+        })
         .collect();
 
     if display_all_combinations {
@@ -662,13 +694,50 @@ fn has_cycle(root: &Node, mir: &RtLolaMir) -> bool {
     false
 }
 
-/// Isolate periodic and event-based streams in the subgraph to break the cycle
-/// This will create 2 or more isolated graphs from the subgraph
-/// Roots of such isolated graphs will be returned
+/// Isolate periodic and event-based streams in the subgraph to break the cycle  
+/// This will create 2 or more isolated graphs from the subgraph  
+/// Roots of such isolated graphs will be returned  
+/// 
+/// To break the cycle we use the rule of evaluating event-based nodes before periodic (existing rule in RTLola).   
+/// So, the periodic nodes splitted here must only be evaluated after all the event-based nodes are evaluated   
+/// For that we introduce chains of phantom nodes as parents for periodic nodes to offset the eval order properly 
 fn break_cycle(root: &Node, mir: &RtLolaMir) -> Vec<Node> {
+    let all_nodes_in_subgraph = reachable_nodes(root, mir, &|_| true);
+    let non_periodic_nodes_reachable_from_root = reachable_nodes(root, mir, &|nd| !is_periodic(nd, mir));
 
+    
     unimplemented!()
 }
+
+fn reachable_nodes(root: &Node, mir: &RtLolaMir, condition: &dyn Fn(&Node) -> bool) -> HashSet<Node> {
+    let mut rechables: HashSet<Node> = HashSet::new();
+    let mut stack: Vec<Node> = vec![root.clone()];
+    while !stack.is_empty() {
+        let node = stack.pop().unwrap();
+        rechables.insert(node.clone());
+        for child in node.get_non_offset_children(mir) {
+            if condition(&child) && !rechables.contains(&child) {
+                stack.push(child);
+            }
+        }
+    }
+    rechables
+}
+
+fn is_periodic(node: &Node, mir: &RtLolaMir) -> bool {
+    match node {
+        Node::OutputStream(x) => {
+            match mir.outputs[x.clone()].eval.eval_pacing {
+                PacingType::GlobalPeriodic(_) => true,
+                PacingType::Event(_) => false,
+                PacingType::Constant => false,
+                _ => unimplemented!()
+            }
+        }
+        _ => false
+    }
+}
+
 
 pub fn find_level(node: &Node, eval_order: &Vec<Vec<Node>>) -> usize {
     for (i, nodes) in eval_order.iter().enumerate() {
@@ -691,4 +760,3 @@ pub fn prettify_eval_order(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> Vec<
         })
         .collect::<Vec<_>>()
 }
-
