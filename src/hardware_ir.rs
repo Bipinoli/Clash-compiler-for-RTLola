@@ -280,7 +280,7 @@ fn calculate_pipeline_wait(
     wait
 }
 
-pub fn level_distance(a: &Node, b: &Node, eval_order: &Vec<Vec<Node>>) -> i32 {
+fn level_distance(a: &Node, b: &Node, eval_order: &Vec<Vec<Node>>) -> i32 {
     let level_a = find_level(a, eval_order) as i32;
     let level_b = find_level(b, eval_order) as i32;
     level_a - level_b
@@ -496,7 +496,7 @@ fn find_disjoint_eval_orders(mir: &RtLolaMir) -> Vec<Vec<Vec<Node>>> {
                 let non_periodic_eval_order =
                     dag_eval_order(non_periodic_roots, mir, &|nd| !is_periodic(nd, mir));
                 let periodic_eval_order =
-                    dag_eval_order(periodic_roots, mir, &|nd| is_periodic(nd, mir));
+                    dag_eval_order(periodic_roots, mir, &|nd| is_periodic(nd, mir) || is_phantom(nd));
                 vec![non_periodic_eval_order, periodic_eval_order]
             } else {
                 vec![dag_eval_order(roots, mir, &|_| true)]
@@ -569,7 +569,9 @@ fn dag_eval_order(
         order.push(cur_level.clone());
         for node in &cur_level {
             for child in node.get_non_offset_children(mir) {
-                next_level.push(child);
+                if condition(&child) {
+                    next_level.push(child);
+                }
             }
         }
         cur_level = remove_reachable_roots(next_level, mir, &condition);
@@ -696,6 +698,13 @@ fn is_periodic(node: &Node, mir: &RtLolaMir) -> bool {
             _ => unimplemented!(),
         },
         _ => false,
+    }
+}
+
+fn is_phantom(node: &Node) -> bool {
+    match node {
+        Node::Phantom(_) => true,
+        _ => false
     }
 }
 
