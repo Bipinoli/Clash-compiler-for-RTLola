@@ -1,5 +1,5 @@
 use crate::hardware_ir::{
-    prettify_eval_order, prettify_required_memory, visualize_pipeline, HardwareIR, Node,
+    prettify_required_memory, EvalNode as Node, HardwareIR,
 };
 use handlebars::Handlebars;
 use serde::Serialize;
@@ -90,7 +90,7 @@ fn get_spec(ir: &HardwareIR) -> String {
 }
 
 fn get_eval_order(ir: &HardwareIR) -> String {
-    prettify_eval_order(&ir.evaluation_order, &ir.mir)
+    ir.prettify_eval_order()
         .iter()
         .map(|s| format!("-- {}", s))
         .collect::<Vec<_>>()
@@ -106,7 +106,7 @@ fn get_required_memory(ir: &HardwareIR) -> String {
 }
 
 fn get_pipeline_visualization(ir: &HardwareIR) -> String {
-    visualize_pipeline(&ir.evaluation_order, ir.pipeline_wait, 10, &ir.mir)
+    ir.visualize_pipeline(10)
         .iter()
         .map(|s| format!("-- {}", s))
         .collect::<Vec<_>>()

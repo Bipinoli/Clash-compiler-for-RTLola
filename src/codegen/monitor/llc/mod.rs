@@ -1,6 +1,5 @@
 use std::cmp::max;
 use std::collections::HashSet;
-use std::fmt::format;
 
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
@@ -9,7 +8,7 @@ use rtlola_frontend::mir::{
 };
 use serde::Serialize;
 
-use crate::hardware_ir::{self, Node};
+use crate::hardware_ir::EvalNode as Node;
 use crate::{codegen::monitor::register_template, hardware_ir::HardwareIR};
 
 use super::datatypes;
@@ -264,7 +263,7 @@ fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
         .enumerate()
         .map(|(i, sw)| {
             let node = Node::SlidingWindow(i.clone());
-            let level = hardware_ir::find_level(&node, &ir.evaluation_order);
+            let level = ir.find_level(&node);
             SlidingWindow {
                 idx: i.clone(),
                 input_data: match sw.target {
@@ -285,7 +284,7 @@ fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
                     ir.required_memory.get(&node).unwrap().clone() > 1
                 },
                 tag: {
-                    let level = hardware_ir::find_level(&node, &ir.evaluation_order);
+                    let level = ir.find_level(&node);
                     if level > 0 {
                         format!("((.slide{}) <$> curTagsLevel{})", i, level)
                     } else {
@@ -323,7 +322,7 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
         .map(|(i, out)| {
             let node = Node::OutputStream(i.clone());
             let deps = get_dependencies_of_output_stream(&node, ir);
-            let level = hardware_ir::find_level(&Node::OutputStream(i), &ir.evaluation_order);
+            let level = ir.find_level(&Node::OutputStream(i));
             Output {
                 idx: i,
                 ty: datatypes::get_type(&out.ty),
@@ -767,7 +766,7 @@ fn get_all_tags_names(ir: &HardwareIR) -> Vec<String> {
 }
 
 fn get_source_tag(node: &Node, source_node: &Node, ir: &HardwareIR) -> String {
-    let node_level = hardware_ir::find_level(&node, &ir.evaluation_order);
+    let node_level = ir.find_level(node);
     if node_level > 0 {
         match &source_node {
             Node::InputStream(x) => format!("((.input{}) <$> curTagsLevel{})", x, node_level),
