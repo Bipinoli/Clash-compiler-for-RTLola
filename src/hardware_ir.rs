@@ -151,6 +151,24 @@ impl Node {
         parents
     }
 
+    fn get_hold_parents(&self, mir: &RtLolaMir) -> Vec<Node> {
+        let mut parents: Vec<Node> = Vec::new();
+        match self {
+            Node::OutputStream(x) => {
+                for parent in &mir.outputs[x.clone()].accesses {
+                    match parent.1.first().unwrap().1 {
+                        StreamAccessKind::Hold => {
+                            parents.push(Node::from_access(parent));
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        }
+        parents
+    }
+
     pub fn prettify(&self, mir: &RtLolaMir) -> String {
         match self {
             Node::InputStream(x) => mir.inputs[x.clone()].name.clone(),
@@ -268,16 +286,39 @@ fn calculate_pipeline_wait(
     eval_order: &Vec<Vec<Node>>,
     _mir: &RtLolaMir,
 ) -> usize {
-    let propagation_time = level_distance(parent, node, eval_order);
-    let value_avail_time = propagation_time + 1; // 1 cycle for the eval
-                                                 // we must wait until: value_avail_time <= (wait + 1) * offset
-    let wait = if value_avail_time < 0 {
-        0
+    let propagation_time = level_distance(node, parent, eval_order);
+    if propagation_time >= 0 {
+        // parent is evaluated before child so no need to wait
+        match propagation_time {
+            0 if offset == 0 => {
+                // Nodes evaluated at the same time can only have dependency for past value between them
+                // i.e they can't have offset = 0
+                usize::MAX
+            }
+            _ => 0,
+        }
     } else {
-        (((value_avail_time as f32) / (offset as f32)).ceil() - 1.0) as usize
-    };
-    // println!("pipeline wait {} - {} = {}, offset = {}", parent.prettify(mir), node.prettify(mir), wait, offset);
-    wait
+        // child is evaluated before parent so we need to wait
+        // Result is availabe in child after 1 cycle of input data reaching there
+        let cur_val_avail_at_child_at = -propagation_time + 1;
+        match offset {
+            0 => {
+                // Offset = 0 implies infinite feedback. Not a wellformed spec!
+                usize::MAX
+            }
+            1 => (cur_val_avail_at_child_at - 1) as usize,
+            _ => {
+                // We can already run other pipelines in the meantime as the data depends on the past value
+                // However the pipeline must be evenly distributed in timescale
+                let total_pipelines_meanwhile = offset - 1;
+                let evenly_distributed_pipeline_exec_time =
+                    (cur_val_avail_at_child_at as f32) / (total_pipelines_meanwhile + 1) as f32;
+                let next_immediate_pipeline_exec_at =
+                    evenly_distributed_pipeline_exec_time.ceil() as usize;
+                next_immediate_pipeline_exec_at - 1
+            }
+        }
+    }
 }
 
 fn level_distance(a: &Node, b: &Node, eval_order: &Vec<Vec<Node>>) -> i32 {
@@ -291,13 +332,43 @@ fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMi
     let max_shift = all_nodes
         .into_iter()
         .map(|node| {
-            node.get_offset_parents(mir)
+            let shift_from_offsets = node
+                .get_offset_parents(mir)
                 .into_iter()
                 .map(|(parent, offset)| {
                     calculate_pipeline_wait(&node, &parent, offset, eval_order, mir)
                 })
                 .max()
-                .unwrap_or(0)
+                .unwrap_or(0);
+            let shift_from_holds = {
+                // There could be a cycle with holds
+                //
+                // For example:
+                // input x: Int
+                // output a := x + b.hold(or: 1)
+                // output b @1kHz := a.hold(or: 0) + 1
+                //
+                // Here eval order is: x -> a -> b
+                //
+                // In such cases we take the last value of parent instead of the cur that will be evaluated later
+                // to break the infinite cycle
+                // i.e we take the parent value at offset 1
+                node.get_hold_parents(mir)
+                    .into_iter()
+                    .map(|parent| {
+                        let parent_eval_time = find_level(&parent, eval_order);
+                        let child_eval_time = find_level(&node, eval_order);
+                        let offset: usize = if parent_eval_time > child_eval_time {
+                            1
+                        } else {
+                            0
+                        };
+                        calculate_pipeline_wait(&node, &parent, offset, eval_order, mir)
+                    })
+                    .max()
+                    .unwrap_or(0)
+            };
+            cmp::max(shift_from_holds, shift_from_offsets)
         })
         .max();
     max_shift.unwrap_or(0)
@@ -495,8 +566,9 @@ fn find_disjoint_eval_orders(mir: &RtLolaMir) -> Vec<Vec<Vec<Node>>> {
                 let (periodic_roots, non_periodic_roots) = break_cycle(roots, mir);
                 let non_periodic_eval_order =
                     dag_eval_order(non_periodic_roots, mir, &|nd| !is_periodic(nd, mir));
-                let periodic_eval_order =
-                    dag_eval_order(periodic_roots, mir, &|nd| is_periodic(nd, mir) || is_phantom(nd));
+                let periodic_eval_order = dag_eval_order(periodic_roots, mir, &|nd| {
+                    is_periodic(nd, mir) || is_phantom(nd)
+                });
                 vec![non_periodic_eval_order, periodic_eval_order]
             } else {
                 vec![dag_eval_order(roots, mir, &|_| true)]
@@ -704,7 +776,7 @@ fn is_periodic(node: &Node, mir: &RtLolaMir) -> bool {
 fn is_phantom(node: &Node) -> bool {
     match node {
         Node::Phantom(_) => true,
-        _ => false
+        _ => false,
     }
 }
 
@@ -769,7 +841,6 @@ fn visualize_pipeline(
     }
     visual
 }
-
 
 #[derive(PartialEq, Eq, Clone, Debug, Hash, PartialOrd, Ord, Serialize)]
 pub enum EvalNode {

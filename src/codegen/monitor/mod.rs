@@ -1,6 +1,4 @@
-use crate::hardware_ir::{
-    prettify_required_memory, EvalNode as Node, HardwareIR,
-};
+use crate::hardware_ir::{prettify_required_memory, EvalNode as Node, HardwareIR};
 use handlebars::Handlebars;
 use serde::Serialize;
 
