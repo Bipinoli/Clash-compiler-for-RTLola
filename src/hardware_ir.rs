@@ -434,6 +434,7 @@ fn find_eval_order(mir: &RtLolaMir, display_all_combinations: bool) -> Vec<Vec<N
                         })
                         .collect::<Vec<_>>()
                 })
+                .filter(|v| v.len() > 0)
                 .collect::<Vec<Vec<Node>>>()
         })
         .collect();
@@ -681,20 +682,35 @@ fn remove_reachable_roots(
 }
 
 fn has_cycle(roots: Vec<Node>, mir: &RtLolaMir) -> bool {
-    let mut stack: Vec<Node> = roots;
     let mut visited: HashSet<Node> = HashSet::new();
-    while !stack.is_empty() {
-        let node = stack.pop().unwrap();
-        visited.insert(node.clone());
-        for nd in node.get_non_offset_children(mir) {
-            if visited.contains(&nd) {
-                return true;
-            }
-            stack.push(nd);
+    let mut visiting: HashSet<Node> = HashSet::new();
+    for root in roots {
+        if has_cycle_dfs(root, mir, &mut visiting, &mut visited) {
+            return true;
         }
     }
     false
 }
+
+fn has_cycle_dfs(root: Node, mir: &RtLolaMir, visiting: &mut HashSet<Node>, visited: &mut HashSet<Node>) -> bool {
+    if visited.contains(&root) {
+        return false;
+    }
+    if visiting.contains(&root) {
+        return true;
+    }
+    visiting.insert(root.clone());
+    let children = root.get_non_offset_children(mir);
+    for child in children {
+        if has_cycle_dfs(child, mir, visiting, visited) {
+            return true;
+        }
+    }
+    visiting.remove(&root);
+    visited.insert(root.clone());
+    false
+}
+
 
 /// Isolate periodic and event-based streams in the subgraph to break the cycle  
 /// This will create 2 or more isolated graphs from the subgraph  
