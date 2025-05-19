@@ -2,6 +2,17 @@
 import os, sys, re
 import subprocess
 
+def extract_output_names(spec):
+    with open(spec) as f:
+        content = f.read().strip().split("\n")
+        content = list(filter(lambda data: len(data) > 0, content)) 
+        content = list(filter(lambda line: line.strip().startswith("output"), content))
+        output_names = list(map(lambda line: line.strip().split(" ")[1].strip(), content))
+        return output_names
+    raise Exception(f"couldn't extract output names from {spec}")
+
+
+
 def read_expected_output(test_dir):
     def parse(line):
             pattern = r'\[([^\]]+)\]\[([^\]]+)\]\[([^\]]+)\]\[([^\]]+)\] = ([^\s]+)'
@@ -11,6 +22,7 @@ def read_expected_output(test_dir):
                 return groups
             else:
                 raise Exception(f"couldn't parse the line {line}")
+    output_names = extract_output_names(f"{test_dir}/spec.lola")
     with open(f"{test_dir}/expected_output.txt", 'r') as f:
         content = f.read().strip().split("\n")
         content = list(filter(lambda data: len(data) > 0, content))
@@ -19,10 +31,12 @@ def read_expected_output(test_dir):
         grouped = {}
         for (time, data_type, output_name, _, value) in expected:
             if time not in grouped:
-                 grouped[time] = []
-            grouped[time].append(value)
-        grouped = list(grouped.values())
-        return grouped
+                grouped[time] = []
+            grouped[time].append((output_name, value))
+        # sort by output name
+        for (key, val) in grouped.items():
+            val.sort(key=lambda item: output_names.index(item[0]))
+        return list(grouped.values())
 
 
 def read_actual_output(test_dir):
@@ -34,6 +48,7 @@ def read_actual_output(test_dir):
                 return groups
             else:
                 return ()
+    output_names = extract_output_names(f"{test_dir}/spec.lola")
     with open(f"{test_dir}/generated/output.txt", 'r') as f:
         content = f.read().split("\n")
         actual = list(map(parse, content))
@@ -45,7 +60,7 @@ def read_actual_output(test_dir):
             group = []
             for i in range(len(has_output)):
                 if has_output[i] == '1':
-                    group.append(output[i])
+                    group.append((output_names[i], output[i]))
             grouped.append(group)
         return grouped
 
