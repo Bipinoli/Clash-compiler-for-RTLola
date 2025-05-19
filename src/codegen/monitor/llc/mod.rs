@@ -455,10 +455,14 @@ fn get_dependencies_from_expression(
                     depending_tags_from_default_expr,
                 },
                 StreamAccessKind::SlidingWindow(sw) => {
-                    let (default_value, source_name, memory) = match sw {
+                    let source_node = match sw {
+                        WindowReference::Sliding(x) => Node::SlidingWindow(x.clone()),
+                        _ => unimplemented!(),
+                    };
+                    let (default_value, source_name, source_tag, memory) = match sw {
                         WindowReference::Sliding(x) => {
                             let default_value = format!(
-                                "(repeat {})",
+                                "(repeat <$> (pure {}))",
                                 datatypes::get_default_for_type(
                                     &ir.mir.sliding_windows[x.clone()].ty,
                                 )
@@ -469,14 +473,12 @@ fn get_dependencies_from_expression(
                                 .get(&Node::SlidingWindow(x.clone()))
                                 .unwrap()
                                 .clone();
-                            (default_value, source_name, memory)
+                            let source_tag = get_source_tag(node, &source_node, ir);
+                            (default_value, source_name, source_tag, memory)
                         }
                         _ => unimplemented!(),
                     };
-                    let source_node = match sw {
-                        WindowReference::Sliding(x) => Node::SlidingWindow(x.clone()),
-                        _ => unimplemented!(),
-                    };
+                    
                     Dependency {
                         is_sliding_window_access: true,
                         is_offset_access: false,
@@ -487,7 +489,7 @@ fn get_dependencies_from_expression(
                         target_node: node.clone(),
                         source_name,
                         source_node,
-                        source_tag: "".to_string(),
+                        source_tag,
                         memory_more_than_one: memory > 1,
                         has_default_expr: false,
                         default_expr_statements: Vec::new(),
@@ -571,9 +573,9 @@ fn order_dependencies_according_to_access_list(deps: &mut Vec<Dependency>, out: 
 /// (
 ///     vec![
 ///          "<name> = <name>Data0 + <name>Data1".to_string(),
-///          "(_, <name>Data0) = unbundle (getOffset <$> input1Win <*> ((.input1) <$> curTagsLevel<level>) <*> (pure 1) <*> (pure 10))".to_string(),
-///          "(_, <name>Data1) = unbundle (getOffsetFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel<level>) <*> (pure 1) <*> <name>Data1Dflt)".to_string(),
-///          "(_, <name>Data1Dflt) = unbundle (getOffset <$> input0Win <*> ((.input0) <$> curTagsLevel<level>) <*> (pure 1) <*> (pure 20))".to_string(),
+///          "(<name>Data0) = getOffset <$> input1Win <*> ((.input1) <$> curTagsLevel<level>) <*> (pure 1) <*> (pure 10)".to_string(),
+///          "(<name>Data1) = getOffsetFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel<level>) <*> (pure 1) <*> <name>Data1Dflt".to_string(),
+///          "(<name>Data1Dflt) = getOffset <$> input0Win <*> ((.input0) <$> curTagsLevel<level>) <*> (pure 1) <*> (pure 20)".to_string(),
 ///      ],
 ///     vec![ Node::OutputStream(0)]
 /// )
@@ -669,7 +671,7 @@ fn get_default_expr_statements_and_depending_tags(
                     depending_tags.push(target_node);
                     if target_keeps_multiple_values {
                         statements.push(format!(
-                            "(_, {}) = unbundle (getMatchingTag <$> {} <*> {} <*> (pure ({})))",
+                            "{} =  getMatchingTag <$> {} <*> {} <*> (pure ({}))",
                             name_prefix, target_name, tag, dflt_val
                         ));
                     } else {
@@ -686,10 +688,10 @@ fn get_default_expr_statements_and_depending_tags(
                         depending_tags.push(target_node.clone());
 
                         if target_keeps_multiple_values {
-                            let statement = format!("(_, {}) = unbundle (getOffset <$> {} <*> {} <*> (pure ({})) <*> {})", name_prefix, target_name, tag, x, dflt_val);
+                            let statement = format!("{} = getOffset <$> {} <*> {} <*> (pure ({})) <*> {}", name_prefix, target_name, tag, x, dflt_val);
                             statements.push(statement);
                         } else {
-                            let statement = format!("(_, {}) = unbundle (getOffsetFromNonVec <$> {} <*> {} <*> (pure ({})) <*> {})", name_prefix, target_name, tag, x, dflt_val);
+                            let statement = format!("{} = getOffsetFromNonVec <$> {} <*> {} <*> (pure ({})) <*> {}", name_prefix, target_name, tag, x, dflt_val);
                             statements.push(statement);
                         }
                     }

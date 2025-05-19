@@ -3,37 +3,37 @@
 maxTag = {{max_tag}} :: Tag
 invalidTag = maxTag + 1
 
-getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
+getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> a
 getOffset win tag offset dflt = out
     where 
         offsetTag = earlierTag tag offset
         out = case findIndex (\(t, _) -> t == offsetTag) win of
-            Just i -> let (_, v) = win !! i in (tag, v)
-            Nothing -> (tag, dflt) 
+            Just i -> let (_, v) = win !! i in v
+            Nothing -> dflt
 
-getMatchingTag :: KnownNat n => Vec n (Tag, a) -> Tag -> a -> (Tag, a)
+getMatchingTag :: KnownNat n => Vec n (Tag, a) -> Tag -> a -> a
 getMatchingTag win tag dflt = out
     where 
         out = case findIndex (\(t, _) -> t == tag) win of
-            Just i -> let (_, v) = win !! i in (tag, v)
-            Nothing -> (tag, dflt)
+            Just i -> let (_, v) = win !! i in v
+            Nothing -> dflt
 
-getOffsetFromNonVec :: (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
+getOffsetFromNonVec :: (Tag, a) -> Tag -> Tag -> a -> a
 getOffsetFromNonVec (winTag, winData) tag offset dflt = out
     where 
         offsetTag = earlierTag tag offset
-        out = if offsetTag == winTag then (tag, winData) else (tag, dflt)
+        out = if offsetTag == winTag then winData else dflt
 
-getMatchingTagFromNonVec :: (Tag, a) -> Tag -> a -> (Tag, a)
-getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then (tag, dta) else (tagToMatch, dflt)
+getMatchingTagFromNonVec :: (Tag, a) -> Tag -> a -> a
+getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then dta else dflt
 
-getLatestValue :: KnownNat n => Vec (n + 1) (Tag, a) -> Tag -> a -> (Tag, a)
-getLatestValue win curTag dflt =
+getLatestValue :: KnownNat n => Vec (n + 1) (Tag, a) -> a -> a
+getLatestValue win dflt =
   let (tag, dta) = last win
-  in if tag == invalidTag then (curTag, dflt) else (curTag, dta)
+  in if tag == invalidTag then dflt else dta
 
-getLatestValueFromNonVec :: (Tag, a) -> Tag -> a -> (Tag, a)
-getLatestValueFromNonVec (tag, dta) curTag dflt = if tag == invalidTag then (curTag, dflt) else (curTag, dta)
+getLatestValueFromNonVec :: (Tag, a) -> a -> a
+getLatestValueFromNonVec (tag, dta) dflt = if tag == invalidTag then dflt else dta
 
 earlierTag :: Tag -> Tag -> Tag
 earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
@@ -146,7 +146,7 @@ llc event = bundle (toPop, outputs)
             {{#if this.memory_more_than_one}}
         out{{../idx}}Data{{@index}} = getMatchingTag <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{{this.default_value}}}
             {{else}}
-        out{{../idx}}Data{{@index}} = {{this.source_name}}
+        (_, out{{../idx}}Data{{@index}}) = unbundle {{this.source_name}}
             {{/if}}
         {{/if}}
 
@@ -160,9 +160,9 @@ llc event = bundle (toPop, outputs)
 
         {{~#if this.is_hold_access}} 
             {{#if this.memory_more_than_one}}
-        out{{../idx}}Data{{@index}} = getLatestValue <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{{this.default_value}}}
+        out{{../idx}}Data{{@index}} = getLatestValue <$> {{this.source_name}} <*> {{{this.default_value}}}
             {{else}}
-        out{{../idx}}Data{{@index}} = getLatestValueFromNonVec <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{{this.default_value}}}
+        out{{../idx}}Data{{@index}} = getLatestValueFromNonVec <$> {{this.source_name}} <*> {{{this.default_value}}}
             {{/if}}
         {{/if}}
 
@@ -183,12 +183,12 @@ llc event = bundle (toPop, outputs)
         {{/each}}
         {{#each sliding_windows}}
         -- Evaluation of sliding window {{@index}}: level {{this.level}}
-        sw{{this.idx}} = slidingWindow{{this.idx}} enSw{{this.idx}} sld{{this.idx}} (bundle ({{{this.tag}}}, sw{{this.idx}}Data))
+        sw{{this.idx}} = slidingWindow{{this.idx}} enSw{{this.idx}} sld{{this.idx}} {{{this.tag}}} sw{{this.idx}}Data
         sw{{this.idx}}Data = bundle (sw{{this.idx}}DataVal, sw{{this.idx}}DataPacing)
         {{#if this.input_memory_more_than_one}}
-        (_, sw{{this.idx}}DataVal) = unbundle (getMatchingTag <$> {{this.input_data}} <*> {{{this.source_tag}}} <*> (pure {{this.input_data_default}}))
+        sw{{this.idx}}DataVal = getMatchingTag <$> {{this.input_data}} <*> {{{this.source_tag}}} <*> (pure {{this.input_data_default}})
         {{else}}
-        (_, sw{{this.idx}}DataVal) = unbundle {{this.input_data}}
+        sw{{this.idx}}DataVal = unbundle {{this.input_data}}
         {{/if}}
 
         {{/each}}
@@ -196,7 +196,7 @@ llc event = bundle (toPop, outputs)
         {{#each outputs}}
         output{{this.idx}} = Valid{{this.ty}} <$> output{{this.idx}}Data <*> output{{this.idx}}Aktv
         {{#if this.memory_more_than_one}}
-        (_, output{{this.idx}}Data) = unbundle (getMatchingTag <$> out{{this.idx}} <*> ((.output{{this.idx}}) <$> curTagsLevel{{../output_level}}) <*> (pure {{this.default_value}}))
+        output{{this.idx}}Data = getMatchingTag <$> out{{this.idx}} <*> ((.output{{this.idx}}) <$> curTagsLevel{{../output_level}}) <*> (pure {{this.default_value}})
         {{else}}
         (_, output{{this.idx}}Data) = unbundle out{{this.idx}}
         {{/if}}

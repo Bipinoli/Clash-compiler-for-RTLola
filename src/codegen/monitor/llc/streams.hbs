@@ -15,11 +15,11 @@ input{{@index}}Window en tag val = result
 
 {{#each output_streams}}
 {{#if (gt this.memory 1) }}
-outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> {{#each this.input_types}}Signal dom (Tag, {{this}}){{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom (Vec {{this.memory}} (Tag, {{this.output_type}}))
+outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> {{#each this.input_types}}Signal dom {{this}}{{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom (Vec {{this.memory}} (Tag, {{this.output_type}}))
 {{else}}
-outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> {{#each this.input_types}}Signal dom (Tag, {{this}}){{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom (Tag, {{this.output_type}})
+outputStream{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> {{#each this.input_types}}Signal dom {{this}}{{#unless @last}} -> {{/unless}}{{/each}} -> Signal dom (Tag, {{this.output_type}})
 {{/if}}
-outputStream{{@index}} en tag {{#each this.inputs}}{{this}}WithTag {{/each}}= result
+outputStream{{@index}} en tag {{#each this.inputs}}{{this}} {{/each}}= result
     where
         {{#if (gt this.memory 1)}}
         result = register (repeat (invalidTag, {{this.default_value}})) (mux en next result)
@@ -29,9 +29,6 @@ outputStream{{@index}} en tag {{#each this.inputs}}{{this}}WithTag {{/each}}= re
         {{/if}}
         nextValWithTag = bundle (tag, nextVal)
         nextVal = {{{this.expression}}}
-        {{#each this.inputs}}
-        (_, {{this}}) = unbundle {{this}}WithTag
-        {{/each}}
         {{#if this.is_sliding_window_based}}
         {{#each this.sliding_window_inputs}}
         merge{{this.window_idx}} :: Vec {{this.window_size}} {{this.data_type}} -> {{this.data_type}}
@@ -53,11 +50,11 @@ windowBucketFunc{{@index}} acc item = {{this.expression}}
 {{#if has_sliding_window}}
 {{#each sliding_windows}}
 {{#if (gt this.memory 1)}}
-slidingWindow{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Tag, ({{this.data_type}}, Bool)) -> Signal dom (Vec {{this.memory}} (Tag, (Vec {{this.window_size}} {{this.data_type}}))) 
+slidingWindow{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom Tag -> Signal dom ({{this.data_type}}, Bool) -> Signal dom (Vec {{this.memory}} (Tag, (Vec {{this.window_size}} {{this.data_type}}))) 
 {{else}}
-slidingWindow{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom (Tag, ({{this.data_type}}, Bool)) -> Signal dom (Tag, (Vec {{this.window_size}} {{this.data_type}})) 
+slidingWindow{{@index}} :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool -> Signal dom Tag -> Signal dom ({{this.data_type}}, Bool) -> Signal dom (Tag, (Vec {{this.window_size}} {{this.data_type}})) 
 {{/if}}
-slidingWindow{{@index}} en slide hasInputWithTag = window
+slidingWindow{{@index}} en slide tag hasInput = window
     where
         {{#if (gt this.memory 1)}}
         window = register (repeat (invalidTag, dflt)) (mux en next window)
@@ -68,7 +65,6 @@ slidingWindow{{@index}} en slide hasInputWithTag = window
         next = bundle (tag, nextWindow <$> (snd <$> window) <*> slide <*> hasInput)
         {{/if}}
         dflt = repeat {{this.default_value}} :: Vec {{this.window_size}} {{this.data_type}}
-        (tag, hasInput) = unbundle hasInputWithTag
 
         nextWindow :: Vec {{this.window_size}} {{this.data_type}} -> Bool -> ({{this.data_type}}, Bool) -> Vec {{this.window_size}} {{this.data_type}}
         nextWindow win toSlide inpt = out
