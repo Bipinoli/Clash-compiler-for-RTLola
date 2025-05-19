@@ -478,7 +478,7 @@ fn get_dependencies_from_expression(
                         }
                         _ => unimplemented!(),
                     };
-                    
+
                     Dependency {
                         is_sliding_window_access: true,
                         is_offset_access: false,
@@ -688,10 +688,16 @@ fn get_default_expr_statements_and_depending_tags(
                         depending_tags.push(target_node.clone());
 
                         if target_keeps_multiple_values {
-                            let statement = format!("{} = getOffset <$> {} <*> {} <*> (pure ({})) <*> {}", name_prefix, target_name, tag, x, dflt_val);
+                            let statement = format!(
+                                "{} = getOffset <$> {} <*> {} <*> (pure ({})) <*> {}",
+                                name_prefix, target_name, tag, x, dflt_val
+                            );
                             statements.push(statement);
                         } else {
-                            let statement = format!("{} = getOffsetFromNonVec <$> {} <*> {} <*> (pure ({})) <*> {}", name_prefix, target_name, tag, x, dflt_val);
+                            let statement = format!(
+                                "{} = getOffsetFromNonVec <$> {} <*> {} <*> (pure ({})) <*> {}",
+                                name_prefix, target_name, tag, x, dflt_val
+                            );
                             statements.push(statement);
                         }
                     }

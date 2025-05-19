@@ -16,8 +16,6 @@ use rtlola_frontend::mir::{
     Offset, Origin, PacingType, RtLolaMir, StreamAccessKind, StreamReference,
 };
 
-static DISPLAY_ALL_COMBINATIONS: bool = true;
-
 #[derive(PartialEq, Eq, Clone, Debug, Hash, PartialOrd, Ord, Serialize)]
 enum Node {
     InputStream(usize),
@@ -414,6 +412,21 @@ fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMi
 ///     - here we have `n` choice to start `k` eval-orders and each pipeline_wait calculation takes `O(n)` hence `k + 1` in the exponent
 fn find_eval_order(mir: &RtLolaMir, display_all_combinations: bool) -> Vec<Vec<Node>> {
     let eval_orders = find_disjoint_eval_orders(mir);
+    if display_all_combinations {
+        println!("All disjoint orders:");
+        for order in &eval_orders {
+            println!(
+                "{}\n",
+                prettify_eval_order(order, mir)
+                    .into_iter()
+                    .enumerate()
+                    .map(|(i, nodes)| format!("level {}: {}", i, nodes))
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            );
+        }
+    }
+
     let n = eval_orders.first().unwrap().len();
     let all_starts = gen_all_combinations(n, eval_orders.len() - 1);
     let all_combinations: Vec<Vec<Vec<Node>>> = all_starts
@@ -434,17 +447,18 @@ fn find_eval_order(mir: &RtLolaMir, display_all_combinations: bool) -> Vec<Vec<N
                         })
                         .collect::<Vec<_>>()
                 })
-                .filter(|v| v.len() > 0)
                 .collect::<Vec<Vec<Node>>>()
         })
         .collect();
 
     if display_all_combinations {
         all_combinations.iter().for_each(|eval_order| {
-            println!();
+            println!("\n\nPotential evaluation order:");
             println!("{}\n", prettify_eval_order(&eval_order, mir).join("\n"));
             let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, mir);
-            visualize_pipeline(&eval_order, pipeline_wait, 10, mir);
+            for line in visualize_pipeline(eval_order, pipeline_wait, 10, mir) {
+                println!("{}", line);
+            }
         });
     }
     all_combinations
@@ -577,8 +591,23 @@ fn find_disjoint_eval_orders(mir: &RtLolaMir) -> Vec<Vec<Vec<Node>>> {
         })
         .flatten()
         .collect();
-    orders.sort_by(|a, b| b.len().cmp(&a.len()));
+    orders.sort_by(|a, b| true_length(b).cmp(&true_length(a)));
     orders
+}
+
+/// length after removing phantom nodes
+fn true_length(eval_order: &Vec<Vec<Node>>) -> usize {
+    eval_order
+        .iter()
+        .map(|level| {
+            level
+                .iter()
+                .filter(|&nd| !is_phantom(nd))
+                .collect::<Vec<_>>()
+        })
+        .filter(|level| !level.is_empty())
+        .collect::<Vec<_>>()
+        .len()
 }
 
 /// get roots of the graph after ignoring offset edges
@@ -692,7 +721,12 @@ fn has_cycle(roots: Vec<Node>, mir: &RtLolaMir) -> bool {
     false
 }
 
-fn has_cycle_dfs(root: Node, mir: &RtLolaMir, visiting: &mut HashSet<Node>, visited: &mut HashSet<Node>) -> bool {
+fn has_cycle_dfs(
+    root: Node,
+    mir: &RtLolaMir,
+    visiting: &mut HashSet<Node>,
+    visited: &mut HashSet<Node>,
+) -> bool {
     if visited.contains(&root) {
         return false;
     }
@@ -710,7 +744,6 @@ fn has_cycle_dfs(root: Node, mir: &RtLolaMir, visiting: &mut HashSet<Node>, visi
     visited.insert(root.clone());
     false
 }
-
 
 /// Isolate periodic and event-based streams in the subgraph to break the cycle  
 /// This will create 2 or more isolated graphs from the subgraph  
@@ -900,8 +933,14 @@ pub struct HardwareIR {
 }
 
 impl HardwareIR {
-    pub fn new(mir: RtLolaMir, spec: String, spec_name: String, debug: bool) -> Self {
-        let eval_order = find_eval_order(&mir, false);
+    pub fn new(
+        mir: RtLolaMir,
+        spec: String,
+        spec_name: String,
+        debug: bool,
+        verbose: bool,
+    ) -> Self {
+        let eval_order = find_eval_order(&mir, verbose);
         let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, &mir);
         let required_memory = calculate_required_memory(&eval_order, &mir);
         HardwareIR {

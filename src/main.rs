@@ -44,6 +44,10 @@ struct Args {
     /// Generate clash code & testbench with debug information
     #[arg(long)]
     debug: bool,
+
+    /// Verbose mode -- displays all considered combination of evaluation order
+    #[arg(long)]
+    verbose: bool,
 }
 
 fn main() {
@@ -70,6 +74,7 @@ fn main() {
                 spec,
                 to_pascal_case(&extract_file_stem(&spec_path)),
                 args.debug,
+                args.verbose,
             );
             match codegen::monitor::generate_clash(hard_ir.clone()) {
                 Some(generated) => {
