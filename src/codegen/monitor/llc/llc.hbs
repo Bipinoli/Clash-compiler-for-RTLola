@@ -27,6 +27,14 @@ getOffsetFromNonVec (winTag, winData) tag offset dflt = out
 getMatchingTagFromNonVec :: (Tag, a) -> Tag -> a -> (Tag, a)
 getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then (tag, dta) else (tagToMatch, dflt)
 
+getLatestValue :: KnownNat n => Vec (n + 1) (Tag, a) -> Tag -> a -> (Tag, a)
+getLatestValue win curTag dflt =
+  let (tag, dta) = last win
+  in if tag == invalidTag then (curTag, dflt) else (curTag, dta)
+
+getLatestValueFromNonVec :: (Tag, a) -> Tag -> a -> (Tag, a)
+getLatestValueFromNonVec (tag, dta) curTag dflt = if tag == invalidTag then (curTag, dflt) else (curTag, dta)
+
 earlierTag :: Tag -> Tag -> Tag
 earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
 
@@ -147,6 +155,14 @@ llc event = bundle (toPop, outputs)
         out{{../idx}}Data{{@index}} = getOffset <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.offset}}) <*> {{{this.default_value}}}
             {{else}}
         out{{../idx}}Data{{@index}} = getOffsetFromNonVec <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> (pure {{this.offset}}) <*> {{{this.default_value}}}
+            {{/if}}
+        {{/if}}
+
+        {{~#if this.is_hold_access}} 
+            {{#if this.memory_more_than_one}}
+        out{{../idx}}Data{{@index}} = getLatestValue <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{{this.default_value}}}
+            {{else}}
+        out{{../idx}}Data{{@index}} = getLatestValueFromNonVec <$> {{this.source_name}} <*> {{{this.source_tag}}} <*> {{{this.default_value}}}
             {{/if}}
         {{/if}}
 
