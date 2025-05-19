@@ -17,13 +17,10 @@ use rtlola_frontend::mir::{
 };
 
 #[derive(PartialEq, Eq, Clone, Debug, Hash, PartialOrd, Ord, Serialize)]
-enum Node {
+pub enum Node {
     InputStream(usize),
     OutputStream(usize),
     SlidingWindow(usize),
-    /// Phantom node acts as a placeholder to pad the eval order so that the disjoint order can only start from some offset  
-    /// Node within the `Box<Node>` would be its immediate child  
-    Phantom(Box<Node>),
 }
 impl Node {
     pub fn from_stream(stream_ref: &StreamReference) -> Node {
@@ -74,9 +71,6 @@ impl Node {
             Node::SlidingWindow(x) => {
                 children.push((Node::from_stream(&mir.sliding_windows[x.clone()].caller), 0));
             }
-            Node::Phantom(child) => {
-                children.push((*child.clone(), 0));
-            }
         }
         children
             .into_iter()
@@ -114,9 +108,6 @@ impl Node {
             }
             Node::SlidingWindow(x) => {
                 children.push(Node::from_stream(&mir.sliding_windows[x.clone()].caller));
-            }
-            Node::Phantom(child) => {
-                children.push(*child.clone());
             }
         }
         children
@@ -187,16 +178,8 @@ impl Node {
                 };
                 format!("sw({},{})", target, caller)
             }
-            Node::Phantom(_) => String::new(),
         }
     }
-}
-
-pub fn display_analysis(ir: &HardwareIR) {
-    println!("\n------- The best pipeline --------");
-    println!("{}\n", ir.prettify_eval_order().join("\n"));
-    println!("{}\n", prettify_required_memory(ir).join("\n"));
-    println!("{}\n", ir.visualize_pipeline(10).join("\n"));
 }
 
 fn calculate_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> HashMap<Node, usize> {
@@ -229,11 +212,7 @@ fn calculate_required_memory(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> Ha
 pub fn prettify_required_memory(ir: &HardwareIR) -> Vec<String> {
     let mut retval: Vec<String> = Vec::new();
     for (nd, mem) in &ir.required_memory {
-        retval.push(format!(
-            "window {} = {}",
-            nd.to_node().prettify(&ir.mir),
-            mem
-        ));
+        retval.push(format!("window {} = {}", nd.prettify(&ir.mir), mem));
     }
     retval
 }
@@ -434,21 +413,6 @@ fn find_eval_order(mir: &RtLolaMir, display_all_combinations: bool) -> Vec<Vec<N
         .map(|start| merge_eval_orders(&eval_orders, start))
         .collect::<HashSet<_>>()
         .into_iter()
-        .map(|eval_order| {
-            // filter out all phantom nodes
-            eval_order
-                .into_iter()
-                .map(|level| {
-                    level
-                        .into_iter()
-                        .filter(|nd| match nd {
-                            Node::Phantom(_) => false,
-                            _ => true,
-                        })
-                        .collect::<Vec<_>>()
-                })
-                .collect::<Vec<Vec<Node>>>()
-        })
         .collect();
 
     if display_all_combinations {
@@ -578,36 +542,14 @@ fn find_disjoint_eval_orders(mir: &RtLolaMir) -> Vec<Vec<Vec<Node>>> {
         .into_iter()
         .map(|roots| {
             if has_cycle(roots.clone(), mir) {
-                let (periodic_roots, non_periodic_roots) = break_cycle(roots, mir);
-                let non_periodic_eval_order =
-                    dag_eval_order(non_periodic_roots, mir, &|nd| !is_periodic(nd, mir));
-                let periodic_eval_order = dag_eval_order(periodic_roots, mir, &|nd| {
-                    is_periodic(nd, mir) || is_phantom(nd)
-                });
-                vec![non_periodic_eval_order, periodic_eval_order]
+                eval_order_by_breaking_cycle(roots, mir)
             } else {
-                vec![dag_eval_order(roots, mir, &|_| true)]
+                dag_eval_order(roots, mir, &|_| true)
             }
         })
-        .flatten()
         .collect();
-    orders.sort_by(|a, b| true_length(b).cmp(&true_length(a)));
+    orders.sort_by(|a, b| b.len().cmp(&a.len()));
     orders
-}
-
-/// length after removing phantom nodes
-fn true_length(eval_order: &Vec<Vec<Node>>) -> usize {
-    eval_order
-        .iter()
-        .map(|level| {
-            level
-                .iter()
-                .filter(|&nd| !is_phantom(nd))
-                .collect::<Vec<_>>()
-        })
-        .filter(|level| !level.is_empty())
-        .collect::<Vec<_>>()
-        .len()
 }
 
 /// get roots of the graph after ignoring offset edges
@@ -745,16 +687,15 @@ fn has_cycle_dfs(
     false
 }
 
+/// Obtain an evaluation order by breaking the cycle in the subgraph
+///
 /// Isolate periodic and event-based streams in the subgraph to break the cycle  
 /// This will create 2 or more isolated graphs from the subgraph  
 /// Roots of such isolated graphs will be returned grouped by (periodic, non_periodic)
 ///
 /// To break the cycle we use the rule of evaluating event-based nodes before periodic (existing rule in RTLola).   
 /// So, the periodic nodes splitted here must only be evaluated after all the event-based nodes are evaluated   
-/// For that we introduce chains of phantom nodes as parents for periodic nodes to offset the eval order properly during merge
-/// Note that the offset is only necessary in this subgraph we are breaking  
-/// There could be a valid periodic root in a different subgraph without a cycle that doesn't need to be offsetted  
-fn break_cycle(roots: Vec<Node>, mir: &RtLolaMir) -> (Vec<Node>, Vec<Node>) {
+fn eval_order_by_breaking_cycle(roots: Vec<Node>, mir: &RtLolaMir) -> Vec<Vec<Node>> {
     let all_nodes_in_subgraph = reachable_nodes(roots, mir, &|_| true);
     let periodic_nodes: HashSet<Node> = all_nodes_in_subgraph
         .iter()
@@ -773,22 +714,19 @@ fn break_cycle(roots: Vec<Node>, mir: &RtLolaMir) -> (Vec<Node>, Vec<Node>) {
     let non_periodic_roots =
         remove_reachable_roots(non_periodic_nodes, mir, &|nd| !is_periodic(nd, mir));
 
-    let eval_order_len_from_non_periodic =
-        dag_eval_order(non_periodic_roots.clone(), mir, &|nd| !is_periodic(nd, mir)).len();
-    let offsetted_periodic_roots: Vec<Node> = periodic_roots
-        .into_iter()
-        .map(|nd| {
-            let mut offset_cnt = eval_order_len_from_non_periodic.clone();
-            let mut node = nd.clone();
-            while offset_cnt > 0 {
-                node = Node::Phantom(Box::new(node));
-                offset_cnt -= 1;
-            }
-            node
-        })
-        .collect();
+    let mut eval_order = dag_eval_order(non_periodic_roots, mir, &|nd| !is_periodic(nd, mir));
+    eval_order.extend(dag_eval_order(periodic_roots, mir, &|nd| {
+        is_periodic(nd, mir)
+    }));
 
-    (offsetted_periodic_roots, non_periodic_roots)
+    eval_order
+
+    // let non_periodic_eval_order =
+
+    // let periodic_eval_order = dag_eval_order(periodic_roots, mir, &|nd| {
+    //     is_periodic(nd, mir) || is_phantom(nd)
+    // });
+    // -(offsetted_periodic_roots, non_periodic_roots)
 }
 
 fn reachable_nodes(
@@ -818,13 +756,6 @@ fn is_periodic(node: &Node, mir: &RtLolaMir) -> bool {
             PacingType::Constant => false,
             _ => unimplemented!(),
         },
-        _ => false,
-    }
-}
-
-fn is_phantom(node: &Node) -> bool {
-    match node {
-        Node::Phantom(_) => true,
         _ => false,
     }
 }
@@ -891,42 +822,12 @@ fn visualize_pipeline(
     visual
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Hash, PartialOrd, Ord, Serialize)]
-pub enum EvalNode {
-    InputStream(usize),
-    OutputStream(usize),
-    SlidingWindow(usize),
-}
-impl EvalNode {
-    fn from_node(node: &Node) -> Self {
-        match node {
-            Node::InputStream(x) => EvalNode::InputStream(x.clone()),
-            Node::OutputStream(x) => EvalNode::OutputStream(x.clone()),
-            Node::SlidingWindow(x) => EvalNode::SlidingWindow(x.clone()),
-            Node::Phantom(_) => unreachable!(),
-        }
-    }
-    fn to_node(&self) -> Node {
-        match self {
-            EvalNode::InputStream(x) => Node::InputStream(x.clone()),
-            EvalNode::OutputStream(x) => Node::OutputStream(x.clone()),
-            EvalNode::SlidingWindow(x) => Node::SlidingWindow(x.clone()),
-        }
-    }
-    pub fn from_stream(stream_ref: &StreamReference) -> EvalNode {
-        EvalNode::from_node(&Node::from_stream(stream_ref))
-    }
-    pub fn prettify(&self, mir: &RtLolaMir) -> String {
-        self.to_node().prettify(mir)
-    }
-}
-
 #[derive(PartialEq, Clone, Debug, Serialize)]
 pub struct HardwareIR {
     pub mir: RtLolaMir,
-    pub evaluation_order: Vec<Vec<EvalNode>>,
+    pub evaluation_order: Vec<Vec<Node>>,
     pub pipeline_wait: usize,
-    pub required_memory: HashMap<EvalNode, usize>,
+    pub required_memory: HashMap<Node, usize>,
     pub spec: String,
     pub spec_name: String,
     pub debug: bool,
@@ -944,54 +845,37 @@ impl HardwareIR {
         let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, &mir);
         let required_memory = calculate_required_memory(&eval_order, &mir);
         HardwareIR {
-            evaluation_order: eval_order
-                .into_iter()
-                .map(|level| {
-                    level
-                        .into_iter()
-                        .map(|nd| EvalNode::from_node(&nd))
-                        .collect::<Vec<EvalNode>>()
-                })
-                .collect(),
+            evaluation_order: eval_order,
             mir,
             pipeline_wait,
-            required_memory: required_memory.into_iter().fold(
-                HashMap::new(),
-                |mut acc, (nd, mem)| {
-                    acc.insert(EvalNode::from_node(&nd), mem);
-                    acc
-                },
-            ),
+            required_memory,
             spec,
             spec_name,
             debug,
         }
     }
 
-    pub fn find_level(&self, node: &EvalNode) -> usize {
-        for (i, nodes) in self.evaluation_order.iter().enumerate() {
-            if nodes.contains(node) {
-                return i;
-            }
-        }
-        unreachable!()
+    pub fn find_level(&self, node: &Node) -> usize {
+        find_level(node, &self.evaluation_order)
     }
 
     pub fn prettify_eval_order(&self) -> Vec<String> {
-        let eval_order: Vec<Vec<Node>> = self
-            .evaluation_order
-            .iter()
-            .map(|level| level.iter().map(|nd| nd.to_node()).collect::<Vec<_>>())
-            .collect();
-        prettify_eval_order(&eval_order, &self.mir)
+        prettify_eval_order(&self.evaluation_order, &self.mir)
     }
 
     pub fn visualize_pipeline(&self, time_steps: usize) -> Vec<String> {
-        let eval_order: Vec<Vec<Node>> = self
-            .evaluation_order
-            .iter()
-            .map(|level| level.iter().map(|nd| nd.to_node()).collect::<Vec<_>>())
-            .collect();
-        visualize_pipeline(&eval_order, self.pipeline_wait, time_steps, &self.mir)
+        visualize_pipeline(
+            &self.evaluation_order,
+            self.pipeline_wait,
+            time_steps,
+            &self.mir,
+        )
+    }
+
+    pub fn display_analysis(&self) {
+        println!("\n------- The best pipeline --------");
+        println!("{}\n", self.prettify_eval_order().join("\n"));
+        println!("{}\n", prettify_required_memory(&self).join("\n"));
+        println!("{}\n", self.visualize_pipeline(10).join("\n"));
     }
 }

@@ -7,7 +7,7 @@ use serde::Serialize;
 
 use crate::{
     codegen::monitor::{datatypes, register_template},
-    hardware_ir::EvalNode as Node,
+    hardware_ir::Node,
     hardware_ir::HardwareIR,
 };
 

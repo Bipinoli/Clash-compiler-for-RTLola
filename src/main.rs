@@ -76,6 +76,9 @@ fn main() {
                 args.debug,
                 args.verbose,
             );
+            if args.verbose {
+                hard_ir.display_analysis();
+            }
             match codegen::monitor::generate_clash(hard_ir.clone()) {
                 Some(generated) => {
                     write_to_file(
