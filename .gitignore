@@ -9,3 +9,5 @@ scratch/
 
 *.o
 *.hi
+
+__pycache__

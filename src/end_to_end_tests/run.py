@@ -84,8 +84,10 @@ def test(test_dir):
         results.append(f"{bcolors.FAIL}Failed: {test_dir}{bcolors.ENDC}")
         for i in range(len(actual)):
             if actual[i] != expected[i]:
-                results.append(f"{bcolors.WARNING}expected: {expected[i]}\nactual: {actual[i]}\n{bcolors.ENDC}")
+                results.append(f"{bcolors.WARNING}Incorrect Output {i+1}:\n\texpected: {expected[i]}\n\tactual: {actual[i]}\n{bcolors.ENDC}")
                 break
+            else:
+                results.append(f"{bcolors.OKGREEN}Correct Output {i+1}: {expected[i]}{bcolors.ENDC}")
         passed = False
     return (passed, results)
 
