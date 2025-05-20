@@ -27,6 +27,20 @@ module testbench;
     wire signed [63:0] output_8;
     wire output_8_aktv;
 
+    wire q_push;
+    wire q_pop;
+    wire q_push_valid;
+    wire q_pop_valid;
+
+    wire pacing_0;
+    wire pacing_1;
+    wire pacing_2;
+    wire pacing_3;
+    wire pacing_4;
+    wire pacing_5;
+    wire pacing_6;
+    wire pacing_7;
+    wire pacing_8;
     
 
     topEntity monitor (
@@ -41,6 +55,16 @@ module testbench;
                         ,output_6, output_6_aktv
                         ,output_7, output_7_aktv
                         ,output_8, output_8_aktv
+                        ,q_push, q_pop, q_push_valid, q_pop_valid
+                        ,pacing_0
+                        ,pacing_1
+                        ,pacing_2
+                        ,pacing_3
+                        ,pacing_4
+                        ,pacing_5
+                        ,pacing_6
+                        ,pacing_7
+                        ,pacing_8
                        );
 
     always begin

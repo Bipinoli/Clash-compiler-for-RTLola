@@ -46,14 +46,14 @@
         },
         {
             "name": "topEntity.v",
-            "sha256": "c8a611a1bb4abd632b3471d53383b6328995005023a1bc2f0e6c382aa1a26b78"
+            "sha256": "2a30fde34c6799b0355252832cbcc13e81911f8f53fe76ff634984481d3da18b"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "f8a3e3e9326cf864258b762b9b77d7b73ea2b7cca37a90b2b909677b710cccbc",
+    "hash": "24418c0a38cedddbb69fdc15b543049a6f962fc6a8bcca2e36c51e185b7210c1",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -416,55 +416,6 @@
                 "name": "result_1_4_13",
                 "type_name": "",
                 "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_5_0",
-                "type_name": "[7:0]",
-                "width": 8
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_5_1",
-                "type_name": "signed [63:0]",
-                "width": 64
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_6_0",
-                "type_name": "[7:0]",
-                "width": 8
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_6_1",
-                "type_name": "signed [63:0]",
-                "width": 64
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_7_0",
-                "type_name": "[7:0]",
-                "width": 8
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_7_1",
-                "type_name": "signed [63:0]",
-                "width": 64
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_8",
-                "type_name": "[7:0]",
-                "width": 8
             }
         ]
     },

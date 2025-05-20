@@ -25,12 +25,12 @@ import Clash.Prelude
 -- d
 
 -- Memory Window
--- window d = 1
--- window x = 5
 -- window a = 3
--- window c = 4
--- window y = 4
+-- window x = 5
 -- window b = 2
+-- window d = 1
+-- window y = 4
+-- window c = 4
 
 -- Pipeline Visualization
 -- x,y | x,y | x,y | x,y | x,y | x,y | x,y | x,y | x,y | x,y
@@ -209,29 +209,37 @@ hlc inputs = out
 maxTag = 6 :: Tag
 invalidTag = maxTag + 1
 
-getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
+getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> a
 getOffset win tag offset dflt = out
     where 
         offsetTag = earlierTag tag offset
         out = case findIndex (\(t, _) -> t == offsetTag) win of
-            Just i -> let (_, v) = win !! i in (tag, v)
-            Nothing -> (tag, dflt) 
+            Just i -> let (_, v) = win !! i in v
+            Nothing -> dflt
 
-getMatchingTag :: KnownNat n => Vec n (Tag, a) -> Tag -> a -> (Tag, a)
+getMatchingTag :: KnownNat n => Vec n (Tag, a) -> Tag -> a -> a
 getMatchingTag win tag dflt = out
     where 
         out = case findIndex (\(t, _) -> t == tag) win of
-            Just i -> let (_, v) = win !! i in (tag, v)
-            Nothing -> (tag, dflt)
+            Just i -> let (_, v) = win !! i in v
+            Nothing -> dflt
 
-getOffsetFromNonVec :: (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
+getOffsetFromNonVec :: (Tag, a) -> Tag -> Tag -> a -> a
 getOffsetFromNonVec (winTag, winData) tag offset dflt = out
     where 
         offsetTag = earlierTag tag offset
-        out = if offsetTag == winTag then (tag, winData) else (tag, dflt)
+        out = if offsetTag == winTag then winData else dflt
 
-getMatchingTagFromNonVec :: (Tag, a) -> Tag -> a -> (Tag, a)
-getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then (tag, dta) else (tagToMatch, dflt)
+getMatchingTagFromNonVec :: (Tag, a) -> Tag -> a -> a
+getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then dta else dflt
+
+getLatestValue :: KnownNat n => Vec (n + 1) (Tag, a) -> a -> a
+getLatestValue win dflt =
+  let (tag, dta) = last win
+  in if tag == invalidTag then dflt else dta
+
+getLatestValueFromNonVec :: (Tag, a) -> a -> a
+getLatestValueFromNonVec (tag, dta) dflt = if tag == invalidTag then dflt else dta
 
 earlierTag :: Tag -> Tag -> Tag
 earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
@@ -303,37 +311,37 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         -- Evaluation of output 0: level 2
         out0 = outputStream0 enOut0 ((.output0) <$> curTagsLevel2) out0Data0 
         out0Data0 = getOffset <$> input0Win <*> ((.input0) <$> curTagsLevel2) <*> (pure 1) <*> out0Data0Dflt
-        (_, out0Data0Dflt) = unbundle (getMatchingTag <$> out2 <*> ((.output2) <$> curTagsLevel2) <*> (pure (0)))
+        out0Data0Dflt =  getMatchingTag <$> out2 <*> ((.output2) <$> curTagsLevel2) <*> (pure (0))
 
         -- Evaluation of output 1: level 3
         out1 = outputStream1 enOut1 ((.output1) <$> curTagsLevel3) out1Data0 out1Data1 
         out1Data0 = getOffset <$> input1Win <*> ((.input1) <$> curTagsLevel3) <*> (pure 1) <*> out1Data0Dflt
         out1Data0Dflt = out1Data0DfltData0 + out1Data0DfltData1
         out1Data0DfltData0 = out1Data0DfltData0Data0 + out1Data0DfltData0Data1
-        (_, out1Data0DfltData0Data0) = unbundle (getMatchingTag <$> out2 <*> ((.output2) <$> curTagsLevel3) <*> (pure (0)))
-        (_, out1Data0DfltData0Data1) = unbundle (getMatchingTag <$> input0Win <*> ((.input0) <$> curTagsLevel3) <*> (pure (0)))
-        (_, out1Data0DfltData1) = unbundle (getMatchingTag <$> input1Win <*> ((.input1) <$> curTagsLevel3) <*> (pure (0)))
+        out1Data0DfltData0Data0 =  getMatchingTag <$> out2 <*> ((.output2) <$> curTagsLevel3) <*> (pure (0))
+        out1Data0DfltData0Data1 =  getMatchingTag <$> input0Win <*> ((.input0) <$> curTagsLevel3) <*> (pure (0))
+        out1Data0DfltData1 =  getMatchingTag <$> input1Win <*> ((.input1) <$> curTagsLevel3) <*> (pure (0))
         out1Data1 = getOffset <$> out0 <*> ((.output0) <$> curTagsLevel3) <*> (pure 1) <*> out1Data1Dflt
-        (_, out1Data1Dflt) = unbundle (getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel3) <*> (pure (0)))
+        out1Data1Dflt =  getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel3) <*> (pure (0))
 
         -- Evaluation of output 2: level 1
         out2 = outputStream2 enOut2 ((.output2) <$> curTagsLevel1) out2Data0 
         out2Data0 = getOffset <$> input1Win <*> ((.input1) <$> curTagsLevel1) <*> (pure 1) <*> out2Data0Dflt
-        (_, out2Data0Dflt) = unbundle (getMatchingTag <$> input1Win <*> ((.input1) <$> curTagsLevel1) <*> (pure (0)))
+        out2Data0Dflt =  getMatchingTag <$> input1Win <*> ((.input1) <$> curTagsLevel1) <*> (pure (0))
 
         -- Evaluation of output 3: level 4
         out3 = outputStream3 enOut3 ((.output3) <$> curTagsLevel4) out3Data0 out3Data1 
         out3Data0 = getOffset <$> input0Win <*> ((.input0) <$> curTagsLevel4) <*> (pure 1) <*> out3Data0Dflt
-        (_, out3Data0Dflt) = unbundle (getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel4) <*> (pure (0)))
+        out3Data0Dflt =  getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel4) <*> (pure (0))
         out3Data1 = getMatchingTag <$> out1 <*> ((.output1) <$> curTagsLevel4) <*> (pure (0))
 
         -- Outputing all results: level 5
         output0 = ValidInt <$> output0Data <*> output0Aktv
-        (_, output0Data) = unbundle (getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel5) <*> (pure 0))
+        output0Data = getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel5) <*> (pure 0)
         output1 = ValidInt <$> output1Data <*> output1Aktv
-        (_, output1Data) = unbundle (getMatchingTag <$> out1 <*> ((.output1) <$> curTagsLevel5) <*> (pure 0))
+        output1Data = getMatchingTag <$> out1 <*> ((.output1) <$> curTagsLevel5) <*> (pure 0)
         output2 = ValidInt <$> output2Data <*> output2Aktv
-        (_, output2Data) = unbundle (getMatchingTag <$> out2 <*> ((.output2) <$> curTagsLevel5) <*> (pure 0))
+        output2Data = getMatchingTag <$> out2 <*> ((.output2) <$> curTagsLevel5) <*> (pure 0)
         output3 = ValidInt <$> output3Data <*> output3Aktv
         (_, output3Data) = unbundle out3
 
@@ -362,45 +370,39 @@ input1Window en tag val = result
 
 
 
-outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, Int) -> Signal dom (Vec 3 (Tag, Int))
-outputStream0 en tag in0WithTag = result
+outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 3 (Tag, Int))
+outputStream0 en tag in0 = result
     where
         result = register (repeat (invalidTag, 0)) (mux en next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in0
-        (_, in0) = unbundle in0WithTag
 
 
-outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Vec 2 (Tag, Int))
-outputStream1 en tag in1WithTag out0WithTag = result
+outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Vec 2 (Tag, Int))
+outputStream1 en tag in1 out0 = result
     where
         result = register (repeat (invalidTag, 0)) (mux en next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out0 + in1
-        (_, in1) = unbundle in1WithTag
-        (_, out0) = unbundle out0WithTag
 
 
-outputStream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, Int) -> Signal dom (Vec 4 (Tag, Int))
-outputStream2 en tag in1WithTag = result
+outputStream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 4 (Tag, Int))
+outputStream2 en tag in1 = result
     where
         result = register (repeat (invalidTag, 0)) (mux en next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in1
-        (_, in1) = unbundle in1WithTag
 
 
-outputStream3 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
-outputStream3 en tag in0WithTag out1WithTag = result
+outputStream3 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream3 en tag in0 out1 = result
     where
         result = register (invalidTag, 0) (mux en nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in0 + out1
-        (_, in0) = unbundle in0WithTag
-        (_, out1) = unbundle out1WithTag
 
 
 

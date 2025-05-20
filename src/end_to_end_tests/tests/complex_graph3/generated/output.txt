@@ -14,4 +14,4 @@ Time 40800000000: Active outputs: (1, 1, 1, 1, 1, 1, 1, 1, 1, 1), Outputs: (12, 
 Time 51280000000: Active outputs: (1, 1, 1, 1, 1, 1, 1, 1, 1, 1), Outputs: (13, 201, 202, 203, 204, 203, 595, 204, 596, 597)
 Time 51380000000: Active outputs: (1, 1, 1, 1, 1, 1, 1, 1, 1, 1), Outputs: (14, 231, 232, 233, 234, 233, 762, 234, 763, 764)
 Time 82300000000: Active outputs: (1, 1, 1, 1, 1, 1, 1, 1, 1, 1), Outputs: (15, 263, 264, 265, 266, 265, 950, 266, 951, 952)
-testbench.v:186: $finish called at 82540000000 (100fs)
+testbench.v:212: $finish called at 82540000000 (100fs)

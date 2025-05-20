@@ -20,8 +20,8 @@ import Clash.Prelude
 -- a
 
 -- Memory Window
--- window y = 2
 -- window a = 1
+-- window y = 2
 -- window x = 3
 
 -- Pipeline Visualization
@@ -184,29 +184,37 @@ hlc inputs = out
 maxTag = 4 :: Tag
 invalidTag = maxTag + 1
 
-getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
+getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> a
 getOffset win tag offset dflt = out
     where 
         offsetTag = earlierTag tag offset
         out = case findIndex (\(t, _) -> t == offsetTag) win of
-            Just i -> let (_, v) = win !! i in (tag, v)
-            Nothing -> (tag, dflt) 
+            Just i -> let (_, v) = win !! i in v
+            Nothing -> dflt
 
-getMatchingTag :: KnownNat n => Vec n (Tag, a) -> Tag -> a -> (Tag, a)
+getMatchingTag :: KnownNat n => Vec n (Tag, a) -> Tag -> a -> a
 getMatchingTag win tag dflt = out
     where 
         out = case findIndex (\(t, _) -> t == tag) win of
-            Just i -> let (_, v) = win !! i in (tag, v)
-            Nothing -> (tag, dflt)
+            Just i -> let (_, v) = win !! i in v
+            Nothing -> dflt
 
-getOffsetFromNonVec :: (Tag, a) -> Tag -> Tag -> a -> (Tag, a)
+getOffsetFromNonVec :: (Tag, a) -> Tag -> Tag -> a -> a
 getOffsetFromNonVec (winTag, winData) tag offset dflt = out
     where 
         offsetTag = earlierTag tag offset
-        out = if offsetTag == winTag then (tag, winData) else (tag, dflt)
+        out = if offsetTag == winTag then winData else dflt
 
-getMatchingTagFromNonVec :: (Tag, a) -> Tag -> a -> (Tag, a)
-getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then (tag, dta) else (tagToMatch, dflt)
+getMatchingTagFromNonVec :: (Tag, a) -> Tag -> a -> a
+getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then dta else dflt
+
+getLatestValue :: KnownNat n => Vec (n + 1) (Tag, a) -> a -> a
+getLatestValue win dflt =
+  let (tag, dta) = last win
+  in if tag == invalidTag then dflt else dta
+
+getLatestValueFromNonVec :: (Tag, a) -> a -> a
+getLatestValueFromNonVec (tag, dta) dflt = if tag == invalidTag then dflt else dta
 
 earlierTag :: Tag -> Tag -> Tag
 earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
@@ -264,9 +272,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         out0 = outputStream0 enOut0 ((.output0) <$> curTagsLevel1) out0Data0 out0Data1 
         out0Data0 = getOffset <$> input0Win <*> ((.input0) <$> curTagsLevel1) <*> (pure 2) <*> out0Data0Dflt
         out0Data0Dflt = out0Data0DfltData0 + out0Data0DfltData1
-        (_, out0Data0DfltData0) = unbundle (getOffset <$> input1Win <*> ((.input1) <$> curTagsLevel1) <*> (pure (1)) <*> (pure (10)))
-        (_, out0Data0DfltData1) = unbundle (getOffsetFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel1) <*> (pure (1)) <*> out0Data0DfltData1Dflt)
-        (_, out0Data0DfltData1Dflt) = unbundle (getOffset <$> input0Win <*> ((.input0) <$> curTagsLevel1) <*> (pure (1)) <*> (pure (20)))
+        out0Data0DfltData0 = getOffset <$> input1Win <*> ((.input1) <$> curTagsLevel1) <*> (pure (1)) <*> (pure (10))
+        out0Data0DfltData1 = getOffsetFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel1) <*> (pure (1)) <*> out0Data0DfltData1Dflt
+        out0Data0DfltData1Dflt = getOffset <$> input0Win <*> ((.input0) <$> curTagsLevel1) <*> (pure (1)) <*> (pure (20))
         out0Data1 = getMatchingTag <$> input1Win <*> ((.input1) <$> curTagsLevel1) <*> (pure (0))
 
         -- Outputing all results: level 2
@@ -298,14 +306,12 @@ input1Window en tag val = result
 
 
 
-outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom (Tag, Int) -> Signal dom (Tag, Int) -> Signal dom (Tag, Int)
-outputStream0 en tag in0WithTag in1WithTag = result
+outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream0 en tag in0 in1 = result
     where
         result = register (invalidTag, 0) (mux en nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in1 + in0
-        (_, in0) = unbundle in0WithTag
-        (_, in1) = unbundle in1WithTag
 
 
 

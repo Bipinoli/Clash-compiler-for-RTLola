@@ -1,5 +1,5 @@
 input x: Int
 
-output a @1Hz := x.hold(or: 1) + c.hold(or: 2)
+output a @1kHz := x.hold(or: 1) + c.hold(or: 2)
 output b := x + a.hold(or: 3) + 1
 output c := b + 1 
