@@ -1,6 +1,7 @@
 -- {-# LANGUAGE DuplicateRecordFields #-}
 -- {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module Simple where
 
@@ -19,53 +20,54 @@ import Clash.Prelude
 
 ------------ USING GADT --------------
 
--- GADT let's us store a value in a constructor and label that with a tag/type
--- 
+-- -- GADT let's us store a value in a constructor and label that with a tag/type
+-- -- 
 
--- input x : Int
--- input y : Int
--- output a := x + y
+-- -- input x : Int
+-- -- input y : Int
+-- -- output a := x + y
 
--- tags for the box
-data PX
-data PY
-data PA
+-- -- tags for the box
+-- data PX deriving (Generic, NFDataX)
+-- data PY deriving (Generic, NFDataX)
+-- data PA deriving (Generic, NFDataX)
 
-data Pacing a where
-    -- PacingX is a constructor that takes Bool param 
-    -- It produces a value of Pacing PX
-    -- And within the constructor it stores a value of Bool
-    -- so conceptually "Pacing PX" is a box labeled with PX that stores Bool inside it
-    PacingX :: Bool -> Pacing PX 
-    PacingY :: Bool -> Pacing PY
-    PacingA :: Pacing PX -> Pacing PY -> Pacing PA
+-- -- here 'a' is the Phantom type that is used to mark type eg. with PX, PY, PA
+-- data Pacing a where
+--     -- PacingX is a constructor that takes Bool param 
+--     -- It produces a value of Pacing PX
+--     -- And within the constructor it stores a value of Bool
+--     -- so conceptually "Pacing PX" is a box labeled with PX that stores Bool inside it
+--     PacingX :: Bool -> Pacing PX 
+--     PacingY :: Bool -> Pacing PY
+--     PacingA :: Pacing PX -> Pacing PY -> Pacing PA
 
-getPacing :: Pacing a -> Bool
--- When we pattern match against "PacingX x" we are opening the box labeledd PX 
--- and extracting the boolean value `x` inside
-getPacing (PacingX x) = x
-getPacing (PacingY y) = y
-getPacing (PacingA a b) = getPacing a && getPacing b
-
-
-mkPacingX :: Bool -> Pacing PX
-mkPacingX = PacingX
-
-mkPacingY :: Bool -> Pacing PY
-mkPacingY = PacingY
-
-mkPacingA :: Pacing PX -> Pacing PY -> Pacing PA
-mkPacingA = PacingA
+-- getPacing :: Pacing a -> Bool
+-- -- When we pattern match against "PacingX x" we are opening the box labeledd PX 
+-- -- and extracting the boolean value `x` inside
+-- getPacing (PacingX x) = x
+-- getPacing (PacingY y) = y
+-- getPacing (PacingA a b) = getPacing a && getPacing b
 
 
-func :: Pacing PA -> Bool
-func pa = getPacing pa
+-- mkPacingX :: Bool -> Pacing PX
+-- mkPacingX = PacingX
 
-px = mkPacingX True
-py = mkPacingY False
-pc = mkPacingA px py
+-- mkPacingY :: Bool -> Pacing PY
+-- mkPacingY = PacingY
 
-zz = func pc
+-- mkPacingA :: Pacing PX -> Pacing PY -> Pacing PA
+-- mkPacingA = PacingA
+
+
+-- func :: Pacing PA -> Bool
+-- func pa = getPacing pa
+
+-- px = mkPacingX True
+-- py = mkPacingY False
+-- pc = mkPacingA px py
+
+-- zz = func pc
 
 
 -- data Pacing a where
@@ -102,7 +104,35 @@ zz = func pc
 
 
 
-------------- USING RECORD -----------
+------------- USING normaal ADT -----------
+
+-- input x : Int
+-- input y : Int
+-- output a := x + y
+
+class Pacing a where 
+    value :: a -> Bool
+
+data PacingX = PacingX Bool 
+    deriving (Generic, NFDataX)
+data PacingY = PacingY Bool
+    deriving (Generic, NFDataX)
+data PacingA = PacingA PacingX PacingY
+    deriving (Generic, NFDataX)
+
+instance Pacing PacingX where
+    value (PacingX x) = x
+instance Pacing PacingY where
+    value (PacingY y) = y
+instance Pacing PacingA where
+    value (PacingA x y) = value x && value y
+
+func :: PacingA -> Bool
+func = value 
+
+px = PacingX True
+py = PacingY False
+pa = PacingA px py
 
 
 -- class Pacing a where
