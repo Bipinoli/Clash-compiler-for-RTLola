@@ -19,44 +19,87 @@ import Clash.Prelude
 
 ------------ USING GADT --------------
 
-data PacingX = PacingX Bool
-data PacingY = PacingY Bool
+-- GADT let's us store a value in a constructor and label that with a tag/type
+-- 
 
+-- input x : Int
+-- input y : Int
+-- output a := x + y
+
+-- tags for the box
+data PX
+data PY
+data PA
 
 data Pacing a where
-    DirectPacing :: Bool -> Pacing Bool
-    DerivedPacing :: Pacing b -> Pacing Bool
-    DerivedPacingAnd :: KnownNat n => Vec n (Pacing b) -> Pacing Bool
+    -- PacingX is a constructor that takes Bool param 
+    -- It produces a value of Pacing PX
+    -- And within the constructor it stores a value of Bool
+    -- so conceptually "Pacing PX" is a box labeled with PX that stores Bool inside it
+    PacingX :: Bool -> Pacing PX 
+    PacingY :: Bool -> Pacing PY
+    PacingA :: Pacing PX -> Pacing PY -> Pacing PA
 
 getPacing :: Pacing a -> Bool
-getPacing (DirectPacing b) = b
-getPacing (DerivedPacing b) = getPacing b
-getPacing (DerivedPacingAnd v) = and . map getPacing $ v
+-- When we pattern match against "PacingX x" we are opening the box labeledd PX 
+-- and extracting the boolean value `x` inside
+getPacing (PacingX x) = x
+getPacing (PacingY y) = y
+getPacing (PacingA a b) = getPacing a && getPacing b
 
-pacingX = DirectPacing True
-pacingY = DirectPacing False
-pacingZ = DirectPacing True
 
-pacingA = DerivedPacing pacingX
-pacingB = DerivedPacing pacingY
+mkPacingX :: Bool -> Pacing PX
+mkPacingX = PacingX
 
-pacingC = DerivedPacingAnd (pacingA :> pacingB :> Nil)
-pacingD = DerivedPacingAnd (pacingA :> pacingB :> pacingZ :> Nil)
+mkPacingY :: Bool -> Pacing PY
+mkPacingY = PacingY
 
-px = getPacing pacingX
-py = getPacing pacingY
-pz = getPacing pacingZ
-pa = getPacing pacingA
-pb = getPacing pacingB
-pc = getPacing pacingC
-pd = getPacing pacingD
+mkPacingA :: Pacing PX -> Pacing PY -> Pacing PA
+mkPacingA = PacingA
 
-pacings = (px, py, pz, pa, pb, pc, pd)
+
+func :: Pacing PA -> Bool
+func pa = getPacing pa
+
+px = mkPacingX True
+py = mkPacingY False
+pc = mkPacingA px py
+
+zz = func pc
+
+
+-- data Pacing a where
+--     DirectPacing :: Bool -> Pacing Bool
+--     DerivedPacing :: Pacing b -> Pacing Bool
+--     DerivedPacingAnd :: KnownNat n => Vec n (Pacing b) -> Pacing Bool
+
+-- getPacing :: Pacing a -> Bool
+-- getPacing (DirectPacing b) = b
+-- getPacing (DerivedPacing b) = getPacing b
+-- getPacing (DerivedPacingAnd v) = and . map getPacing $ v
+
+-- pacingX = DirectPacing True
+-- pacingY = DirectPacing False
+-- pacingZ = DirectPacing True
+
+-- pacingA = DerivedPacing pacingX
+-- pacingB = DerivedPacing pacingY
+
+-- pacingC = DerivedPacingAnd (pacingA :> pacingB :> Nil)
+-- pacingD = DerivedPacingAnd (pacingA :> pacingB :> pacingZ :> Nil)
+
+-- px = getPacing pacingX
+-- py = getPacing pacingY
+-- pz = getPacing pacingZ
+-- pa = getPacing pacingA
+-- pb = getPacing pacingB
+-- pc = getPacing pacingC
+-- pd = getPacing pacingD
+
+-- pacings = (px, py, pz, pa, pb, pc, pd)
 
 -- type PacingD = DerivedPacing ( :> pacingB :> pacingZ :> Nil)
 
--- func :: PacingD -> Bool
--- func pacingD = getPacing pacingD
 
 
 ------------- USING RECORD -----------
