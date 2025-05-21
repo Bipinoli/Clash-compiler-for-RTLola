@@ -1,0 +1,10 @@
+input x : Int
+input y : Int
+input z : Int
+
+output a := x 
+output b := y 
+output c := a + b 
+output d := a + b + z
+
+output e @1kHz := d.aggregate(over: 0.01s, using: sum) 
