@@ -121,6 +121,10 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
 }
 
 fn get_trace_data(trace_data: Vec<StringRecord>) -> Vec<TraceData> {
+    // Note:
+    // Input is synchronised with the rising edge of the clock
+    // Clock period is 1us. The clock rises in every even microsecond
+    let mut last_input_time: f64 = 0.0;
     trace_data
         .iter()
         .enumerate()
@@ -135,16 +139,9 @@ fn get_trace_data(trace_data: Vec<StringRecord>) -> Vec<TraceData> {
                         .expect("Failed to parse time from trace data");
                     // Initial reset signal for #2
                     let microseconds = seconds * 1e6 - 2 as f64;
+                    last_input_time = next_immediate_clock_rise_time(seconds * 1e6);
                     format!("{}", microseconds)
                 } else {
-                    let prev_row_time = trace_data
-                        .get(i - 1)
-                        .unwrap()
-                        .get(0)
-                        .unwrap()
-                        .to_string()
-                        .parse::<f64>()
-                        .expect("Failed to parse time from previous row");
                     let cur_row_time = d
                         .get(0)
                         .unwrap()
@@ -152,7 +149,9 @@ fn get_trace_data(trace_data: Vec<StringRecord>) -> Vec<TraceData> {
                         .parse::<f64>()
                         .expect("Failed to parse time from trace data");
                     // #2 from one cycle delay caused by putting input to zero in the impulse input
-                    let microseconds = cur_row_time * 1e6 - prev_row_time * 1e6 - 2 as f64;
+                    let microseconds = cur_row_time * 1e6 - last_input_time - 2 as f64;
+                    let microseconds = microseconds.max(0.0);
+                    last_input_time = next_immediate_clock_rise_time(last_input_time + microseconds + 2.0);
                     format!("{}", microseconds)
                 }
             },
@@ -171,6 +170,17 @@ fn get_trace_data(trace_data: Vec<StringRecord>) -> Vec<TraceData> {
                 .collect(),
         })
         .collect()
+}
+
+fn next_immediate_clock_rise_time(microseconds: f64) -> f64 {
+    // Note:
+    // Input is synchronised with the rising edge of the clock
+    // Clock period is 1us. The clock rises in every even microsecond 
+    let mut micros = microseconds.ceil(); 
+    if micros % 2.0 == 1.0 {
+        micros += 1.0;
+    }
+    micros
 }
 
 fn get_sliding_windows(ir: &HardwareIR) -> Vec<()> {
