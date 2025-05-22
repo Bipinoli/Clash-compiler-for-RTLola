@@ -76,9 +76,6 @@ llc event = bundle (toPop, outputs)
         {{#each inputs}}
         input{{@index}} = (.input{{@index}}) <$> inputs
         {{/each}}
-        {{#each inputs}}
-        input{{@index}}HasData = ((.valid). (.input{{@index}})) <$> inputs
-        {{/each}}
 
         {{#if has_sliding_window}}
         {{#each sliding_windows}}
@@ -86,8 +83,11 @@ llc event = bundle (toPop, outputs)
         {{/each}}
         {{/if}}
 
+        {{#each inputs}}
+        pIn{{@index}} = (.pacingIn{{@index}}) <$> pacings
+        {{/each}}
         {{#each outputs}}
-        p{{@index}} = (.pacing{{@index}}) <$> pacings
+        pOut{{@index}} = (.pacingOut{{@index}}) <$> pacings
         {{/each}}
         
         {{#each tags}}
@@ -184,11 +184,10 @@ llc event = bundle (toPop, outputs)
         {{#each sliding_windows}}
         -- Evaluation of sliding window {{@index}}: level {{this.level}}
         sw{{this.idx}} = slidingWindow{{this.idx}} enSw{{this.idx}} sld{{this.idx}} {{{this.tag}}} sw{{this.idx}}Data
-        sw{{this.idx}}Data = bundle (sw{{this.idx}}DataVal, sw{{this.idx}}DataPacing)
         {{#if this.input_memory_more_than_one}}
-        sw{{this.idx}}DataVal = getMatchingTag <$> {{this.input_data}} <*> {{{this.source_tag}}} <*> (pure {{this.input_data_default}})
+        sw{{this.idx}}Data = getMatchingTag <$> {{this.input_data}} <*> {{{this.source_tag}}} <*> (pure {{this.input_data_default}})
         {{else}}
-        sw{{this.idx}}DataVal = unbundle {{this.input_data}}
+        sw{{this.idx}}Data = unbundle {{this.input_data}}
         {{/if}}
 
         {{/each}}

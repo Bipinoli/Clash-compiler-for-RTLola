@@ -40,10 +40,30 @@ newtype Outputs = Outputs {
 } deriving (Generic, NFDataX)
 {{/if}}
 
-{{#if (gt (len outputs) 1)}}
+
+class Pacing a where getPacing :: a -> Bool
+
+{{#each inputs}}
+data PacingIn{{@index}} = PacingIn{{@index}} Bool deriving (Generic, NFDataX)
+{{/each}}
+{{#each outputs}}
+data PacingOut{{@index}} = PacingOut{{@index}} {{#if this.is_periodic}}Bool {{else}}{{#each this.pacing_deps}}Pacing{{this}} {{/each}}{{/if}}deriving (Generic, NFDataX)
+{{/each}}
+
+{{#each inputs}}
+instance Pacing PacingIn{{@index}} where {{{this.get_pacing_stmt}}}
+{{/each}}
+{{#each outputs}}
+instance Pacing PacingOut{{@index}} where {{{this.get_pacing_stmt}}}
+{{/each}}
+
+{{#if (or (gt (len outputs) 1) (and (gt (len inputs) 0) (gt (len outputs) 0)))}}
 data Pacings = Pacings {
+    {{#each inputs}}
+    pacingIn{{@index}} :: PacingIn{{@index}},
+    {{/each}}
     {{#each outputs}}
-    pacing{{this.index}} :: Bool{{#unless @last}},{{/unless}}
+    pacingOut{{@index}} :: PacingOut{{@index}}{{#unless @last}},{{/unless}}
     {{/each}}
 } deriving (Generic, NFDataX)
 {{else}}
@@ -51,7 +71,7 @@ data Pacings = Pacings {
 -- https://clash-lang.discourse.group/t/how-to-avoid-flattening-of-fields-in-record/79/5
 newtype Pacings = Pacings {
     {{#each outputs}}
-    pacing{{this.index}} :: Bool
+    pacingOut{{@index}} :: PacingOut{{@index}}{{#unless @last}},{{/unless}}
     {{/each}}
 } deriving (Generic, NFDataX)
 {{/if}}
@@ -98,4 +118,14 @@ nullInputs = Inputs {{#each inputs}}(Valid{{this.ty}} {{this.default}} False) {{
 {{#if has_sliding_window}}
 nullSlides = Slides {{#each sliding_windows}}False {{/each}}
 {{/if}}
-nullPacings = Pacings {{#each outputs}}False {{/each}}
+nullPacings = Pacings {{#each inputs}}nullPacingIn{{@index}} {{/each}}{{#each outputs}}nullPacingOut{{@index}} {{/each}}
+{{#each inputs}}
+nullPacingIn{{@index}} = PacingIn{{@index}} False
+{{/each}}
+{{#each outputs}}
+{{#if this.is_periodic}}
+nullPacingOut{{@index}} = PacingOut{{@index}} False 
+{{else}}
+nullPacingOut{{@index}} = PacingOut{{@index}} {{#each this.pacing_deps}}nullPacing{{this}} {{/each}}
+{{/if}}
+{{/each}}

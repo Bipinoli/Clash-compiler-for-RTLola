@@ -120,10 +120,10 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
 
 /// Example:
 /// [
-///     "tIn0 = genTag input0HasData",
-///     "tOut0 = genTag p0",
-///     "tSw0 = genTag p1",
-///     "tOut1 = genTag p1",
+///     "tIn0 = genTag (getPacing <$> pIn0)",
+///     "tOut0 = genTag (getPacing <$> pOut0)",
+///     "tSw0 = genTag (getPacing <$> pOut1)",
+///     "tOut1 = genTag (getPacing <$> pOut1)",
 /// ]
 fn get_tags(ir: &HardwareIR) -> Vec<String> {
     ir.evaluation_order
@@ -131,10 +131,19 @@ fn get_tags(ir: &HardwareIR) -> Vec<String> {
         .map(|order| {
             order.iter().map(move |nd| match nd {
                 Node::InputStream(x) => {
-                    format!("tIn{} = genTag input{}HasData", x.clone(), x.clone())
+                    format!("tIn{} = genTag (getPacing <$> pIn{})", x.clone(), x.clone())
                 }
-                Node::OutputStream(x) => format!("tOut{} = genTag p{}", x.clone(), x.clone()),
-                Node::SlidingWindow(x) => format!("tSw{} = genTag p{}", x.clone(), x.clone()),
+                Node::OutputStream(x) => format!(
+                    "tOut{} = genTag (getPacing <$> pOut{})",
+                    x.clone(),
+                    x.clone()
+                ),
+                Node::SlidingWindow(x) => {
+                    let pacing = datatypes::get_target_from_sliding_window(
+                        &ir.mir.sliding_windows[x.clone()],
+                    );
+                    format!("tSw{} = genTag (getPacing <$> p{})", x.clone(), pacing)
+                }
             })
         })
         .flatten()
@@ -143,10 +152,10 @@ fn get_tags(ir: &HardwareIR) -> Vec<String> {
 
 /// Example:
 /// [
-///     "enIn0 = input0HasData",
-///     "enOut0 = delayFor d1 False p0",
-///     "enSw0 = delayFor d2 (slide0 .||. p1)",
-///     "sld0 = delayFor d2 slide0",
+///     "enIn0 = pIn0",
+///     "enOut0 = delayFor d1 nullPacingOut0 pOut0",
+///     "enSw0 = delayFor d2 False pOut1",
+///     "sld0 = delayFor d2 False slide0",
 ///     ...
 /// ]
 fn get_enables(ir: &HardwareIR) -> Vec<String> {
@@ -157,12 +166,12 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
             order
                 .iter()
                 .map(move |nd| {
-                    let (has_three, name1, pacing1, name2, pacing2, name3, pacing3) = match nd {
+                    let (has_two, name1, pacing1, default1, name2, pacing2, default2) = match nd {
                         Node::InputStream(x) => (
                             false,
                             format!("enIn{}", x.clone()),
-                            format!("input{}HasData", x.clone()),
-                            String::new(),
+                            format!("pIn{}", x.clone()),
+                            format!("nullPacingIn{}", x.clone()),
                             String::new(),
                             String::new(),
                             String::new(),
@@ -170,55 +179,43 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
                         Node::OutputStream(x) => (
                             false,
                             format!("enOut{}", x.clone()),
-                            format!("p{}", x.clone()),
-                            String::new(),
+                            format!("pOut{}", x.clone()),
+                            format!("nullPacingOut{}", x.clone()),
                             String::new(),
                             String::new(),
                             String::new(),
                         ),
                         Node::SlidingWindow(x) => {
                             let name1 = format!("enSw{}", x.clone());
-                            let pacing1 = match ir.mir.sliding_windows[x.clone()].target {
-                                StreamReference::Out(idx) => {
-                                    format!("(slide{} .||. p{})", x.clone(), idx.clone())
-                                }
-                                StreamReference::In(idx) => {
-                                    format!("(slide{} .||. input{}HasData)", x.clone(), idx.clone())
-                                }
-                            };
+                            let target_name = datatypes::get_target_from_sliding_window(
+                                &ir.mir.sliding_windows[x.clone()],
+                            );
+                            let pacing1 = format!("p{}", &target_name);
+                            let default1 = format!("nullPacing{}", &target_name);
                             let name2 = format!("sld{}", x.clone());
                             let pacing2 = format!("slide{}", x.clone());
-                            let name3 = format!("sw{}DataPacing", x.clone());
-                            let pacing3 = match ir.mir.sliding_windows[x.clone()].target {
-                                StreamReference::In(x) => format!("input{}HasData", x.clone()),
-                                StreamReference::Out(x) => format!("p{}", x.clone()),
-                            };
-                            (true, name1, pacing1, name2, pacing2, name3, pacing3)
+                            let default2 = format!("False");
+                            (true, name1, pacing1, default1, name2, pacing2, default2)
                         }
                     };
-                    if has_three {
+                    if has_two {
                         vec![
                             format!(
                                 "{} = {}",
                                 name1,
-                                surround_with_delay(level + 1, "False".to_string(), pacing1)
+                                surround_with_delay(level + 1, default1, pacing1)
                             ),
                             format!(
                                 "{} = {}",
                                 name2,
-                                surround_with_delay(level + 1, "False".to_string(), pacing2)
-                            ),
-                            format!(
-                                "{} = {}",
-                                name3,
-                                surround_with_delay(level + 1, "False".to_string(), pacing3)
+                                surround_with_delay(level + 1, default2, pacing2)
                             ),
                         ]
                     } else {
                         vec![format!(
                             "{} = {}",
                             name1,
-                            surround_with_delay(level + 1, "False".to_string(), pacing1)
+                            surround_with_delay(level + 1, default1, pacing1)
                         )]
                     }
                 })
@@ -230,7 +227,7 @@ fn get_enables(ir: &HardwareIR) -> Vec<String> {
 
 /// Example:
 /// [
-///     "output0Aktv = delayFor d4 False p0",
+///     "output0Aktv = delayFor d4 False (getPacing <$> pOut0)",
 ///     ...
 /// ]
 fn get_output_phase_enables(ir: &HardwareIR) -> Vec<String> {
@@ -246,7 +243,7 @@ fn get_output_phase_enables(ir: &HardwareIR) -> Vec<String> {
                 surround_with_delay(
                     eval_levels + 1,
                     "False".to_string(),
-                    format!("p{}", i.clone())
+                    format!("(getPacing <$> pOut{})", i.clone())
                 )
             )
         })

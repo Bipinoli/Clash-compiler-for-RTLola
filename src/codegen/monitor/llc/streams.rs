@@ -7,8 +7,8 @@ use serde::Serialize;
 
 use crate::{
     codegen::monitor::{datatypes, register_template},
-    hardware_ir::Node,
     hardware_ir::HardwareIR,
+    hardware_ir::Node,
 };
 
 #[derive(Serialize)]
@@ -54,6 +54,7 @@ pub struct SlidingWindow {
     pub data_type: String,
     pub default_value: String,
     pub memory: usize,
+    pub pacing: String,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
@@ -174,6 +175,7 @@ pub fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
                     .get(&Node::SlidingWindow(i))
                     .unwrap()
                     .clone(),
+                pacing: datatypes::get_target_from_sliding_window(sw),
             }
         })
         .collect()
@@ -263,46 +265,55 @@ fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<Sl
                     .get(&Node::SlidingWindow(sw.idx()))
                     .unwrap()
                     .clone(),
+                pacing: datatypes::get_target_from_sliding_window(
+                    &ir.mir.sliding_windows[sw.idx()],
+                ),
             },
             _ => unreachable!(),
         })
         .collect()
 }
 
-/// Instant to slide              time --->
-///   |
-///   |
-///   V
+/// ```
+/// Instant to slide              time --->   
+///   |  
+///   |  
+///   V  
 /// slide1 -------- slide2 -------- slide3 -------- slide4 -------- slide5 --------
 ///   |      bkt1     |       bkt2    |      bkt3     |      bkt4     |  
 ///   x1      x2      x3       x4     |       x5      x6      x7      | x8
 ///   ------------------------------------------------------------------------
+/// ```
 ///
-///   If we need to work with the data within the window of 3 buckets
-///   Then at the instant of slide4 we need to aggregate the data [x2, x3, x4, x5, x6]
-///   x1 was the data that came exactly at the instant when we were about to slide1
-///   this falls outside the window of 3 buckets at instant of slide4
-///   However x2 & x6 will be included in the aggregate
+///   If we need to work with the data within the window of 3 buckets   
+///   Then at the instant of slide4 we need to aggregate the data `[x2, x3, x4, x5, x6]`    
+///   `x1` was the data that came exactly at the instant when we were about to `slide1`  
+///   this falls outside the window of 3 buckets at instant of `slide4`  
+///   However `x2` & `x6` will be included in the aggregate  
 ///
-///   So the semantic for a bucket is to be right inclusive and left exclusive
-///   i.e in bkt1 aggregation x2 & x3 are included whereas x1 is excluded
+///   So the semantic for a bucket is to be right inclusive and left exclusive  
+///   i.e in bkt1 aggregation x2 & x3 are included whereas x1 is excluded  
 ///
-///   Therefore we need 4 memory buckets to store all the required data
-///   even though we are calcuating aggregate on 3 buckets
+///   Therefore we need 4 memory buckets to store all the required data  
+///   even though we are calcuating aggregate on 3 buckets  
 ///
-///   At the instant of slide4, before processing:
-///   memory 1: (.., slide1] -> (x1)
-///   memory 2: (slide1, slide2] -> (x2, x3)
-///   memory 3: (slide2, slide3] -> (x4)
-///   memory 4: (slide3, slide4] -> (x5)
+///   At the instant of `slide4`, before processing:  
+///  ```
+///   memory 1: (.., slide1] -> (x1)  
+///   memory 2: (slide1, slide2] -> (x2, x3)  
+///   memory 3: (slide2, slide3] -> (x4)  
+///   memory 4: (slide3, slide4] -> (x5)  
+///   ```
 ///
-///   We put x6 into the last bucket and then slide.
+///   We put `x6` into the last bucket and then slide.   
 ///
-///   So, after processing:
-///   memory 1: (slide1, slide2] -> (x2, x3)
-///   memory 2: (slide2, slide3] -> (x4)
-///   memory 3: (slide3, slide4] -> (x5, x6)
-///   memory 4: (slide3, slide4] -> ()
+///   So, after processing:  
+///   ```
+///   memory 1: (slide1, slide2] -> (x2, x3)  
+///   memory 2: (slide2, slide3] -> (x4)  
+///   memory 3: (slide3, slide4] -> (x5, x6)  
+///   memory 4: (slide3, slide4] -> ()  
+///  ```
 ///
 fn get_sliding_window_size(window_idx: usize, ir: &HardwareIR) -> usize {
     match ir.mir.sliding_windows[window_idx].num_buckets {

@@ -12,7 +12,9 @@ hlc :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs -> {{/if
 hlc {{#if has_input}}inputs {{/if}}= out
     where 
         out = bundle (newEvent, event)
-        newEvent = {{new_event_condition}}
+        newEvent = {{#each inputs}}hasInput{{@index}}{{~#unless @last}} .||. {{/unless}}{{~/each}}
+                   {{~#if (and (gt (len inputs) 0) (gt (len periods) 0))}} .||. {{/if}}
+                   {{~#each periods}}timer{{@index}}Over{{#unless @last}} .||. {{/unless}}{{/each}}
 
         {{#if (and (not has_input) (not has_sliding_window))}}
         event = (pacings)
@@ -23,14 +25,19 @@ hlc {{#if has_input}}inputs {{/if}}= out
         {{#if has_sliding_window}}
         slides = Slides <$> {{#each slides}}s{{@index}}{{#unless @last}} <*> {{/unless}}{{/each}}
         {{/if}}
-        pacings = Pacings <$> {{#each pacings}}p{{@index}}{{#unless @last}} <*> {{/unless}}{{/each}}
+        pacings = Pacings <$> {{#each inputs}}pIn{{@index}}{{#unless @last}} <*> {{/unless}}{{/each}}
+                              {{~#if (and (gt (len inputs) 0) (gt (len  output_pacings) 0))}} <*> {{/if}}
+                              {{~#each output_pacings}}pOut{{@index}}{{#unless @last}} <*> {{/unless}}{{/each}}
 
         {{#each inputs}}
         hasInput{{this.index}} = ((.valid). (.input{{this.index}})) <$> inputs
         {{/each}}
 
-        {{#each pacings}}
-        {{{this}}}
+        {{#each inputs}}
+        pIn{{@index}} = PacingIn{{@index}} <$> hasInput{{@index}}
+        {{/each}}
+        {{#each output_pacings}}
+        pOut{{@index}} = PacingOut{{@index}} <$> {{#each this.deps}}{{this}}{{#unless @last}} <*> {{/unless}}{{/each}}
         {{/each}}
 
         {{#each slides}}

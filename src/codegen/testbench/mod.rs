@@ -3,6 +3,7 @@ use handlebars::Handlebars;
 use rtlola_frontend::mir::Type;
 use serde::Serialize;
 
+use crate::codegen::monitor::hlc;
 use crate::hardware_ir::HardwareIR;
 
 #[derive(Serialize)]
@@ -10,8 +11,15 @@ struct Data {
     debug: bool,
     inputs: Vec<Input>,
     outputs: Vec<Output>,
+    output_pacings: Vec<OutputPacing>,
     trace_data: Vec<TraceData>,
     sliding_windows: Vec<()>,
+}
+
+#[derive(Serialize)]
+struct OutputPacing {
+    idx: usize,
+    deps: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -54,6 +62,14 @@ pub fn generate_verilog_testbench(
         outputs: get_outputs(&hard_ir),
         trace_data: get_trace_data(trace_data),
         sliding_windows: get_sliding_windows(&hard_ir),
+        output_pacings: hlc::get_output_pacings(&hard_ir)
+            .iter()
+            .enumerate()
+            .map(|(i, p)| OutputPacing {
+                idx: i,
+                deps: p.deps.clone(),
+            })
+            .collect(),
     };
     match reg.render("testbench", &data) {
         Ok(result) => Some(result),

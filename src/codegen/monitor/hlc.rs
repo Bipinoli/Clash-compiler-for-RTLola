@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use handlebars::Handlebars;
-use rtlola_frontend::mir::{ActivationCondition, OutputStream, PacingType, StreamReference};
+use rtlola_frontend::mir::PacingType;
 use serde::Serialize;
 use uom::num_rational::Ratio;
 use uom::si::rational64::Frequency;
@@ -15,11 +15,15 @@ struct Data {
     has_periodic_pacing: bool,
     has_input: bool,
     has_sliding_window: bool,
-    new_event_condition: String,
     inputs: Vec<datatypes::Stream>,
-    pacings: Vec<String>,
+    output_pacings: Vec<OutputPacing>,
     periods: Vec<String>,
     slides: Vec<String>,
+}
+
+#[derive(Serialize)]
+pub struct OutputPacing {
+    pub deps: Vec<String>,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
@@ -32,9 +36,8 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         has_input: ir.mir.inputs.len() > 0,
         has_periodic_pacing: get_has_periodic_pacing(ir),
         has_sliding_window: ir.mir.sliding_windows.len() > 0,
-        new_event_condition: get_new_event_condition(ir),
         inputs: datatypes::get_inputs(ir),
-        pacings: get_pacings(ir, &get_all_periods(ir)),
+        output_pacings: get_output_pacings(ir),
         slides: get_slides(ir, &get_all_periods(ir)),
         periods: get_all_periods(ir),
     };
@@ -55,70 +58,34 @@ fn get_has_periodic_pacing(ir: &HardwareIR) -> bool {
     })
 }
 
-fn get_new_event_condition(ir: &HardwareIR) -> String {
-    let inputs = ir
-        .mir
-        .inputs
-        .iter()
-        .enumerate()
-        .map(|(i, _)| format!("hasInput{}", i))
-        .collect::<Vec<_>>();
-    let pacings = ir
-        .mir
-        .outputs
-        .iter()
-        .enumerate()
-        .filter(|(_, out)| match out.eval.eval_pacing {
-            PacingType::GlobalPeriodic(_) => true,
-            _ => false,
-        })
-        .map(|(i, _)| format!("p{}", i))
-        .collect::<Vec<_>>();
-    let slides = ir
-        .mir
-        .sliding_windows
-        .iter()
-        .enumerate()
-        .map(|(i, _)| format!("s{}", i))
-        .collect::<Vec<_>>();
-    let all: Vec<String> = vec![&inputs[..], &pacings[..], &slides[..]].concat();
-    let all: Vec<String> = all.into_iter().filter(|item| item.len() > 0).collect();
-    all.join(" .||. ")
-}
-
-fn get_pacings(ir: &HardwareIR, all_periods: &Vec<String>) -> Vec<String> {
+pub fn get_output_pacings(ir: &HardwareIR) -> Vec<OutputPacing> {
+    let all_periods = &get_all_periods(ir);
     ir.mir
         .outputs
         .iter()
-        .enumerate()
-        .map(|(i, output)| format!("p{} = {}", i, get_pacing_from_output(output, all_periods)))
+        .map(|outpt| {
+            let pacing = datatypes::get_pacing_from_output(outpt);
+            OutputPacing {
+                deps: get_pacing_deps_names(pacing, all_periods),
+            }
+        })
         .collect()
 }
 
-fn get_pacing_from_output(output: &OutputStream, all_periods: &Vec<String>) -> String {
-    match &output.eval.eval_pacing {
-        PacingType::Event(cond) => get_pacing_from_activation_cond(&cond),
-        PacingType::GlobalPeriodic(freq) => {
-            let period = get_period_in_ns(freq);
+fn get_pacing_deps_names(pacing: datatypes::Pacing, all_periods: &Vec<String>) -> Vec<String> {
+    match pacing {
+        datatypes::Pacing::Periodic(freq) => {
+            let period = get_period_in_ns(&freq);
             let indx = all_periods.iter().position(|p| *p == period).unwrap();
-            format!("timer{}Over", indx)
+            vec![format!("timer{}Over", indx)]
         }
-        _ => unimplemented!(),
-    }
-}
-
-fn get_pacing_from_activation_cond(cond: &ActivationCondition) -> String {
-    match cond {
-        ActivationCondition::Stream(st) => match st {
-            StreamReference::In(x) => format!("hasInput{}", x),
-            _ => unreachable!(),
-        },
-        ActivationCondition::Conjunction(conj) => conj
+        datatypes::Pacing::Stream(name) => vec![format!("p{}", name)],
+        datatypes::Pacing::And(v) => v
             .iter()
-            .map(|cond| get_pacing_from_activation_cond(cond))
-            .collect::<Vec<_>>()
-            .join(" .&&. "),
-        _ => unimplemented!(),
+            .map(|p| get_pacing_deps_names(p.clone(), all_periods))
+            .flatten()
+            .collect(),
+        datatypes::Pacing::Input => unreachable!(),
     }
 }
 

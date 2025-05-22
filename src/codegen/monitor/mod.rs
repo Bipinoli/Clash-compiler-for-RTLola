@@ -1,10 +1,10 @@
-use crate::hardware_ir::{prettify_required_memory, Node, HardwareIR};
+use crate::hardware_ir::{prettify_required_memory, HardwareIR, Node};
 use handlebars::Handlebars;
 use serde::Serialize;
 
 mod datatypes;
 mod handlebars_helpers;
-mod hlc;
+pub mod hlc;
 mod llc;
 
 #[derive(Serialize)]
