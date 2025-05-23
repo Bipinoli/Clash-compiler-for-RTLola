@@ -187,7 +187,7 @@ llc event = bundle (toPop, outputs)
         {{#if this.input_memory_more_than_one}}
         sw{{this.idx}}Data = getMatchingTag <$> {{this.input_data}} <*> {{{this.source_tag}}} <*> (pure {{this.input_data_default}})
         {{else}}
-        sw{{this.idx}}Data = unbundle {{this.input_data}}
+        (_, sw{{this.idx}}Data) = unbundle {{this.input_data}}
         {{/if}}
 
         {{/each}}
