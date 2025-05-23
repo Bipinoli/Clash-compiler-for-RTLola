@@ -26,293 +26,338 @@ module topEntity
     , output wire  result_1_3
     , output wire  result_1_4_0
     , output wire  result_1_4_1
-    , output wire  result_1_4_2
+    , output wire  result_1_4_2_0
+    , output wire  result_1_4_2_1
+    , output wire  result_1_4_3_0
+    , output wire  result_1_4_3_1
+    , output wire  result_1_4_4
     , output wire  result_1_5
     );
-  wire [134:0] result_2;
-  // spec.hs:188:1-82
-  wire  ds;
-  wire signed [63:0] result_3;
+  wire signed [63:0] result_2;
   wire signed [63:0] x;
-  reg signed [63:0] result_4 = (64'sd0);
-  // spec.hs:188:1-82
+  reg signed [63:0] result_3 = (64'sd0);
+  wire [138:0] result_4;
+  // spec.hs:211:1-82
+  wire  pIn0;
+  // spec.hs:211:1-82
+  wire  pIn1;
+  // spec.hs:211:1-82
   wire  timer0Over;
-  wire [199:0] result_5;
+  wire [203:0] result_5;
   wire [6:0] c$app_arg;
   wire  result_6;
-  // spec.hs:399:1-149
-  reg [71:0] result_7 = {8'd6,   64'sd0};
-  // spec.hs:399:1-149
+  wire [71:0] result_7;
+  // spec.hs:422:1-155
+  reg [71:0] result_8 = {8'd6,   64'sd0};
+  // spec.hs:422:1-155
+  wire  b;
+  // spec.hs:422:1-155
   wire [71:0] t;
-  wire [71:0] result_8;
   wire signed [63:0] ds1;
   wire signed [63:0] x_0;
   wire signed [63:0] y;
-  // spec.hs:414:1-159
+  // spec.hs:437:1-157
   wire signed [63:0] y_0;
-  // spec.hs:414:1-159
+  // spec.hs:437:1-157
   wire signed [63:0] x_1;
-  // spec.hs:414:1-159
+  // spec.hs:437:1-157
   wire [255:0] win;
-  // spec.hs:414:1-159
+  // spec.hs:437:1-157
   reg [263:0] window = {8'd6,   {64'sd0,   64'sd0,   64'sd0,   64'sd0}};
   wire [263:0] result_9;
-  // spec.hs:414:1-159
+  // spec.hs:437:1-157
   wire [263:0] t_0;
   wire [255:0] result_10;
-  // spec.hs:414:1-159
+  // spec.hs:437:1-157
   wire [255:0] c$t_case_alt;
-  // spec.hs:414:1-159
+  // spec.hs:437:1-157
   wire [255:0] c$t_case_alt_0;
-  // spec.hs:414:1-159
+  // spec.hs:437:1-157
   wire [255:0] lastBucketUpdated;
-  wire [4:0] c$app_arg_0;
-  wire  result_11;
-  // spec.hs:234:1-63
+  // spec.hs:437:1-157
+  wire  b_0;
+  // spec.hs:437:1-157
+  wire  c$b_case_alt;
+  // spec.hs:84:34-42
+  wire  x1;
+  // spec.hs:84:34-42
+  wire  x0;
+  // spec.hs:259:1-63
   wire [224:0] c$ws_app_arg;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [8:0] c$ws_app_arg_0;
   wire [71:0] c$case_scrut;
   wire [2:0] c$case_scrut_0;
-  wire signed [63:0] result_12;
-  // spec.hs:234:1-63
+  wire signed [63:0] result_11;
+  // spec.hs:259:1-63
   wire [1:0] i;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [11:0] ws;
-  wire [4:0] c$app_arg_1;
-  wire  result_13;
-  // spec.hs:261:1-127
-  wire  sig;
-  wire [4:0] c$app_arg_2;
-  wire  result_14;
-  // spec.hs:268:1-112
+  wire [4:0] c$app_arg_0;
+  wire  result_12;
+  // spec.hs:293:1-112
   wire  slides;
-  // spec.hs:268:1-112
+  wire [9:0] c$app_arg_1;
+  wire [1:0] result_13;
+  // spec.hs:293:1-112
   wire signed [63:0] c$ds1_case_alt;
-  // spec.hs:268:1-112
+  // spec.hs:293:1-112
   wire signed [63:0] dta;
-  // spec.hs:268:1-112
+  // spec.hs:293:1-112
   wire [7:0] tag;
-  // spec.hs:268:1-112
+  // spec.hs:293:1-112
   wire [71:0] c$ds1_case_scrut;
-  wire [239:0] c$app_arg_3;
-  wire [47:0] result_15;
-  wire [5:0] c$app_arg_4;
-  wire  result_16;
-  // spec.hs:234:1-63
+  wire [239:0] c$app_arg_2;
+  wire [47:0] result_14;
+  wire [5:0] c$app_arg_3;
+  wire  result_15;
+  // spec.hs:259:1-63
   wire [224:0] c$ws_app_arg_1;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [8:0] c$ws_app_arg_2;
   wire [71:0] c$case_scrut_1;
   wire [2:0] c$case_scrut_2;
-  wire signed [63:0] result_17;
-  // spec.hs:234:1-63
+  wire signed [63:0] result_16;
+  // spec.hs:259:1-63
   wire [1:0] i_0;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [11:0] ws_0;
-  wire [6:0] c$app_arg_5;
-  wire  result_18;
-  // spec.hs:234:1-63
+  wire [6:0] c$app_arg_4;
+  wire  result_17;
+  // spec.hs:259:1-63
   wire [299:0] c$ws_app_arg_3;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [11:0] c$ws_app_arg_4;
   wire [71:0] c$case_scrut_3;
   wire [2:0] c$case_scrut_4;
-  wire signed [63:0] result_19;
-  // spec.hs:234:1-63
+  wire signed [63:0] result_18;
+  // spec.hs:259:1-63
   wire [1:0] i_1;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [14:0] ws_1;
-  wire [6:0] c$app_arg_6;
-  wire  result_20;
-  // spec.hs:226:1-65
+  wire [6:0] c$app_arg_5;
+  wire  result_19;
+  // spec.hs:251:1-65
   wire [224:0] c$ws_app_arg_5;
-  // spec.hs:226:1-65
+  // spec.hs:251:1-65
   wire [8:0] c$ws_app_arg_6;
   wire [71:0] c$case_scrut_5;
   wire [2:0] c$case_scrut_6;
-  wire signed [63:0] result_21;
-  wire [7:0] result_22;
-  wire [7:0] c$app_arg_7;
-  // spec.hs:226:1-65
+  wire signed [63:0] result_20;
+  wire [7:0] result_21;
+  wire [7:0] c$app_arg_6;
+  // spec.hs:251:1-65
   wire [1:0] i_2;
-  // spec.hs:226:1-65
+  // spec.hs:251:1-65
   wire [11:0] ws_2;
-  // spec.hs:390:1-149
+  wire [215:0] result_22;
+  // spec.hs:84:34-42
+  wire  x0_0;
+  // spec.hs:84:34-42
+  wire  x1_0;
+  // spec.hs:413:1-155
   reg [215:0] result_23 = {{8'd6,   64'sd0},   {8'd6,   64'sd0},   {8'd6,   64'sd0}};
-  // spec.hs:390:1-149
+  // spec.hs:413:1-155
   wire [215:0] t_1;
-  wire [215:0] result_24;
   wire signed [63:0] x_2;
   wire signed [63:0] y_1;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [299:0] c$ws_app_arg_7;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [11:0] c$ws_app_arg_8;
   wire [71:0] c$case_scrut_7;
   wire [2:0] c$case_scrut_8;
-  wire signed [63:0] result_25;
-  // spec.hs:234:1-63
+  wire signed [63:0] result_24;
+  // spec.hs:259:1-63
   wire [1:0] i_3;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [14:0] ws_3;
-  // spec.hs:381:1-149
+  wire [287:0] result_25;
+  // spec.hs:83:34-42
+  wire  x0_1;
+  // spec.hs:83:34-42
+  wire  x1_1;
+  // spec.hs:404:1-155
   reg [287:0] result_26 = {{8'd6,   64'sd0},   {8'd6,   64'sd0},   {8'd6,   64'sd0},   {8'd6,   64'sd0}};
-  // spec.hs:381:1-149
+  // spec.hs:404:1-155
   wire [287:0] t_2;
-  wire [287:0] result_27;
   wire signed [63:0] x_3;
   wire signed [63:0] y_2;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [147:0] c$ws_app_arg_9;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [3:0] c$ws_app_arg_10;
   wire [71:0] c$case_scrut_9;
   wire [1:0] c$case_scrut_10;
-  wire signed [63:0] result_28;
-  // spec.hs:234:1-63
+  wire signed [63:0] result_27;
+  // spec.hs:259:1-63
   wire [0:0] i_4;
-  // spec.hs:234:1-63
+  // spec.hs:259:1-63
   wire [5:0] ws_4;
-  // spec.hs:375:1-130
+  wire [143:0] result_28;
+  // spec.hs:398:1-135
   reg [143:0] result_29 = {{8'd6,   64'sd0},   {8'd6,   64'sd0}};
-  // spec.hs:375:1-130
+  // spec.hs:398:1-135
+  wire  b_1;
+  // spec.hs:398:1-135
   wire [143:0] t_3;
-  wire [143:0] result_30;
-  // spec.hs:268:1-112
+  // spec.hs:293:1-112
   reg signed [63:0] c$out1_app_arg = (64'sd0);
-  wire [1:0] c$app_arg_8;
-  wire  result_31;
-  wire [3:0] c$app_arg_9;
-  wire  result_32;
-  // spec.hs:268:1-112
+  wire [1:0] c$app_arg_7;
+  wire  result_30;
+  wire [7:0] c$app_arg_8;
+  wire [1:0] result_31;
+  // spec.hs:293:1-112
   wire signed [63:0] c$out0_case_alt;
-  // spec.hs:247:1-53
+  // spec.hs:272:1-53
   wire signed [63:0] dta_0;
-  // spec.hs:247:1-53
+  // spec.hs:272:1-53
   wire [7:0] tagToMatch;
-  // spec.hs:247:1-53
+  // spec.hs:272:1-53
   wire [7:0] tag_0;
-  // spec.hs:370:1-122
+  wire [71:0] result_32;
+  // spec.hs:393:1-127
   reg [71:0] result_33 = {8'd6,   64'sd0};
-  // spec.hs:370:1-122
-  wire [71:0] c$result_app_arg;
-  // spec.hs:247:1-53
+  // spec.hs:393:1-127
+  wire  b_2;
+  // spec.hs:272:1-53
   reg signed [63:0] c$ds_app_arg = (64'sd0);
-  wire [1:0] c$app_arg_10;
+  // spec.hs:293:1-112
+  wire [129:0] inputs_2;
+  wire [1:0] c$app_arg_9;
   wire  result_34;
-  wire [2:0] c$app_arg_11;
-  wire  result_35;
-  wire [287:0] c$app_arg_12;
+  wire [5:0] c$app_arg_10;
+  wire [1:0] result_35;
+  wire [287:0] c$app_arg_11;
   wire [47:0] result_36;
-  wire [191:0] c$app_arg_13;
+  wire [191:0] c$app_arg_12;
   wire [47:0] result_37;
-  wire [143:0] c$app_arg_14;
+  wire [143:0] c$app_arg_13;
   wire [47:0] result_38;
-  wire [95:0] c$app_arg_15;
+  wire [95:0] c$app_arg_14;
   wire [47:0] result_39;
-  // spec.hs:360:9-81
+  // spec.hs:383:9-81
   reg [7:0] t_4 = 8'd1;
   wire [7:0] result_40;
-  // spec.hs:360:9-81
-  wire  b;
-  // spec.hs:360:9-81
+  // spec.hs:383:9-81
+  wire  b_3;
+  // spec.hs:383:9-81
   wire [7:0] f1;
   wire [7:0] result_41;
-  // spec.hs:268:1-112
-  wire  p2;
-  // spec.hs:360:9-81
+  // spec.hs:293:1-112
+  wire  pOut2;
+  // spec.hs:383:9-81
   reg [7:0] t_5 = 8'd1;
   wire [7:0] result_42;
-  // spec.hs:360:9-81
-  wire  b_0;
-  // spec.hs:360:9-81
+  // spec.hs:383:9-81
+  wire  b_4;
+  // spec.hs:383:9-81
   wire [7:0] f1_0;
   wire [7:0] result_43;
-  // spec.hs:268:1-112
-  wire  p1;
-  // spec.hs:360:9-81
+  // spec.hs:293:1-112
+  wire  c$ds4_case_alt;
+  // spec.hs:84:34-42
+  wire  x1_2;
+  // spec.hs:84:34-42
+  wire  x0_2;
+  // spec.hs:293:1-112
+  wire [1:0] pOut1;
+  // spec.hs:383:9-81
   reg [7:0] t_6 = 8'd1;
   wire [7:0] result_44;
-  // spec.hs:360:9-81
-  wire  b_1;
-  // spec.hs:360:9-81
+  // spec.hs:383:9-81
+  wire  b_5;
+  // spec.hs:383:9-81
   wire [7:0] f1_1;
   wire [7:0] result_45;
-  // spec.hs:268:1-112
-  wire  p0;
-  // spec.hs:268:1-112
-  wire [2:0] pacings;
-  // spec.hs:360:9-81
+  // spec.hs:293:1-112
+  wire  c$ds3_case_alt;
+  // spec.hs:83:34-42
+  wire  x1_3;
+  // spec.hs:83:34-42
+  wire  x0_3;
+  // spec.hs:293:1-112
+  wire [1:0] pOut0;
+  // spec.hs:383:9-81
   reg [7:0] t_7 = 8'd1;
   wire [7:0] result_46;
-  // spec.hs:360:9-81
-  wire  b_2;
-  // spec.hs:360:9-81
+  // spec.hs:383:9-81
+  wire  b_6;
+  // spec.hs:383:9-81
   wire [7:0] f1_2;
   wire [7:0] result_47;
-  // spec.hs:360:9-81
+  // spec.hs:293:1-112
+  wire  pIn1_0;
+  // spec.hs:383:9-81
   reg [7:0] t_8 = 8'd1;
   wire [7:0] result_48;
-  // spec.hs:360:9-81
-  wire  b_3;
-  // spec.hs:360:9-81
+  // spec.hs:383:9-81
+  wire  b_7;
+  // spec.hs:383:9-81
   wire [7:0] f1_3;
   wire [7:0] result_49;
-  // spec.hs:268:1-112
-  wire [129:0] inputs_2;
-  wire [135:0] result_50;
-  reg [133:0] c$app_arg_16 = {{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   1'b0}};
-  wire [133:0] c$case_alt;
-  wire [133:0] c$case_alt_0;
-  wire [133:0] c$case_alt_1;
-  reg [133:0] c$case_alt_2;
-  reg [133:0] c$case_alt_3;
-  wire [133:0] c$case_alt_4;
-  reg  c$app_arg_17 = 1'b0;
+  // spec.hs:293:1-112
+  wire  pIn0_0;
+  // spec.hs:293:1-112
+  wire [6:0] pacings;
+  wire [139:0] result_50;
+  reg [137:0] c$app_arg_15 = {{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   {1'b0,
+                                                                     1'b0},
+                                                    {1'b0,   1'b0},   1'b0}};
+  wire [137:0] c$case_alt;
+  wire [137:0] c$case_alt_0;
+  wire [137:0] c$case_alt_1;
+  reg [137:0] c$case_alt_2;
+  reg [137:0] c$case_alt_3;
+  wire [137:0] c$case_alt_4;
+  reg  c$app_arg_16 = 1'b0;
   wire  c$case_alt_5;
   wire  c$case_alt_6;
   wire  c$case_alt_7;
   wire  c$case_alt_8;
   reg  c$case_alt_9;
-  reg  c$app_arg_18 = 1'b0;
+  reg  c$app_arg_17 = 1'b0;
   wire  c$case_alt_10;
   wire  c$case_alt_11;
   wire  c$case_alt_12;
-  // spec.hs:119:1-78
-  reg [267:0] buffer = {{{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   1'b0}},
- {{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   1'b0}}};
-  // spec.hs:119:1-78
-  wire [267:0] c$buffer_case_alt;
-  // spec.hs:119:1-78
-  wire [267:0] c$buffer_case_alt_0;
-  // spec.hs:119:1-78
-  wire [267:0] c$buffer_case_alt_1;
-  // spec.hs:119:1-78
-  wire [133:0] qData;
-  // spec.hs:119:1-78
+  // spec.hs:142:1-78
+  reg [275:0] buffer = {{{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   {1'b0,
+                                                                      1'b0},
+                                                     {1'b0,   1'b0},   1'b0}},
+ {{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   {1'b0,
+                                                                      1'b0},
+                                                     {1'b0,   1'b0},   1'b0}}};
+  // spec.hs:142:1-78
+  wire [275:0] c$buffer_case_alt;
+  // spec.hs:142:1-78
+  wire [275:0] c$buffer_case_alt_0;
+  // spec.hs:142:1-78
+  wire [275:0] c$buffer_case_alt_1;
+  // spec.hs:142:1-78
+  wire [137:0] qData;
+  // spec.hs:142:1-78
   wire signed [63:0] x_4;
-  // spec.hs:119:1-78
+  // spec.hs:142:1-78
   reg signed [63:0] cursor = (64'sd0);
-  // spec.hs:119:1-78
+  // spec.hs:142:1-78
   wire signed [63:0] c$cursor_case_alt;
-  // spec.hs:119:1-78
+  // spec.hs:142:1-78
   wire signed [63:0] c$cursor_case_alt_0;
-  // spec.hs:119:1-78
+  // spec.hs:142:1-78
   wire signed [63:0] c$cursor_case_alt_1;
-  // spec.hs:119:1-78
+  // spec.hs:142:1-78
   wire  c$cursor_case_scrut;
-  // spec.hs:119:1-78
+  // spec.hs:142:1-78
   wire signed [63:0] c$cursor_case_alt_2;
-  // spec.hs:119:1-78
+  // spec.hs:142:1-78
   reg signed [63:0] c$cursor_case_alt_3;
-  // spec.hs:119:1-78
+  // spec.hs:142:1-78
   wire signed [63:0] c$cursor_case_alt_4;
-  // spec.hs:437:1-136
+  // spec.hs:460:1-136
   wire  qPopValid;
-  // spec.hs:437:1-136
+  // spec.hs:460:1-136
   wire  qPush;
-  // spec.hs:437:1-136
+  // spec.hs:460:1-136
   wire  qPop;
   wire [129:0] inputs;
   wire [255:0] c$vec;
@@ -329,58 +374,66 @@ module topEntity
   wire [3:0] c$vec2_4;
   wire [215:0] t_projection_7;
   wire signed [63:0] c$tte_rhs;
-  wire [401:0] c$buffer_case_alt_sel_alt_t_1;
-  wire [401:0] c$buffer_case_alt_sel_alt_f_2;
+  wire [413:0] c$buffer_case_alt_sel_alt_t_1;
+  wire [413:0] c$buffer_case_alt_sel_alt_f_2;
   wire signed [63:0] c$tte_rhs_0;
-  wire [202:0] result;
+  wire [206:0] result;
   wire [194:0] result_0;
   wire [64:0] result_0_0;
   wire [64:0] result_0_1;
   wire [64:0] result_0_2;
-  wire [7:0] result_1;
-  wire [2:0] result_1_4;
+  wire [11:0] result_1;
+  wire [6:0] result_1_4;
+  wire [1:0] result_1_4_2;
+  wire [1:0] result_1_4_3;
 
   assign inputs = {{inputs_0_0,   inputs_0_1},
                    {inputs_1_0,   inputs_1_1}};
 
-  assign result_2 = {inputs[65:65] | (inputs[0:0] | (timer0Over | timer0Over)),
-                     {inputs,   timer0Over,   {ds,   ds,
-                                               timer0Over}}};
+  assign result_2 = timer0Over ? (64'sd2000) : ((x + 64'sd2000));
 
-  assign ds = inputs[65:65] & inputs[0:0];
-
-  assign result_3 = timer0Over ? (64'sd2000) : ((x + 64'sd2000));
-
-  assign x = result_4;
+  assign x = result_3;
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_4_register
+  always @(posedge clk or  posedge  rst) begin : result_3_register
     if ( rst) begin
-      result_4 <= (64'sd0);
+      result_3 <= (64'sd0);
     end else if (en) begin
-      result_4 <= result_3;
+      result_3 <= result_2;
     end
   end
   // register end
 
-  assign timer0Over = result_4 >= (64'sd1000000);
+  assign result_4 = {inputs[65:65] | (inputs[0:0] | timer0Over),
+                     {inputs,   timer0Over,   {pIn0,   pIn1,
+                                               {pIn0,   pIn1},   {pIn0,   pIn1},
+                                               timer0Over}}};
 
-  assign result_5 = {{1'b1,   {{result_19,
-                                result_20},   {result_17,   result_18},
-                               {$signed(result_7[63:0]),   result_6}}},
+  assign pIn0 = inputs[65:65];
+
+  assign pIn1 = inputs[0:0];
+
+  assign timer0Over = result_3 >= (64'sd1000000);
+
+  assign result_5 = {{1'b1,   {{result_18,
+                                result_19},   {result_16,   result_17},
+                               {$signed(result_8[63:0]),   result_6}}},
                      {pacings,   slides}};
 
+  wire  iterateI_ho1_0_arg0;
   wire  iterateI_ho1_0_res;
   wire  iterateI_ho1_1_res;
   wire  iterateI_ho1_2_res;
   wire  iterateI_ho1_3_res;
   wire  iterateI_ho1_4_res;
   wire  iterateI_ho1_5_res;
+  assign iterateI_ho1_0_arg0 = pOut2;
+
   reg  c$bb_res_res = 1'b0;
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_delay
     if (en) begin
-      c$bb_res_res <= p2;
+      c$bb_res_res <= iterateI_ho1_0_arg0;
     end
   end
   // delay end
@@ -454,28 +507,30 @@ module topEntity
 
 
 
-  assign c$app_arg = {p2,   iterateI_ho1_0_res,
-                      iterateI_ho1_1_res,   iterateI_ho1_2_res,
-                      iterateI_ho1_3_res,   iterateI_ho1_4_res,
-                      iterateI_ho1_5_res};
+  assign c$app_arg = {pOut2,
+                      iterateI_ho1_0_res,   iterateI_ho1_1_res,
+                      iterateI_ho1_2_res,   iterateI_ho1_3_res,
+                      iterateI_ho1_4_res,   iterateI_ho1_5_res};
 
 
 
   assign result_6 = c$app_arg[1-1:0];
 
+  assign result_7 = b ? t : result_8;
+
   // register begin
-  always @(posedge clk or  posedge  rst) begin : result_7_register
+  always @(posedge clk or  posedge  rst) begin : result_8_register
     if ( rst) begin
-      result_7 <= {8'd6,   64'sd0};
+      result_8 <= {8'd6,   64'sd0};
     end else if (en) begin
-      result_7 <= result_8;
+      result_8 <= result_7;
     end
   end
   // register end
 
-  assign t = {result_15[15:8],   (x_0 + y)};
+  assign b = result_15;
 
-  assign result_8 = result_16 ? t : result_7;
+  assign t = {result_14[15:8],   (x_0 + y)};
 
   assign c$vec = window[255:0];
 
@@ -527,7 +582,7 @@ module topEntity
 
   assign y = ds1;
 
-  assign y_0 = result_12;
+  assign y_0 = result_11;
 
   assign x_projection_3 = $signed(win[256-1 -: 64]);
 
@@ -545,19 +600,19 @@ module topEntity
   end
   // register end
 
-  assign result_9 = result_14 ? t_0 : window;
+  assign result_9 = b_0 ? t_0 : window;
 
   assign t_0 = {result_37[7:0],   result_10};
 
-  assign result_10 = result_13 ? c$t_case_alt : c$t_case_alt_0;
+  assign result_10 = result_12 ? c$t_case_alt : c$t_case_alt_0;
 
   assign c$t_case_alt_sel_alt_t_0 = ({64'sd0,lastBucketUpdated});
 
   assign c$t_case_alt_sel_alt_f_0 = ({64'sd0,win});
 
-  assign c$t_case_alt = result_11 ? c$t_case_alt_sel_alt_t_0[319:64] : c$t_case_alt_sel_alt_f_0[319:64];
+  assign c$t_case_alt = c$b_case_alt ? c$t_case_alt_sel_alt_t_0[319:64] : c$t_case_alt_sel_alt_f_0[319:64];
 
-  assign c$t_case_alt_0 = result_11 ? lastBucketUpdated : win;
+  assign c$t_case_alt_0 = c$b_case_alt ? lastBucketUpdated : win;
 
   // vector replace begin
   genvar i_5;
@@ -568,6 +623,81 @@ module topEntity
   endgenerate
   // vector replace end
 
+  assign b_0 = c$b_case_alt | result_12;
+
+  assign c$b_case_alt = x0 & x1;
+
+  assign x1 = result_13[0:0];
+
+  assign x0 = result_13[1:1];
+
+  assign c$vec2 = (ws[9-1 : 0]);
+
+  // zipWith start
+  genvar i_6;
+  generate
+  for (i_6 = 0; i_6 < 3; i_6 = i_6 + 1) begin : zipWith
+    wire [71:0] zipWith_in1;
+    assign zipWith_in1 = result_23[i_6*72+:72];
+    wire [2:0] zipWith_in2;
+    assign zipWith_in2 = c$vec2[i_6*3+:3];
+    wire [74:0] c$n;
+    assign c$n = {zipWith_in1,   zipWith_in2};
+
+
+    assign c$ws_app_arg[i_6*75+:75] = c$n;
+  end
+  endgenerate
+  // zipWith end
+
+  // imap begin
+  genvar i_7;
+  generate
+  for (i_7=0; i_7 < 3; i_7 = i_7 + 1) begin : imap
+    wire [2-1:0] map_index;
+    wire [74:0] map_in;
+    assign map_in = c$ws_app_arg[i_7*75+:75];
+    wire [2:0] map_out;
+
+    assign map_index = 2'd2 - i_7[0+:2];
+    wire [2:0] c$case_alt_15;
+    // spec.hs:259:1-63
+    wire [7:0] t_10;
+    // spec.hs:259:1-63
+    wire [71:0] x_8;
+    assign map_out = c$case_alt_15;
+
+    assign c$case_alt_15 = (t_10 == result_37[23:16]) ? {1'b1,map_index} : map_in[2:0];
+
+    assign t_10 = x_8[71:64];
+
+    assign x_8 = map_in[74:3];
+
+
+    assign c$ws_app_arg_0[i_7*3+:3] = map_out;
+  end
+  endgenerate
+  // imap end
+
+  // index begin
+  wire [71:0] vecArray [0:3-1];
+  genvar i_8;
+  generate
+  for (i_8=0; i_8 < 3; i_8=i_8+1) begin : mk_array
+    assign vecArray[(3-1)-i_8] = result_23[i_8*72+:72];
+  end
+  endgenerate
+  assign c$case_scrut = vecArray[($unsigned({{(64-2) {1'b0}},i}))];
+  // index end
+
+  assign c$case_scrut_0 = ws[12-1 -: 3];
+
+  assign result_11 = c$case_scrut_0[2:2] ? $signed(c$case_scrut[63:0]) : (64'sd0);
+
+  assign i = c$case_scrut_0[1:0];
+
+  assign ws = {c$ws_app_arg_0,{1'b0,2'bxx}};
+
   wire  iterateI_ho1_0_res_0;
   wire  iterateI_ho1_1_res_0;
   wire  iterateI_ho1_2_res_0;
@@ -576,7 +706,7 @@ module topEntity
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_5_delay
     if (en) begin
-      c$bb_res_res_5 <= p1;
+      c$bb_res_res_5 <= slides;
     end
   end
   // delay end
@@ -624,90 +754,25 @@ module topEntity
 
 
 
-  assign c$app_arg_0 = {p1,
+  assign c$app_arg_0 = {slides,
                         iterateI_ho1_0_res_0,   iterateI_ho1_1_res_0,
                         iterateI_ho1_2_res_0,   iterateI_ho1_3_res_0};
 
 
 
-  assign result_11 = c$app_arg_0[1-1:0];
+  assign result_12 = c$app_arg_0[1-1:0];
 
-  assign c$vec2 = (ws[9-1 : 0]);
+  assign slides = result_50[7:7];
 
-  // zipWith start
-  genvar i_6;
-  generate
-  for (i_6 = 0; i_6 < 3; i_6 = i_6 + 1) begin : zipWith
-    wire [71:0] zipWith_in1;
-    assign zipWith_in1 = result_23[i_6*72+:72];
-    wire [2:0] zipWith_in2;
-    assign zipWith_in2 = c$vec2[i_6*3+:3];
-    wire [74:0] c$n;
-    assign c$n = {zipWith_in1,   zipWith_in2};
-
-
-    assign c$ws_app_arg[i_6*75+:75] = c$n;
-  end
-  endgenerate
-  // zipWith end
-
-  // imap begin
-  genvar i_7;
-  generate
-  for (i_7=0; i_7 < 3; i_7 = i_7 + 1) begin : imap
-    wire [2-1:0] map_index;
-    wire [74:0] map_in;
-    assign map_in = c$ws_app_arg[i_7*75+:75];
-    wire [2:0] map_out;
-
-    assign map_index = 2'd2 - i_7[0+:2];
-    wire [2:0] c$case_alt_15;
-    // spec.hs:234:1-63
-    wire [7:0] t_10;
-    // spec.hs:234:1-63
-    wire [71:0] x_8;
-    assign map_out = c$case_alt_15;
-
-    assign c$case_alt_15 = (t_10 == result_37[23:16]) ? {1'b1,map_index} : map_in[2:0];
-
-    assign t_10 = x_8[71:64];
-
-    assign x_8 = map_in[74:3];
-
-
-    assign c$ws_app_arg_0[i_7*3+:3] = map_out;
-  end
-  endgenerate
-  // imap end
-
-  // index begin
-  wire [71:0] vecArray [0:3-1];
-  genvar i_8;
-  generate
-  for (i_8=0; i_8 < 3; i_8=i_8+1) begin : mk_array
-    assign vecArray[(3-1)-i_8] = result_23[i_8*72+:72];
-  end
-  endgenerate
-  assign c$case_scrut = vecArray[($unsigned({{(64-2) {1'b0}},i}))];
-  // index end
-
-  assign c$case_scrut_0 = ws[12-1 -: 3];
-
-  assign result_12 = c$case_scrut_0[2:2] ? $signed(c$case_scrut[63:0]) : (64'sd0);
-
-  assign i = c$case_scrut_0[1:0];
-
-  assign ws = {c$ws_app_arg_0,{1'b0,2'bxx}};
-
-  wire  iterateI_ho1_0_res_1;
-  wire  iterateI_ho1_1_res_1;
-  wire  iterateI_ho1_2_res_1;
-  wire  iterateI_ho1_3_res_1;
-  reg  c$bb_res_res_9 = 1'b0;
+  wire [1:0] iterateI_ho1_0_res_1;
+  wire [1:0] iterateI_ho1_1_res_1;
+  wire [1:0] iterateI_ho1_2_res_1;
+  wire [1:0] iterateI_ho1_3_res_1;
+  reg [1:0] c$bb_res_res_9 = {1'b0,   1'b0};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_9_delay
     if (en) begin
-      c$bb_res_res_9 <= slides;
+      c$bb_res_res_9 <= pOut1;
     end
   end
   // delay end
@@ -716,7 +781,7 @@ module topEntity
 
 
 
-  reg  c$bb_res_res_10 = 1'b0;
+  reg [1:0] c$bb_res_res_10 = {1'b0,   1'b0};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_10_delay
     if (en) begin
@@ -729,7 +794,7 @@ module topEntity
 
 
 
-  reg  c$bb_res_res_11 = 1'b0;
+  reg [1:0] c$bb_res_res_11 = {1'b0,   1'b0};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_11_delay
     if (en) begin
@@ -742,7 +807,7 @@ module topEntity
 
 
 
-  reg  c$bb_res_res_12 = 1'b0;
+  reg [1:0] c$bb_res_res_12 = {1'b0,   1'b0};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_12_delay
     if (en) begin
@@ -755,25 +820,35 @@ module topEntity
 
 
 
-  assign c$app_arg_1 = {slides,
+  assign c$app_arg_1 = {pOut1,
                         iterateI_ho1_0_res_1,   iterateI_ho1_1_res_1,
                         iterateI_ho1_2_res_1,   iterateI_ho1_3_res_1};
 
 
 
-  assign result_13 = c$app_arg_1[1-1:0];
+  assign result_13 = c$app_arg_1[2-1:0];
 
-  assign sig = slides | p1;
+  assign c$ds1_case_alt = (tag == 8'd6) ? (64'sd1) : dta;
 
-  wire  iterateI_ho1_0_res_2;
-  wire  iterateI_ho1_1_res_2;
-  wire  iterateI_ho1_2_res_2;
-  wire  iterateI_ho1_3_res_2;
-  reg  c$bb_res_res_13 = 1'b0;
+  assign dta = $signed(c$ds1_case_scrut[63:0]);
+
+  assign tag = c$ds1_case_scrut[71:64];
+
+  assign c$ds1_case_scrut = result_26[72-1:0];
+
+  wire [47:0] iterateI_ho1_0_arg0_0;
+  wire [47:0] iterateI_ho1_0_res_2;
+  wire [47:0] iterateI_ho1_1_res_2;
+  wire [47:0] iterateI_ho1_2_res_2;
+  wire [47:0] iterateI_ho1_3_res_2;
+  assign iterateI_ho1_0_arg0_0 = {t_8,   t_7,
+                                  t_6,   t_5,   t_4,   t_5};
+
+  reg [47:0] c$bb_res_res_13 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_13_delay
     if (en) begin
-      c$bb_res_res_13 <= sig;
+      c$bb_res_res_13 <= iterateI_ho1_0_arg0_0;
     end
   end
   // delay end
@@ -782,7 +857,7 @@ module topEntity
 
 
 
-  reg  c$bb_res_res_14 = 1'b0;
+  reg [47:0] c$bb_res_res_14 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_14_delay
     if (en) begin
@@ -795,7 +870,7 @@ module topEntity
 
 
 
-  reg  c$bb_res_res_15 = 1'b0;
+  reg [47:0] c$bb_res_res_15 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_15_delay
     if (en) begin
@@ -808,7 +883,7 @@ module topEntity
 
 
 
-  reg  c$bb_res_res_16 = 1'b0;
+  reg [47:0] c$bb_res_res_16 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_16_delay
     if (en) begin
@@ -821,37 +896,25 @@ module topEntity
 
 
 
-  assign c$app_arg_2 = {sig,
-                        iterateI_ho1_0_res_2,   iterateI_ho1_1_res_2,
-                        iterateI_ho1_2_res_2,   iterateI_ho1_3_res_2};
+  assign c$app_arg_2 = {{t_8,   t_7,   t_6,
+                         t_5,   t_4,   t_5},   iterateI_ho1_0_res_2,
+                        iterateI_ho1_1_res_2,   iterateI_ho1_2_res_2,
+                        iterateI_ho1_3_res_2};
 
 
 
-  assign result_14 = c$app_arg_2[1-1:0];
+  assign result_14 = c$app_arg_2[48-1:0];
 
-  assign slides = result_50[3:3];
-
-  assign c$ds1_case_alt = (tag == 8'd6) ? (64'sd1) : dta;
-
-  assign dta = $signed(c$ds1_case_scrut[63:0]);
-
-  assign tag = c$ds1_case_scrut[71:64];
-
-  assign c$ds1_case_scrut = result_26[72-1:0];
-
-  wire [47:0] iterateI_ho1_0_arg0;
-  wire [47:0] iterateI_ho1_0_res_3;
-  wire [47:0] iterateI_ho1_1_res_3;
-  wire [47:0] iterateI_ho1_2_res_3;
-  wire [47:0] iterateI_ho1_3_res_3;
-  assign iterateI_ho1_0_arg0 = {t_8,   t_7,
-                                t_6,   t_5,   t_4,   t_6};
-
-  reg [47:0] c$bb_res_res_17 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
+  wire  iterateI_ho1_0_res_3;
+  wire  iterateI_ho1_1_res_3;
+  wire  iterateI_ho1_2_res_3;
+  wire  iterateI_ho1_3_res_3;
+  wire  iterateI_ho1_4_res_0;
+  reg  c$bb_res_res_17 = 1'b0;
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_17_delay
     if (en) begin
-      c$bb_res_res_17 <= iterateI_ho1_0_arg0;
+      c$bb_res_res_17 <= pOut2;
     end
   end
   // delay end
@@ -860,7 +923,7 @@ module topEntity
 
 
 
-  reg [47:0] c$bb_res_res_18 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
+  reg  c$bb_res_res_18 = 1'b0;
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_18_delay
     if (en) begin
@@ -873,7 +936,7 @@ module topEntity
 
 
 
-  reg [47:0] c$bb_res_res_19 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
+  reg  c$bb_res_res_19 = 1'b0;
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_19_delay
     if (en) begin
@@ -886,7 +949,7 @@ module topEntity
 
 
 
-  reg [47:0] c$bb_res_res_20 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
+  reg  c$bb_res_res_20 = 1'b0;
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_20_delay
     if (en) begin
@@ -899,93 +962,27 @@ module topEntity
 
 
 
-  assign c$app_arg_3 = {{t_8,   t_7,   t_6,
-                         t_5,   t_4,   t_6},   iterateI_ho1_0_res_3,
-                        iterateI_ho1_1_res_3,   iterateI_ho1_2_res_3,
-                        iterateI_ho1_3_res_3};
-
-
-
-  assign result_15 = c$app_arg_3[48-1:0];
-
-  wire  iterateI_ho1_0_res_4;
-  wire  iterateI_ho1_1_res_4;
-  wire  iterateI_ho1_2_res_4;
-  wire  iterateI_ho1_3_res_4;
-  wire  iterateI_ho1_4_res_0;
   reg  c$bb_res_res_21 = 1'b0;
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_21_delay
     if (en) begin
-      c$bb_res_res_21 <= p2;
+      c$bb_res_res_21 <= iterateI_ho1_3_res_3;
     end
   end
   // delay end
 
-  assign iterateI_ho1_0_res_4 = c$bb_res_res_21;
+  assign iterateI_ho1_4_res_0 = c$bb_res_res_21;
 
 
 
-  reg  c$bb_res_res_22 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_22_delay
-    if (en) begin
-      c$bb_res_res_22 <= iterateI_ho1_0_res_4;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_1_res_4 = c$bb_res_res_22;
-
-
-
-  reg  c$bb_res_res_23 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_23_delay
-    if (en) begin
-      c$bb_res_res_23 <= iterateI_ho1_1_res_4;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_2_res_4 = c$bb_res_res_23;
-
-
-
-  reg  c$bb_res_res_24 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_24_delay
-    if (en) begin
-      c$bb_res_res_24 <= iterateI_ho1_2_res_4;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_3_res_4 = c$bb_res_res_24;
-
-
-
-  reg  c$bb_res_res_25 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_25_delay
-    if (en) begin
-      c$bb_res_res_25 <= iterateI_ho1_3_res_4;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_4_res_0 = c$bb_res_res_25;
-
-
-
-  assign c$app_arg_4 = {p2,
-                        iterateI_ho1_0_res_4,   iterateI_ho1_1_res_4,
-                        iterateI_ho1_2_res_4,   iterateI_ho1_3_res_4,
+  assign c$app_arg_3 = {pOut2,
+                        iterateI_ho1_0_res_3,   iterateI_ho1_1_res_3,
+                        iterateI_ho1_2_res_3,   iterateI_ho1_3_res_3,
                         iterateI_ho1_4_res_0};
 
 
 
-  assign result_16 = c$app_arg_4[1-1:0];
+  assign result_15 = c$app_arg_3[1-1:0];
 
   assign c$vec2_0 = (ws_0[9-1 : 0]);
 
@@ -1017,9 +1014,9 @@ module topEntity
 
     assign map_index_0 = 2'd2 - i_11[0+:2];
     wire [2:0] c$case_alt_16;
-    // spec.hs:234:1-63
+    // spec.hs:259:1-63
     wire [7:0] t_11;
-    // spec.hs:234:1-63
+    // spec.hs:259:1-63
     wire [71:0] x_9;
     assign map_out_0 = c$case_alt_16;
 
@@ -1048,28 +1045,80 @@ module topEntity
 
   assign c$case_scrut_2 = ws_0[12-1 -: 3];
 
-  assign result_17 = c$case_scrut_2[2:2] ? $signed(c$case_scrut_1[63:0]) : (64'sd0);
+  assign result_16 = c$case_scrut_2[2:2] ? $signed(c$case_scrut_1[63:0]) : (64'sd0);
 
   assign i_0 = c$case_scrut_2[1:0];
 
   assign ws_0 = {c$ws_app_arg_2,{1'b0,2'bxx}};
 
-  wire  iterateI_ho1_0_res_5;
-  wire  iterateI_ho1_1_res_5;
-  wire  iterateI_ho1_2_res_5;
-  wire  iterateI_ho1_3_res_5;
+  wire  iterateI_ho1_0_res_4;
+  wire  iterateI_ho1_1_res_4;
+  wire  iterateI_ho1_2_res_4;
+  wire  iterateI_ho1_3_res_4;
   wire  iterateI_ho1_4_res_1;
   wire  iterateI_ho1_5_res_0;
-  reg  c$bb_res_res_26 = 1'b0;
+  reg  c$bb_res_res_22 = 1'b0;
   // delay begin
-  always @(posedge clk) begin : c$bb_res_res_26_delay
+  always @(posedge clk) begin : c$bb_res_res_22_delay
     if (en) begin
-      c$bb_res_res_26 <= p1;
+      c$bb_res_res_22 <= c$ds4_case_alt;
     end
   end
   // delay end
 
-  assign iterateI_ho1_0_res_5 = c$bb_res_res_26;
+  assign iterateI_ho1_0_res_4 = c$bb_res_res_22;
+
+
+
+  reg  c$bb_res_res_23 = 1'b0;
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_23_delay
+    if (en) begin
+      c$bb_res_res_23 <= iterateI_ho1_0_res_4;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_1_res_4 = c$bb_res_res_23;
+
+
+
+  reg  c$bb_res_res_24 = 1'b0;
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_24_delay
+    if (en) begin
+      c$bb_res_res_24 <= iterateI_ho1_1_res_4;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_2_res_4 = c$bb_res_res_24;
+
+
+
+  reg  c$bb_res_res_25 = 1'b0;
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_25_delay
+    if (en) begin
+      c$bb_res_res_25 <= iterateI_ho1_2_res_4;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_3_res_4 = c$bb_res_res_25;
+
+
+
+  reg  c$bb_res_res_26 = 1'b0;
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_26_delay
+    if (en) begin
+      c$bb_res_res_26 <= iterateI_ho1_3_res_4;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_4_res_1 = c$bb_res_res_26;
 
 
 
@@ -1077,75 +1126,23 @@ module topEntity
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_27_delay
     if (en) begin
-      c$bb_res_res_27 <= iterateI_ho1_0_res_5;
+      c$bb_res_res_27 <= iterateI_ho1_4_res_1;
     end
   end
   // delay end
 
-  assign iterateI_ho1_1_res_5 = c$bb_res_res_27;
+  assign iterateI_ho1_5_res_0 = c$bb_res_res_27;
 
 
 
-  reg  c$bb_res_res_28 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_28_delay
-    if (en) begin
-      c$bb_res_res_28 <= iterateI_ho1_1_res_5;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_2_res_5 = c$bb_res_res_28;
-
-
-
-  reg  c$bb_res_res_29 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_29_delay
-    if (en) begin
-      c$bb_res_res_29 <= iterateI_ho1_2_res_5;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_3_res_5 = c$bb_res_res_29;
-
-
-
-  reg  c$bb_res_res_30 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_30_delay
-    if (en) begin
-      c$bb_res_res_30 <= iterateI_ho1_3_res_5;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_4_res_1 = c$bb_res_res_30;
-
-
-
-  reg  c$bb_res_res_31 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_31_delay
-    if (en) begin
-      c$bb_res_res_31 <= iterateI_ho1_4_res_1;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_5_res_0 = c$bb_res_res_31;
-
-
-
-  assign c$app_arg_5 = {p1,
-                        iterateI_ho1_0_res_5,   iterateI_ho1_1_res_5,
-                        iterateI_ho1_2_res_5,   iterateI_ho1_3_res_5,
+  assign c$app_arg_4 = {c$ds4_case_alt,
+                        iterateI_ho1_0_res_4,   iterateI_ho1_1_res_4,
+                        iterateI_ho1_2_res_4,   iterateI_ho1_3_res_4,
                         iterateI_ho1_4_res_1,   iterateI_ho1_5_res_0};
 
 
 
-  assign result_18 = c$app_arg_5[1-1:0];
+  assign result_17 = c$app_arg_4[1-1:0];
 
   assign c$vec2_1 = (ws_1[12-1 : 0]);
 
@@ -1177,9 +1174,9 @@ module topEntity
 
     assign map_index_1 = 2'd3 - i_14[0+:2];
     wire [2:0] c$case_alt_17;
-    // spec.hs:234:1-63
+    // spec.hs:259:1-63
     wire [7:0] t_12;
-    // spec.hs:234:1-63
+    // spec.hs:259:1-63
     wire [71:0] x_10;
     assign map_out_1 = c$case_alt_17;
 
@@ -1208,28 +1205,80 @@ module topEntity
 
   assign c$case_scrut_4 = ws_1[15-1 -: 3];
 
-  assign result_19 = c$case_scrut_4[2:2] ? $signed(c$case_scrut_3[63:0]) : (64'sd0);
+  assign result_18 = c$case_scrut_4[2:2] ? $signed(c$case_scrut_3[63:0]) : (64'sd0);
 
   assign i_1 = c$case_scrut_4[1:0];
 
   assign ws_1 = {c$ws_app_arg_4,{1'b0,2'bxx}};
 
-  wire  iterateI_ho1_0_res_6;
-  wire  iterateI_ho1_1_res_6;
-  wire  iterateI_ho1_2_res_6;
-  wire  iterateI_ho1_3_res_6;
+  wire  iterateI_ho1_0_res_5;
+  wire  iterateI_ho1_1_res_5;
+  wire  iterateI_ho1_2_res_5;
+  wire  iterateI_ho1_3_res_5;
   wire  iterateI_ho1_4_res_2;
   wire  iterateI_ho1_5_res_1;
-  reg  c$bb_res_res_32 = 1'b0;
+  reg  c$bb_res_res_28 = 1'b0;
   // delay begin
-  always @(posedge clk) begin : c$bb_res_res_32_delay
+  always @(posedge clk) begin : c$bb_res_res_28_delay
     if (en) begin
-      c$bb_res_res_32 <= p0;
+      c$bb_res_res_28 <= c$ds3_case_alt;
     end
   end
   // delay end
 
-  assign iterateI_ho1_0_res_6 = c$bb_res_res_32;
+  assign iterateI_ho1_0_res_5 = c$bb_res_res_28;
+
+
+
+  reg  c$bb_res_res_29 = 1'b0;
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_29_delay
+    if (en) begin
+      c$bb_res_res_29 <= iterateI_ho1_0_res_5;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_1_res_5 = c$bb_res_res_29;
+
+
+
+  reg  c$bb_res_res_30 = 1'b0;
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_30_delay
+    if (en) begin
+      c$bb_res_res_30 <= iterateI_ho1_1_res_5;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_2_res_5 = c$bb_res_res_30;
+
+
+
+  reg  c$bb_res_res_31 = 1'b0;
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_31_delay
+    if (en) begin
+      c$bb_res_res_31 <= iterateI_ho1_2_res_5;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_3_res_5 = c$bb_res_res_31;
+
+
+
+  reg  c$bb_res_res_32 = 1'b0;
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_32_delay
+    if (en) begin
+      c$bb_res_res_32 <= iterateI_ho1_3_res_5;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_4_res_2 = c$bb_res_res_32;
 
 
 
@@ -1237,75 +1286,23 @@ module topEntity
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_33_delay
     if (en) begin
-      c$bb_res_res_33 <= iterateI_ho1_0_res_6;
+      c$bb_res_res_33 <= iterateI_ho1_4_res_2;
     end
   end
   // delay end
 
-  assign iterateI_ho1_1_res_6 = c$bb_res_res_33;
+  assign iterateI_ho1_5_res_1 = c$bb_res_res_33;
 
 
 
-  reg  c$bb_res_res_34 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_34_delay
-    if (en) begin
-      c$bb_res_res_34 <= iterateI_ho1_1_res_6;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_2_res_6 = c$bb_res_res_34;
-
-
-
-  reg  c$bb_res_res_35 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_35_delay
-    if (en) begin
-      c$bb_res_res_35 <= iterateI_ho1_2_res_6;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_3_res_6 = c$bb_res_res_35;
-
-
-
-  reg  c$bb_res_res_36 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_36_delay
-    if (en) begin
-      c$bb_res_res_36 <= iterateI_ho1_3_res_6;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_4_res_2 = c$bb_res_res_36;
-
-
-
-  reg  c$bb_res_res_37 = 1'b0;
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_37_delay
-    if (en) begin
-      c$bb_res_res_37 <= iterateI_ho1_4_res_2;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_5_res_1 = c$bb_res_res_37;
-
-
-
-  assign c$app_arg_6 = {p0,
-                        iterateI_ho1_0_res_6,   iterateI_ho1_1_res_6,
-                        iterateI_ho1_2_res_6,   iterateI_ho1_3_res_6,
+  assign c$app_arg_5 = {c$ds3_case_alt,
+                        iterateI_ho1_0_res_5,   iterateI_ho1_1_res_5,
+                        iterateI_ho1_2_res_5,   iterateI_ho1_3_res_5,
                         iterateI_ho1_4_res_2,   iterateI_ho1_5_res_1};
 
 
 
-  assign result_20 = c$app_arg_6[1-1:0];
+  assign result_19 = c$app_arg_5[1-1:0];
 
   assign c$vec2_2 = (ws_2[9-1 : 0]);
 
@@ -1337,13 +1334,13 @@ module topEntity
 
     assign map_index_2 = 2'd2 - i_17[0+:2];
     wire [2:0] c$case_alt_18;
-    // spec.hs:234:1-63
+    // spec.hs:259:1-63
     wire [7:0] t_13;
-    // spec.hs:234:1-63
+    // spec.hs:259:1-63
     wire [71:0] x_11;
     assign map_out_2 = c$case_alt_18;
 
-    assign c$case_alt_18 = (t_13 == result_22) ? {1'b1,map_index_2} : map_in_2[2:0];
+    assign c$case_alt_18 = (t_13 == result_21) ? {1'b1,map_index_2} : map_in_2[2:0];
 
     assign t_13 = x_11[71:64];
 
@@ -1368,22 +1365,28 @@ module topEntity
 
   assign c$case_scrut_6 = ws_2[12-1 -: 3];
 
-  assign result_21 = c$case_scrut_6[2:2] ? $signed(c$case_scrut_5[63:0]) : (64'sd2);
+  assign result_20 = c$case_scrut_6[2:2] ? $signed(c$case_scrut_5[63:0]) : (64'sd2);
 
-  assign result_22 = (result_39[23:16] > 8'd3) ? c$app_arg_7 : (c$app_arg_7 + 8'd5);
+  assign result_21 = (result_39[23:16] > 8'd3) ? c$app_arg_6 : (c$app_arg_6 + 8'd5);
 
-  assign c$app_arg_7 = result_39[23:16] - 8'd3;
+  assign c$app_arg_6 = result_39[23:16] - 8'd3;
 
   assign i_2 = c$case_scrut_6[1:0];
 
   assign ws_2 = {c$ws_app_arg_6,{1'b0,2'bxx}};
+
+  assign result_22 = (x0_0 & x1_0) ? t_1 : result_23;
+
+  assign x0_0 = result_31[1:1];
+
+  assign x1_0 = result_31[0:0];
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_23_register
     if ( rst) begin
       result_23 <= {{8'd6,   64'sd0},   {8'd6,   64'sd0},   {8'd6,   64'sd0}};
     end else if (en) begin
-      result_23 <= result_24;
+      result_23 <= result_22;
     end
   end
   // register end
@@ -1392,11 +1395,9 @@ module topEntity
 
   assign t_1 = t_projection_3[215:0];
 
-  assign result_24 = result_32 ? t_1 : result_23;
+  assign x_2 = result_24;
 
-  assign x_2 = result_25;
-
-  assign y_1 = result_28;
+  assign y_1 = result_27;
 
   assign c$vec2_3 = (ws_3[12-1 : 0]);
 
@@ -1428,9 +1429,9 @@ module topEntity
 
     assign map_index_3 = 2'd3 - i_20[0+:2];
     wire [2:0] c$case_alt_19;
-    // spec.hs:234:1-63
+    // spec.hs:259:1-63
     wire [7:0] t_14;
-    // spec.hs:234:1-63
+    // spec.hs:259:1-63
     wire [71:0] x_12;
     assign map_out_3 = c$case_alt_19;
 
@@ -1459,18 +1460,24 @@ module topEntity
 
   assign c$case_scrut_8 = ws_3[15-1 -: 3];
 
-  assign result_25 = c$case_scrut_8[2:2] ? $signed(c$case_scrut_7[63:0]) : (64'sd0);
+  assign result_24 = c$case_scrut_8[2:2] ? $signed(c$case_scrut_7[63:0]) : (64'sd0);
 
   assign i_3 = c$case_scrut_8[1:0];
 
   assign ws_3 = {c$ws_app_arg_8,{1'b0,2'bxx}};
+
+  assign result_25 = (x0_1 & x1_1) ? t_2 : result_26;
+
+  assign x0_1 = result_35[1:1];
+
+  assign x1_1 = result_35[0:0];
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_26_register
     if ( rst) begin
       result_26 <= {{8'd6,   64'sd0},   {8'd6,   64'sd0},   {8'd6,   64'sd0},   {8'd6,   64'sd0}};
     end else if (en) begin
-      result_26 <= result_27;
+      result_26 <= result_25;
     end
   end
   // register end
@@ -1479,11 +1486,9 @@ module topEntity
 
   assign t_2 = t_projection_5[287:0];
 
-  assign result_27 = result_35 ? t_2 : result_26;
-
   assign x_3 = c$out0_case_alt;
 
-  assign y_2 = result_21;
+  assign y_2 = result_20;
 
   assign c$vec2_4 = (ws_4[4-1 : 0]);
 
@@ -1515,9 +1520,9 @@ module topEntity
 
     assign map_index_4 = 1'd1 - i_23[0+:1];
     wire [1:0] c$case_alt_20;
-    // spec.hs:234:1-63
+    // spec.hs:259:1-63
     wire [7:0] t_15;
-    // spec.hs:234:1-63
+    // spec.hs:259:1-63
     wire [71:0] x_13;
     assign map_out_4 = c$case_alt_20;
 
@@ -1546,27 +1551,29 @@ module topEntity
 
   assign c$case_scrut_10 = ws_4[6-1 -: 2];
 
-  assign result_28 = c$case_scrut_10[1:1] ? $signed(c$case_scrut_9[63:0]) : (64'sd0);
+  assign result_27 = c$case_scrut_10[1:1] ? $signed(c$case_scrut_9[63:0]) : (64'sd0);
 
   assign i_4 = c$case_scrut_10[0:0];
 
   assign ws_4 = {c$ws_app_arg_10,{1'b0,1'bx}};
+
+  assign result_28 = b_1 ? t_3 : result_29;
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_29_register
     if ( rst) begin
       result_29 <= {{8'd6,   64'sd0},   {8'd6,   64'sd0}};
     end else if (en) begin
-      result_29 <= result_30;
+      result_29 <= result_28;
     end
   end
   // register end
 
+  assign b_1 = result_30;
+
   assign t_projection_7 = ({result_29,{t_7,   c$out1_app_arg}});
 
   assign t_3 = t_projection_7[143:0];
-
-  assign result_30 = result_31 ? t_3 : result_29;
 
   // delay begin
   always @(posedge clk) begin : c$out1_app_arg_delay
@@ -1576,79 +1583,76 @@ module topEntity
   end
   // delay end
 
-  wire  iterateI_ho1_0_arg0_0;
-  wire  iterateI_ho1_0_res_7;
-  assign iterateI_ho1_0_arg0_0 = inputs_2[0:0];
-
-  reg  c$bb_res_res_38 = 1'b0;
+  wire  iterateI_ho1_0_res_6;
+  reg  c$bb_res_res_34 = 1'b0;
   // delay begin
-  always @(posedge clk) begin : c$bb_res_res_38_delay
+  always @(posedge clk) begin : c$bb_res_res_34_delay
     if (en) begin
-      c$bb_res_res_38 <= iterateI_ho1_0_arg0_0;
+      c$bb_res_res_34 <= pIn1_0;
     end
   end
   // delay end
 
-  assign iterateI_ho1_0_res_7 = c$bb_res_res_38;
+  assign iterateI_ho1_0_res_6 = c$bb_res_res_34;
 
 
 
-  assign c$app_arg_8 = {inputs_2[0:0],
-                        iterateI_ho1_0_res_7};
+  assign c$app_arg_7 = {pIn1_0,
+                        iterateI_ho1_0_res_6};
 
 
 
-  assign result_31 = c$app_arg_8[1-1:0];
+  assign result_30 = c$app_arg_7[1-1:0];
 
-  wire  iterateI_ho1_0_res_8;
-  wire  iterateI_ho1_1_res_7;
-  wire  iterateI_ho1_2_res_7;
-  reg  c$bb_res_res_39 = 1'b0;
+  wire [1:0] iterateI_ho1_0_res_7;
+  wire [1:0] iterateI_ho1_1_res_6;
+  wire [1:0] iterateI_ho1_2_res_6;
+  reg [1:0] c$bb_res_res_35 = {1'b0,   1'b0};
   // delay begin
-  always @(posedge clk) begin : c$bb_res_res_39_delay
+  always @(posedge clk) begin : c$bb_res_res_35_delay
     if (en) begin
-      c$bb_res_res_39 <= p1;
+      c$bb_res_res_35 <= pOut1;
     end
   end
   // delay end
 
-  assign iterateI_ho1_0_res_8 = c$bb_res_res_39;
+  assign iterateI_ho1_0_res_7 = c$bb_res_res_35;
 
 
 
-  reg  c$bb_res_res_40 = 1'b0;
+  reg [1:0] c$bb_res_res_36 = {1'b0,   1'b0};
   // delay begin
-  always @(posedge clk) begin : c$bb_res_res_40_delay
+  always @(posedge clk) begin : c$bb_res_res_36_delay
     if (en) begin
-      c$bb_res_res_40 <= iterateI_ho1_0_res_8;
+      c$bb_res_res_36 <= iterateI_ho1_0_res_7;
     end
   end
   // delay end
 
-  assign iterateI_ho1_1_res_7 = c$bb_res_res_40;
+  assign iterateI_ho1_1_res_6 = c$bb_res_res_36;
 
 
 
-  reg  c$bb_res_res_41 = 1'b0;
+  reg [1:0] c$bb_res_res_37 = {1'b0,   1'b0};
   // delay begin
-  always @(posedge clk) begin : c$bb_res_res_41_delay
+  always @(posedge clk) begin : c$bb_res_res_37_delay
     if (en) begin
-      c$bb_res_res_41 <= iterateI_ho1_1_res_7;
+      c$bb_res_res_37 <= iterateI_ho1_1_res_6;
     end
   end
   // delay end
 
-  assign iterateI_ho1_2_res_7 = c$bb_res_res_41;
+  assign iterateI_ho1_2_res_6 = c$bb_res_res_37;
 
 
 
-  assign c$app_arg_9 = {p1,
-                        iterateI_ho1_0_res_8,   iterateI_ho1_1_res_7,
-                        iterateI_ho1_2_res_7};
+  assign c$app_arg_8 = {pOut1,
+                        iterateI_ho1_0_res_7,   iterateI_ho1_1_res_6,
+                        iterateI_ho1_2_res_6};
 
 
 
-  assign result_32 = c$app_arg_9[1-1:0];
+  assign result_31 = c$app_arg_8[2-1:0];
 
   assign c$out0_case_alt = (tag_0 == tagToMatch) ? dta_0 : (64'sd0);
 
@@ -1658,18 +1662,20 @@ module topEntity
 
   assign tag_0 = result_33[71:64];
 
+  assign result_32 = b_2 ? {t_8,
+                            c$ds_app_arg} : result_33;
+
   // register begin
   always @(posedge clk or  posedge  rst) begin : result_33_register
     if ( rst) begin
       result_33 <= {8'd6,   64'sd0};
     end else if (en) begin
-      result_33 <= c$result_app_arg;
+      result_33 <= result_32;
     end
   end
   // register end
 
-  assign c$result_app_arg = result_34 ? {t_8,
-                                         c$ds_app_arg} : result_33;
+  assign b_2 = result_34;
 
   // delay begin
   always @(posedge clk) begin : c$ds_app_arg_delay
@@ -1679,97 +1685,164 @@ module topEntity
   end
   // delay end
 
-  wire  iterateI_ho1_0_arg0_1;
-  wire  iterateI_ho1_0_res_9;
-  assign iterateI_ho1_0_arg0_1 = inputs_2[65:65];
+  assign inputs_2 = result_50[137:8];
 
-  reg  c$bb_res_res_42 = 1'b0;
+  wire  iterateI_ho1_0_res_8;
+  reg  c$bb_res_res_38 = 1'b0;
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_38_delay
+    if (en) begin
+      c$bb_res_res_38 <= pIn0_0;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_0_res_8 = c$bb_res_res_38;
+
+
+
+  assign c$app_arg_9 = {pIn0_0,
+                        iterateI_ho1_0_res_8};
+
+
+
+  assign result_34 = c$app_arg_9[1-1:0];
+
+  wire [1:0] iterateI_ho1_0_res_9;
+  wire [1:0] iterateI_ho1_1_res_7;
+  reg [1:0] c$bb_res_res_39 = {1'b0,   1'b0};
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_39_delay
+    if (en) begin
+      c$bb_res_res_39 <= pOut0;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_0_res_9 = c$bb_res_res_39;
+
+
+
+  reg [1:0] c$bb_res_res_40 = {1'b0,   1'b0};
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_40_delay
+    if (en) begin
+      c$bb_res_res_40 <= iterateI_ho1_0_res_9;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_1_res_7 = c$bb_res_res_40;
+
+
+
+  assign c$app_arg_10 = {pOut0,
+                         iterateI_ho1_0_res_9,   iterateI_ho1_1_res_7};
+
+
+
+  assign result_35 = c$app_arg_10[2-1:0];
+
+  wire [47:0] iterateI_ho1_0_arg0_1;
+  wire [47:0] iterateI_ho1_0_res_10;
+  wire [47:0] iterateI_ho1_1_res_8;
+  wire [47:0] iterateI_ho1_2_res_7;
+  wire [47:0] iterateI_ho1_3_res_6;
+  wire [47:0] iterateI_ho1_4_res_3;
+  assign iterateI_ho1_0_arg0_1 = {t_8,   t_7,
+                                  t_6,   t_5,   t_4,   t_5};
+
+  reg [47:0] c$bb_res_res_41 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
+  // delay begin
+  always @(posedge clk) begin : c$bb_res_res_41_delay
+    if (en) begin
+      c$bb_res_res_41 <= iterateI_ho1_0_arg0_1;
+    end
+  end
+  // delay end
+
+  assign iterateI_ho1_0_res_10 = c$bb_res_res_41;
+
+
+
+  reg [47:0] c$bb_res_res_42 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_42_delay
     if (en) begin
-      c$bb_res_res_42 <= iterateI_ho1_0_arg0_1;
+      c$bb_res_res_42 <= iterateI_ho1_0_res_10;
     end
   end
   // delay end
 
-  assign iterateI_ho1_0_res_9 = c$bb_res_res_42;
+  assign iterateI_ho1_1_res_8 = c$bb_res_res_42;
 
 
 
-  assign c$app_arg_10 = {inputs_2[65:65],
-                         iterateI_ho1_0_res_9};
-
-
-
-  assign result_34 = c$app_arg_10[1-1:0];
-
-  wire  iterateI_ho1_0_res_10;
-  wire  iterateI_ho1_1_res_8;
-  reg  c$bb_res_res_43 = 1'b0;
+  reg [47:0] c$bb_res_res_43 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_43_delay
     if (en) begin
-      c$bb_res_res_43 <= p0;
+      c$bb_res_res_43 <= iterateI_ho1_1_res_8;
     end
   end
   // delay end
 
-  assign iterateI_ho1_0_res_10 = c$bb_res_res_43;
+  assign iterateI_ho1_2_res_7 = c$bb_res_res_43;
 
 
 
-  reg  c$bb_res_res_44 = 1'b0;
+  reg [47:0] c$bb_res_res_44 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_44_delay
     if (en) begin
-      c$bb_res_res_44 <= iterateI_ho1_0_res_10;
+      c$bb_res_res_44 <= iterateI_ho1_2_res_7;
     end
   end
   // delay end
 
-  assign iterateI_ho1_1_res_8 = c$bb_res_res_44;
+  assign iterateI_ho1_3_res_6 = c$bb_res_res_44;
 
 
-
-  assign c$app_arg_11 = {p0,
-                         iterateI_ho1_0_res_10,   iterateI_ho1_1_res_8};
-
-
-
-  assign result_35 = c$app_arg_11[1-1:0];
-
-  wire [47:0] iterateI_ho1_0_arg0_2;
-  wire [47:0] iterateI_ho1_0_res_11;
-  wire [47:0] iterateI_ho1_1_res_9;
-  wire [47:0] iterateI_ho1_2_res_8;
-  wire [47:0] iterateI_ho1_3_res_7;
-  wire [47:0] iterateI_ho1_4_res_3;
-  assign iterateI_ho1_0_arg0_2 = {t_8,   t_7,
-                                  t_6,   t_5,   t_4,   t_6};
 
   reg [47:0] c$bb_res_res_45 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_45_delay
     if (en) begin
-      c$bb_res_res_45 <= iterateI_ho1_0_arg0_2;
+      c$bb_res_res_45 <= iterateI_ho1_3_res_6;
     end
   end
   // delay end
 
-  assign iterateI_ho1_0_res_11 = c$bb_res_res_45;
+  assign iterateI_ho1_4_res_3 = c$bb_res_res_45;
 
 
+
+  assign c$app_arg_11 = {{t_8,   t_7,   t_6,
+                          t_5,   t_4,   t_5},   iterateI_ho1_0_res_10,
+                         iterateI_ho1_1_res_8,   iterateI_ho1_2_res_7,
+                         iterateI_ho1_3_res_6,   iterateI_ho1_4_res_3};
+
+
+
+  assign result_36 = c$app_arg_11[48-1:0];
+
+  wire [47:0] iterateI_ho1_0_arg0_2;
+  wire [47:0] iterateI_ho1_0_res_11;
+  wire [47:0] iterateI_ho1_1_res_9;
+  wire [47:0] iterateI_ho1_2_res_8;
+  assign iterateI_ho1_0_arg0_2 = {t_8,   t_7,
+                                  t_6,   t_5,   t_4,   t_5};
 
   reg [47:0] c$bb_res_res_46 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_46_delay
     if (en) begin
-      c$bb_res_res_46 <= iterateI_ho1_0_res_11;
+      c$bb_res_res_46 <= iterateI_ho1_0_arg0_2;
     end
   end
   // delay end
 
-  assign iterateI_ho1_1_res_9 = c$bb_res_res_46;
+  assign iterateI_ho1_0_res_11 = c$bb_res_res_46;
 
 
 
@@ -1777,12 +1850,12 @@ module topEntity
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_47_delay
     if (en) begin
-      c$bb_res_res_47 <= iterateI_ho1_1_res_9;
+      c$bb_res_res_47 <= iterateI_ho1_0_res_11;
     end
   end
   // delay end
 
-  assign iterateI_ho1_2_res_8 = c$bb_res_res_47;
+  assign iterateI_ho1_1_res_9 = c$bb_res_res_47;
 
 
 
@@ -1790,155 +1863,87 @@ module topEntity
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_48_delay
     if (en) begin
-      c$bb_res_res_48 <= iterateI_ho1_2_res_8;
+      c$bb_res_res_48 <= iterateI_ho1_1_res_9;
     end
   end
   // delay end
 
-  assign iterateI_ho1_3_res_7 = c$bb_res_res_48;
+  assign iterateI_ho1_2_res_8 = c$bb_res_res_48;
 
 
+
+  assign c$app_arg_12 = {{t_8,   t_7,   t_6,
+                          t_5,   t_4,   t_5},   iterateI_ho1_0_res_11,
+                         iterateI_ho1_1_res_9,   iterateI_ho1_2_res_8};
+
+
+
+  assign result_37 = c$app_arg_12[48-1:0];
+
+  wire [47:0] iterateI_ho1_0_arg0_3;
+  wire [47:0] iterateI_ho1_0_res_12;
+  wire [47:0] iterateI_ho1_1_res_10;
+  assign iterateI_ho1_0_arg0_3 = {t_8,   t_7,
+                                  t_6,   t_5,   t_4,   t_5};
 
   reg [47:0] c$bb_res_res_49 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_49_delay
     if (en) begin
-      c$bb_res_res_49 <= iterateI_ho1_3_res_7;
+      c$bb_res_res_49 <= iterateI_ho1_0_arg0_3;
     end
   end
   // delay end
 
-  assign iterateI_ho1_4_res_3 = c$bb_res_res_49;
+  assign iterateI_ho1_0_res_12 = c$bb_res_res_49;
 
 
-
-  assign c$app_arg_12 = {{t_8,   t_7,   t_6,
-                          t_5,   t_4,   t_6},   iterateI_ho1_0_res_11,
-                         iterateI_ho1_1_res_9,   iterateI_ho1_2_res_8,
-                         iterateI_ho1_3_res_7,   iterateI_ho1_4_res_3};
-
-
-
-  assign result_36 = c$app_arg_12[48-1:0];
-
-  wire [47:0] iterateI_ho1_0_arg0_3;
-  wire [47:0] iterateI_ho1_0_res_12;
-  wire [47:0] iterateI_ho1_1_res_10;
-  wire [47:0] iterateI_ho1_2_res_9;
-  assign iterateI_ho1_0_arg0_3 = {t_8,   t_7,
-                                  t_6,   t_5,   t_4,   t_6};
 
   reg [47:0] c$bb_res_res_50 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_50_delay
     if (en) begin
-      c$bb_res_res_50 <= iterateI_ho1_0_arg0_3;
+      c$bb_res_res_50 <= iterateI_ho1_0_res_12;
     end
   end
   // delay end
 
-  assign iterateI_ho1_0_res_12 = c$bb_res_res_50;
+  assign iterateI_ho1_1_res_10 = c$bb_res_res_50;
 
 
+
+  assign c$app_arg_13 = {{t_8,   t_7,   t_6,
+                          t_5,   t_4,   t_5},   iterateI_ho1_0_res_12,
+                         iterateI_ho1_1_res_10};
+
+
+
+  assign result_38 = c$app_arg_13[48-1:0];
+
+  wire [47:0] iterateI_ho1_0_arg0_4;
+  wire [47:0] iterateI_ho1_0_res_13;
+  assign iterateI_ho1_0_arg0_4 = {t_8,   t_7,
+                                  t_6,   t_5,   t_4,   t_5};
 
   reg [47:0] c$bb_res_res_51 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
   // delay begin
   always @(posedge clk) begin : c$bb_res_res_51_delay
     if (en) begin
-      c$bb_res_res_51 <= iterateI_ho1_0_res_12;
+      c$bb_res_res_51 <= iterateI_ho1_0_arg0_4;
     end
   end
   // delay end
 
-  assign iterateI_ho1_1_res_10 = c$bb_res_res_51;
-
-
-
-  reg [47:0] c$bb_res_res_52 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_52_delay
-    if (en) begin
-      c$bb_res_res_52 <= iterateI_ho1_1_res_10;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_2_res_9 = c$bb_res_res_52;
-
-
-
-  assign c$app_arg_13 = {{t_8,   t_7,   t_6,
-                          t_5,   t_4,   t_6},   iterateI_ho1_0_res_12,
-                         iterateI_ho1_1_res_10,   iterateI_ho1_2_res_9};
-
-
-
-  assign result_37 = c$app_arg_13[48-1:0];
-
-  wire [47:0] iterateI_ho1_0_arg0_4;
-  wire [47:0] iterateI_ho1_0_res_13;
-  wire [47:0] iterateI_ho1_1_res_11;
-  assign iterateI_ho1_0_arg0_4 = {t_8,   t_7,
-                                  t_6,   t_5,   t_4,   t_6};
-
-  reg [47:0] c$bb_res_res_53 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_53_delay
-    if (en) begin
-      c$bb_res_res_53 <= iterateI_ho1_0_arg0_4;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_0_res_13 = c$bb_res_res_53;
-
-
-
-  reg [47:0] c$bb_res_res_54 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_54_delay
-    if (en) begin
-      c$bb_res_res_54 <= iterateI_ho1_0_res_13;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_1_res_11 = c$bb_res_res_54;
+  assign iterateI_ho1_0_res_13 = c$bb_res_res_51;
 
 
 
   assign c$app_arg_14 = {{t_8,   t_7,   t_6,
-                          t_5,   t_4,   t_6},   iterateI_ho1_0_res_13,
-                         iterateI_ho1_1_res_11};
+                          t_5,   t_4,   t_5},   iterateI_ho1_0_res_13};
 
 
 
-  assign result_38 = c$app_arg_14[48-1:0];
-
-  wire [47:0] iterateI_ho1_0_arg0_5;
-  wire [47:0] iterateI_ho1_0_res_14;
-  assign iterateI_ho1_0_arg0_5 = {t_8,   t_7,
-                                  t_6,   t_5,   t_4,   t_6};
-
-  reg [47:0] c$bb_res_res_55 = {8'd6,   8'd6,   8'd6,   8'd6,   8'd6,   8'd6};
-  // delay begin
-  always @(posedge clk) begin : c$bb_res_res_55_delay
-    if (en) begin
-      c$bb_res_res_55 <= iterateI_ho1_0_arg0_5;
-    end
-  end
-  // delay end
-
-  assign iterateI_ho1_0_res_14 = c$bb_res_res_55;
-
-
-
-  assign c$app_arg_15 = {{t_8,   t_7,   t_6,
-                          t_5,   t_4,   t_6},   iterateI_ho1_0_res_14};
-
-
-
-  assign result_39 = c$app_arg_15[48-1:0];
+  assign result_39 = c$app_arg_14[48-1:0];
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : t_4_register
@@ -1950,15 +1955,15 @@ module topEntity
   end
   // register end
 
-  assign result_40 = p2 ? result_41 : t_4;
+  assign result_40 = pOut2 ? result_41 : t_4;
 
-  assign b = t_4 == 8'd5;
+  assign b_3 = t_4 == 8'd5;
 
   assign f1 = t_4 + 8'd1;
 
-  assign result_41 = b ? 8'd1 : f1;
+  assign result_41 = b_3 ? 8'd1 : f1;
 
-  assign p2 = pacings[0:0];
+  assign pOut2 = pacings[0:0];
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : t_5_register
@@ -1970,15 +1975,21 @@ module topEntity
   end
   // register end
 
-  assign result_42 = p1 ? result_43 : t_5;
+  assign result_42 = c$ds4_case_alt ? result_43 : t_5;
 
-  assign b_0 = t_5 == 8'd5;
+  assign b_4 = t_5 == 8'd5;
 
   assign f1_0 = t_5 + 8'd1;
 
-  assign result_43 = b_0 ? 8'd1 : f1_0;
+  assign result_43 = b_4 ? 8'd1 : f1_0;
 
-  assign p1 = pacings[1:1];
+  assign c$ds4_case_alt = x0_2 & x1_2;
+
+  assign x1_2 = pOut1[0:0];
+
+  assign x0_2 = pOut1[1:1];
+
+  assign pOut1 = pacings[2:1];
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : t_6_register
@@ -1990,17 +2001,21 @@ module topEntity
   end
   // register end
 
-  assign result_44 = p0 ? result_45 : t_6;
+  assign result_44 = c$ds3_case_alt ? result_45 : t_6;
 
-  assign b_1 = t_6 == 8'd5;
+  assign b_5 = t_6 == 8'd5;
 
   assign f1_1 = t_6 + 8'd1;
 
-  assign result_45 = b_1 ? 8'd1 : f1_1;
+  assign result_45 = b_5 ? 8'd1 : f1_1;
 
-  assign p0 = pacings[2:2];
+  assign c$ds3_case_alt = x0_3 & x1_3;
 
-  assign pacings = result_50[2:0];
+  assign x1_3 = pOut0[0:0];
+
+  assign x0_3 = pOut0[1:1];
+
+  assign pOut0 = pacings[4:3];
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : t_7_register
@@ -2012,13 +2027,15 @@ module topEntity
   end
   // register end
 
-  assign result_46 = inputs_2[0:0] ? result_47 : t_7;
+  assign result_46 = pIn1_0 ? result_47 : t_7;
 
-  assign b_2 = t_7 == 8'd5;
+  assign b_6 = t_7 == 8'd5;
 
   assign f1_2 = t_7 + 8'd1;
 
-  assign result_47 = b_2 ? 8'd1 : f1_2;
+  assign result_47 = b_6 ? 8'd1 : f1_2;
+
+  assign pIn1_0 = pacings[5:5];
 
   // register begin
   always @(posedge clk or  posedge  rst) begin : t_8_register
@@ -2030,25 +2047,29 @@ module topEntity
   end
   // register end
 
-  assign result_48 = inputs_2[65:65] ? result_49 : t_8;
+  assign result_48 = pIn0_0 ? result_49 : t_8;
 
-  assign b_3 = t_8 == 8'd5;
+  assign b_7 = t_8 == 8'd5;
 
   assign f1_3 = t_8 + 8'd1;
 
-  assign result_49 = b_3 ? 8'd1 : f1_3;
+  assign result_49 = b_7 ? 8'd1 : f1_3;
 
-  assign inputs_2 = result_50[133:4];
+  assign pIn0_0 = pacings[6:6];
 
-  assign result_50 = {c$app_arg_18,
-                      c$app_arg_17,   c$app_arg_16};
+  assign pacings = result_50[6:0];
+
+  assign result_50 = {c$app_arg_17,
+                      c$app_arg_16,   c$app_arg_15};
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : c$app_arg_16_register
+  always @(posedge clk or  posedge  rst) begin : c$app_arg_15_register
     if ( rst) begin
-      c$app_arg_16 <= {{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   1'b0}};
+      c$app_arg_15 <= {{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   {1'b0,
+                                                                       1'b0},
+                                                      {1'b0,   1'b0},   1'b0}};
     end else if (en) begin
-      c$app_arg_16 <= c$case_alt;
+      c$app_arg_15 <= c$case_alt;
     end
   end
   // register end
@@ -2057,11 +2078,13 @@ module topEntity
 
   assign c$case_alt_0 = qPop ? c$case_alt_2 : {{{64'sd0,
                                                  1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,
-                                                                                        1'b0,   1'b0}};
+                                                                                        1'b0,   {1'b0,   1'b0},
+                                                                                        {1'b0,   1'b0},   1'b0}};
 
   assign c$case_alt_1 = qPop ? c$case_alt_3 : {{{64'sd0,
                                                  1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,
-                                                                                        1'b0,   1'b0}};
+                                                                                        1'b0,   {1'b0,   1'b0},
+                                                                                        {1'b0,   1'b0},   1'b0}};
 
   always @(*) begin
     case(x_4)
@@ -2074,28 +2097,28 @@ module topEntity
     case(x_4)
       64'sd0 : c$case_alt_3 = {{{64'sd0,   1'b0},
                                 {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,
-                                                              1'b0}};
+                                                              {1'b0,   1'b0},   {1'b0,   1'b0},   1'b0}};
       default : c$case_alt_3 = c$case_alt_4;
     endcase
   end
 
   // index begin
-  wire [133:0] vecArray_5 [0:2-1];
+  wire [137:0] vecArray_5 [0:2-1];
   genvar i_25;
   generate
   for (i_25=0; i_25 < 2; i_25=i_25+1) begin : mk_array_5
-    assign vecArray_5[(2-1)-i_25] = buffer[i_25*134+:134];
+    assign vecArray_5[(2-1)-i_25] = buffer[i_25*138+:138];
   end
   endgenerate
   assign c$case_alt_4 = vecArray_5[c$cursor_case_alt_4];
   // index end
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : c$app_arg_17_register
+  always @(posedge clk or  posedge  rst) begin : c$app_arg_16_register
     if ( rst) begin
-      c$app_arg_17 <= 1'b0;
+      c$app_arg_16 <= 1'b0;
     end else if (en) begin
-      c$app_arg_17 <= c$case_alt_5;
+      c$app_arg_16 <= c$case_alt_5;
     end
   end
   // register end
@@ -2116,11 +2139,11 @@ module topEntity
   end
 
   // register begin
-  always @(posedge clk or  posedge  rst) begin : c$app_arg_18_register
+  always @(posedge clk or  posedge  rst) begin : c$app_arg_17_register
     if ( rst) begin
-      c$app_arg_18 <= 1'b0;
+      c$app_arg_17 <= 1'b0;
     end else if (en) begin
-      c$app_arg_18 <= c$case_alt_10;
+      c$app_arg_17 <= c$case_alt_10;
     end
   end
   // register end
@@ -2136,8 +2159,12 @@ module topEntity
   // register begin
   always @(posedge clk or  posedge  rst) begin : buffer_register
     if ( rst) begin
-      buffer <= {{{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   1'b0}},
-   {{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   1'b0}}};
+      buffer <= {{{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   {1'b0,
+                                                                        1'b0},
+                                                       {1'b0,   1'b0},   1'b0}},
+   {{{64'sd0,   1'b0},   {64'sd0,   1'b0}},   1'b0,   {1'b0,   1'b0,   {1'b0,
+                                                                        1'b0},
+                                                       {1'b0,   1'b0},   1'b0}}};
     end else if (en) begin
       buffer <= c$buffer_case_alt;
     end
@@ -2148,13 +2175,13 @@ module topEntity
 
   assign c$buffer_case_alt_sel_alt_t_1 = ({qData,buffer});
 
-  assign c$buffer_case_alt_0 = qPop ? c$buffer_case_alt_sel_alt_t_1[401:134] : c$buffer_case_alt_1;
+  assign c$buffer_case_alt_0 = qPop ? c$buffer_case_alt_sel_alt_t_1[413:138] : c$buffer_case_alt_1;
 
   assign c$buffer_case_alt_sel_alt_f_2 = ({qData,buffer});
 
-  assign c$buffer_case_alt_1 = c$cursor_case_scrut ? buffer : c$buffer_case_alt_sel_alt_f_2[401:134];
+  assign c$buffer_case_alt_1 = c$cursor_case_scrut ? buffer : c$buffer_case_alt_sel_alt_f_2[413:138];
 
-  assign qData = result_2[133:0];
+  assign qData = result_4[137:0];
 
   assign x_4 = cursor;
 
@@ -2189,19 +2216,19 @@ module topEntity
 
   assign c$cursor_case_alt_4 = (x_4 - 64'sd1);
 
-  assign result = {result_5[198:4],   {qPush,
-                                       qPop,   result_50[135:135],   qPopValid,
-                                       result_5[3:1],   result_5[0:0]}};
+  assign result = {result_5[202:8],   {qPush,
+                                       qPop,   result_50[139:139],   qPopValid,
+                                       result_5[7:1],   result_5[0:0]}};
 
-  assign qPopValid = result_50[134:134];
+  assign qPopValid = result_50[138:138];
 
-  assign qPush = result_2[134:134];
+  assign qPush = result_4[138:138];
 
-  assign qPop = result_5[199:199];
+  assign qPop = result_5[203:203];
 
-  assign result_0 = result[202:8];
+  assign result_0 = result[206:12];
 
-  assign result_1 = result[7:0];
+  assign result_1 = result[11:0];
 
   assign result_0_0 = result_0[194:130];
 
@@ -2221,23 +2248,35 @@ module topEntity
 
   assign result_0_2_1 = result_0_2[0:0];
 
-  assign result_1_0 = result_1[7:7];
+  assign result_1_0 = result_1[11:11];
 
-  assign result_1_1 = result_1[6:6];
+  assign result_1_1 = result_1[10:10];
 
-  assign result_1_2 = result_1[5:5];
+  assign result_1_2 = result_1[9:9];
 
-  assign result_1_3 = result_1[4:4];
+  assign result_1_3 = result_1[8:8];
 
-  assign result_1_4 = result_1[3:1];
+  assign result_1_4 = result_1[7:1];
 
   assign result_1_5 = result_1[0:0];
 
-  assign result_1_4_0 = result_1_4[2:2];
+  assign result_1_4_0 = result_1_4[6:6];
 
-  assign result_1_4_1 = result_1_4[1:1];
+  assign result_1_4_1 = result_1_4[5:5];
 
-  assign result_1_4_2 = result_1_4[0:0];
+  assign result_1_4_2 = result_1_4[4:3];
+
+  assign result_1_4_3 = result_1_4[2:1];
+
+  assign result_1_4_4 = result_1_4[0:0];
+
+  assign result_1_4_2_0 = result_1_4_2[1:1];
+
+  assign result_1_4_2_1 = result_1_4_2[0:0];
+
+  assign result_1_4_3_0 = result_1_4_3[1:1];
+
+  assign result_1_4_3_1 = result_1_4_3[0:0];
 
 
 endmodule

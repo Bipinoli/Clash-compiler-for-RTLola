@@ -26,10 +26,15 @@ module testbench;
     wire q_push_valid;
     wire q_pop_valid;
 
-    wire pacing_0;
-    wire pacing_1;
-    wire pacing_2;
-    wire pacing_3;
+    wire pacing_in0;
+    wire pacing_in1;
+    wire pacing_in2;
+    wire pacing_out0_0;
+    wire pacing_out0_1;
+    wire pacing_out1_0;
+    wire pacing_out1_1;
+    wire pacing_out2_0;
+    wire pacing_out3_0;
     wire slide_0;
     wire slide_1;
     wire slide_2;
@@ -45,10 +50,15 @@ module testbench;
                         ,output_2, output_2_aktv
                         ,output_3, output_3_aktv
                         ,q_push, q_pop, q_push_valid, q_pop_valid
-                        ,pacing_0
-                        ,pacing_1
-                        ,pacing_2
-                        ,pacing_3
+                        ,pacing_in0
+                        ,pacing_in1
+                        ,pacing_in2
+                        ,pacing_out0_0
+                        ,pacing_out0_1
+                        ,pacing_out1_0
+                        ,pacing_out1_1
+                        ,pacing_out2_0
+                        ,pacing_out3_0
                         ,slide_0
                         ,slide_1
                         ,slide_2
@@ -127,7 +137,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #1.9999999999998863;
+        #0;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 4;
@@ -159,7 +169,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #1008;
+        #1007;
         @(posedge clk);
         new_input_0 = 0;
         input_0 = 0;
@@ -191,7 +201,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #0.9999999999995453;
+        #0;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 8;
@@ -207,7 +217,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #0.0000000000004547473508864641;
+        #0;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 9;
@@ -255,7 +265,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #1075.0000000000005;
+        #1074;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 12;
@@ -287,7 +297,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #3095;
+        #3094;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 14;

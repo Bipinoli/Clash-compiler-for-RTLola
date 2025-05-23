@@ -15,4 +15,4 @@ Time 55160000000: Active outputs: (1, 0, 1, 0, 1, 0), Outputs: (7, 28, 44, 16, 2
 Time 60160000000: Active outputs: (0, 1, 0, 1, 0, 0), Outputs: (7, 30, 44, 45, 23, 16)
 Time 70160000000: Active outputs: (1, 1, 1, 0, 1, 0), Outputs: (8, 61, 46, 45, 53, 16)
 Time 80160000000: Active outputs: (1, 1, 1, 1, 1, 1), Outputs: (9, 63, 77, 78, 54, 63)
-testbench.v:176: $finish called at 80420000000 (100fs)
+testbench.v:178: $finish called at 80420000000 (100fs)

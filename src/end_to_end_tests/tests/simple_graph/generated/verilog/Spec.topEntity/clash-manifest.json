@@ -46,14 +46,14 @@
         },
         {
             "name": "topEntity.v",
-            "sha256": "bd13d48d60e300997ad539b34f88c9a58f1a922fdd3ecbf00368f69c808f3a9b"
+            "sha256": "638cf344f1945d1fe0fd0db5ac0447fa3b7f30dbd9bee9749d732b84ed4e8cdd"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "69c4967ff2128f63d04bdd387d7bc654594ee09550f5c398919dee8ae0cf90d4",
+    "hash": "e6dd3ee57febd046eba3977ee610c07d1f8ea7129a1a3d4c00aa40ebe21bfe02",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -204,6 +204,13 @@
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_1_4_3",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_4",
                 "type_name": "",
                 "width": 1
             }

@@ -46,14 +46,14 @@
         },
         {
             "name": "topEntity.v",
-            "sha256": "4939afc9eaa90475fdbeb641a15674ab35aa5fba66010273080dd2279a4d0d07"
+            "sha256": "4af22feeab04e7efc5396f09887760713fe131e43504c8cd6ebf5235a1003a98"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "d9ae11858cd5e15c52fd463fded4b9cf6c087b04084c4accf325889c2b02340f",
+    "hash": "8a9116364ca0c498fddafadc69b96dc164d5017da939a15f1cbedefdf21a7b63",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -210,14 +210,49 @@
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4_2",
+                "name": "result_1_4_2_0",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4_3",
+                "name": "result_1_4_2_1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_3_0",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_3_1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_4",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_5_0",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_5_1",
                 "type_name": "",
                 "width": 1
             }

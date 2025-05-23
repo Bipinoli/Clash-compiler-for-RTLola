@@ -1,0 +1,7 @@
+// Running in legacy mode 
+// i.e evaluation of event-based stream always before periodic-stream in the same eval level
+
+input x : Int
+
+output a := x + b.hold(or: 0)
+output b @1kHz := b.offset(by: -1).defaults(to: 0) + 1

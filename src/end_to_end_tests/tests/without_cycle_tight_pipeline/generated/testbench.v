@@ -28,22 +28,17 @@ module testbench;
     wire q_push_valid;
     wire q_pop_valid;
 
-    wire p_i0;
-    wire p_i1;
-    wire p_i2;
-    wire p_ot0;
-    wire p_ot1;
-    wire p_ot2;
-    wire p_ot3;
-    wire p_ot4;
-    wire p_ot5_0;
-    wire p_ot5_1;
-    wire p_ot6_0;
-    wire p_ot6_1;
-    wire p_ot6_2;
-    wire p_ot7;
-    wire p_ot8;
-
+    wire pacing_in0;
+    wire pacing_in1;
+    wire pacing_in2;
+    wire pacing_out0_0;
+    wire pacing_out1_0;
+    wire pacing_out2_0;
+    wire pacing_out2_1;
+    wire pacing_out3_0;
+    wire pacing_out3_1;
+    wire pacing_out3_2;
+    wire pacing_out4_0;
     wire slide_0;
     
 
@@ -58,17 +53,17 @@ module testbench;
                         ,output_3, output_3_aktv
                         ,output_4, output_4_aktv
                         ,q_push, q_pop, q_push_valid, q_pop_valid
-                        ,p_i0
-                        ,p_i1
-                        ,p_i2
-                        ,p_ot0
-                        ,p_ot1
-                        ,p_ot2
-                        ,p_ot3
-                        ,p_ot4
-                        ,p_ot5_0
-                        ,p_ot5_1
-                        ,p_ot6_0
+                        ,pacing_in0
+                        ,pacing_in1
+                        ,pacing_in2
+                        ,pacing_out0_0
+                        ,pacing_out1_0
+                        ,pacing_out2_0
+                        ,pacing_out2_1
+                        ,pacing_out3_0
+                        ,pacing_out3_1
+                        ,pacing_out3_2
+                        ,pacing_out4_0
                         ,slide_0
                        );
 
@@ -145,7 +140,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #1.9999999999998863;
+        #0;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 4;
@@ -177,7 +172,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #1008;
+        #1007;
         @(posedge clk);
         new_input_0 = 0;
         input_0 = 0;
@@ -209,7 +204,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #0.9999999999995453;
+        #0;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 8;
@@ -225,7 +220,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #0.0000000000004547473508864641;
+        #0;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 9;
@@ -273,7 +268,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #1075.0000000000005;
+        #1074;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 12;
@@ -305,7 +300,7 @@ module testbench;
         new_input_2 = 0;
         input_2 = 0;
 
-        #3095;
+        #3094;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 14;

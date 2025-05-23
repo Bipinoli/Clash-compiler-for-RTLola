@@ -25,26 +25,26 @@ import Clash.Prelude
 -- Evaluation Order
 -- x, f, i, a
 -- h, b
--- g, d, e, c
+-- g, e, d, c
 
 -- Memory Window
--- window a = 1
--- window g = 1
+-- window e = 1
+-- window c = 1
+-- window i = 1
+-- window d = 1
 -- window h = 1
 -- window f = 1
--- window d = 1
--- window c = 1
--- window e = 1
--- window i = 1
 -- window b = 1
+-- window a = 1
 -- window x = 2
+-- window g = 1
 
 -- Pipeline Visualization
 -- x,f,i,a |         |         | x,f,i,a |         |         | x,f,i,a |         |         | x,f,i,a
 -- -------------------------------------------------------------------------------------------------
 --         | h,b     |         |         | h,b     |         |         | h,b     |         |        
 -- -------------------------------------------------------------------------------------------------
---         |         | g,d,e,c |         |         | g,d,e,c |         |         | g,d,e,c |        
+--         |         | g,e,d,c |         |         | g,e,d,c |         |         | g,e,d,c |        
 -- -------------------------------------------------------------------------------------------------
 
 -- input0 = x
@@ -84,16 +84,42 @@ data Outputs = Outputs {
     output8 :: ValidInt
 } deriving (Generic, NFDataX)
 
+
+class Pacing a where getPacing :: a -> Bool
+
+data PacingIn0 = PacingIn0 Bool deriving (Generic, NFDataX)
+data PacingOut0 = PacingOut0 PacingIn0 deriving (Generic, NFDataX)
+data PacingOut1 = PacingOut1 PacingIn0 deriving (Generic, NFDataX)
+data PacingOut2 = PacingOut2 PacingIn0 deriving (Generic, NFDataX)
+data PacingOut3 = PacingOut3 PacingIn0 deriving (Generic, NFDataX)
+data PacingOut4 = PacingOut4 PacingIn0 deriving (Generic, NFDataX)
+data PacingOut5 = PacingOut5 PacingIn0 deriving (Generic, NFDataX)
+data PacingOut6 = PacingOut6 PacingIn0 deriving (Generic, NFDataX)
+data PacingOut7 = PacingOut7 PacingIn0 deriving (Generic, NFDataX)
+data PacingOut8 = PacingOut8 PacingIn0 deriving (Generic, NFDataX)
+
+instance Pacing PacingIn0 where getPacing (PacingIn0 x) = x
+instance Pacing PacingOut0 where getPacing (PacingOut0 x) = getPacing x
+instance Pacing PacingOut1 where getPacing (PacingOut1 x) = getPacing x
+instance Pacing PacingOut2 where getPacing (PacingOut2 x) = getPacing x
+instance Pacing PacingOut3 where getPacing (PacingOut3 x) = getPacing x
+instance Pacing PacingOut4 where getPacing (PacingOut4 x) = getPacing x
+instance Pacing PacingOut5 where getPacing (PacingOut5 x) = getPacing x
+instance Pacing PacingOut6 where getPacing (PacingOut6 x) = getPacing x
+instance Pacing PacingOut7 where getPacing (PacingOut7 x) = getPacing x
+instance Pacing PacingOut8 where getPacing (PacingOut8 x) = getPacing x
+
 data Pacings = Pacings {
-    pacing0 :: Bool,
-    pacing1 :: Bool,
-    pacing2 :: Bool,
-    pacing3 :: Bool,
-    pacing4 :: Bool,
-    pacing5 :: Bool,
-    pacing6 :: Bool,
-    pacing7 :: Bool,
-    pacing8 :: Bool
+    pacingIn0 :: PacingIn0,
+    pacingOut0 :: PacingOut0,
+    pacingOut1 :: PacingOut1,
+    pacingOut2 :: PacingOut2,
+    pacingOut3 :: PacingOut3,
+    pacingOut4 :: PacingOut4,
+    pacingOut5 :: PacingOut5,
+    pacingOut6 :: PacingOut6,
+    pacingOut7 :: PacingOut7,
+    pacingOut8 :: PacingOut8
 } deriving (Generic, NFDataX)
 
 
@@ -117,7 +143,18 @@ type Event = (Inputs, Pacings)
 nullEvent :: Event
 nullEvent = (nullInputs, nullPacings)
 nullInputs = Inputs (ValidInt 0 False) 
-nullPacings = Pacings False False False False False False False False False 
+nullPacings = Pacings nullPacingIn0 nullPacingOut0 nullPacingOut1 nullPacingOut2 nullPacingOut3 nullPacingOut4 nullPacingOut5 nullPacingOut6 nullPacingOut7 nullPacingOut8 
+nullPacingIn0 = PacingIn0 False
+nullPacingOut0 = PacingOut0 nullPacingIn0 
+nullPacingOut1 = PacingOut1 nullPacingIn0 
+nullPacingOut2 = PacingOut2 nullPacingIn0 
+nullPacingOut3 = PacingOut3 nullPacingIn0 
+nullPacingOut4 = PacingOut4 nullPacingIn0 
+nullPacingOut5 = PacingOut5 nullPacingIn0 
+nullPacingOut6 = PacingOut6 nullPacingIn0 
+nullPacingOut7 = PacingOut7 nullPacingIn0 
+nullPacingOut8 = PacingOut8 nullPacingIn0 
+
 
 ---------------------------------------------------------------
 
@@ -210,19 +247,20 @@ hlc inputs = out
 
         event = bundle (inputs, pacings)
 
-        pacings = Pacings <$> p0 <*> p1 <*> p2 <*> p3 <*> p4 <*> p5 <*> p6 <*> p7 <*> p8
+        pacings = Pacings <$> pIn0 <*> pOut0 <*> pOut1 <*> pOut2 <*> pOut3 <*> pOut4 <*> pOut5 <*> pOut6 <*> pOut7 <*> pOut8
 
         hasInput0 = ((.valid). (.input0)) <$> inputs
 
-        p0 = hasInput0
-        p1 = hasInput0
-        p2 = hasInput0
-        p3 = hasInput0
-        p4 = hasInput0
-        p5 = hasInput0
-        p6 = hasInput0
-        p7 = hasInput0
-        p8 = hasInput0
+        pIn0 = PacingIn0 <$> hasInput0
+        pOut0 = PacingOut0 <$> pIn0
+        pOut1 = PacingOut1 <$> pIn0
+        pOut2 = PacingOut2 <$> pIn0
+        pOut3 = PacingOut3 <$> pIn0
+        pOut4 = PacingOut4 <$> pIn0
+        pOut5 = PacingOut5 <$> pIn0
+        pOut6 = PacingOut6 <$> pIn0
+        pOut7 = PacingOut7 <$> pIn0
+        pOut8 = PacingOut8 <$> pIn0
 
 
 
@@ -289,29 +327,29 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         (inputs, pacings) = unbundle poppedEvent
 
         input0 = (.input0) <$> inputs
-        input0HasData = ((.valid). (.input0)) <$> inputs
 
 
-        p0 = (.pacing0) <$> pacings
-        p1 = (.pacing1) <$> pacings
-        p2 = (.pacing2) <$> pacings
-        p3 = (.pacing3) <$> pacings
-        p4 = (.pacing4) <$> pacings
-        p5 = (.pacing5) <$> pacings
-        p6 = (.pacing6) <$> pacings
-        p7 = (.pacing7) <$> pacings
-        p8 = (.pacing8) <$> pacings
+        pIn0 = (.pacingIn0) <$> pacings
+        pOut0 = (.pacingOut0) <$> pacings
+        pOut1 = (.pacingOut1) <$> pacings
+        pOut2 = (.pacingOut2) <$> pacings
+        pOut3 = (.pacingOut3) <$> pacings
+        pOut4 = (.pacingOut4) <$> pacings
+        pOut5 = (.pacingOut5) <$> pacings
+        pOut6 = (.pacingOut6) <$> pacings
+        pOut7 = (.pacingOut7) <$> pacings
+        pOut8 = (.pacingOut8) <$> pacings
         
-        tIn0 = genTag input0HasData
-        tOut5 = genTag p5
-        tOut8 = genTag p8
-        tOut0 = genTag p0
-        tOut7 = genTag p7
-        tOut1 = genTag p1
-        tOut6 = genTag p6
-        tOut3 = genTag p3
-        tOut4 = genTag p4
-        tOut2 = genTag p2
+        tIn0 = genTag (getPacing <$> pIn0)
+        tOut5 = genTag (getPacing <$> pOut5)
+        tOut8 = genTag (getPacing <$> pOut8)
+        tOut0 = genTag (getPacing <$> pOut0)
+        tOut7 = genTag (getPacing <$> pOut7)
+        tOut1 = genTag (getPacing <$> pOut1)
+        tOut6 = genTag (getPacing <$> pOut6)
+        tOut4 = genTag (getPacing <$> pOut4)
+        tOut3 = genTag (getPacing <$> pOut3)
+        tOut2 = genTag (getPacing <$> pOut2)
 
         -- tag generation takes 1 cycle so we need to delay the input data
         input0Data = delay 0 (((.value). (.input0)) <$> inputs)
@@ -324,26 +362,26 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel3 = delayFor d3 tagsDefault curTags
         nullT = invalidTag
 
-        enIn0 = delayFor d1 False input0HasData
-        enOut5 = delayFor d1 False p5
-        enOut8 = delayFor d1 False p8
-        enOut0 = delayFor d1 False p0
-        enOut7 = delayFor d2 False p7
-        enOut1 = delayFor d2 False p1
-        enOut6 = delayFor d3 False p6
-        enOut3 = delayFor d3 False p3
-        enOut4 = delayFor d3 False p4
-        enOut2 = delayFor d3 False p2
+        enIn0 = delayFor d1 nullPacingIn0 pIn0
+        enOut5 = delayFor d1 nullPacingOut5 pOut5
+        enOut8 = delayFor d1 nullPacingOut8 pOut8
+        enOut0 = delayFor d1 nullPacingOut0 pOut0
+        enOut7 = delayFor d2 nullPacingOut7 pOut7
+        enOut1 = delayFor d2 nullPacingOut1 pOut1
+        enOut6 = delayFor d3 nullPacingOut6 pOut6
+        enOut4 = delayFor d3 nullPacingOut4 pOut4
+        enOut3 = delayFor d3 nullPacingOut3 pOut3
+        enOut2 = delayFor d3 nullPacingOut2 pOut2
 
-        output0Aktv = delayFor d4 False p0
-        output1Aktv = delayFor d4 False p1
-        output2Aktv = delayFor d4 False p2
-        output3Aktv = delayFor d4 False p3
-        output4Aktv = delayFor d4 False p4
-        output5Aktv = delayFor d4 False p5
-        output6Aktv = delayFor d4 False p6
-        output7Aktv = delayFor d4 False p7
-        output8Aktv = delayFor d4 False p8
+        output0Aktv = delayFor d4 False (getPacing <$> pOut0)
+        output1Aktv = delayFor d4 False (getPacing <$> pOut1)
+        output2Aktv = delayFor d4 False (getPacing <$> pOut2)
+        output3Aktv = delayFor d4 False (getPacing <$> pOut3)
+        output4Aktv = delayFor d4 False (getPacing <$> pOut4)
+        output5Aktv = delayFor d4 False (getPacing <$> pOut5)
+        output6Aktv = delayFor d4 False (getPacing <$> pOut6)
+        output7Aktv = delayFor d4 False (getPacing <$> pOut7)
+        output8Aktv = delayFor d4 False (getPacing <$> pOut8)
 
         -- Evaluation of input windows: level 0
         input0Win = input0Window enIn0 tIn0 input0Data
@@ -437,80 +475,80 @@ pipelineReady rst = toWait .==. pure 0
 
 
 
-input0Window :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 2 (Tag, Int))
+input0Window :: HiddenClockResetEnable dom => Signal dom PacingIn0 -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 2 (Tag, Int))
 input0Window en tag val = result
-    where result = register (repeat (invalidTag, 0)) (mux en ((<<+) <$> result <*> (bundle (tag, val))) result)
+    where result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) ((<<+) <$> result <*> (bundle (tag, val))) result)
 
 
 
-outputStream0 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream0 :: HiddenClockResetEnable dom => Signal dom PacingOut0 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
 outputStream0 en tag in0 out2 out6 = result
     where
-        result = register (invalidTag, 0) (mux en nextValWithTag result)
+        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in0 + out6 + out2
 
 
-outputStream1 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
 outputStream1 en tag out0 = result
     where
-        result = register (invalidTag, 0) (mux en nextValWithTag result)
+        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out0 + 1
 
 
-outputStream2 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream2 :: HiddenClockResetEnable dom => Signal dom PacingOut2 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
 outputStream2 en tag out1 = result
     where
-        result = register (invalidTag, 0) (mux en nextValWithTag result)
+        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out1 + 1
 
 
-outputStream3 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream3 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
 outputStream3 en tag out1 = result
     where
-        result = register (invalidTag, 0) (mux en nextValWithTag result)
+        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out1 + 1
 
 
-outputStream4 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream4 :: HiddenClockResetEnable dom => Signal dom PacingOut4 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
 outputStream4 en tag out1 = result
     where
-        result = register (invalidTag, 0) (mux en nextValWithTag result)
+        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out1 + 1
 
 
-outputStream5 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream5 :: HiddenClockResetEnable dom => Signal dom PacingOut5 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
 outputStream5 en tag out3 out4 = result
     where
-        result = register (invalidTag, 0) (mux en nextValWithTag result)
+        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out3 + out4
 
 
-outputStream6 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream6 :: HiddenClockResetEnable dom => Signal dom PacingOut6 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
 outputStream6 en tag out5 out6 out7 out8 = result
     where
-        result = register (invalidTag, 0) (mux en nextValWithTag result)
+        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out5 + out6 + out7 + out8
 
 
-outputStream7 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream7 :: HiddenClockResetEnable dom => Signal dom PacingOut7 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
 outputStream7 en tag in0 = result
     where
-        result = register (invalidTag, 0) (mux en nextValWithTag result)
+        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in0 + 1
 
 
-outputStream8 :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream8 :: HiddenClockResetEnable dom => Signal dom PacingOut8 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
 outputStream8 en tag in0 = result
     where
-        result = register (invalidTag, 0) (mux en nextValWithTag result)
+        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in0 + 1
 

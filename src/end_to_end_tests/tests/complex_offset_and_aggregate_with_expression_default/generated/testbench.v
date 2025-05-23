@@ -32,14 +32,20 @@ module testbench;
     wire q_push_valid;
     wire q_pop_valid;
 
-    wire pacing_0;
-    wire pacing_1;
-    wire pacing_2;
-    wire pacing_3;
-    wire pacing_4;
-    wire pacing_5;
-    wire pacing_6;
-    wire pacing_7;
+    wire pacing_in0;
+    wire pacing_in1;
+    wire pacing_out0_0;
+    wire pacing_out0_1;
+    wire pacing_out1_0;
+    wire pacing_out1_1;
+    wire pacing_out2_0;
+    wire pacing_out2_1;
+    wire pacing_out3_0;
+    wire pacing_out3_1;
+    wire pacing_out4_0;
+    wire pacing_out5_0;
+    wire pacing_out6_0;
+    wire pacing_out7_0;
     wire slide_0;
     wire slide_1;
     
@@ -57,14 +63,20 @@ module testbench;
                         ,output_6, output_6_aktv
                         ,output_7, output_7_aktv
                         ,q_push, q_pop, q_push_valid, q_pop_valid
-                        ,pacing_0
-                        ,pacing_1
-                        ,pacing_2
-                        ,pacing_3
-                        ,pacing_4
-                        ,pacing_5
-                        ,pacing_6
-                        ,pacing_7
+                        ,pacing_in0
+                        ,pacing_in1
+                        ,pacing_out0_0
+                        ,pacing_out0_1
+                        ,pacing_out1_0
+                        ,pacing_out1_1
+                        ,pacing_out2_0
+                        ,pacing_out2_1
+                        ,pacing_out3_0
+                        ,pacing_out3_1
+                        ,pacing_out4_0
+                        ,pacing_out5_0
+                        ,pacing_out6_0
+                        ,pacing_out7_0
                         ,slide_0
                         ,slide_1
                        );

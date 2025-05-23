@@ -75,7 +75,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #1.9999999999998863;
+        #0;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 4;
@@ -91,7 +91,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #1008;
+        #1007;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 6;
@@ -107,7 +107,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #0.9999999999995453;
+        #0;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 8;
@@ -115,7 +115,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #0.0000000000004547473508864641;
+        #0;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 9;
@@ -139,7 +139,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #1075.0000000000005;
+        #1074;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 12;
@@ -155,7 +155,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #3095;
+        #3094;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 14;
