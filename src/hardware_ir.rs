@@ -309,293 +309,52 @@ fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMi
     let max_shift = all_nodes
         .into_iter()
         .map(|node| {
-            let shift_from_offsets = node
+            node
                 .get_offset_parents(mir)
                 .into_iter()
                 .map(|(parent, offset)| {
                     calculate_pipeline_wait(&node, &parent, offset, eval_order, mir)
                 })
                 .max()
-                .unwrap_or(0);
-            let shift_from_holds = {
-                // There could be a cycle with holds
-                //
-                // For example:
-                // input x: Int
-                // output a := x + b.hold(or: 1)
-                // output b @1kHz := a.hold(or: 0) + 1
-                //
-                // Here eval order is: x -> a -> b
-                //
-                // In such cases we take the last value of parent instead of the cur that will be evaluated later
-                // to break the infinite cycle
-                // i.e we take the parent value at offset 1
-                node.get_hold_parents(mir)
-                    .into_iter()
-                    .map(|parent| {
-                        let parent_eval_time = find_level(&parent, eval_order);
-                        let child_eval_time = find_level(&node, eval_order);
-                        let offset: usize = if parent_eval_time > child_eval_time {
-                            1
-                        } else {
-                            0
-                        };
-                        calculate_pipeline_wait(&node, &parent, offset, eval_order, mir)
-                    })
-                    .max()
-                    .unwrap_or(0)
-            };
-            cmp::max(shift_from_holds, shift_from_offsets)
+                .unwrap_or(0)
         })
         .max();
     max_shift.unwrap_or(0)
 }
 
-/// Find the evaluation order of Nodes
-///
-/// - First find the eval orders ignoring the offsets  
-/// - This can give us disjointed sub-graphs  
-/// - If we don't want to pipeline then we can run them in parallel
-/// - As in non-pipeline evaluation, the next eval cycle will only run after completely finishing earlier
-/// - This gives us correct evaluation as all past values (offsets) will be available
-/// - However, it might still be possible to pipeline the evaluation
-/// - For this we could check the dependency by offsets and check the maximum pipeline_wait necessary
-/// - The amount of necesary pipeline_wait also depends on when we want to start evaluation of the disjointed graphs
-/// - For this we can try all the possible combinations and choose the one which requires the minimum pipeline_wait
-///
-/// For example:
-/// ```
-/// input x: Int
-/// output a := x + 1
-/// output b := a + 1
-/// output c := b + 1
-/// output d := c.offset(by: -1).defaults(to: 0)
-/// ```
-///
-/// - After removing offsets the isolated graphs with eval orders are `[x, a, b, c]` and `[d]`
-/// - We could try all combinations of eval orders i.e:
-///     - `[(x, d), a, b, c]`
-///     - `[x, (a, d), b, c]`
-///     - `[x, a, (b, d), c]`
-///     - `[x, a, b, (c, d)]`
-///     - `[x, a, b, c, d]`
-/// - Among them the eval order `[x, a, b, (c, d)]` & `[x, a, b, c, d]` will give the least `pipeline_wait` necessary i.e `0`
-/// - However `[x, a, b, (c, d)]` is more desirable as the total eval layers are smaller and we get to evaluate d as early as possible
-/// - When we look deeper, it makes sense as when evaluating `c` we will already have the past value of `c` availabe
-/// - Whereas if we had tried to evaluate `d` along with `b` then we would need to wait one cycle until the `c` gets evaluated
-/// - It is possible to avoid checking all possbile combinations using this observations
-/// - However for the sake of simplicity we can simpley check all the combinations
-/// - Given the time complexity of `O(n ^ (k + 1))` is acceptable
-/// - where `n` = max length of eval order ~ number of nodes
-///     - `k` = number of disjointed sub-graphs
-///     - here we have `n` choice to start `k` eval-orders and each pipeline_wait calculation takes `O(n)` hence `k + 1` in the exponent
-fn find_eval_order(mir: &RtLolaMir, display_all_combinations: bool) -> Vec<Vec<Node>> {
-    let eval_orders = find_disjoint_eval_orders(mir);
-    if display_all_combinations {
-        println!("All disjoint orders:");
-        for order in &eval_orders {
-            println!(
-                "{}\n",
-                prettify_eval_order(order, mir)
-                    .into_iter()
-                    .enumerate()
-                    .map(|(i, nodes)| format!("level {}: {}", i, nodes))
-                    .collect::<Vec<_>>()
-                    .join("\n")
-            );
-        }
-    }
-
-    let n = eval_orders.first().unwrap().len();
-    let all_starts = gen_all_combinations(n, eval_orders.len() - 1);
-    let all_combinations: Vec<Vec<Vec<Node>>> = all_starts
-        .into_iter()
-        .map(|start| merge_eval_orders(&eval_orders, start))
-        .collect::<HashSet<_>>()
-        .into_iter()
-        .collect();
-
-    if display_all_combinations {
-        all_combinations.iter().for_each(|eval_order| {
-            println!("\n\nPotential evaluation order:");
-            println!("{}\n", prettify_eval_order(&eval_order, mir).join("\n"));
-            let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, mir);
-            for line in visualize_pipeline(eval_order, pipeline_wait, 10, mir) {
-                println!("{}", line);
-            }
-        });
-    }
-    all_combinations
-        .into_iter()
-        .reduce(|best, item| choose_better_eval_order(best, item, mir))
-        .unwrap()
-}
-
-fn choose_better_eval_order(
-    eval_order1: Vec<Vec<Node>>,
-    eval_order2: Vec<Vec<Node>>,
-    mir: &RtLolaMir,
-) -> Vec<Vec<Node>> {
-    let pipeline_wait1 = calculate_necessary_pipeline_wait(&eval_order1, mir);
-    let pipeline_wait2 = calculate_necessary_pipeline_wait(&eval_order2, mir);
-    if pipeline_wait1 < pipeline_wait2 {
-        return eval_order1;
-    }
-    if pipeline_wait2 < pipeline_wait1 {
-        return eval_order2;
-    }
-    if eval_order1.len() < eval_order2.len() {
-        return eval_order1;
-    }
-    if eval_order2.len() < eval_order1.len() {
-        return eval_order2;
-    }
-    // choose the one which evaluates most nodes the earliest
-    let mut earilest_different_level = None;
-    for i in 0..(cmp::min(eval_order1.len(), eval_order2.len())) {
-        if eval_order1[i].len() != eval_order2[i].len() {
-            earilest_different_level = Some(i);
-            break;
-        }
-    }
-    match earilest_different_level {
-        Some(i) => {
-            if eval_order1[i].len() > eval_order2[i].len() {
-                eval_order1
-            } else {
-                eval_order2
-            }
-        }
-        None => eval_order2,
-    }
-}
-
-fn gen_all_combinations(n: usize, k: usize) -> Vec<Vec<usize>> {
-    let mut result = Vec::new();
-    gen_combination(n, k, &mut Vec::new(), &mut result);
-    result
-}
-
-fn gen_combination(n: usize, k: usize, cur: &mut Vec<usize>, result: &mut Vec<Vec<usize>>) {
-    if cur.len() == k {
-        result.push(cur.clone());
-        return;
-    }
-    for i in 0..=(2 * n) {
-        cur.push(i);
-        gen_combination(n, k, cur, result);
-        cur.pop();
-    }
-}
-
-fn merge_eval_orders(eval_orders: &Vec<Vec<Vec<Node>>>, starts: Vec<usize>) -> Vec<Vec<Node>> {
-    assert!(eval_orders.len() == starts.len() + 1);
-    let eval_orders: Vec<Vec<Vec<Node>>> = eval_orders
-        .iter()
-        .enumerate()
-        .map(|(i, orders)| {
-            if i > 0 {
-                let mut extended: Vec<Vec<Node>> = vec![Vec::new(); starts[i - 1]];
-                extended.extend(orders.clone());
-                extended
-            } else {
-                orders.clone()
-            }
-        })
-        .collect();
-    let max_len = eval_orders
-        .iter()
-        .map(|eval_order| eval_order.len())
-        .max()
-        .unwrap();
-    let extended_eval_orders: Vec<Vec<Vec<Node>>> = eval_orders
-        .into_iter()
-        .map(|eval_order| {
-            let to_pad = max_len - eval_order.len();
-            let padding: Vec<Vec<Node>> = vec![Vec::new(); to_pad];
-            let mut eval_order = eval_order;
-            eval_order.extend(padding);
-            eval_order
-        })
-        .collect();
-    let mut merged: Vec<Vec<Node>> = Vec::new();
-    for i in 0..max_len {
-        let level: Vec<Node> = extended_eval_orders
-            .iter()
-            .map(|eval_order| eval_order[i].clone())
-            .fold(Vec::new(), |acc, item| {
-                let mut acc = acc;
-                acc.extend(item);
-                acc
-            });
-        merged.push(level);
-    }
-    merged
-        .into_iter()
-        .filter(|level| !level.is_empty())
-        .collect()
-}
-
-/// returns disjoint eval orders ordered_by their length in desc order
-fn find_disjoint_eval_orders(mir: &RtLolaMir) -> Vec<Vec<Vec<Node>>> {
-    let mut orders: Vec<Vec<Vec<Node>>> = get_roots(mir)
-        .into_iter()
-        .map(|roots| {
-            if has_cycle(roots.clone(), mir) {
-                eval_order_by_breaking_cycle(roots, mir)
-            } else {
-                dag_eval_order(roots, mir, &|_| true)
-            }
-        })
-        .collect();
-    orders.sort_by(|a, b| b.len().cmp(&a.len()));
-    orders
-}
-
-/// get roots of the graph after ignoring offset edges
-/// roots are grouped together if they belog to the same connected sub-graph
-fn get_roots(mir: &RtLolaMir) -> Vec<Vec<Node>> {
-    let inputs: Vec<Node> = mir
-        .inputs
-        .iter()
-        .map(|inpt| Node::from_stream(&inpt.reference))
-        .collect();
-    let mut roots = inputs.clone();
-    let unreachable_from_inputs: Vec<Node> = {
-        let reachables = reachable_nodes(inputs, mir, &|_| true);
-        mir.outputs
-            .iter()
-            .map(|output| Node::from_stream(&output.reference))
-            .filter(|nd| !reachables.contains(nd))
-            .collect()
-    };
-    let other_roots = remove_reachable_roots(unreachable_from_inputs, mir, &|_| true);
-    roots.extend(other_roots);
-
-    let reachables: Vec<HashSet<Node>> = roots
-        .iter()
-        .map(|nd| reachable_nodes(vec![nd.clone()], mir, &|_| true))
-        .collect();
-    let mut groups: Vec<usize> = roots
-        .iter()
-        .enumerate()
-        .into_iter()
-        .map(|(i, _)| i.clone())
-        .collect();
-    for i in 0..roots.len() {
-        for j in (i + 1)..roots.len() {
-            if reachables[i].intersection(&reachables[j]).count() > 0 {
-                let min_group = cmp::min(groups[i], groups[j]);
-                groups[i] = min_group;
-                groups[j] = min_group;
-            }
-        }
-    }
-    let mut root_groups: Vec<Vec<Node>> = roots.iter().map(|_| vec![]).collect();
-    for (i, rt) in roots.into_iter().enumerate() {
-        root_groups[groups[i]].push(rt);
-    }
-    root_groups.into_iter().filter(|v| !v.is_empty()).collect()
+fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
+    // Observations:
+    // 1. Without cycle the evaluation order is simply the level order of the DAG
+    // 2. Cycle can exist in 3 ways:
+    //      a) Between event-based streams via -ve offset
+    //      b) Between periodic streams via -ve offset
+    //      c) Across event-based & periodic streams via hold
+    // 3. -ve offset can also exist in a DAG without a cycle
+    // 4. With only -ve offset dependency, the child can be evaluated earlier with or even before the parent as the value is alreay there
+    // 5. The longest path along a cycle in a subgraph determines how long we have to wait (pipelin_wait)  before the next pipeline can be started
+    //
+    // Idea:
+    // 1. Break cycles across event-based & periodic by splitting graph into only event-based & periodic streams
+    // 2. Break cycle due to -ve offset by ignoring -ve offsets
+    // 3. Get eval order from the resulting DAGs and merge them according to -ve offsets & event-based/periodic periority rule
+    //
+    // Algorithm:
+    // step 1: separate event-based and periodic
+    // step 2: Split further ignoring -ve offsets
+    // step 3: In each group find roots and group them if they are connected ignoring -ve offset
+    // step 4: calculate eval order and pipeline wait in all groups (periodic, non periodic)
+    // step 5: max pipeline_wait among every eval orders will be the total pipeline_wait of the while eval order
+    //         assert that the max pipeline wait <= max needed by any -ve cycle i.e max path length
+    // step 6: merge eval-orders within event-based and within periodic accoring to -ve offset & pipeline_wait
+    //         try to evaluate as early as possible without increasing the pipeline_wait
+    // step 7: after all event based are merged and all periodic are merged together then merge periodic & event_based together
+    //         merged periodic & event-based together making sure the event-based node depending on periodic gets evaluated earlier
+    //         i.e the existing event-based before periodic semantics in RTLola
+    // Note:
+    // How we merge eval orders affects "pipeline_wait", total levels in eval_order & the required memory of each node
+    // We should minimize them in the order: "pipeline_wait", "memory", "total levels"
+    // i.e we prefer as small pipeline_wait and possible. If the pipeline wait is the same we prefer least possible memory and so on.
+   unimplemented!() 
 }
 
 // evaluation order from a DAG (directed acyclic graph)
@@ -650,83 +409,6 @@ fn remove_reachable_roots(
         .difference(&all_reachables)
         .map(|nd| nd.clone())
         .collect()
-}
-
-fn has_cycle(roots: Vec<Node>, mir: &RtLolaMir) -> bool {
-    let mut visited: HashSet<Node> = HashSet::new();
-    let mut visiting: HashSet<Node> = HashSet::new();
-    for root in roots {
-        if has_cycle_dfs(root, mir, &mut visiting, &mut visited) {
-            return true;
-        }
-    }
-    false
-}
-
-fn has_cycle_dfs(
-    root: Node,
-    mir: &RtLolaMir,
-    visiting: &mut HashSet<Node>,
-    visited: &mut HashSet<Node>,
-) -> bool {
-    if visited.contains(&root) {
-        return false;
-    }
-    if visiting.contains(&root) {
-        return true;
-    }
-    visiting.insert(root.clone());
-    let children = root.get_non_offset_children(mir);
-    for child in children {
-        if has_cycle_dfs(child, mir, visiting, visited) {
-            return true;
-        }
-    }
-    visiting.remove(&root);
-    visited.insert(root.clone());
-    false
-}
-
-/// Obtain an evaluation order by breaking the cycle in the subgraph
-///
-/// Isolate periodic and event-based streams in the subgraph to break the cycle  
-/// This will create 2 or more isolated graphs from the subgraph  
-/// Roots of such isolated graphs will be returned grouped by (periodic, non_periodic)
-///
-/// To break the cycle we use the rule of evaluating event-based nodes before periodic (existing rule in RTLola).   
-/// So, the periodic nodes splitted here must only be evaluated after all the event-based nodes are evaluated   
-fn eval_order_by_breaking_cycle(roots: Vec<Node>, mir: &RtLolaMir) -> Vec<Vec<Node>> {
-    let all_nodes_in_subgraph = reachable_nodes(roots, mir, &|_| true);
-    let periodic_nodes: HashSet<Node> = all_nodes_in_subgraph
-        .iter()
-        .filter(|&nd| is_periodic(nd, mir))
-        .map(|nd| nd.clone())
-        .collect();
-    let non_periodic_nodes: Vec<Node> = all_nodes_in_subgraph
-        .difference(&periodic_nodes)
-        .map(|nd| nd.clone())
-        .collect();
-
-    let periodic_roots =
-        remove_reachable_roots(periodic_nodes.into_iter().collect::<Vec<_>>(), mir, &|nd| {
-            is_periodic(nd, mir)
-        });
-    let non_periodic_roots =
-        remove_reachable_roots(non_periodic_nodes, mir, &|nd| !is_periodic(nd, mir));
-
-    let mut eval_order = dag_eval_order(non_periodic_roots, mir, &|nd| !is_periodic(nd, mir));
-    eval_order.extend(dag_eval_order(periodic_roots, mir, &|nd| {
-        is_periodic(nd, mir)
-    }));
-
-    eval_order
-
-    // let non_periodic_eval_order =
-
-    // let periodic_eval_order = dag_eval_order(periodic_roots, mir, &|nd| {
-    //     is_periodic(nd, mir) || is_phantom(nd)
-    // });
-    // -(offsetted_periodic_roots, non_periodic_roots)
 }
 
 fn reachable_nodes(
@@ -841,7 +523,7 @@ impl HardwareIR {
         debug: bool,
         verbose: bool,
     ) -> Self {
-        let eval_order = find_eval_order(&mir, verbose);
+        let eval_order = find_eval_order(&mir);
         let pipeline_wait = calculate_necessary_pipeline_wait(&eval_order, &mir);
         let required_memory = calculate_required_memory(&eval_order, &mir);
         HardwareIR {
