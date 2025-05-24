@@ -309,8 +309,7 @@ fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMi
     let max_shift = all_nodes
         .into_iter()
         .map(|node| {
-            node
-                .get_offset_parents(mir)
+            node.get_offset_parents(mir)
                 .into_iter()
                 .map(|(parent, offset)| {
                     calculate_pipeline_wait(&node, &parent, offset, eval_order, mir)
@@ -328,7 +327,7 @@ fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     // 2. Cycle can exist in 3 ways:
     //      a) Between event-based streams via -ve offset
     //      b) Between periodic streams via -ve offset
-    //      c) Across event-based & periodic streams via hold
+    //      c) Across event-based & periodic streams via hold or sliding window
     // 3. -ve offset can also exist in a DAG without a cycle
     // 4. With only -ve offset dependency, the child can be evaluated earlier with or even before the parent as the value is alreay there
     // 5. The longest path along a cycle in a subgraph determines how long we have to wait (pipelin_wait)  before the next pipeline can be started
@@ -354,14 +353,109 @@ fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     // How we merge eval orders affects "pipeline_wait", total levels in eval_order & the required memory of each node
     // We should minimize them in the order: "pipeline_wait", "memory", "total levels"
     // i.e we prefer as small pipeline_wait and possible. If the pipeline wait is the same we prefer least possible memory and so on.
-   unimplemented!() 
+
+    let (event_based_nodes, periodic_nodes) = split_event_based_and_periodic(mir);
+    let is_event_based_node = |nd: &Node| !is_periodic(&nd, mir);
+    let is_periodc_node = |nd: &Node| is_periodic(&nd, mir);
+
+    let event_based_roots = find_roots(event_based_nodes, mir, &is_event_based_node);
+    let periodic_roots = find_roots(periodic_nodes, mir, &is_periodc_node);
+
+    let orders_ev_based: Vec<_> = event_based_roots
+        .iter()
+        .map(|roots| dag_eval_order(roots.clone(), mir, &is_event_based_node))
+        .collect();
+    let orders_periodic: Vec<_> = periodic_roots
+        .iter()
+        .map(|roots| dag_eval_order(roots.clone(), mir, &is_periodc_node))
+        .collect();
+
+    let pipeline_wait = vec![&orders_ev_based[..], &orders_periodic[..]]
+        .concat()
+        .iter()
+        .map(|eval_order| calculate_necessary_pipeline_wait(eval_order, mir))
+        .max()
+        .unwrap_or(0);
+
+    //TODO: 
+    // merge_by_offset
+    // merge_periodic_and_event_based
+
+    unimplemented!()
+}
+
+fn split_event_based_and_periodic(mir: &RtLolaMir) -> (Vec<Node>, Vec<Node>) {
+    let all_nodes: Vec<Node> = {
+        let inputs: Vec<Node> = mir
+            .inputs
+            .iter()
+            .enumerate()
+            .map(|(i, _)| Node::InputStream(i))
+            .collect();
+        let outputs: Vec<Node> = mir
+            .outputs
+            .iter()
+            .enumerate()
+            .map(|(i, _)| Node::OutputStream(i))
+            .collect();
+        let sliding_windows: Vec<Node> = mir
+            .sliding_windows
+            .iter()
+            .enumerate()
+            .map(|(i, _)| Node::SlidingWindow(i))
+            .collect();
+        vec![&inputs[..], &outputs[..], &sliding_windows[..]].concat()
+    };
+    let periodic: Vec<Node> = all_nodes
+        .iter()
+        .filter(|&nd| is_periodic(nd, mir))
+        .map(|nd| nd.clone())
+        .collect();
+    let event_based: Vec<Node> = all_nodes
+        .iter()
+        .filter(|&nd| !is_periodic(nd, mir))
+        .map(|nd| nd.clone())
+        .collect();
+    (event_based, periodic)
+}
+
+fn find_roots(
+    nodes: Vec<Node>,
+    mir: &RtLolaMir,
+    node_cond: &dyn Fn(&Node) -> bool,
+) -> Vec<Vec<Node>> {
+    let mut roots: HashSet<Node> = nodes.iter().map(|nd| nd.clone()).collect();
+    for node in nodes {
+        let rechables = reachable_nodes(vec![node.clone()], mir, node_cond);
+        roots = roots.difference(&rechables).map(|nd| nd.clone()).collect();
+    }
+    let mut connected_components: HashMap<Node, Vec<Node>> = HashMap::new();
+    for root in roots {
+        let comp_leader = last_leaf(root.clone(), mir, node_cond);
+        let updated = connected_components
+            .get(&comp_leader)
+            .unwrap_or(&Vec::new())
+            .clone();
+        connected_components.insert(comp_leader, updated);
+    }
+    connected_components.values().map(|v| v.clone()).collect()
+}
+
+fn last_leaf(root: Node, mir: &RtLolaMir, node_cond: &dyn Fn(&Node) -> bool) -> Node {
+    let mut retval: Node = root.clone();
+    for child in root.get_non_offset_children(mir) {
+        if node_cond(&child) {
+            retval = last_leaf(child, mir, node_cond);
+        }
+    }
+    retval
 }
 
 // evaluation order from a DAG (directed acyclic graph)
 fn dag_eval_order(
     roots: Vec<Node>,
     mir: &RtLolaMir,
-    condition: &dyn Fn(&Node) -> bool,
+    node_cond: &dyn Fn(&Node) -> bool,
 ) -> Vec<Vec<Node>> {
     let mut order: Vec<Vec<Node>> = Vec::new();
 
@@ -372,12 +466,12 @@ fn dag_eval_order(
         order.push(cur_level.clone());
         for node in &cur_level {
             for child in node.get_non_offset_children(mir) {
-                if condition(&child) {
+                if node_cond(&child) {
                     next_level.push(child);
                 }
             }
         }
-        cur_level = remove_reachable_roots(next_level, mir, &condition);
+        cur_level = remove_reachable_roots(next_level, mir, &node_cond);
         next_level = vec![];
     }
     order
@@ -386,12 +480,12 @@ fn dag_eval_order(
 fn remove_reachable_roots(
     roots: Vec<Node>,
     mir: &RtLolaMir,
-    condition: &dyn Fn(&Node) -> bool,
+    node_cond: &dyn Fn(&Node) -> bool,
 ) -> Vec<Node> {
     let all_reachables: HashSet<Node> = roots
         .iter()
         .map(|nd| {
-            reachable_nodes(vec![nd.clone()], mir, &condition)
+            reachable_nodes(vec![nd.clone()], mir, &node_cond)
                 .into_iter()
                 .filter(|r| *r != *nd)
                 .collect::<HashSet<_>>()
@@ -432,13 +526,14 @@ fn reachable_nodes(
 
 fn is_periodic(node: &Node, mir: &RtLolaMir) -> bool {
     match node {
+        Node::InputStream(_) => false,
         Node::OutputStream(x) => match mir.outputs[x.clone()].eval.eval_pacing {
             PacingType::GlobalPeriodic(_) => true,
             PacingType::Event(_) => false,
             PacingType::Constant => false,
             _ => unimplemented!(),
         },
-        _ => false,
+        Node::SlidingWindow(_) => true,
     }
 }
 
