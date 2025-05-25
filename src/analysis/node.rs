@@ -105,6 +105,33 @@ impl Node {
             .collect::<Vec<_>>()
     }
 
+    pub fn get_non_offset_parents(&self, mir: &RtLolaMir) -> Vec<Node> {
+        let mut parents: Vec<Node> = Vec::new();
+        match self {
+            Node::InputStream(x) => (),
+            Node::OutputStream(x) => {
+                for parent in &mir.outputs[x.clone()].accesses {
+                    for (_, access_kind) in &parent.1 {
+                        match access_kind {
+                            StreamAccessKind::Offset(_) => {}
+                            _ => {
+                                parents.push(Node::from_access(parent));
+                            }
+                        }
+                    }
+                }
+            }
+            Node::SlidingWindow(x) => {
+                parents.push(Node::from_stream(&mir.sliding_windows[x.clone()].target));
+            }
+        }
+        parents
+            .into_iter()
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>()
+    }
+
     pub fn get_offset_parents(&self, mir: &RtLolaMir) -> Vec<(Node, usize)> {
         let mut parents: Vec<(Node, usize)> = Vec::new();
         match self {

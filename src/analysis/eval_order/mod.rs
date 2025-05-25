@@ -113,17 +113,36 @@ fn find_roots(
             roots.insert(node.clone());
         }
     }
-    let mut connected_components: HashMap<Node, Vec<Node>> = HashMap::new();
-    for root in roots {
-        let comp_leader = last_leaf(root.clone(), mir, node_cond);
-        let existing = connected_components
-            .get(&comp_leader)
-            .unwrap_or(&Vec::new())
-            .clone();
-        let updated = vec![&existing[..], &vec![root.clone()]].concat();
-        connected_components.insert(comp_leader, updated);
+    let mut connected_roots: Vec<Vec<Node>> = Vec::new();
+    let mut already_connected: Vec<bool> = vec![false; roots.len()];
+    for (i, r1) in roots.iter().enumerate() {
+        if !already_connected[i] {
+            let mut connected: Vec<Node> = vec![r1.clone()];
+            for (j, r2) in roots.iter().enumerate().skip(i + 1) {
+                if !already_connected[j] {
+                    if are_connected(r1.clone(), r2.clone(), mir, node_cond) {
+                        connected.push(r2.clone());
+                        already_connected[j] = true;
+                    }
+                }
+            }
+            connected_roots.push(connected);
+        }
     }
-    connected_components.values().map(|v| v.clone()).collect()
+    connected_roots
+}
+
+fn are_connected(
+    node1: Node,
+    node2: Node,
+    mir: &RtLolaMir,
+    node_cond: &dyn Fn(&Node) -> bool,
+) -> bool {
+    let last_leaf1 = last_leaf(node1.clone(), mir, node_cond);
+    let last_leaf2 = last_leaf(node2.clone(), mir, node_cond);
+    let earliest_parents1 = earliest_parents(last_leaf1, mir, node_cond);
+    let earliest_parents2 = earliest_parents(last_leaf2, mir, node_cond);
+    earliest_parents1.intersection(&earliest_parents2).count() > 0
 }
 
 fn last_leaf(root: Node, mir: &RtLolaMir, node_cond: &dyn Fn(&Node) -> bool) -> Node {
@@ -134,6 +153,24 @@ fn last_leaf(root: Node, mir: &RtLolaMir, node_cond: &dyn Fn(&Node) -> bool) -> 
         }
     }
     retval
+}
+
+fn earliest_parents(
+    root: Node,
+    mir: &RtLolaMir,
+    node_cond: &dyn Fn(&Node) -> bool,
+) -> HashSet<Node> {
+    let mut parents: HashSet<Node> = HashSet::new();
+    root.get_non_offset_parents(mir)
+        .iter()
+        .filter(|&parent| node_cond(parent))
+        .for_each(|parent| {
+            parents.extend(earliest_parents(parent.clone(), mir, node_cond));
+        });
+    if parents.is_empty() {
+        parents.insert(root);
+    }
+    parents
 }
 
 /// evaluation order from a DAG (directed acyclic graph)  
@@ -256,8 +293,10 @@ fn merge_eval_orders_by_offset(
 
 fn merge_periodic_and_event_based_eval_orders(
     event_based: Vec<Vec<Node>>,
-    _periodic: Vec<Vec<Node>>,
+    periodic: Vec<Vec<Node>>,
     _mir: &RtLolaMir,
 ) -> Vec<Vec<Node>> {
-    event_based
+    let retval = vec![&event_based[..], &periodic[..]].concat();
+    // dbg!(&retval);
+    retval
 }
