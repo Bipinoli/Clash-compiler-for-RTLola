@@ -1,0 +1,14 @@
+input x : Int
+
+output a := x + c.offset(by: -1).defaults(to: 0)
+output b := a + 1
+output c := b + 1
+output d := b + 1
+output e := c + 1
+output f := d + 1
+output g := e + l.offset(by: -1).defaults(to: 0)
+output h := f + 1
+output i := g + k
+output j := h + 1
+output k := j + 1
+output l := i + 1

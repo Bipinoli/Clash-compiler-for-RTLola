@@ -328,7 +328,7 @@ fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     //      a) Between event-based streams via -ve offset
     //      b) Between periodic streams via -ve offset
     //      c) Across event-based & periodic streams via hold or sliding window
-    // 3. -ve offset can also exist in a DAG without a cycle
+    // 3. -ve offset can also exist in a DAG (directed acyclic graph) without a cycle
     // 4. With only -ve offset dependency, the child can be evaluated earlier with or even before the parent as the value is alreay there
     // 5. The longest path along a cycle in a subgraph determines how long we have to wait (pipelin_wait)  before the next pipeline can be started
     //
@@ -377,10 +377,74 @@ fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
         .max()
         .unwrap_or(0);
 
-    //TODO: 
-    // merge_by_offset
-    // merge_periodic_and_event_based
+    let merged_event_based =
+        merge_eval_orders_by_offset(orders_ev_based, pipeline_wait, mir, &is_event_based_node);
+    let merged_periodic =
+        merge_eval_orders_by_offset(orders_periodic, pipeline_wait, mir, &is_periodc_node);
 
+    merge_periodic_and_event_based_eval_orders(
+        merged_event_based,
+        merged_periodic,
+        pipeline_wait,
+        mir,
+    )
+}
+
+fn merge_eval_orders_by_offset(
+    orders: Vec<Vec<Vec<Node>>>,
+    pipeline_wait: usize,
+    mir: &RtLolaMir,
+    node_cond: &dyn Fn(&Node) -> bool,
+) -> Vec<Vec<Node>> {
+    // It is a heuristic approach that doesn't guarantee an optimum order
+    // 
+    // For simplicity, we enforce a restriction of not allowing stretching of individual orders
+    // For example:
+    // If we have orders: [a, b, c, d, e] & [m, n, o] to merge and if we allow strectching
+    // They could be merged in various ways:
+    // Option 1:
+    // [a, b, c, d, e]
+    // [m, _, _, n, o] <-- [m,n,o] is stretched 
+    // It means, a & m are in the same level, and so on
+    //
+    // Option 2:
+    // [a, b, c, d, e]
+    // [_, m, n, o, _] <-- [m,n,o] is not stretched i.e the order is tightly packed
+    // etc.
+    // 
+    // Allowing for stretching let's use further optimize the pipeline_wait, memory and total evaluation levels
+    // 
+    // For example, think of a situation when some parent before these orders depend on `m` by -ve offset
+    // and say `n` depends on some child after these orders by -ve offset
+    // In that case, option 1 could give us smaller pipeline_wait as the path between those -ve offset nodes would be smaller
+    //
+    // Producing an optimum order here requires thinking of various situations which is outside the scope for now
+    // So we restrict the stretching
+    // 
+    // There is also a case of -ve edges that don't create a cycle
+    // For example: a ---> b ----> c --(-2)--> d
+    // Here, `d` needs the value of `c`, 2 eval cycles ago
+    // Which means when the pipeline is about to evaluate `a` the value in `c` would be from lastest the 2 cycles ago
+    // So, `d` could be evaluated as early as with `a` without introducing any extra pipeline_wait
+    // However, there could also be further children from `d` that also depends on `c` 
+    // so when we pull `d` at the front the distance between `d` and those children would increase
+    // Depending on -ve offset there, this could actually increase the pipeline_wait and the amount of things to remember in nodes
+    // 
+    // So for simplicity we follow the heuristics of merging the orders by starting at different offsets 
+    // We try all possible combinations when the stretching is not allowed and choose the merge with the lease pipeline_wait
+
+    unimplemented!()
+}
+
+
+
+
+fn merge_periodic_and_event_based_eval_orders(
+    event_based: Vec<Vec<Node>>,
+    periodic: Vec<Vec<Node>>,
+    pipeline_wait: usize,
+    mir: &RtLolaMir,
+) -> Vec<Vec<Node>> {
     unimplemented!()
 }
 
@@ -451,7 +515,7 @@ fn last_leaf(root: Node, mir: &RtLolaMir, node_cond: &dyn Fn(&Node) -> bool) -> 
     retval
 }
 
-// evaluation order from a DAG (directed acyclic graph)
+/// evaluation order from a DAG (directed acyclic graph)  
 fn dag_eval_order(
     roots: Vec<Node>,
     mir: &RtLolaMir,
