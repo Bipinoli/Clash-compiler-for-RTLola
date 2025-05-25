@@ -1,4 +1,6 @@
-use crate::hardware_ir::{prettify_required_memory, HardwareIR, Node};
+use crate::analysis::node::Node;
+use crate::analysis::HardwareIR;
+
 use handlebars::Handlebars;
 use serde::Serialize;
 
@@ -96,7 +98,7 @@ fn get_eval_order(ir: &HardwareIR) -> String {
 }
 
 fn get_required_memory(ir: &HardwareIR) -> String {
-    prettify_required_memory(&ir)
+    ir.prettify_required_memory()
         .iter()
         .map(|s| format!("-- {}", s))
         .collect::<Vec<_>>()

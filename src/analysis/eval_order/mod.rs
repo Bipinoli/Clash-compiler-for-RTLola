@@ -1,0 +1,263 @@
+use crate::analysis::node::Node;
+use rtlola_frontend::mir::RtLolaMir;
+use std::{
+    collections::{HashMap, HashSet},
+    vec,
+};
+
+pub mod memory;
+mod merge_combinations;
+pub mod pipeline;
+pub mod utils;
+
+pub fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
+    // Observations:
+    // 1. Without cycle the evaluation order is simply the level order of the DAG (directed acyclic graph)
+    // 2. Cycle can exist in 3 ways:
+    //      a) Between event-based streams via -ve offset
+    //      b) Between periodic streams via -ve offset
+    //      c) Across event-based & periodic streams via hold or sliding window
+    // 3. -ve offset can also exist in a DAG without a cycle
+    // 4. With only -ve offset dependency, the child can be evaluated earlier with or even before the parent as the value is alreay there
+    // 5. The longest path along a cycle in a subgraph determines how long we have to wait (pipelin_wait)  before the next pipeline can be started
+    //
+    // Idea:
+    // 1. Break cycles across event-based & periodic by splitting graph into only event-based & periodic streams
+    // 2. Break cycle due to -ve offset by ignoring -ve offsets
+    // 3. Get eval order from the resulting DAGs and merge them according to -ve offsets & event-based/periodic periority rule
+    //
+    // Algorithm:
+    // step 1: separate event-based and periodic
+    // step 2: Split further ignoring -ve offsets
+    // step 3: In each group find roots and group them if they are connected ignoring -ve offset
+    // step 4: calculate eval order and pipeline wait in all groups (periodic, non periodic)
+    // step 5: max pipeline_wait among every eval orders will be the total pipeline_wait of the while eval order
+    // step 6: merge eval-orders within event-based and within periodic accoring to -ve offset & pipeline_wait
+    //         try to evaluate as early as possible without increasing the pipeline_wait
+    // step 7: after all event-based are merged and all periodic are merged, then we merge them together
+    //         RTLola has the semantics of evaluation event-based before periodic to avoid infinite cycle
+    //         So, merge them accordingly
+    // Note:
+    // How we merge eval orders affects "pipeline_wait", total levels in eval_order & the required memory of each node
+    // We should try to minimize them in the order: "pipeline_wait", "memory", "total levels"
+    // i.e we prefer as small pipeline_wait and possible. If the pipeline wait is the same we prefer least possible memory and so on.
+
+    let (event_based_nodes, periodic_nodes) = split_event_based_and_periodic(mir);
+    let is_event_based_node = |nd: &Node| !nd.is_periodic(mir);
+    let is_periodc_node = |nd: &Node| nd.is_periodic(mir);
+
+    let event_based_roots = find_roots(event_based_nodes, mir, &is_event_based_node);
+    let periodic_roots = find_roots(periodic_nodes, mir, &is_periodc_node);
+
+    let orders_ev_based: Vec<_> = event_based_roots
+        .iter()
+        .map(|roots| dag_eval_order(roots.clone(), mir, &is_event_based_node))
+        .collect();
+    let orders_periodic: Vec<_> = periodic_roots
+        .iter()
+        .map(|roots| dag_eval_order(roots.clone(), mir, &is_periodc_node))
+        .collect();
+
+    let merged_event_based =
+        merge_eval_orders_by_offset(orders_ev_based, mir, &is_event_based_node);
+    let merged_periodic = merge_eval_orders_by_offset(orders_periodic, mir, &is_periodc_node);
+
+    merge_periodic_and_event_based_eval_orders(merged_event_based, merged_periodic, mir)
+}
+
+fn split_event_based_and_periodic(mir: &RtLolaMir) -> (Vec<Node>, Vec<Node>) {
+    let all_nodes: Vec<Node> = {
+        let inputs: Vec<Node> = mir
+            .inputs
+            .iter()
+            .enumerate()
+            .map(|(i, _)| Node::InputStream(i))
+            .collect();
+        let outputs: Vec<Node> = mir
+            .outputs
+            .iter()
+            .enumerate()
+            .map(|(i, _)| Node::OutputStream(i))
+            .collect();
+        let sliding_windows: Vec<Node> = mir
+            .sliding_windows
+            .iter()
+            .enumerate()
+            .map(|(i, _)| Node::SlidingWindow(i))
+            .collect();
+        vec![&inputs[..], &outputs[..], &sliding_windows[..]].concat()
+    };
+    let periodic: Vec<Node> = all_nodes
+        .iter()
+        .filter(|&nd| nd.is_periodic(mir))
+        .map(|nd| nd.clone())
+        .collect();
+    let event_based: Vec<Node> = all_nodes
+        .iter()
+        .filter(|&nd| !nd.is_periodic(mir))
+        .map(|nd| nd.clone())
+        .collect();
+    (event_based, periodic)
+}
+
+fn find_roots(
+    nodes: Vec<Node>,
+    mir: &RtLolaMir,
+    node_cond: &dyn Fn(&Node) -> bool,
+) -> Vec<Vec<Node>> {
+    let mut roots: HashSet<Node> = nodes.iter().map(|nd| nd.clone()).collect();
+    for node in nodes {
+        if roots.contains(&node) {
+            let rechables = reachable_nodes(vec![node.clone()], mir, node_cond);
+            roots = roots.difference(&rechables).map(|nd| nd.clone()).collect();
+            roots.insert(node.clone());
+        }
+    }
+    let mut connected_components: HashMap<Node, Vec<Node>> = HashMap::new();
+    for root in roots {
+        let comp_leader = last_leaf(root.clone(), mir, node_cond);
+        let existing = connected_components
+            .get(&comp_leader)
+            .unwrap_or(&Vec::new())
+            .clone();
+        let updated = vec![&existing[..], &vec![root.clone()]].concat();
+        connected_components.insert(comp_leader, updated);
+    }
+    connected_components.values().map(|v| v.clone()).collect()
+}
+
+fn last_leaf(root: Node, mir: &RtLolaMir, node_cond: &dyn Fn(&Node) -> bool) -> Node {
+    let mut retval: Node = root.clone();
+    for child in root.get_non_offset_children(mir) {
+        if node_cond(&child) {
+            retval = last_leaf(child, mir, node_cond);
+        }
+    }
+    retval
+}
+
+/// evaluation order from a DAG (directed acyclic graph)  
+fn dag_eval_order(
+    roots: Vec<Node>,
+    mir: &RtLolaMir,
+    node_cond: &dyn Fn(&Node) -> bool,
+) -> Vec<Vec<Node>> {
+    let mut order: Vec<Vec<Node>> = Vec::new();
+
+    let mut cur_level: Vec<Node> = roots;
+    let mut next_level: Vec<Node> = Vec::new();
+
+    while !cur_level.is_empty() {
+        order.push(cur_level.clone());
+        for node in &cur_level {
+            for child in node.get_non_offset_children(mir) {
+                if node_cond(&child) {
+                    next_level.push(child);
+                }
+            }
+        }
+        cur_level = remove_reachable_roots(next_level, mir, &node_cond);
+        next_level = vec![];
+    }
+    order
+}
+
+fn remove_reachable_roots(
+    roots: Vec<Node>,
+    mir: &RtLolaMir,
+    node_cond: &dyn Fn(&Node) -> bool,
+) -> Vec<Node> {
+    let all_reachables: HashSet<Node> = roots
+        .iter()
+        .map(|nd| {
+            reachable_nodes(vec![nd.clone()], mir, &node_cond)
+                .into_iter()
+                .filter(|r| *r != *nd)
+                .collect::<HashSet<_>>()
+        })
+        .collect::<Vec<HashSet<_>>>()
+        .iter()
+        .fold(HashSet::new(), |acc, item| {
+            let mut all_reached = acc;
+            all_reached.extend(item.clone());
+            all_reached
+        });
+    roots
+        .into_iter()
+        .collect::<HashSet<_>>()
+        .difference(&all_reachables)
+        .map(|nd| nd.clone())
+        .collect()
+}
+
+fn reachable_nodes(
+    roots: Vec<Node>,
+    mir: &RtLolaMir,
+    condition: &dyn Fn(&Node) -> bool,
+) -> HashSet<Node> {
+    let mut rechables: HashSet<Node> = HashSet::new();
+    let mut stack: Vec<Node> = roots;
+    while !stack.is_empty() {
+        let node = stack.pop().unwrap();
+        rechables.insert(node.clone());
+        for child in node.get_non_offset_children(mir) {
+            if condition(&child) && !rechables.contains(&child) {
+                stack.push(child);
+            }
+        }
+    }
+    rechables
+}
+
+fn merge_eval_orders_by_offset(
+    orders: Vec<Vec<Vec<Node>>>,
+    mir: &RtLolaMir,
+    _node_cond: &dyn Fn(&Node) -> bool,
+) -> Vec<Vec<Node>> {
+    // It is a heuristic approach that doesn't guarantee an optimum order
+    //
+    // For simplicity, we enforce a restriction of not allowing stretching of individual orders
+    // For example:
+    // If we have orders: [a, b, c, d, e] & [m, n, o] to merge and if we allow strectching
+    // They could be merged in various ways:
+    // Option 1:
+    // [a, b, c, d, e]
+    // [m, _, _, n, o] <-- [m,n,o] is stretched
+    // It means, a & m are in the same level, and so on
+    //
+    // Option 2:
+    // [a, b, c, d, e]
+    // [_, m, n, o, _] <-- [m,n,o] is not stretched i.e the order is tightly packed
+    // etc.
+    //
+    // Allowing for stretching let's use further optimize the pipeline_wait, memory and total evaluation levels
+    //
+    // For example, think of a situation when some parent before these orders depend on `m` by -ve offset
+    // and say `n` depends on some child after these orders by -ve offset
+    // In that case, option 1 could give us smaller pipeline_wait as the path between those -ve offset nodes would be smaller
+    //
+    // Producing an optimum order here requires thinking of various situations which is outside the scope for now
+    // So we restrict the stretching
+    //
+    // There is also a case of -ve edges that don't create a cycle
+    // For example: a ---> b ----> c --(-2)--> d
+    // Here, `d` needs the value of `c`, 2 eval cycles ago
+    // Which means when the pipeline is about to evaluate `a` the value in `c` would be from lastest the 2 cycles ago
+    // So, `d` could be evaluated as early as with `a` without introducing any extra pipeline_wait
+    // However, there could also be further children from `d` that also depends on `c`
+    // so when we pull `d` at the front the distance between `d` and those children would increase
+    // Depending on -ve offset there, this could actually increase the pipeline_wait and the amount of things to remember in nodes
+    //
+    // So for simplicity we follow the heuristics of merging the orders by starting at different offsets
+    // We try all possible combinations when the stretching is not allowed and choose the merge with the lease pipeline_wait
+
+    merge_combinations::merge_eval_orders_various_combinations(orders, mir)
+}
+
+fn merge_periodic_and_event_based_eval_orders(
+    event_based: Vec<Vec<Node>>,
+    _periodic: Vec<Vec<Node>>,
+    _mir: &RtLolaMir,
+) -> Vec<Vec<Node>> {
+    event_based
+}

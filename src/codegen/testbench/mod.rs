@@ -3,8 +3,8 @@ use handlebars::Handlebars;
 use rtlola_frontend::mir::Type;
 use serde::Serialize;
 
+use crate::analysis::HardwareIR;
 use crate::codegen::monitor::hlc;
-use crate::hardware_ir::HardwareIR;
 
 #[derive(Serialize)]
 struct Data {
@@ -151,7 +151,8 @@ fn get_trace_data(trace_data: Vec<StringRecord>) -> Vec<TraceData> {
                     // #2 from one cycle delay caused by putting input to zero in the impulse input
                     let microseconds = cur_row_time * 1e6 - last_input_time - 2 as f64;
                     let microseconds = microseconds.max(0.0);
-                    last_input_time = next_immediate_clock_rise_time(last_input_time + microseconds + 2.0);
+                    last_input_time =
+                        next_immediate_clock_rise_time(last_input_time + microseconds + 2.0);
                     format!("{}", microseconds)
                 }
             },
@@ -175,8 +176,8 @@ fn get_trace_data(trace_data: Vec<StringRecord>) -> Vec<TraceData> {
 fn next_immediate_clock_rise_time(microseconds: f64) -> f64 {
     // Note:
     // Input is synchronised with the rising edge of the clock
-    // Clock period is 1us. The clock rises in every even microsecond 
-    let mut micros = microseconds.ceil(); 
+    // Clock period is 1us. The clock rises in every even microsecond
+    let mut micros = microseconds.ceil();
     if micros % 2.0 == 1.0 {
         micros += 1.0;
     }

@@ -6,9 +6,9 @@ use rtlola_frontend::mir::{
 use serde::Serialize;
 
 use crate::{
+    analysis::node::Node,
+    analysis::HardwareIR,
     codegen::monitor::{datatypes, register_template},
-    hardware_ir::HardwareIR,
-    hardware_ir::Node,
 };
 
 #[derive(Serialize)]

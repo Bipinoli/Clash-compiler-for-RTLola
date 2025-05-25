@@ -8,7 +8,7 @@ use rtlola_frontend::{
 use serde::Serialize;
 use uom::si::rational64::Frequency;
 
-use crate::{codegen::monitor::register_template, hardware_ir::HardwareIR};
+use crate::{analysis::HardwareIR, codegen::monitor::register_template};
 
 #[derive(Serialize)]
 struct Data {

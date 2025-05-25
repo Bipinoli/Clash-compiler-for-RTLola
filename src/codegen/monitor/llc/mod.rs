@@ -8,8 +8,8 @@ use rtlola_frontend::mir::{
 };
 use serde::Serialize;
 
-use crate::hardware_ir::Node;
-use crate::{codegen::monitor::register_template, hardware_ir::HardwareIR};
+use crate::analysis::node::Node;
+use crate::{analysis::HardwareIR, codegen::monitor::register_template};
 
 use super::datatypes;
 

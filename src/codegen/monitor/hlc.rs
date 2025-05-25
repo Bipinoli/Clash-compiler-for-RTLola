@@ -7,7 +7,7 @@ use uom::num_rational::Ratio;
 use uom::si::rational64::Frequency;
 
 use crate::{
-    codegen::monitor::datatypes, codegen::monitor::register_template, hardware_ir::HardwareIR,
+    analysis::HardwareIR, codegen::monitor::datatypes, codegen::monitor::register_template,
 };
 
 #[derive(Serialize)]
