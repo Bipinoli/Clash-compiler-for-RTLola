@@ -6,8 +6,8 @@ use std::fs::File;
 use std::io::Read;
 use std::io::Write;
 use std::path::PathBuf;
+mod analysis;
 mod codegen;
-mod hardware_ir;
 
 /// Compile RTLola specs to Clash
 #[derive(Parser, Debug)]
@@ -44,10 +44,6 @@ struct Args {
     /// Generate clash code & testbench with debug information
     #[arg(long)]
     debug: bool,
-
-    /// Verbose mode -- displays all considered combination of evaluation order
-    #[arg(long)]
-    verbose: bool,
 }
 
 fn main() {
@@ -69,16 +65,12 @@ fn main() {
                     args.output.clone(),
                 );
             };
-            let hard_ir = hardware_ir::HardwareIR::new(
+            let hard_ir = analysis::HardwareIR::new(
                 mir,
                 spec,
                 to_pascal_case(&extract_file_stem(&spec_path)),
                 args.debug,
-                args.verbose,
             );
-            if args.verbose {
-                hard_ir.display_analysis();
-            }
             match codegen::monitor::generate_clash(hard_ir.clone()) {
                 Some(generated) => {
                     write_to_file(
