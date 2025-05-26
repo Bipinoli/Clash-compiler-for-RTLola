@@ -124,7 +124,11 @@ fn get_output_streams(ir: &HardwareIR) -> Vec<OutputStream> {
                 input_types: get_input_types(&node, ir),
                 output_type: datatypes::get_type(&out.ty),
                 default_value: datatypes::get_default_for_type(&out.ty),
-                expression: get_expression(&out.eval.clauses.first().unwrap().expression, ir),
+                expression: get_expression(
+                    "".to_string(),
+                    &out.eval.clauses.first().unwrap().expression,
+                    ir,
+                ),
                 memory: ir
                     .required_memory
                     .get(&Node::OutputStream(i))
@@ -181,7 +185,11 @@ pub fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
         .collect()
 }
 
-fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
+// Same stream can be a dependency multiple times
+// Eg: output a := b.offset(by: -1).defaults(to: 0) + b.offset(by: -2).defaults(to: 0)
+// To deal with this, we follow the order of dependencies as in expression appending by a suffix to make them unique
+// When calling the function, the arguments are likewise provided in the order as in expression as well (get_dependencies_of_output_stream() in llc/mod.rs)
+fn get_expression(suffix: String, expr: &Expression, ir: &HardwareIR) -> String {
     match &expr.kind {
         ExpressionKind::LoadConstant(con) => match con {
             Constant::Int(x) => format!("{}", x),
@@ -196,15 +204,16 @@ fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
                 format!("(merge{} <$> sw{})", x.idx(), x.idx())
             }
             _ => match target {
-                StreamReference::In(x) => format!("in{}", x),
-                StreamReference::Out(x) => format!("out{}", x),
+                StreamReference::In(x) => format!("in{}_{}", x, suffix),
+                StreamReference::Out(x) => format!("out{}_{}", x, suffix),
             },
         },
-        ExpressionKind::Default { expr, default: _ } => get_expression(&expr, ir),
+        ExpressionKind::Default { expr, default: _ } => get_expression(suffix, &expr, ir),
         ExpressionKind::ArithLog(operator, expressions) => {
             let expressions: Vec<String> = expressions
                 .into_iter()
-                .map(|expr| get_expression(expr, ir))
+                .enumerate()
+                .map(|(i, expr)| get_expression(format!("{}{}", suffix, i), expr, ir))
                 .collect();
             let final_expression = match operator {
                 ArithLogOp::Add => expressions.join(" + "),
@@ -219,15 +228,55 @@ fn get_expression(expr: &Expression, ir: &HardwareIR) -> String {
     }
 }
 
+// Same stream can be a dependency multiple times
+// Eg: output a := b.offset(by: -1).defaults(to: 0) + b.offset(by: -2).defaults(to: 0)
+// To deal with this, we follow the order of dependencies as in expression appending by a suffix to make them unique
+// When calling the function, the arguments are likewise provided in the order as in expression as well (get_dependencies_of_output_stream() in llc/mod.rs)
+fn get_inputs_from_expression(suffix: String, expr: &Expression, ir: &HardwareIR) -> Vec<String> {
+    let mut inputs: Vec<String> = Vec::new();
+    match &expr.kind {
+        ExpressionKind::LoadConstant(_) => (),
+        ExpressionKind::StreamAccess {
+            target,
+            parameters: _,
+            access_kind,
+        } => match access_kind {
+            StreamAccessKind::SlidingWindow(x) => inputs.push(format!("sw{}", x.idx())),
+            _ => match target {
+                StreamReference::In(x) => inputs.push(format!("in{}_{}", x, suffix)),
+                StreamReference::Out(x) => inputs.push(format!("out{}_{}", x, suffix)),
+            },
+        },
+        ExpressionKind::Default { expr, default: _ } => {
+            inputs.extend(get_inputs_from_expression(suffix, &expr, ir))
+        }
+        ExpressionKind::ArithLog(_, expressions) => {
+            expressions.into_iter().enumerate().for_each(|(i, expr)| {
+                inputs.extend(get_inputs_from_expression(
+                    format!("{}{}", suffix, i),
+                    expr,
+                    ir,
+                ));
+            });
+        }
+        _ => unimplemented!(),
+    };
+    inputs
+}
+
 fn get_inputs(output_node: &Node, ir: &HardwareIR) -> Vec<String> {
-    super::get_dependencies_of_output_stream(output_node, ir)
-        .iter()
-        .map(|dep| match dep.source_node {
-            Node::InputStream(x) => format!("in{}", x),
-            Node::OutputStream(x) => format!("out{}", x),
-            Node::SlidingWindow(x) => format!("sw{}", x),
-        })
-        .collect()
+    let expr = match output_node {
+        Node::OutputStream(x) => {
+            &ir.mir.outputs[x.clone()]
+                .eval
+                .clauses
+                .first()
+                .unwrap()
+                .expression
+        }
+        _ => unreachable!(),
+    };
+    get_inputs_from_expression("".to_string(), expr, ir)
 }
 
 fn get_input_types(output_node: &Node, ir: &HardwareIR) -> Vec<String> {

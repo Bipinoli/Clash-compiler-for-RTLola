@@ -334,16 +334,18 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
 }
 
 fn get_dependencies_of_output_stream(node: &Node, ir: &HardwareIR) -> Vec<Dependency> {
+    // Same stream can be a dependency multiple times
+    // Eg: output a := b.offset(by: -1).defaults(to: 0) + b.offset(by: -2).defaults(to: 0)
+    // To deal with this, on the stream function (file: stream.rs) we get the parameter names from the dependency along with the index
+    // Hence, the dependencies which are passed as arguments must also follow the order as in the expression
     match node {
         Node::OutputStream(x) => {
             let out = &ir.mir.outputs[x.clone()];
-            let mut deps = get_dependencies_from_expression(
+            get_dependencies_from_expression(
                 node,
                 &out.eval.clauses.first().unwrap().expression,
                 ir,
-            );
-            order_dependencies_according_to_access_list(&mut deps, &out, ir);
-            deps
+            )
         }
         _ => unreachable!(),
     }
@@ -537,35 +539,6 @@ fn get_dependencies_from_expression(
         ExpressionKind::LoadConstant(_) => Vec::new(),
         _ => unimplemented!(),
     }
-}
-
-fn order_dependencies_according_to_access_list(
-    deps: &mut Vec<Dependency>,
-    out: &OutputStream,
-    ir: &HardwareIR,
-) {
-    deps.sort_by_key(|dep| {
-        let accesses: Vec<Node> = out
-            .accesses
-            .iter()
-            .map(|access| {
-                let source_node = match access.0 {
-                    StreamReference::In(x) => Node::InputStream(x.clone()),
-                    StreamReference::Out(x) => Node::OutputStream(x.clone()),
-                };
-                source_node
-            })
-            .collect();
-        let dep_source: Node = match dep.source_node {
-            Node::SlidingWindow(x) => Node::from_stream(&ir.mir.sliding_windows[x.clone()].target),
-            _ => dep.source_node.clone(),
-        };
-        let index = accesses
-            .iter()
-            .position(|source_node| *source_node == dep_source)
-            .unwrap();
-        index
-    });
 }
 
 /// Example: get_default_expr_statements_and_depending_tags(expr, String::from("<name>"), ...)
