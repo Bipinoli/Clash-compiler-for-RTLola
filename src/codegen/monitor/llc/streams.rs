@@ -246,32 +246,33 @@ fn get_input_types(output_node: &Node, ir: &HardwareIR) -> Vec<String> {
 }
 
 fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<SlidingWindow> {
-    out.accesses
-        .iter()
-        .filter(|access| match access.1.first().unwrap().1 {
-            StreamAccessKind::SlidingWindow(_) => true,
-            _ => false,
-        })
-        .map(|access| match access.1.first().unwrap().1 {
-            StreamAccessKind::SlidingWindow(sw) => SlidingWindow {
-                window_idx: sw.idx(),
-                window_size: get_sliding_window_size(sw.idx(), ir),
-                data_type: datatypes::get_type(&ir.mir.sliding_windows[sw.idx()].ty),
-                default_value: datatypes::get_default_for_type(
-                    &ir.mir.sliding_windows[sw.idx()].ty,
-                ),
-                memory: ir
-                    .required_memory
-                    .get(&Node::SlidingWindow(sw.idx()))
-                    .unwrap()
-                    .clone(),
-                pacing: datatypes::get_target_from_sliding_window(
-                    &ir.mir.sliding_windows[sw.idx()],
-                ),
-            },
-            _ => unreachable!(),
-        })
-        .collect()
+    let mut windows: Vec<SlidingWindow> = Vec::new();
+    out.accesses.iter().for_each(|access| {
+        for (_, access_kind) in &access.1 {
+            match access_kind {
+                StreamAccessKind::SlidingWindow(sw) => {
+                    windows.push(SlidingWindow {
+                        window_idx: sw.idx(),
+                        window_size: get_sliding_window_size(sw.idx(), ir),
+                        data_type: datatypes::get_type(&ir.mir.sliding_windows[sw.idx()].ty),
+                        default_value: datatypes::get_default_for_type(
+                            &ir.mir.sliding_windows[sw.idx()].ty,
+                        ),
+                        memory: ir
+                            .required_memory
+                            .get(&Node::SlidingWindow(sw.idx()))
+                            .unwrap()
+                            .clone(),
+                        pacing: datatypes::get_target_from_sliding_window(
+                            &ir.mir.sliding_windows[sw.idx()],
+                        ),
+                    });
+                }
+                _ => (),
+            }
+        }
+    });
+    windows
 }
 
 /// ```

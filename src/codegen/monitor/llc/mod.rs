@@ -342,7 +342,7 @@ fn get_dependencies_of_output_stream(node: &Node, ir: &HardwareIR) -> Vec<Depend
                 &out.eval.clauses.first().unwrap().expression,
                 ir,
             );
-            order_dependencies_according_to_access_list(&mut deps, &out);
+            order_dependencies_according_to_access_list(&mut deps, &out, ir);
             deps
         }
         _ => unreachable!(),
@@ -539,7 +539,11 @@ fn get_dependencies_from_expression(
     }
 }
 
-fn order_dependencies_according_to_access_list(deps: &mut Vec<Dependency>, out: &OutputStream) {
+fn order_dependencies_according_to_access_list(
+    deps: &mut Vec<Dependency>,
+    out: &OutputStream,
+    ir: &HardwareIR,
+) {
     deps.sort_by_key(|dep| {
         let accesses: Vec<Node> = out
             .accesses
@@ -549,18 +553,16 @@ fn order_dependencies_according_to_access_list(deps: &mut Vec<Dependency>, out: 
                     StreamReference::In(x) => Node::InputStream(x.clone()),
                     StreamReference::Out(x) => Node::OutputStream(x.clone()),
                 };
-                match access.1.first().unwrap().1 {
-                    StreamAccessKind::SlidingWindow(sw) => match sw {
-                        WindowReference::Sliding(x) => Node::SlidingWindow(x.clone()),
-                        _ => unimplemented!(),
-                    },
-                    _ => source_node,
-                }
+                source_node
             })
             .collect();
+        let dep_source: Node = match dep.source_node {
+            Node::SlidingWindow(x) => Node::from_stream(&ir.mir.sliding_windows[x.clone()].target),
+            _ => dep.source_node.clone(),
+        };
         let index = accesses
             .iter()
-            .position(|source_node| *source_node == dep.source_node)
+            .position(|source_node| *source_node == dep_source)
             .unwrap();
         index
     });

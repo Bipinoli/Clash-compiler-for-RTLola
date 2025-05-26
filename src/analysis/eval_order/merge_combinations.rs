@@ -34,8 +34,6 @@ pub fn merge_eval_orders_various_combinations(
     // - where `n` = max length of eval order ~ number of nodes
     //     - `k` = number of disjointed sub-graphs
     //     - here we have `n` choice to start `k` eval-orders and each pipeline_wait calculation takes `O(n)` hence `k + 1` in the exponent
-    dbg!(&orders);
-
     if orders.is_empty() {
         return Vec::new();
     }
