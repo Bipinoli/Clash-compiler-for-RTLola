@@ -66,6 +66,17 @@ data Pacings = Pacings {
     pacingOut{{@index}} :: PacingOut{{@index}}{{#unless @last}},{{/unless}}
     {{/each}}
 } deriving (Generic, NFDataX)
+{{#if debug}}
+
+data DebugEnables = DebugEnables {
+    {{#each inputs}}
+    enableIn{{@index}} :: Bool,
+    {{/each}}
+    {{#each outputs}}
+    enableOut{{@index}} :: Bool{{#unless @last}},{{/unless}}
+    {{/each}} 
+} deriving (Generic, NFDataX)
+{{/if}}
 {{else}}
 -- using newtype to avoid flattening of data
 -- https://clash-lang.discourse.group/t/how-to-avoid-flattening-of-fields-in-record/79/5
@@ -74,6 +85,14 @@ newtype Pacings = Pacings {
     pacingOut{{@index}} :: PacingOut{{@index}}{{#unless @last}},{{/unless}}
     {{/each}}
 } deriving (Generic, NFDataX)
+{{#if debug}}
+
+newtype DebugEnables = DebugEnables {
+    {{#each outputs}}
+    enableOut{{@index}} :: Bool{{#unless @last}},{{/unless}}
+    {{/each}}
+} deriving (Generic, NFDataX)
+{{/if}}
 {{/if}}
 
 {{#if has_sliding_window}}

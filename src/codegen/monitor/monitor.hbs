@@ -115,9 +115,9 @@ queue input = output
 
 {{#if debug}}
     {{#if has_sliding_window}}
-monitor :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs ->{{/if}}Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings, Slides))
+monitor :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs ->{{/if}}Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
     {{else}}
-monitor :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs ->{{/if}} Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
+monitor :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs ->{{/if}} Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, DebugEnables))
     {{/if}}
 monitor {{#if has_input}}inputs {{/if}}= bundle (outputs, debugSignals)
 {{else}}
@@ -137,11 +137,11 @@ monitor {{#if has_input}}inputs {{/if}}= outputs
         (toPop, outputs) = unbundle llcOutput
 
         {{#if has_sliding_window}}
-        (llcPacings, llcSlides) = unbundle llcDebug
-        debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcPacings, llcSlides)
+        (llcSlides, debugEnables) = unbundle llcDebug
+        debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcSlides, debugEnables)
         {{else}}
-        llcPacings = llcDebug
-        debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcPacings)
+        debugEnables = llcDebug
+        debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, debugEnables)
         {{/if}}
         {{else}}
         (toPop, outputs) = unbundle (llc (bundle (qPopValid, qPopData)))
@@ -153,10 +153,10 @@ monitor {{#if has_input}}inputs {{/if}}= outputs
 {{#if debug}}
     {{#if has_sliding_window}}
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    {{#if has_input}}Signal TestDomain Inputs -> {{/if}}Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings, Slides))
+    {{#if has_input}}Signal TestDomain Inputs -> {{/if}}Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
     {{else}}
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    {{#if has_input}}Signal TestDomain Inputs -> {{/if}}Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
+    {{#if has_input}}Signal TestDomain Inputs -> {{/if}}Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, DebugEnables))
     {{/if}}
 {{else}}
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 

@@ -1,9 +1,6 @@
 use crate::analysis::node::Node;
 use rtlola_frontend::mir::RtLolaMir;
-use std::{
-    collections::{HashMap, HashSet},
-    vec,
-};
+use std::{collections::HashSet, vec};
 
 pub mod memory;
 mod merge_combinations;

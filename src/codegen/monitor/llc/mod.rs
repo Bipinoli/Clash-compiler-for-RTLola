@@ -3,8 +3,8 @@ use std::collections::HashSet;
 
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
-    ArithLogOp, Constant, Expression, ExpressionKind, Offset, OutputStream, StreamAccessKind,
-    StreamReference, WindowReference,
+    ArithLogOp, Constant, Expression, ExpressionKind, Offset, StreamAccessKind, StreamReference,
+    WindowReference,
 };
 use serde::Serialize;
 

@@ -47,9 +47,9 @@ delayFor n initVal sig = last delayedVec
 
 {{#if debug}}
     {{#if has_sliding_window}}
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Pacings, Slides))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Slides, DebugEnables))
     {{else}}
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Pacings))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (DebugEnables))
     {{/if}}
 llc event = bundle (bundle (toPop, outputs), debugSignals)
 {{else}}
@@ -205,10 +205,17 @@ llc event = bundle (toPop, outputs)
 
         {{#if debug}}
             {{#if has_sliding_window}}
-        debugSignals = bundle (pacings, slides)
+        debugSignals = bundle (slides, debugEnables)
             {{else}}
-        debugSignals = pacings
+        debugSignals = debugEnables
             {{/if}}
+        debugEnables = DebugEnables <$>
+                            {{#each inputs}}
+                            (getPacing <$> enIn{{@index}}) <*>
+                            {{/each}}
+                            {{#each outputs}}
+                            (getPacing <$> enOut{{@index}}){{#unless @last}} <*>{{/unless}}
+                            {{/each}}
         {{/if}}
 
         genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag

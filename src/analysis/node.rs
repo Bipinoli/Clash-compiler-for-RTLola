@@ -108,7 +108,7 @@ impl Node {
     pub fn get_non_offset_parents(&self, mir: &RtLolaMir) -> Vec<Node> {
         let mut parents: Vec<Node> = Vec::new();
         match self {
-            Node::InputStream(x) => (),
+            Node::InputStream(_) => (),
             Node::OutputStream(x) => {
                 for parent in &mir.outputs[x.clone()].accesses {
                     for (_, access_kind) in &parent.1 {

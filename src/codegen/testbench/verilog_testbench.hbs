@@ -21,16 +21,14 @@ module testbench;
     wire q_push_valid;
     wire q_pop_valid;
 
-    {{#each inputs}}
-    wire pacing_in{{@index}};
-    {{/each}}
-    {{#each output_pacings}}
-        {{#each this.deps}}
-    wire pacing_out{{../idx}}_{{@index}};
-        {{/each}}
-    {{/each}}
     {{#each sliding_windows}}
     wire slide_{{@index}};
+    {{/each}}
+    {{#each inputs}}
+    wire enable_in{{@index}};
+    {{/each}}
+    {{#each outputs}}
+    wire enable_out{{@index}};
     {{/each}}
     {{/if}}
     
@@ -45,16 +43,14 @@ module testbench;
                         {{/each}}
                         {{#if debug}}
                         ,q_push, q_pop, q_push_valid, q_pop_valid
-                            {{#each inputs}}
-                        ,pacing_in{{@index}}
-                            {{/each}}
-                            {{#each output_pacings}}
-                                {{#each this.deps}}
-                        ,pacing_out{{../idx}}_{{@index}}
-                                {{/each}}
-                            {{/each}}
                             {{#each sliding_windows}}
                         ,slide_{{@index}}
+                            {{/each}}
+                            {{#each inputs}}
+                        ,enable_in{{@index}}
+                            {{/each}}
+                            {{#each outputs}}
+                        ,enable_out{{@index}}
                             {{/each}}
                         {{/if}}
                        );

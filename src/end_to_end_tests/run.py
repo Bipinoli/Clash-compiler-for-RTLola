@@ -78,10 +78,14 @@ def test(test_dir):
     expected = read_expected_output(f"tests/{test_dir}")
     actual = read_actual_output(f"tests/{test_dir}")
     if actual == expected:
-        results.append(f"{bcolors.OKGREEN}Passed: {test_dir}{bcolors.ENDC}")
+        result = f"{bcolors.OKGREEN}Passed: {test_dir}{bcolors.ENDC}"
+        print(f"\n{result}\n")
+        results.append(result)
         passed = True
     else:
-        results.append(f"{bcolors.FAIL}Failed: {test_dir}{bcolors.ENDC}")
+        result = f"{bcolors.FAIL}Failed: {test_dir}{bcolors.ENDC}"
+        print(f"\n{result}\n")
+        results.append(result)
         for i in range(len(actual)):
             if actual[i] != expected[i]:
                 results.append(f"{bcolors.WARNING}Incorrect Output {i+1}:\n\texpected: {expected[i]}\n\tactual: {actual[i]}\n{bcolors.ENDC}")

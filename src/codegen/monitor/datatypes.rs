@@ -12,6 +12,7 @@ use crate::{analysis::HardwareIR, codegen::monitor::register_template};
 
 #[derive(Serialize)]
 struct Data {
+    debug: bool,
     inputs: Vec<Stream>,
     outputs: Vec<Stream>,
     sliding_windows: Vec<Stream>,
@@ -87,6 +88,7 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         handlebars,
     );
     let data = Data {
+        debug: ir.debug,
         inputs: get_inputs(ir),
         outputs: get_outputs(ir),
         sliding_windows: get_sliding_windows(ir),
