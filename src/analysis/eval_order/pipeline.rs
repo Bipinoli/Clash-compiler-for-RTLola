@@ -52,13 +52,45 @@ pub fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLo
     let max_shift = all_nodes
         .into_iter()
         .map(|node| {
-            node.get_offset_parents(mir)
+            let shift_from_offsets = node
+                .get_offset_parents(mir)
                 .into_iter()
                 .map(|(parent, offset)| {
                     calculate_pipeline_wait(&node, &parent, offset, eval_order, mir)
                 })
                 .max()
-                .unwrap_or(0)
+                .unwrap_or(0);
+            let shift_from_holds = {
+                // There could be a cycle with holds
+                //
+                // For example:
+                // input x: Int
+                // output a := x + b.hold(or: 1)
+                // output b @1kHz := a.hold(or: 0) + 1
+                //
+                // To break such cycles we evaluate event-based streams before periodic
+                // Therefor the eval order is: x -> a -> b
+                //
+                // So when dealing with hold(), if we need a value from the node later in the evaluation order
+                // then the latest value if from the last eval cycle i.e offset - 1
+                // Whereas if we hold() a value from a node that is earlier in the evaluation order
+                // then the latest value would be from the current cycle i.e offset 0
+                node.get_hold_parents(mir)
+                    .into_iter()
+                    .map(|parent| {
+                        let parent_eval_time = utils::find_level(&parent, eval_order);
+                        let child_eval_time = utils::find_level(&node, eval_order);
+                        let offset: usize = if parent_eval_time > child_eval_time {
+                            1
+                        } else {
+                            0
+                        };
+                        calculate_pipeline_wait(&node, &parent, offset, eval_order, mir)
+                    })
+                    .max()
+                    .unwrap_or(0)
+            };
+            std::cmp::max(shift_from_holds, shift_from_offsets)
         })
         .max();
     max_shift.unwrap_or(0)
