@@ -79,7 +79,7 @@ def test(test_dir):
     actual = read_actual_output(f"tests/{test_dir}")
     expected = expected[0:min(len(expected), len(actual))]
     actual = actual[0:min(len(expected), len(actual))]
-    if actual == expected:
+    if len(actual) > 0 and actual == expected:
         result = f"{bcolors.OKGREEN}Passed: {test_dir}{bcolors.ENDC}"
         print(f"\n{result}\n")
         results.append(result)

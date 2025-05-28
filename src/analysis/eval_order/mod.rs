@@ -291,8 +291,158 @@ fn merge_eval_orders_by_offset(
 fn merge_periodic_and_event_based_eval_orders(
     event_based: Vec<Vec<Node>>,
     periodic: Vec<Vec<Node>>,
-    _mir: &RtLolaMir,
+    mir: &RtLolaMir,
 ) -> Vec<Vec<Node>> {
-    let retval = vec![&event_based[..], &periodic[..]].concat();
-    retval
+    // Evaluating periodic nodes after all event-based is always valid (RTlola event-based node before periodic node rule)
+    // However, we can do better as periodic nodes don't have to wait for those event-based nodes which are not connected via data-dependency
+    // For simplicity we also don't allow stretching of eval orders here
+    // And follow the heuristics of finding the earliest level where the periodic eval order could be started
+    merge_periodic_and_event_based(
+        event_based.clone(),
+        periodic.clone(),
+        get_lowest_offset(&event_based, &periodic, mir),
+    )
+}
+
+fn get_lowest_offset(
+    event_based: &Vec<Vec<Node>>,
+    periodic: &Vec<Vec<Node>>,
+    mir: &RtLolaMir,
+) -> usize {
+    // We could just iterate down from the highest offset till the invalid point is reached
+    // However as this is monotonic, the threshold can be more efficiently found with binary search
+    let edges_between = all_edges_between_event_based_and_periodic(periodic, event_based, mir);
+    let hi = event_based.len() as i32;
+    let is_valid =
+        |offset: i32| is_valid_merge(offset as usize, periodic, event_based, &edges_between);
+    binary_search_invalid_threshold(hi, &is_valid) as usize
+}
+
+fn binary_search_invalid_threshold(hi: i32, is_valid: &dyn Fn(i32) -> bool) -> i32 {
+    let mut lo: i32 = -1;
+    let mut hi: i32 = hi;
+    while lo + 1 < hi {
+        let md = (lo + hi) / 2;
+        if is_valid(md) {
+            hi = md;
+        } else {
+            lo = md;
+        }
+    }
+    lo + 1
+}
+
+fn is_valid_merge(
+    periodic_offset: usize,
+    periodic: &Vec<Vec<Node>>,
+    event_based: &Vec<Vec<Node>>,
+    edges_between: &Vec<Edge>,
+) -> bool {
+    // If there is an edge between event-based and periodic, then the event-based node must be evaluated before periodic
+    for edge in edges_between {
+        let periodic_node_level = periodic_offset + utils::find_level(&edge.periodic, &periodic);
+        let event_based_node_level = utils::find_level(&edge.event_based, &event_based);
+        if periodic_node_level <= event_based_node_level {
+            return false;
+        }
+    }
+    true
+}
+
+struct Edge {
+    periodic: Node,
+    event_based: Node,
+}
+
+fn all_edges_between_event_based_and_periodic(
+    periodic_eval_order: &Vec<Vec<Node>>,
+    event_based_eval_order: &Vec<Vec<Node>>,
+    mir: &RtLolaMir,
+) -> Vec<Edge> {
+    let periodic_nodes: HashSet<Node> = periodic_eval_order.clone().into_iter().flatten().collect();
+    let event_based_nodes: HashSet<Node> = event_based_eval_order
+        .clone()
+        .into_iter()
+        .flatten()
+        .collect();
+    let mut edges: Vec<Edge> = Vec::new();
+    for periodic_node in &periodic_nodes {
+        for (child, _) in periodic_node.get_children(mir) {
+            if event_based_nodes.contains(&child) {
+                edges.push(Edge {
+                    periodic: periodic_node.clone(),
+                    event_based: child.clone(),
+                });
+            }
+        }
+    }
+    for event_based_node in &event_based_nodes {
+        for (child, _) in event_based_node.get_children(mir) {
+            if periodic_nodes.contains(&child) {
+                edges.push(Edge {
+                    periodic: child.clone(),
+                    event_based: event_based_node.clone(),
+                });
+            }
+        }
+    }
+    edges
+}
+
+fn merge_periodic_and_event_based(
+    event_based: Vec<Vec<Node>>,
+    periodic: Vec<Vec<Node>>,
+    periodic_offset: usize,
+) -> Vec<Vec<Node>> {
+    let new_length = std::cmp::max(periodic_offset + periodic.len(), event_based.len());
+    let (padded_event_based, padded_periodic) = {
+        if new_length > event_based.len() {
+            let ev_padding = new_length - event_based.len();
+            let pr_padding = periodic_offset;
+            (
+                vec![&event_based[..], &vec![vec![]; ev_padding][..]].concat(),
+                vec![&vec![vec![]; pr_padding][..], &periodic[..]].concat(),
+            )
+        } else {
+            let padding1 = periodic_offset;
+            let padding2 = new_length - (periodic.len() + padding1);
+            (
+                event_based,
+                vec![
+                    &vec![vec![]; padding1][..],
+                    &periodic[..],
+                    &vec![vec![]; padding2][..],
+                ]
+                .concat(),
+            )
+        }
+    };
+    padded_event_based
+        .iter()
+        .zip(padded_periodic)
+        .map(|(v1, v2)| {
+            let mut v = v1.clone();
+            v.extend(v2);
+            v
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn binary_search_invalid_threshold_works() {
+        for hi in 0..10 {
+            for expected in 0..hi + 1 {
+                let is_valid = |v: i32| v >= expected;
+                let ans = binary_search_invalid_threshold(hi, &is_valid);
+                assert_eq!(
+                    ans, expected,
+                    "Expected: {expected}, Actual: {ans}, with hi: {hi}"
+                );
+            }
+        }
+    }
 }
