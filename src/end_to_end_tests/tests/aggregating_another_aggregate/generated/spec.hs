@@ -28,16 +28,16 @@ import Clash.Prelude
 -- d
 
 -- Memory Window
+-- window x = 1
 -- window z = 1
+-- window c = 3
 -- window y = 1
--- window d = 1
--- window a = 5
 -- window b = 5
 -- window sw(a,c) = 1
--- window c = 3
--- window sw(b,c) = 1
 -- window sw(c,d) = 1
--- window x = 1
+-- window a = 5
+-- window sw(b,c) = 1
+-- window d = 1
 
 -- Pipeline Visualization
 -- x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z          

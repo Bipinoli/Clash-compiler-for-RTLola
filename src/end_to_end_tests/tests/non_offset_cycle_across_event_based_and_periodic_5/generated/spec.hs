@@ -22,33 +22,30 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- x, d, y
--- a
--- e, b
+-- x, y, d
+-- a, e, b
 -- f, c
 -- g
 
 -- Memory Window
--- window e = 1
+-- window x = 1
 -- window f = 1
+-- window a = 1
 -- window g = 1
 -- window b = 1
 -- window y = 1
--- window x = 1
--- window a = 1
--- window c = 1
+-- window e = 1
 -- window d = 2
+-- window c = 1
 
 -- Pipeline Visualization
--- x,d,y |       |       |       | x,d,y |       |       |       | x,d,y |      
+-- x,y,d |       |       | x,y,d |       |       | x,y,d |       |       | x,y,d
 -- -----------------------------------------------------------------------------
---       | a     |       |       |       | a     |       |       |       | a    
+--       | a,e,b |       |       | a,e,b |       |       | a,e,b |       |      
 -- -----------------------------------------------------------------------------
---       |       | e,b   |       |       |       | e,b   |       |       |      
+--       |       | f,c   |       |       | f,c   |       |       | f,c   |      
 -- -----------------------------------------------------------------------------
---       |       |       | f,c   |       |       |       | f,c   |       |      
--- -----------------------------------------------------------------------------
---       |       |       |       | g     |       |       |       | g     |      
+--       |       |       | g     |       |       | g     |       |       | g    
 -- -----------------------------------------------------------------------------
 
 -- input0 = x
@@ -165,7 +162,7 @@ nullPacingOut6 = PacingOut6 False
 
 ---------------------------------------------------------------
 
-type QMemSize = 5
+type QMemSize = 4
 
 type QData = Event
 type QMem = Vec QMemSize QData
@@ -361,8 +358,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut6 = (.pacingOut6) <$> pacings
         
         tIn0 = genTag (getPacing <$> pIn0)
-        tOut3 = genTag (getPacing <$> pOut3)
         tIn1 = genTag (getPacing <$> pIn1)
+        tOut3 = genTag (getPacing <$> pOut3)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut4 = genTag (getPacing <$> pOut4)
         tOut1 = genTag (getPacing <$> pOut1)
@@ -381,26 +378,25 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags
         curTagsLevel4 = delayFor d4 tagsDefault curTags
-        curTagsLevel5 = delayFor d5 tagsDefault curTags
         nullT = invalidTag
 
         enIn0 = delayFor d1 nullPacingIn0 pIn0
-        enOut3 = delayFor d1 nullPacingOut3 pOut3
         enIn1 = delayFor d1 nullPacingIn1 pIn1
+        enOut3 = delayFor d1 nullPacingOut3 pOut3
         enOut0 = delayFor d2 nullPacingOut0 pOut0
-        enOut4 = delayFor d3 nullPacingOut4 pOut4
-        enOut1 = delayFor d3 nullPacingOut1 pOut1
-        enOut5 = delayFor d4 nullPacingOut5 pOut5
-        enOut2 = delayFor d4 nullPacingOut2 pOut2
-        enOut6 = delayFor d5 nullPacingOut6 pOut6
+        enOut4 = delayFor d2 nullPacingOut4 pOut4
+        enOut1 = delayFor d2 nullPacingOut1 pOut1
+        enOut5 = delayFor d3 nullPacingOut5 pOut5
+        enOut2 = delayFor d3 nullPacingOut2 pOut2
+        enOut6 = delayFor d4 nullPacingOut6 pOut6
 
-        output0Aktv = delayFor d6 False (getPacing <$> pOut0)
-        output1Aktv = delayFor d6 False (getPacing <$> pOut1)
-        output2Aktv = delayFor d6 False (getPacing <$> pOut2)
-        output3Aktv = delayFor d6 False (getPacing <$> pOut3)
-        output4Aktv = delayFor d6 False (getPacing <$> pOut4)
-        output5Aktv = delayFor d6 False (getPacing <$> pOut5)
-        output6Aktv = delayFor d6 False (getPacing <$> pOut6)
+        output0Aktv = delayFor d5 False (getPacing <$> pOut0)
+        output1Aktv = delayFor d5 False (getPacing <$> pOut1)
+        output2Aktv = delayFor d5 False (getPacing <$> pOut2)
+        output3Aktv = delayFor d5 False (getPacing <$> pOut3)
+        output4Aktv = delayFor d5 False (getPacing <$> pOut4)
+        output5Aktv = delayFor d5 False (getPacing <$> pOut5)
+        output6Aktv = delayFor d5 False (getPacing <$> pOut6)
 
         -- Evaluation of input windows: level 0
         input0Win = input0Window enIn0 tIn0 input0Data
@@ -410,15 +406,15 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         out0 = outputStream0 enOut0 ((.output0) <$> curTagsLevel1) out0Data0 
         out0Data0 = getMatchingTagFromNonVec <$> input0Win <*> ((.input0) <$> curTagsLevel1) <*> (pure (0))
 
-        -- Evaluation of output 1: level 2
-        out1 = outputStream1 enOut1 ((.output1) <$> curTagsLevel2) out1Data0 out1Data1 
+        -- Evaluation of output 1: level 1
+        out1 = outputStream1 enOut1 ((.output1) <$> curTagsLevel1) out1Data0 out1Data1 
         out1Data0 = getLatestValueFromNonVec <$> input1Win <*> out1Data0Dflt
         out1Data0Dflt = pure (1)
         out1Data1 = getLatestValue <$> out3 <*> out1Data1Dflt
         out1Data1Dflt = pure (2)
 
-        -- Evaluation of output 2: level 3
-        out2 = outputStream2 enOut2 ((.output2) <$> curTagsLevel3) out2Data0 out2Data1 
+        -- Evaluation of output 2: level 2
+        out2 = outputStream2 enOut2 ((.output2) <$> curTagsLevel2) out2Data0 out2Data1 
         out2Data0 = getLatestValueFromNonVec <$> out1 <*> out2Data0Dflt
         out2Data0Dflt = pure (10)
         out2Data1 = getLatestValueFromNonVec <$> out0 <*> out2Data1Dflt
@@ -429,20 +425,20 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         out3Data0 = getLatestValueFromNonVec <$> out2 <*> out3Data0Dflt
         out3Data0Dflt = pure (0)
 
-        -- Evaluation of output 4: level 2
-        out4 = outputStream4 enOut4 ((.output4) <$> curTagsLevel2) out4Data0 
-        out4Data0 = getOffsetFromNonVec <$> out4 <*> ((.output4) <$> curTagsLevel2) <*> (pure 1) <*> out4Data0Dflt
+        -- Evaluation of output 4: level 1
+        out4 = outputStream4 enOut4 ((.output4) <$> curTagsLevel1) out4Data0 
+        out4Data0 = getOffsetFromNonVec <$> out4 <*> ((.output4) <$> curTagsLevel1) <*> (pure 1) <*> out4Data0Dflt
         out4Data0Dflt = pure (0)
 
-        -- Evaluation of output 5: level 3
-        out5 = outputStream5 enOut5 ((.output5) <$> curTagsLevel3) out5Data0 
-        out5Data0 = getMatchingTagFromNonVec <$> out4 <*> ((.output4) <$> curTagsLevel3) <*> (pure (0))
+        -- Evaluation of output 5: level 2
+        out5 = outputStream5 enOut5 ((.output5) <$> curTagsLevel2) out5Data0 
+        out5Data0 = getMatchingTagFromNonVec <$> out4 <*> ((.output4) <$> curTagsLevel2) <*> (pure (0))
 
-        -- Evaluation of output 6: level 4
-        out6 = outputStream6 enOut6 ((.output6) <$> curTagsLevel4) out6Data0 
-        out6Data0 = getMatchingTagFromNonVec <$> out5 <*> ((.output5) <$> curTagsLevel4) <*> (pure (0))
+        -- Evaluation of output 6: level 3
+        out6 = outputStream6 enOut6 ((.output6) <$> curTagsLevel3) out6Data0 
+        out6Data0 = getMatchingTagFromNonVec <$> out5 <*> ((.output5) <$> curTagsLevel3) <*> (pure (0))
 
-        -- Outputing all results: level 5
+        -- Outputing all results: level 4
         output0 = ValidInt <$> output0Data <*> output0Aktv
         (_, output0Data) = unbundle out0
         output1 = ValidInt <$> output1Data <*> output1Aktv
@@ -450,7 +446,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         output2 = ValidInt <$> output2Data <*> output2Aktv
         (_, output2Data) = unbundle out2
         output3 = ValidInt <$> output3Data <*> output3Aktv
-        output3Data = getMatchingTag <$> out3 <*> ((.output3) <$> curTagsLevel5) <*> (pure 0)
+        output3Data = getMatchingTag <$> out3 <*> ((.output3) <$> curTagsLevel4) <*> (pure 0)
         output4 = ValidInt <$> output4Data <*> output4Aktv
         (_, output4Data) = unbundle out4
         output5 = ValidInt <$> output5Data <*> output5Aktv
@@ -482,7 +478,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 pipelineReady :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
 pipelineReady rst = toWait .==. pure 0 
     where 
-        waitTime = pure 3 :: Signal dom Int
+        waitTime = pure 2 :: Signal dom Int
         toWait = register (0 :: Int) next
         next = mux rst waitTime (mux (toWait .>. pure 0) (toWait - 1) toWait)
 

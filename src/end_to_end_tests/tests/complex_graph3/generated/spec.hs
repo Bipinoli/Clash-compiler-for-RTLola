@@ -31,17 +31,17 @@ import Clash.Prelude
 -- h, e
 
 -- Memory Window
--- window e = 1
--- window d = 1
--- window i = 2
--- window a = 2
--- window f = 2
+-- window x = 1
 -- window h = 4
+-- window f = 2
+-- window e = 1
+-- window i = 2
 -- window c = 1
--- window b = 1
+-- window d = 1
 -- window j = 2
 -- window g = 2
--- window x = 1
+-- window a = 2
+-- window b = 1
 
 -- Pipeline Visualization
 -- x,g |     |     |     | x,g |     |     |     | x,g |    

@@ -29,46 +29,37 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- x, j
--- a, d, k, h
--- b, e, f, i
+-- x, j, l
+-- a, d, k, h, m
+-- b, f, e, i, n
 -- c, g
--- l
--- m
--- n
 
 -- Memory Window
--- window d = 1
 -- window a = 1
 -- window k = 3
--- window f = 1
--- window x = 1
--- window h = 1
 -- window c = 1
--- window b = 1
--- window i = 1
+-- window l = 2
+-- window f = 1
+-- window h = 1
+-- window m = 1
 -- window n = 1
 -- window g = 1
--- window e = 1
--- window m = 1
+-- window b = 1
+-- window x = 1
 -- window j = 2
--- window l = 1
+-- window e = 1
+-- window d = 1
+-- window i = 1
 
 -- Pipeline Visualization
--- x,j     |         |         |         |         |         | x,j     |         |         |        
--- -------------------------------------------------------------------------------------------------
---         | a,d,k,h |         |         |         |         |         | a,d,k,h |         |        
--- -------------------------------------------------------------------------------------------------
---         |         | b,e,f,i |         |         |         |         |         | b,e,f,i |        
--- -------------------------------------------------------------------------------------------------
---         |         |         | c,g     |         |         |         |         |         | c,g    
--- -------------------------------------------------------------------------------------------------
---         |         |         |         | l       |         |         |         |         |        
--- -------------------------------------------------------------------------------------------------
---         |         |         |         |         | m       |         |         |         |        
--- -------------------------------------------------------------------------------------------------
---         |         |         |         |         |         | n       |         |         |        
--- -------------------------------------------------------------------------------------------------
+-- x,j,l     |           |           | x,j,l     |           |           | x,j,l     |           |           | x,j,l    
+-- ---------------------------------------------------------------------------------------------------------------------
+--           | a,d,k,h,m |           |           | a,d,k,h,m |           |           | a,d,k,h,m |           |          
+-- ---------------------------------------------------------------------------------------------------------------------
+--           |           | b,f,e,i,n |           |           | b,f,e,i,n |           |           | b,f,e,i,n |          
+-- ---------------------------------------------------------------------------------------------------------------------
+--           |           |           | c,g       |           |           | c,g       |           |           | c,g      
+-- ---------------------------------------------------------------------------------------------------------------------
 
 -- input0 = x
 -- output0 = a
@@ -234,7 +225,7 @@ nullPacingOut13 = PacingOut13 False
 
 ---------------------------------------------------------------
 
-type QMemSize = 7
+type QMemSize = 4
 
 type QData = Event
 type QMem = Vec QMemSize QData
@@ -438,19 +429,19 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         
         tIn0 = genTag (getPacing <$> pIn0)
         tOut9 = genTag (getPacing <$> pOut9)
+        tOut11 = genTag (getPacing <$> pOut11)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut3 = genTag (getPacing <$> pOut3)
         tOut10 = genTag (getPacing <$> pOut10)
         tOut7 = genTag (getPacing <$> pOut7)
+        tOut12 = genTag (getPacing <$> pOut12)
         tOut1 = genTag (getPacing <$> pOut1)
-        tOut4 = genTag (getPacing <$> pOut4)
         tOut5 = genTag (getPacing <$> pOut5)
+        tOut4 = genTag (getPacing <$> pOut4)
         tOut8 = genTag (getPacing <$> pOut8)
+        tOut13 = genTag (getPacing <$> pOut13)
         tOut2 = genTag (getPacing <$> pOut2)
         tOut6 = genTag (getPacing <$> pOut6)
-        tOut11 = genTag (getPacing <$> pOut11)
-        tOut12 = genTag (getPacing <$> pOut12)
-        tOut13 = genTag (getPacing <$> pOut13)
 
         -- tag generation takes 1 cycle so we need to delay the input data
         input0Data = delay 0 (((.value). (.input0)) <$> inputs)
@@ -462,41 +453,38 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags
         curTagsLevel4 = delayFor d4 tagsDefault curTags
-        curTagsLevel5 = delayFor d5 tagsDefault curTags
-        curTagsLevel6 = delayFor d6 tagsDefault curTags
-        curTagsLevel7 = delayFor d7 tagsDefault curTags
         nullT = invalidTag
 
         enIn0 = delayFor d1 nullPacingIn0 pIn0
         enOut9 = delayFor d1 nullPacingOut9 pOut9
+        enOut11 = delayFor d1 nullPacingOut11 pOut11
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut3 = delayFor d2 nullPacingOut3 pOut3
         enOut10 = delayFor d2 nullPacingOut10 pOut10
         enOut7 = delayFor d2 nullPacingOut7 pOut7
+        enOut12 = delayFor d2 nullPacingOut12 pOut12
         enOut1 = delayFor d3 nullPacingOut1 pOut1
-        enOut4 = delayFor d3 nullPacingOut4 pOut4
         enOut5 = delayFor d3 nullPacingOut5 pOut5
+        enOut4 = delayFor d3 nullPacingOut4 pOut4
         enOut8 = delayFor d3 nullPacingOut8 pOut8
+        enOut13 = delayFor d3 nullPacingOut13 pOut13
         enOut2 = delayFor d4 nullPacingOut2 pOut2
         enOut6 = delayFor d4 nullPacingOut6 pOut6
-        enOut11 = delayFor d5 nullPacingOut11 pOut11
-        enOut12 = delayFor d6 nullPacingOut12 pOut12
-        enOut13 = delayFor d7 nullPacingOut13 pOut13
 
-        output0Aktv = delayFor d8 False (getPacing <$> pOut0)
-        output1Aktv = delayFor d8 False (getPacing <$> pOut1)
-        output2Aktv = delayFor d8 False (getPacing <$> pOut2)
-        output3Aktv = delayFor d8 False (getPacing <$> pOut3)
-        output4Aktv = delayFor d8 False (getPacing <$> pOut4)
-        output5Aktv = delayFor d8 False (getPacing <$> pOut5)
-        output6Aktv = delayFor d8 False (getPacing <$> pOut6)
-        output7Aktv = delayFor d8 False (getPacing <$> pOut7)
-        output8Aktv = delayFor d8 False (getPacing <$> pOut8)
-        output9Aktv = delayFor d8 False (getPacing <$> pOut9)
-        output10Aktv = delayFor d8 False (getPacing <$> pOut10)
-        output11Aktv = delayFor d8 False (getPacing <$> pOut11)
-        output12Aktv = delayFor d8 False (getPacing <$> pOut12)
-        output13Aktv = delayFor d8 False (getPacing <$> pOut13)
+        output0Aktv = delayFor d5 False (getPacing <$> pOut0)
+        output1Aktv = delayFor d5 False (getPacing <$> pOut1)
+        output2Aktv = delayFor d5 False (getPacing <$> pOut2)
+        output3Aktv = delayFor d5 False (getPacing <$> pOut3)
+        output4Aktv = delayFor d5 False (getPacing <$> pOut4)
+        output5Aktv = delayFor d5 False (getPacing <$> pOut5)
+        output6Aktv = delayFor d5 False (getPacing <$> pOut6)
+        output7Aktv = delayFor d5 False (getPacing <$> pOut7)
+        output8Aktv = delayFor d5 False (getPacing <$> pOut8)
+        output9Aktv = delayFor d5 False (getPacing <$> pOut9)
+        output10Aktv = delayFor d5 False (getPacing <$> pOut10)
+        output11Aktv = delayFor d5 False (getPacing <$> pOut11)
+        output12Aktv = delayFor d5 False (getPacing <$> pOut12)
+        output13Aktv = delayFor d5 False (getPacing <$> pOut13)
 
         -- Evaluation of input windows: level 0
         input0Win = input0Window enIn0 tIn0 input0Data
@@ -558,22 +546,22 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         out10 = outputStream10 enOut10 ((.output10) <$> curTagsLevel1) out10Data0 
         out10Data0 = getMatchingTag <$> out9 <*> ((.output9) <$> curTagsLevel1) <*> (pure (0))
 
-        -- Evaluation of output 11: level 4
-        out11 = outputStream11 enOut11 ((.output11) <$> curTagsLevel4) out11Data0 
-        out11Data0 = getOffsetFromNonVec <$> out11 <*> ((.output11) <$> curTagsLevel4) <*> (pure 1) <*> out11Data0Dflt
+        -- Evaluation of output 11: level 0
+        out11 = outputStream11 enOut11 tOut11 out11Data0 
+        out11Data0 = getOffset <$> out11 <*> tOut11 <*> (pure 1) <*> out11Data0Dflt
         out11Data0Dflt = pure (0)
 
-        -- Evaluation of output 12: level 5
-        out12 = outputStream12 enOut12 ((.output12) <$> curTagsLevel5) out12Data0 out12Data1 
-        out12Data0 = getMatchingTagFromNonVec <$> out11 <*> ((.output11) <$> curTagsLevel5) <*> (pure (0))
-        out12Data1 = getOffsetFromNonVec <$> out13 <*> ((.output13) <$> curTagsLevel5) <*> (pure 1) <*> out12Data1Dflt
+        -- Evaluation of output 12: level 1
+        out12 = outputStream12 enOut12 ((.output12) <$> curTagsLevel1) out12Data0 out12Data1 
+        out12Data0 = getMatchingTag <$> out11 <*> ((.output11) <$> curTagsLevel1) <*> (pure (0))
+        out12Data1 = getOffsetFromNonVec <$> out13 <*> ((.output13) <$> curTagsLevel1) <*> (pure 1) <*> out12Data1Dflt
         out12Data1Dflt = pure (0)
 
-        -- Evaluation of output 13: level 6
-        out13 = outputStream13 enOut13 ((.output13) <$> curTagsLevel6) out13Data0 
-        out13Data0 = getMatchingTagFromNonVec <$> out12 <*> ((.output12) <$> curTagsLevel6) <*> (pure (0))
+        -- Evaluation of output 13: level 2
+        out13 = outputStream13 enOut13 ((.output13) <$> curTagsLevel2) out13Data0 
+        out13Data0 = getMatchingTagFromNonVec <$> out12 <*> ((.output12) <$> curTagsLevel2) <*> (pure (0))
 
-        -- Outputing all results: level 7
+        -- Outputing all results: level 4
         output0 = ValidInt <$> output0Data <*> output0Aktv
         (_, output0Data) = unbundle out0
         output1 = ValidInt <$> output1Data <*> output1Aktv
@@ -593,11 +581,11 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         output8 = ValidInt <$> output8Data <*> output8Aktv
         (_, output8Data) = unbundle out8
         output9 = ValidInt <$> output9Data <*> output9Aktv
-        output9Data = getMatchingTag <$> out9 <*> ((.output9) <$> curTagsLevel7) <*> (pure 0)
+        output9Data = getMatchingTag <$> out9 <*> ((.output9) <$> curTagsLevel4) <*> (pure 0)
         output10 = ValidInt <$> output10Data <*> output10Aktv
-        output10Data = getMatchingTag <$> out10 <*> ((.output10) <$> curTagsLevel7) <*> (pure 0)
+        output10Data = getMatchingTag <$> out10 <*> ((.output10) <$> curTagsLevel4) <*> (pure 0)
         output11 = ValidInt <$> output11Data <*> output11Aktv
-        (_, output11Data) = unbundle out11
+        output11Data = getMatchingTag <$> out11 <*> ((.output11) <$> curTagsLevel4) <*> (pure 0)
         output12 = ValidInt <$> output12Data <*> output12Aktv
         (_, output12Data) = unbundle out12
         output13 = ValidInt <$> output13Data <*> output13Aktv
@@ -633,7 +621,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 pipelineReady :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
 pipelineReady rst = toWait .==. pure 0 
     where 
-        waitTime = pure 5 :: Signal dom Int
+        waitTime = pure 2 :: Signal dom Int
         toWait = register (0 :: Int) next
         next = mux rst waitTime (mux (toWait .>. pure 0) (toWait - 1) toWait)
 
@@ -735,10 +723,11 @@ outputStream10 en tag out9_0 = result
         nextVal = out9_0 + 1
 
 
-outputStream11 :: HiddenClockResetEnable dom => Signal dom PacingOut11 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream11 :: HiddenClockResetEnable dom => Signal dom PacingOut11 -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 2 (Tag, Int))
 outputStream11 en tag out11_0 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
+        next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out11_0 + 1
 

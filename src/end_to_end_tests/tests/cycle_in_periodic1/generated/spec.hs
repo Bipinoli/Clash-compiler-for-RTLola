@@ -15,8 +15,7 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- x
--- b
+-- x, b
 -- a
 
 -- Memory Window
@@ -25,12 +24,10 @@ import Clash.Prelude
 -- window a = 1
 
 -- Pipeline Visualization
--- x |   | x |   | x |   | x |   | x |  
--- -------------------------------------
---   | b |   | b |   | b |   | b |   | b
--- -------------------------------------
---   |   | a |   | a |   | a |   | a |  
--- -------------------------------------
+-- x,b |     | x,b |     | x,b |     | x,b |     | x,b |    
+-- ---------------------------------------------------------
+--     | a   |     | a   |     | a   |     | a   |     | a  
+-- ---------------------------------------------------------
 
 -- input0 = x
 -- output0 = a
@@ -293,32 +290,31 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTags = Tags <$> tIn0 <*> tOut0 <*> tOut1
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
-        curTagsLevel3 = delayFor d3 tagsDefault curTags
         nullT = invalidTag
 
         enIn0 = delayFor d1 nullPacingIn0 pIn0
-        enOut1 = delayFor d2 nullPacingOut1 pOut1
-        enOut0 = delayFor d3 nullPacingOut0 pOut0
+        enOut1 = delayFor d1 nullPacingOut1 pOut1
+        enOut0 = delayFor d2 nullPacingOut0 pOut0
 
-        output0Aktv = delayFor d4 False (getPacing <$> pOut0)
-        output1Aktv = delayFor d4 False (getPacing <$> pOut1)
+        output0Aktv = delayFor d3 False (getPacing <$> pOut0)
+        output1Aktv = delayFor d3 False (getPacing <$> pOut1)
 
         -- Evaluation of input windows: level 0
         input0Win = input0Window enIn0 tIn0 input0Data
 
-        -- Evaluation of output 0: level 2
-        out0 = outputStream0 enOut0 ((.output0) <$> curTagsLevel2) out0Data0 out0Data1 
-        out0Data0 = getOffsetFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure 1) <*> out0Data0Dflt
+        -- Evaluation of output 0: level 1
+        out0 = outputStream0 enOut0 ((.output0) <$> curTagsLevel1) out0Data0 out0Data1 
+        out0Data0 = getOffsetFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel1) <*> (pure 1) <*> out0Data0Dflt
         out0Data0Dflt = pure (0)
         out0Data1 = getLatestValueFromNonVec <$> out1 <*> out0Data1Dflt
         out0Data1Dflt = pure (0)
 
-        -- Evaluation of output 1: level 1
-        out1 = outputStream1 enOut1 ((.output1) <$> curTagsLevel1) out1Data0 
-        out1Data0 = getOffsetFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel1) <*> (pure 1) <*> out1Data0Dflt
+        -- Evaluation of output 1: level 0
+        out1 = outputStream1 enOut1 tOut1 out1Data0 
+        out1Data0 = getOffsetFromNonVec <$> out0 <*> tOut0 <*> (pure 1) <*> out1Data0Dflt
         out1Data0Dflt = pure (0)
 
-        -- Outputing all results: level 3
+        -- Outputing all results: level 2
         output0 = ValidInt <$> output0Data <*> output0Aktv
         (_, output0Data) = unbundle out0
         output1 = ValidInt <$> output1Data <*> output1Aktv

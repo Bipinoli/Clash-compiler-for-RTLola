@@ -22,26 +22,26 @@ import Clash.Prelude
 
 -- Evaluation Order
 -- x, z, y
--- a, b
+-- b, a
 -- c, d
 -- sw(d,e)
 -- e
 
 -- Memory Window
--- window x = 1
--- window a = 4
--- window b = 4
--- window y = 1
--- window d = 3
--- window sw(d,e) = 1
 -- window z = 2
+-- window sw(d,e) = 1
+-- window b = 4
 -- window c = 3
 -- window e = 1
+-- window x = 1
+-- window d = 3
+-- window a = 4
+-- window y = 1
 
 -- Pipeline Visualization
 -- x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y  
 -- -------------------------------------------------------------------------------------------------
---         | a,b     | a,b     | a,b     | a,b     | a,b     | a,b     | a,b     | a,b     | a,b    
+--         | b,a     | b,a     | b,a     | b,a     | b,a     | b,a     | b,a     | b,a     | b,a    
 -- -------------------------------------------------------------------------------------------------
 --         |         | c,d     | c,d     | c,d     | c,d     | c,d     | c,d     | c,d     | c,d    
 -- -------------------------------------------------------------------------------------------------
@@ -360,8 +360,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tIn0 = genTag (getPacing <$> pIn0)
         tIn2 = genTag (getPacing <$> pIn2)
         tIn1 = genTag (getPacing <$> pIn1)
-        tOut0 = genTag (getPacing <$> pOut0)
         tOut1 = genTag (getPacing <$> pOut1)
+        tOut0 = genTag (getPacing <$> pOut0)
         tOut2 = genTag (getPacing <$> pOut2)
         tOut3 = genTag (getPacing <$> pOut3)
         tSw0 = genTag (getPacing <$> pOut3)
@@ -385,8 +385,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enIn0 = delayFor d1 nullPacingIn0 pIn0
         enIn2 = delayFor d1 nullPacingIn2 pIn2
         enIn1 = delayFor d1 nullPacingIn1 pIn1
-        enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut1 = delayFor d2 nullPacingOut1 pOut1
+        enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut2 = delayFor d3 nullPacingOut2 pOut2
         enOut3 = delayFor d3 nullPacingOut3 pOut3
         enSw0 = delayFor d4 nullPacingOut3 pOut3
