@@ -46,14 +46,14 @@
         },
         {
             "name": "topEntity.v",
-            "sha256": "09b1cb0e8e7b22d77ebbcd840f6f18025b2d49005a0fb9559825fa93683c11c4"
+            "sha256": "c9b5b0eb7013099cdef1e02f52015af3e5fcf0502e144c251054da8a0e0b1ab4"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "840777881cfb74dffe18d340532de744ec07e4c839318fb7f50ca235c445e98c",
+    "hash": "e61fac42dbaf6035fbb9449ab8bc85b1a1b3a2ef81d332eb30d512c02d48608a",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -224,84 +224,63 @@
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4_0",
+                "name": "result_1_4",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4_1",
+                "name": "result_1_5_0",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4_2",
+                "name": "result_1_5_1",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4_3",
+                "name": "result_1_5_2",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4_4",
+                "name": "result_1_5_3",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4_5_0",
+                "name": "result_1_5_4",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4_5_1",
+                "name": "result_1_5_5",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4_6_0",
+                "name": "result_1_5_6",
                 "type_name": "",
                 "width": 1
             },
             {
                 "direction": "out",
                 "is_clock": false,
-                "name": "result_1_4_6_1",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_4_6_2",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_4_7",
-                "type_name": "",
-                "width": 1
-            },
-            {
-                "direction": "out",
-                "is_clock": false,
-                "name": "result_1_5",
+                "name": "result_1_5_7",
                 "type_name": "",
                 "width": 1
             }

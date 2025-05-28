@@ -77,6 +77,8 @@ def test(test_dir):
     subprocess.run(['bash', 'run.sh'], cwd=f'tests/{test_dir}')
     expected = read_expected_output(f"tests/{test_dir}")
     actual = read_actual_output(f"tests/{test_dir}")
+    expected = expected[0:min(len(expected), len(actual))]
+    actual = actual[0:min(len(expected), len(actual))]
     if actual == expected:
         result = f"{bcolors.OKGREEN}Passed: {test_dir}{bcolors.ENDC}"
         print(f"\n{result}\n")

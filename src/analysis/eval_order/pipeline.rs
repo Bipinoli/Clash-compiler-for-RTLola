@@ -1,7 +1,7 @@
 use crate::analysis::node::Node;
 
 use rtlola_frontend::mir::RtLolaMir;
-use std::usize;
+use std::{collections::HashSet, usize};
 
 use crate::analysis::eval_order::utils;
 
@@ -48,9 +48,9 @@ fn calculate_pipeline_wait(
 }
 
 pub fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> usize {
-    let all_nodes: Vec<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
+    let all_nodes: HashSet<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
     let max_shift = all_nodes
-        .into_iter()
+        .iter()
         .map(|node| {
             let shift_from_offsets = node
                 .get_offset_parents(mir)
@@ -78,14 +78,18 @@ pub fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLo
                 node.get_hold_parents(mir)
                     .into_iter()
                     .map(|parent| {
-                        let parent_eval_time = utils::find_level(&parent, eval_order);
-                        let child_eval_time = utils::find_level(&node, eval_order);
-                        let offset: usize = if parent_eval_time > child_eval_time {
-                            1
+                        if all_nodes.contains(&parent) {
+                            let parent_eval_time = utils::find_level(&parent, eval_order);
+                            let child_eval_time = utils::find_level(&node, eval_order);
+                            let offset: usize = if parent_eval_time > child_eval_time {
+                                1
+                            } else {
+                                0
+                            };
+                            calculate_pipeline_wait(&node, &parent, offset, eval_order, mir)
                         } else {
                             0
-                        };
-                        calculate_pipeline_wait(&node, &parent, offset, eval_order, mir)
+                        }
                     })
                     .max()
                     .unwrap_or(0)

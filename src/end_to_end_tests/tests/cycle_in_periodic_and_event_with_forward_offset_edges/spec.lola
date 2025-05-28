@@ -1,0 +1,16 @@
+input x: Int
+input y: Int 
+
+output a := x + 1
+output b := a.offset(by: -1).defaults(to: 0) + d.offset(by: -1).defaults(to: 1) + h.hold(or: 0)
+output c := b + o + 1
+output d := c + 1
+output e := f.offset(by: -1).defaults(to: 0) + i.offset(by: -1).defaults(to: 0)
+output f := g + 1
+output g @1kHz := g.offset(by: -1).defaults(to: 0) + 1
+output h @1kHz := e + d.hold(or: 0)
+output i := h + 1   
+
+output m := y + 1
+output n := m.offset(by: -1).defaults(to: 0) +1
+output o := n + 1

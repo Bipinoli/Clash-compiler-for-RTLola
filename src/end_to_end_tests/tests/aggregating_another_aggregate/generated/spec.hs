@@ -21,30 +21,30 @@ import Clash.Prelude
 
 -- Evaluation Order
 -- x, y, z
--- b, a
--- sw(a,c), sw(b,c)
+-- a, b
+-- sw(b,c), sw(a,c)
 -- c
 -- sw(c,d)
 -- d
 
 -- Memory Window
--- window x = 1
--- window b = 5
--- window a = 5
--- window sw(b,c) = 1
--- window sw(a,c) = 1
--- window sw(c,d) = 1
--- window y = 1
 -- window z = 1
--- window c = 3
+-- window y = 1
 -- window d = 1
+-- window a = 5
+-- window b = 5
+-- window sw(a,c) = 1
+-- window c = 3
+-- window sw(b,c) = 1
+-- window sw(c,d) = 1
+-- window x = 1
 
 -- Pipeline Visualization
 -- x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z          
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                 | b,a             | b,a             | b,a             | b,a             | b,a             | b,a             | b,a             | b,a             | b,a            
+--                 | a,b             | a,b             | a,b             | a,b             | a,b             | a,b             | a,b             | a,b             | a,b            
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                 |                 | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c)
+--                 |                 | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c)
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                 |                 |                 | c               | c               | c               | c               | c               | c               | c              
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -112,6 +112,16 @@ data Pacings = Pacings {
     pacingOut1 :: PacingOut1,
     pacingOut2 :: PacingOut2,
     pacingOut3 :: PacingOut3
+} deriving (Generic, NFDataX)
+
+data DebugEnables = DebugEnables {
+    enableIn0 :: Bool,
+    enableIn1 :: Bool,
+    enableIn2 :: Bool,
+    enableOut0 :: Bool,
+    enableOut1 :: Bool,
+    enableOut2 :: Bool,
+    enableOut3 :: Bool
 } deriving (Generic, NFDataX)
 
 data Slides = Slides {
@@ -326,7 +336,7 @@ delayFor n initVal sig = last delayedVec
       delayedVec = iterateI (delay initVal) sig
      
 
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Pacings, Slides))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Slides, DebugEnables))
 llc event = bundle (bundle (toPop, outputs), debugSignals)
     where 
         (isValidEvent, poppedEvent) = unbundle event
@@ -354,10 +364,10 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tIn0 = genTag (getPacing <$> pIn0)
         tIn1 = genTag (getPacing <$> pIn1)
         tIn2 = genTag (getPacing <$> pIn2)
-        tOut1 = genTag (getPacing <$> pOut1)
         tOut0 = genTag (getPacing <$> pOut0)
-        tSw0 = genTag (getPacing <$> pOut0)
+        tOut1 = genTag (getPacing <$> pOut1)
         tSw1 = genTag (getPacing <$> pOut1)
+        tSw0 = genTag (getPacing <$> pOut0)
         tOut2 = genTag (getPacing <$> pOut2)
         tSw2 = genTag (getPacing <$> pOut2)
         tOut3 = genTag (getPacing <$> pOut3)
@@ -381,12 +391,12 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enIn0 = delayFor d1 nullPacingIn0 pIn0
         enIn1 = delayFor d1 nullPacingIn1 pIn1
         enIn2 = delayFor d1 nullPacingIn2 pIn2
-        enOut1 = delayFor d2 nullPacingOut1 pOut1
         enOut0 = delayFor d2 nullPacingOut0 pOut0
-        enSw0 = delayFor d3 nullPacingOut0 pOut0
-        sld0 = delayFor d3 False slide0
+        enOut1 = delayFor d2 nullPacingOut1 pOut1
         enSw1 = delayFor d3 nullPacingOut1 pOut1
         sld1 = delayFor d3 False slide1
+        enSw0 = delayFor d3 nullPacingOut0 pOut0
+        sld0 = delayFor d3 False slide0
         enOut2 = delayFor d4 nullPacingOut2 pOut2
         enSw2 = delayFor d5 nullPacingOut2 pOut2
         sld2 = delayFor d5 False slide2
@@ -445,7 +455,15 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         outputs = Outputs <$> output0 <*> output1 <*> output2 <*> output3
 
-        debugSignals = bundle (pacings, slides)
+        debugSignals = bundle (slides, debugEnables)
+        debugEnables = DebugEnables <$>
+                            (getPacing <$> enIn0) <*>
+                            (getPacing <$> enIn1) <*>
+                            (getPacing <$> enIn2) <*>
+                            (getPacing <$> enOut0) <*>
+                            (getPacing <$> enOut1) <*>
+                            (getPacing <$> enOut2) <*>
+                            (getPacing <$> enOut3)
 
         genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
         genTag en = t
@@ -474,21 +492,21 @@ input2Window en tag val = result
 
 
 outputStream0 :: HiddenClockResetEnable dom => Signal dom PacingOut0 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Vec 5 (Tag, Int))
-outputStream0 en tag in0 in1 = result
+outputStream0 en tag in0_0 in1_1 = result
     where
         result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = in0 + in1
+        nextVal = in0_0 + in1_1
 
 
 outputStream1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Vec 5 (Tag, Int))
-outputStream1 en tag in1 in2 = result
+outputStream1 en tag in1_0 in2_1 = result
     where
         result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = in1 + in2
+        nextVal = in1_0 + in2_1
 
 
 outputStream2 :: HiddenClockResetEnable dom => Signal dom PacingOut2 -> Signal dom Tag -> Signal dom (Vec 11 Int) -> Signal dom (Vec 21 Int) -> Signal dom (Vec 3 (Tag, Int))
@@ -584,7 +602,7 @@ slidingWindow2 newData slide tag inpt = window
 
 ---------------------------------------------------------------
 
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs ->Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings, Slides))
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs ->Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
 monitor inputs = bundle (outputs, debugSignals)
     where 
         (newEvent, event) = unbundle (hlc inputs)
@@ -597,12 +615,12 @@ monitor inputs = bundle (outputs, debugSignals)
         (llcOutput, llcDebug) = unbundle (llc (bundle (qPopValid, qPopData)))
         (toPop, outputs) = unbundle llcOutput
 
-        (llcPacings, llcSlides) = unbundle llcDebug
-        debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcPacings, llcSlides)
+        (llcSlides, debugEnables) = unbundle llcDebug
+        debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcSlides, debugEnables)
 
 
 ---------------------------------------------------------------
 
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings, Slides))
+    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
 topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en

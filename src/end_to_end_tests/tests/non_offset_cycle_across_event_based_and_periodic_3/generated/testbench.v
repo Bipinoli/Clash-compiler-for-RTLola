@@ -20,10 +20,10 @@ module testbench;
     wire q_push_valid;
     wire q_pop_valid;
 
-    wire pacing_in0;
-    wire pacing_out0_0;
-    wire pacing_out1_0;
-    wire pacing_out2_0;
+    wire enable_in0;
+    wire enable_out0;
+    wire enable_out1;
+    wire enable_out2;
     
 
     topEntity monitor (
@@ -33,10 +33,10 @@ module testbench;
                         ,output_1, output_1_aktv
                         ,output_2, output_2_aktv
                         ,q_push, q_pop, q_push_valid, q_pop_valid
-                        ,pacing_in0
-                        ,pacing_out0_0
-                        ,pacing_out1_0
-                        ,pacing_out2_0
+                        ,enable_in0
+                        ,enable_out0
+                        ,enable_out1
+                        ,enable_out2
                        );
 
     always begin

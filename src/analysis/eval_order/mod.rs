@@ -294,6 +294,5 @@ fn merge_periodic_and_event_based_eval_orders(
     _mir: &RtLolaMir,
 ) -> Vec<Vec<Node>> {
     let retval = vec![&event_based[..], &periodic[..]].concat();
-    // dbg!(&retval);
     retval
 }

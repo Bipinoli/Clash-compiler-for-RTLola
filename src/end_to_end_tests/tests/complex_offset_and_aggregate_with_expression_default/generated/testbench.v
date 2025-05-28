@@ -32,22 +32,18 @@ module testbench;
     wire q_push_valid;
     wire q_pop_valid;
 
-    wire pacing_in0;
-    wire pacing_in1;
-    wire pacing_out0_0;
-    wire pacing_out0_1;
-    wire pacing_out1_0;
-    wire pacing_out1_1;
-    wire pacing_out2_0;
-    wire pacing_out2_1;
-    wire pacing_out3_0;
-    wire pacing_out3_1;
-    wire pacing_out4_0;
-    wire pacing_out5_0;
-    wire pacing_out6_0;
-    wire pacing_out7_0;
     wire slide_0;
     wire slide_1;
+    wire enable_in0;
+    wire enable_in1;
+    wire enable_out0;
+    wire enable_out1;
+    wire enable_out2;
+    wire enable_out3;
+    wire enable_out4;
+    wire enable_out5;
+    wire enable_out6;
+    wire enable_out7;
     
 
     topEntity monitor (
@@ -63,22 +59,18 @@ module testbench;
                         ,output_6, output_6_aktv
                         ,output_7, output_7_aktv
                         ,q_push, q_pop, q_push_valid, q_pop_valid
-                        ,pacing_in0
-                        ,pacing_in1
-                        ,pacing_out0_0
-                        ,pacing_out0_1
-                        ,pacing_out1_0
-                        ,pacing_out1_1
-                        ,pacing_out2_0
-                        ,pacing_out2_1
-                        ,pacing_out3_0
-                        ,pacing_out3_1
-                        ,pacing_out4_0
-                        ,pacing_out5_0
-                        ,pacing_out6_0
-                        ,pacing_out7_0
                         ,slide_0
                         ,slide_1
+                        ,enable_in0
+                        ,enable_in1
+                        ,enable_out0
+                        ,enable_out1
+                        ,enable_out2
+                        ,enable_out3
+                        ,enable_out4
+                        ,enable_out5
+                        ,enable_out6
+                        ,enable_out7
                        );
 
     always begin

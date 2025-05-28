@@ -1,0 +1,7 @@
+Time scale of (testbench) is 1us / 1ns
+VCD info: dumpfile dump.vcd opened for output.
+Time 10080000000: Active outputs: (1, 1, 1), Outputs: (1, 0, 0)
+Time 20080000000: Active outputs: (1, 1, 1), Outputs: (1, 1, 0)
+Time 30080000000: Active outputs: (1, 1, 1), Outputs: (1, 1, 1)
+Time 40080000000: Active outputs: (1, 1, 1), Outputs: (2, 1, 1)
+testbench.v:85: $finish called at 40540000000 (100fs)

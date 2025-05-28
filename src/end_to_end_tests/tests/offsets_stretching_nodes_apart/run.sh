@@ -1,6 +1,6 @@
 #!/bin/sh
 
-test_dir="src/end_to_end_tests/tests/offsets_tug_of_war"
+test_dir="src/end_to_end_tests/tests/offsets_stretching_nodes_apart"
 
 rm -rf generated
 mkdir generated

@@ -23,9 +23,9 @@ import Clash.Prelude
 -- d, c
 
 -- Memory Window
+-- window c = 1
 -- window d = 1
 -- window a = 1
--- window c = 1
 -- window b = 1
 -- window x = 1
 
@@ -373,35 +373,35 @@ input0Window en tag val = result
 
 
 outputStream0 :: HiddenClockResetEnable dom => Signal dom PacingOut0 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
-outputStream0 en tag in0 out2 = result
+outputStream0 en tag in0_0 out2_1 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = in0 + out2
+        nextVal = in0_0 + out2_1
 
 
 outputStream1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
-outputStream1 en tag out0 = result
+outputStream1 en tag out0_0 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out0 + 1
+        nextVal = out0_0 + 1
 
 
 outputStream2 :: HiddenClockResetEnable dom => Signal dom PacingOut2 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
-outputStream2 en tag out1 = result
+outputStream2 en tag out1_0 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out1 + 1
+        nextVal = out1_0 + 1
 
 
 outputStream3 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
-outputStream3 en tag out1 = result
+outputStream3 en tag out1_0 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out1 + 1
+        nextVal = out1_0 + 1
 
 
 

@@ -42,20 +42,21 @@ module testbench;
     wire q_push_valid;
     wire q_pop_valid;
 
-    wire pacing_0;
-    wire pacing_1;
-    wire pacing_2;
-    wire pacing_3;
-    wire pacing_4;
-    wire pacing_5;
-    wire pacing_6;
-    wire pacing_7;
-    wire pacing_8;
-    wire pacing_9;
-    wire pacing_10;
-    wire pacing_11;
-    wire pacing_12;
-    wire pacing_13;
+    wire enable_in0;
+    wire enable_out0;
+    wire enable_out1;
+    wire enable_out2;
+    wire enable_out3;
+    wire enable_out4;
+    wire enable_out5;
+    wire enable_out6;
+    wire enable_out7;
+    wire enable_out8;
+    wire enable_out9;
+    wire enable_out10;
+    wire enable_out11;
+    wire enable_out12;
+    wire enable_out13;
     
 
     topEntity monitor (
@@ -76,20 +77,21 @@ module testbench;
                         ,output_12, output_12_aktv
                         ,output_13, output_13_aktv
                         ,q_push, q_pop, q_push_valid, q_pop_valid
-                        ,pacing_0
-                        ,pacing_1
-                        ,pacing_2
-                        ,pacing_3
-                        ,pacing_4
-                        ,pacing_5
-                        ,pacing_6
-                        ,pacing_7
-                        ,pacing_8
-                        ,pacing_9
-                        ,pacing_10
-                        ,pacing_11
-                        ,pacing_12
-                        ,pacing_13
+                        ,enable_in0
+                        ,enable_out0
+                        ,enable_out1
+                        ,enable_out2
+                        ,enable_out3
+                        ,enable_out4
+                        ,enable_out5
+                        ,enable_out6
+                        ,enable_out7
+                        ,enable_out8
+                        ,enable_out9
+                        ,enable_out10
+                        ,enable_out11
+                        ,enable_out12
+                        ,enable_out13
                        );
 
     always begin

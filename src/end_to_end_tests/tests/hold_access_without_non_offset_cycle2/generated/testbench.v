@@ -12,15 +12,27 @@ module testbench;
     wire output_0_aktv;
     wire signed [63:0] output_1;
     wire output_1_aktv;
+    wire signed [63:0] output_2;
+    wire output_2_aktv;
+    wire signed [63:0] output_3;
+    wire output_3_aktv;
+    wire signed [63:0] output_4;
+    wire output_4_aktv;
+    wire signed [63:0] output_5;
+    wire output_5_aktv;
 
     wire q_push;
     wire q_pop;
     wire q_push_valid;
     wire q_pop_valid;
 
-    wire pacing_in0;
-    wire pacing_out0_0;
-    wire pacing_out1_0;
+    wire enable_in0;
+    wire enable_out0;
+    wire enable_out1;
+    wire enable_out2;
+    wire enable_out3;
+    wire enable_out4;
+    wire enable_out5;
     
 
     topEntity monitor (
@@ -28,10 +40,18 @@ module testbench;
                         ,input_0, new_input_0
                         ,output_0, output_0_aktv
                         ,output_1, output_1_aktv
+                        ,output_2, output_2_aktv
+                        ,output_3, output_3_aktv
+                        ,output_4, output_4_aktv
+                        ,output_5, output_5_aktv
                         ,q_push, q_pop, q_push_valid, q_pop_valid
-                        ,pacing_in0
-                        ,pacing_out0_0
-                        ,pacing_out1_0
+                        ,enable_in0
+                        ,enable_out0
+                        ,enable_out1
+                        ,enable_out2
+                        ,enable_out3
+                        ,enable_out4
+                        ,enable_out5
                        );
 
     always begin
@@ -39,8 +59,8 @@ module testbench;
     end
 
     always @(posedge clk) begin
-        if (output_0_aktv == 1'b1 || output_1_aktv == 1'b1) begin
-            $display("Time %0t: Active outputs: (%b, %b), Outputs: (%0d, %0d)", $time, output_0_aktv, output_1_aktv, output_0, output_1);
+        if (output_0_aktv == 1'b1 || output_1_aktv == 1'b1 || output_2_aktv == 1'b1 || output_3_aktv == 1'b1 || output_4_aktv == 1'b1 || output_5_aktv == 1'b1) begin
+            $display("Time %0t: Active outputs: (%b, %b, %b, %b, %b, %b), Outputs: (%0d, %0d, %0d, %0d, %0d, %0d)", $time, output_0_aktv, output_1_aktv, output_2_aktv, output_3_aktv, output_4_aktv, output_5_aktv, output_0, output_1, output_2, output_3, output_4, output_5);
         end
     end
 
@@ -81,7 +101,15 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #398;
+        #98;
+        @(posedge clk);
+        new_input_0 = 1;
+        input_0 = 3;
+        @(posedge clk);
+        new_input_0 = 0;
+        input_0 = 0;
+
+        #298;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 4;
@@ -89,7 +117,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #1298;
+        #198;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 5;
@@ -97,7 +125,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #898;
+        #298;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 6;
@@ -105,7 +133,7 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #1098;
+        #398;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 7;
@@ -113,10 +141,34 @@ module testbench;
         new_input_0 = 0;
         input_0 = 0;
 
-        #3098;
+        #398;
         @(posedge clk);
         new_input_0 = 1;
         input_0 = 8;
+        @(posedge clk);
+        new_input_0 = 0;
+        input_0 = 0;
+
+        #898;
+        @(posedge clk);
+        new_input_0 = 1;
+        input_0 = 9;
+        @(posedge clk);
+        new_input_0 = 0;
+        input_0 = 0;
+
+        #1098;
+        @(posedge clk);
+        new_input_0 = 1;
+        input_0 = 10;
+        @(posedge clk);
+        new_input_0 = 0;
+        input_0 = 0;
+
+        #3098;
+        @(posedge clk);
+        new_input_0 = 1;
+        input_0 = 11;
         @(posedge clk);
         new_input_0 = 0;
         input_0 = 0;

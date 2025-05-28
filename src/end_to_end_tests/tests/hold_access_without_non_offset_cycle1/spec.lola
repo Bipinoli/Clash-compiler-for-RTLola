@@ -1,6 +1,3 @@
-// Running in legacy mode 
-// i.e evaluation of event-based stream always before periodic-stream in the same eval level
-
 input x : Int
 
 output a := x + b.hold(or: 0)

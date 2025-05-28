@@ -21,4 +21,4 @@ Time 60160000000: Active outputs: (0, 0, 0, 0, 1), Outputs: (13, 13, 26, 39, 162
 Time 70160000000: Active outputs: (0, 0, 0, 0, 1), Outputs: (13, 13, 26, 39, 162)
 Time 80160000000: Active outputs: (0, 0, 0, 0, 1), Outputs: (13, 13, 26, 39, 162)
 Time 82240000000: Active outputs: (1, 1, 1, 1, 0), Outputs: (14, 14, 28, 42, 162)
-testbench.v:321: $finish called at 82500000000 (100fs)
+testbench.v:315: $finish called at 82500000000 (100fs)

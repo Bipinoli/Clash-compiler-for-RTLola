@@ -46,14 +46,14 @@
         },
         {
             "name": "topEntity.v",
-            "sha256": "f1ab08bcb89c555f910b5d15d506835283c1d20337d8d14524ceb37c2f6c5450"
+            "sha256": "3aaf483517f01dafbb19bcd6f5b2f1bb63ad8d27cdc68843515a1f2f14a4eabc"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "a5a9646536af3f8e7ef4fb5dab5270334bdf82d6c52ba5c3699d50903357119e",
+    "hash": "d16afd340a2bd9c29a402fa6c18525c9dea8d2830987eed20dbba4b13ef75391",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -126,6 +126,62 @@
             {
                 "direction": "out",
                 "is_clock": false,
+                "name": "result_0_2_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_2_1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_3_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_3_1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_4_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_4_1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_5_0",
+                "type_name": "signed [63:0]",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_5_1",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
                 "name": "result_1_0",
                 "type_name": "",
                 "width": 1
@@ -169,6 +225,34 @@
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_1_4_2",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_3",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_4",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_5",
+                "type_name": "",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_4_6",
                 "type_name": "",
                 "width": 1
             }

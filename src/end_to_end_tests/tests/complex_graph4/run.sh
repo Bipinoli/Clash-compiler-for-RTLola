@@ -10,6 +10,7 @@ cd $test_dir/generated
 
 chmod +x gen_verilog.sh
 chmod +x dump_waveform.sh
+chmod +x open_waveform.sh
 
 ./gen_verilog.sh
 ./dump_waveform.sh >output.txt

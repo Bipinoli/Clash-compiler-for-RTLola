@@ -417,6 +417,16 @@
                   "Sliding": 1
                 }
               }
+            ],
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "SlidingWindow": {
+                  "Sliding": 2
+                }
+              }
             ]
           ]
         ]
@@ -428,6 +438,14 @@
           },
           {
             "Sliding": 1
+          }
+        ],
+        [
+          {
+            "Out": 2
+          },
+          {
+            "Sliding": 2
           }
         ]
       ],
@@ -467,17 +485,47 @@
                   [
                     {
                       "kind": {
-                        "StreamAccess": {
-                          "target": {
-                            "Out": 0
-                          },
-                          "parameters": [],
-                          "access_kind": {
-                            "SlidingWindow": {
-                              "Sliding": 0
+                        "ArithLog": [
+                          "Add",
+                          [
+                            {
+                              "kind": {
+                                "StreamAccess": {
+                                  "target": {
+                                    "Out": 0
+                                  },
+                                  "parameters": [],
+                                  "access_kind": {
+                                    "SlidingWindow": {
+                                      "Sliding": 0
+                                    }
+                                  }
+                                }
+                              },
+                              "ty": {
+                                "Int": "Int64"
+                              }
+                            },
+                            {
+                              "kind": {
+                                "StreamAccess": {
+                                  "target": {
+                                    "Out": 1
+                                  },
+                                  "parameters": [],
+                                  "access_kind": {
+                                    "SlidingWindow": {
+                                      "Sliding": 1
+                                    }
+                                  }
+                                }
+                              },
+                              "ty": {
+                                "Int": "Int64"
+                              }
                             }
-                          }
-                        }
+                          ]
+                        ]
                       },
                       "ty": {
                         "Int": "Int64"
@@ -492,7 +540,7 @@
                           "parameters": [],
                           "access_kind": {
                             "SlidingWindow": {
-                              "Sliding": 1
+                              "Sliding": 2
                             }
                           }
                         }
@@ -558,6 +606,16 @@
               {
                 "SlidingWindow": {
                   "Sliding": 1
+                }
+              }
+            ],
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "SlidingWindow": {
+                  "Sliding": 2
                 }
               }
             ]
@@ -682,6 +740,33 @@
       "op": "Sum",
       "reference": {
         "Sliding": 1
+      },
+      "ty": {
+        "Int": "Int64"
+      }
+    },
+    {
+      "target": {
+        "Out": 1
+      },
+      "caller": {
+        "Out": 2
+      },
+      "duration": {
+        "secs": 0,
+        "nanos": 5000000
+      },
+      "num_buckets": {
+        "Bounded": 5
+      },
+      "bucket_size": {
+        "secs": 0,
+        "nanos": 1000000
+      },
+      "wait": false,
+      "op": "Sum",
+      "reference": {
+        "Sliding": 2
       },
       "ty": {
         "Int": "Int64"

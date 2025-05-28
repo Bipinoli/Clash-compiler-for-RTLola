@@ -20,23 +20,23 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- c, x
+-- x, c
 -- a
 -- e
 -- b, d
 -- f
 
 -- Memory Window
--- window e = 1
--- window c = 1
--- window f = 1
--- window b = 1
 -- window d = 1
--- window a = 1
 -- window x = 1
+-- window f = 1
+-- window c = 1
+-- window a = 1
+-- window e = 1
+-- window b = 1
 
 -- Pipeline Visualization
--- c,x |     |     |     |     | c,x |     |     |     |    
+-- x,c |     |     |     |     | x,c |     |     |     |    
 -- ---------------------------------------------------------
 --     | a   |     |     |     |     | a   |     |     |    
 -- ---------------------------------------------------------
@@ -105,6 +105,16 @@ data Pacings = Pacings {
     pacingOut3 :: PacingOut3,
     pacingOut4 :: PacingOut4,
     pacingOut5 :: PacingOut5
+} deriving (Generic, NFDataX)
+
+data DebugEnables = DebugEnables {
+    enableIn0 :: Bool,
+    enableOut0 :: Bool,
+    enableOut1 :: Bool,
+    enableOut2 :: Bool,
+    enableOut3 :: Bool,
+    enableOut4 :: Bool,
+    enableOut5 :: Bool
 } deriving (Generic, NFDataX)
 
 
@@ -307,7 +317,7 @@ delayFor n initVal sig = last delayedVec
       delayedVec = iterateI (delay initVal) sig
      
 
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Pacings))
+llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (DebugEnables))
 llc event = bundle (bundle (toPop, outputs), debugSignals)
     where 
         (isValidEvent, poppedEvent) = unbundle event
@@ -329,8 +339,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut4 = (.pacingOut4) <$> pacings
         pOut5 = (.pacingOut5) <$> pacings
         
-        tOut2 = genTag (getPacing <$> pOut2)
         tIn0 = genTag (getPacing <$> pIn0)
+        tOut2 = genTag (getPacing <$> pOut2)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut4 = genTag (getPacing <$> pOut4)
         tOut1 = genTag (getPacing <$> pOut1)
@@ -350,8 +360,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel5 = delayFor d5 tagsDefault curTags
         nullT = invalidTag
 
-        enOut2 = delayFor d1 nullPacingOut2 pOut2
         enIn0 = delayFor d1 nullPacingIn0 pIn0
+        enOut2 = delayFor d1 nullPacingOut2 pOut2
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut4 = delayFor d3 nullPacingOut4 pOut4
         enOut1 = delayFor d4 nullPacingOut1 pOut1
@@ -393,9 +403,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         -- Evaluation of output 4: level 2
         out4 = outputStream4 enOut4 ((.output4) <$> curTagsLevel2) out4Data0 out4Data1 
-        out4Data0 = getMatchingTagFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure (0))
-        out4Data1 = getLatestValueFromNonVec <$> out3 <*> out4Data1Dflt
-        out4Data1Dflt = pure (0)
+        out4Data0 = getLatestValueFromNonVec <$> out3 <*> out4Data0Dflt
+        out4Data0Dflt = pure (0)
+        out4Data1 = getMatchingTagFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure (0))
 
         -- Evaluation of output 5: level 4
         out5 = outputStream5 enOut5 ((.output5) <$> curTagsLevel4) out5Data0 
@@ -418,7 +428,15 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         outputs = Outputs <$> output0 <*> output1 <*> output2 <*> output3 <*> output4 <*> output5
 
-        debugSignals = pacings
+        debugSignals = debugEnables
+        debugEnables = DebugEnables <$>
+                            (getPacing <$> enIn0) <*>
+                            (getPacing <$> enOut0) <*>
+                            (getPacing <$> enOut1) <*>
+                            (getPacing <$> enOut2) <*>
+                            (getPacing <$> enOut3) <*>
+                            (getPacing <$> enOut4) <*>
+                            (getPacing <$> enOut5)
 
         genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
         genTag en = t
@@ -443,51 +461,51 @@ input0Window en tag val = result
 
 
 outputStream0 :: HiddenClockResetEnable dom => Signal dom PacingOut0 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
-outputStream0 en tag in0 = result
+outputStream0 en tag in0_0 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = in0 + 1
+        nextVal = in0_0 + 1
 
 
 outputStream1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
-outputStream1 en tag out0 out4 = result
+outputStream1 en tag out0_0 out4_1 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out0 + out4
+        nextVal = out0_0 + out4_1
 
 
 outputStream2 :: HiddenClockResetEnable dom => Signal dom PacingOut2 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
-outputStream2 en tag out1 out5 = result
+outputStream2 en tag out1_0 out5_1 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out1 + out5
+        nextVal = out1_0 + out5_1
 
 
 outputStream3 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
-outputStream3 en tag out2 = result
+outputStream3 en tag out2_0 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out2 + 1
+        nextVal = out2_0 + 1
 
 
 outputStream4 :: HiddenClockResetEnable dom => Signal dom PacingOut4 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
-outputStream4 en tag out0 out3 = result
+outputStream4 en tag out3_0 out0_1 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out3 + out0
+        nextVal = out3_0 + out0_1
 
 
 outputStream5 :: HiddenClockResetEnable dom => Signal dom PacingOut5 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
-outputStream5 en tag out1 = result
+outputStream5 en tag out1_ = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out1
+        nextVal = out1_
 
 
 
@@ -497,7 +515,7 @@ outputStream5 en tag out1 = result
 
 ---------------------------------------------------------------
 
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
+monitor :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, DebugEnables))
 monitor inputs = bundle (outputs, debugSignals)
     where 
         (newEvent, event) = unbundle (hlc inputs)
@@ -510,12 +528,12 @@ monitor inputs = bundle (outputs, debugSignals)
         (llcOutput, llcDebug) = unbundle (llc (bundle (qPopValid, qPopData)))
         (toPop, outputs) = unbundle llcOutput
 
-        llcPacings = llcDebug
-        debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, llcPacings)
+        debugEnables = llcDebug
+        debugSignals = bundle (qPush, qPop, qPushValid, qPopValid, debugEnables)
 
 
 ---------------------------------------------------------------
 
 topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Pacings))
+    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, DebugEnables))
 topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en
