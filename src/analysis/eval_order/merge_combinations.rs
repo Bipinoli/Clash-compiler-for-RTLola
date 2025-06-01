@@ -4,6 +4,9 @@ use rtlola_frontend::mir::RtLolaMir;
 use std::{collections::HashSet, usize, vec};
 
 use crate::analysis::pipeline;
+use crate::analysis::utils;
+
+use super::memory;
 
 pub fn merge_eval_orders_various_combinations(
     orders: Vec<Vec<Vec<Node>>>,
@@ -49,7 +52,35 @@ pub fn merge_eval_orders_various_combinations(
         .map(|start| merge_offsetted_eval_orders(&orders, start))
         .collect::<HashSet<_>>()
         .into_iter()
+        .filter(|order| {
+            // input nodes must be in the top level
+            let all_nodes: Vec<Node> = order.iter().flatten().map(|x| x.clone()).collect();
+            for node in all_nodes {
+                if node.is_input() && utils::find_level(&node, order) > 0 {
+                    return false;
+                }
+            }
+            true
+        })
         .collect();
+    let display_all_combinations = false;
+    if display_all_combinations {
+        all_combinations.iter().for_each(|eval_order| {
+            println!("\n\nPotential evaluation order:");
+            println!(
+                "{}\n",
+                utils::prettify_eval_order(eval_order, mir).join("\n")
+            );
+            println!(
+                "Total required memory in bits: {}\n",
+                memory::calculate_total_required_memory(eval_order, mir)
+            );
+            let pipeline_wait = pipeline::calculate_necessary_pipeline_wait(eval_order, mir);
+            for line in pipeline::visualize_pipeline(eval_order, pipeline_wait, 10, mir) {
+                println!("{}", line);
+            }
+        });
+    }
     all_combinations
         .into_iter()
         .reduce(|best, item| choose_better_eval_order(best, item, mir))
@@ -136,6 +167,14 @@ fn choose_better_eval_order(
         return eval_order1;
     }
     if pipeline_wait2 < pipeline_wait1 {
+        return eval_order2;
+    }
+    let total_mem1 = memory::calculate_total_required_memory(&eval_order1, mir);
+    let total_mem2 = memory::calculate_total_required_memory(&eval_order2, mir);
+    if total_mem1 < total_mem2 {
+        return eval_order1;
+    }
+    if total_mem2 < total_mem1 {
         return eval_order2;
     }
     if eval_order1.len() < eval_order2.len() {

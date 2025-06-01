@@ -3,7 +3,7 @@ use rtlola_frontend::mir::RtLolaMir;
 use serde::Serialize;
 use std::{collections::HashMap, usize};
 
-mod eval_order;
+pub mod eval_order;
 pub mod node;
 
 use eval_order::{memory, pipeline, utils};

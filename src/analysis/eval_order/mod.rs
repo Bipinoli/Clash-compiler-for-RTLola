@@ -24,14 +24,14 @@ pub fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     // 3. Get eval order from the resulting DAGs and merge them according to -ve offsets & event-based/periodic periority rule
     //
     // Algorithm:
-    // step 1: separate event-based and periodic
+    // step 1: Separate event-based and periodic
     // step 2: Split further ignoring -ve offsets
     // step 3: In each group find roots and group them if they are connected ignoring -ve offset
-    // step 4: calculate eval order and pipeline wait in all groups (periodic, non periodic)
-    // step 5: max pipeline_wait among every eval orders will be the total pipeline_wait of the while eval order
-    // step 6: merge eval-orders within event-based and within periodic accoring to -ve offset & pipeline_wait
+    // step 4: Calculate eval order and pipeline wait in all groups (periodic, non periodic)
+    // step 5: max pipeline_wait among every eval orders will be the total pipeline_wait of the whole eval order
+    // step 6: Merge eval-orders within event-based and within periodic accoring to -ve offset & pipeline_wait
     //         try to evaluate as early as possible without increasing the pipeline_wait
-    // step 7: after all event-based are merged and all periodic are merged, then we merge them together
+    // step 7: After all event-based are merged and all periodic are merged, then we merge them together
     //         RTLola has the semantics of evaluation event-based before periodic to avoid infinite cycle
     //         So, merge them accordingly
     // Note:

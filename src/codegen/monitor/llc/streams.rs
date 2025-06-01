@@ -1,11 +1,12 @@
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
-    self as MIR, ArithLogOp, Constant, Expression, ExpressionKind, MemorizationBound,
-    StreamAccessKind, StreamReference, WindowOperation,
+    self as MIR, ArithLogOp, Constant, Expression, ExpressionKind, StreamAccessKind,
+    StreamReference, WindowOperation,
 };
 use serde::Serialize;
 
 use crate::{
+    analysis::eval_order::memory,
     analysis::node::Node,
     analysis::HardwareIR,
     codegen::monitor::{datatypes, register_template},
@@ -173,7 +174,7 @@ pub fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
                 window_idx: i,
                 default_value,
                 data_type: datatypes::get_type(&sw.ty),
-                window_size: get_sliding_window_size(i, ir),
+                window_size: memory::get_sliding_window_size(i, &ir.mir),
                 memory: ir
                     .required_memory
                     .get(&Node::SlidingWindow(i))
@@ -287,7 +288,7 @@ fn get_input_types(output_node: &Node, ir: &HardwareIR) -> Vec<String> {
             Node::OutputStream(x) => datatypes::get_type(&ir.mir.outputs[x].ty),
             Node::SlidingWindow(x) => {
                 let stream_data_type = datatypes::get_type(&ir.mir.outputs[x].ty);
-                let window_size = get_sliding_window_size(x.clone(), ir);
+                let window_size = memory::get_sliding_window_size(x.clone(), &ir.mir);
                 format!("(Vec {} {})", window_size, stream_data_type)
             }
         })
@@ -302,7 +303,7 @@ fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<Sl
                 StreamAccessKind::SlidingWindow(sw) => {
                     windows.push(SlidingWindow {
                         window_idx: sw.idx(),
-                        window_size: get_sliding_window_size(sw.idx(), ir),
+                        window_size: memory::get_sliding_window_size(sw.idx(), &ir.mir),
                         data_type: datatypes::get_type(&ir.mir.sliding_windows[sw.idx()].ty),
                         default_value: datatypes::get_default_for_type(
                             &ir.mir.sliding_windows[sw.idx()].ty,
@@ -322,52 +323,4 @@ fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<Sl
         }
     });
     windows
-}
-
-/// ```
-/// Instant to slide              time --->   
-///   |  
-///   |  
-///   V  
-/// slide1 -------- slide2 -------- slide3 -------- slide4 -------- slide5 --------
-///   |      bkt1     |       bkt2    |      bkt3     |      bkt4     |  
-///   x1      x2      x3       x4     |       x5      x6      x7      | x8
-///   ------------------------------------------------------------------------
-/// ```
-///
-///   If we need to work with the data within the window of 3 buckets   
-///   Then at the instant of slide4 we need to aggregate the data `[x2, x3, x4, x5, x6]`    
-///   `x1` was the data that came exactly at the instant when we were about to `slide1`  
-///   this falls outside the window of 3 buckets at instant of `slide4`  
-///   However `x2` & `x6` will be included in the aggregate  
-///
-///   So the semantic for a bucket is to be right inclusive and left exclusive  
-///   i.e in bkt1 aggregation x2 & x3 are included whereas x1 is excluded  
-///
-///   Therefore we need 4 memory buckets to store all the required data  
-///   even though we are calcuating aggregate on 3 buckets  
-///
-///   At the instant of `slide4`, before processing:  
-///  ```
-///   memory 1: (.., slide1] -> (x1)  
-///   memory 2: (slide1, slide2] -> (x2, x3)  
-///   memory 3: (slide2, slide3] -> (x4)  
-///   memory 4: (slide3, slide4] -> (x5)  
-///   ```
-///
-///   We put `x6` into the last bucket and then slide.   
-///
-///   So, after processing:  
-///   ```
-///   memory 1: (slide1, slide2] -> (x2, x3)  
-///   memory 2: (slide2, slide3] -> (x4)  
-///   memory 3: (slide3, slide4] -> (x5, x6)  
-///   memory 4: (slide3, slide4] -> ()  
-///  ```
-///
-fn get_sliding_window_size(window_idx: usize, ir: &HardwareIR) -> usize {
-    match ir.mir.sliding_windows[window_idx].num_buckets {
-        MemorizationBound::Bounded(x) => (x + 1) as usize,
-        _ => unimplemented!(),
-    }
 }

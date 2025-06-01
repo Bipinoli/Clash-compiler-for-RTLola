@@ -208,4 +208,11 @@ impl Node {
             Node::SlidingWindow(_) => true,
         }
     }
+
+    pub fn is_input(&self) -> bool {
+        match self {
+            Node::InputStream(_) => true,
+            _ => false
+        }
+    }
 }
