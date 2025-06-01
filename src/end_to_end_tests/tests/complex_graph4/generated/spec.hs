@@ -28,38 +28,38 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- e, y, x, i
+-- i, e, y, x
 -- g, a
--- d, c, b
+-- d, b, c
 -- h
 -- f
 -- sw(f,l), sw(b,l), j
 -- l, k
 
 -- Memory Window
--- window y = 1
--- window a = 1
--- window h = 1
--- window x = 3
--- window i = 1
--- window d = 2
--- window j = 1
--- window c = 1
--- window l = 1
--- window b = 1
--- window g = 1
--- window f = 1
--- window e = 1
 -- window sw(b,l) = 1
--- window k = 1
+-- window d = 2
+-- window a = 1
+-- window c = 1
+-- window j = 1
+-- window g = 1
 -- window sw(f,l) = 1
+-- window h = 1
+-- window f = 1
+-- window l = 1
+-- window y = 1
+-- window i = 1
+-- window k = 1
+-- window e = 1
+-- window x = 3
+-- window b = 1
 
 -- Pipeline Visualization
--- e,y,x,i           |                   |                   |                   |                   |                   |                   | e,y,x,i           |                   |                  
+-- i,e,y,x           |                   |                   |                   |                   |                   |                   | i,e,y,x           |                   |                  
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                   | g,a               |                   |                   |                   |                   |                   |                   | g,a               |                  
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                   |                   | d,c,b             |                   |                   |                   |                   |                   |                   | d,c,b            
+--                   |                   | d,b,c             |                   |                   |                   |                   |                   |                   | d,b,c            
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                   |                   |                   | h                 |                   |                   |                   |                   |                   |                  
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -443,15 +443,15 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut10 = (.pacingOut10) <$> pacings
         pOut11 = (.pacingOut11) <$> pacings
         
+        tOut8 = genTag (getPacing <$> pOut8)
         tOut4 = genTag (getPacing <$> pOut4)
         tIn1 = genTag (getPacing <$> pIn1)
         tIn0 = genTag (getPacing <$> pIn0)
-        tOut8 = genTag (getPacing <$> pOut8)
         tOut6 = genTag (getPacing <$> pOut6)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut3 = genTag (getPacing <$> pOut3)
-        tOut2 = genTag (getPacing <$> pOut2)
         tOut1 = genTag (getPacing <$> pOut1)
+        tOut2 = genTag (getPacing <$> pOut2)
         tOut7 = genTag (getPacing <$> pOut7)
         tOut5 = genTag (getPacing <$> pOut5)
         tSw0 = genTag (getPacing <$> pOut5)
@@ -476,15 +476,15 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel7 = delayFor d7 tagsDefault curTags
         nullT = invalidTag
 
+        enOut8 = delayFor d1 nullPacingOut8 pOut8
         enOut4 = delayFor d1 nullPacingOut4 pOut4
         enIn1 = delayFor d1 nullPacingIn1 pIn1
         enIn0 = delayFor d1 nullPacingIn0 pIn0
-        enOut8 = delayFor d1 nullPacingOut8 pOut8
         enOut6 = delayFor d2 nullPacingOut6 pOut6
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut3 = delayFor d3 nullPacingOut3 pOut3
-        enOut2 = delayFor d3 nullPacingOut2 pOut2
         enOut1 = delayFor d3 nullPacingOut1 pOut1
+        enOut2 = delayFor d3 nullPacingOut2 pOut2
         enOut7 = delayFor d4 nullPacingOut7 pOut7
         enOut5 = delayFor d5 nullPacingOut5 pOut5
         enSw0 = delayFor d6 nullPacingOut5 pOut5

@@ -20,31 +20,31 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- x, c
+-- x
 -- a
--- e
--- b, d
--- f
+-- e, c
+-- b
+-- f, d
 
 -- Memory Window
--- window a = 1
--- window e = 1
 -- window x = 1
--- window d = 1
--- window f = 1
+-- window a = 2
+-- window e = 1
 -- window c = 1
+-- window f = 1
+-- window d = 1
 -- window b = 1
 
 -- Pipeline Visualization
--- x,c |     |     |     |     | x,c |     |     |     |    
+-- x   |     |     | x   |     |     | x   |     |     | x  
 -- ---------------------------------------------------------
---     | a   |     |     |     |     | a   |     |     |    
+--     | a   |     |     | a   |     |     | a   |     |    
 -- ---------------------------------------------------------
---     |     | e   |     |     |     |     | e   |     |    
+--     |     | e,c |     |     | e,c |     |     | e,c |    
 -- ---------------------------------------------------------
---     |     |     | b,d |     |     |     |     | b,d |    
+--     |     |     | b   |     |     | b   |     |     | b  
 -- ---------------------------------------------------------
---     |     |     |     | f   |     |     |     |     | f  
+--     |     |     |     | f,d |     |     | f,d |     |    
 -- ---------------------------------------------------------
 
 -- input0 = x
@@ -147,7 +147,7 @@ nullPacingOut5 = PacingOut5 False
 
 ---------------------------------------------------------------
 
-type QMemSize = 6
+type QMemSize = 4
 
 type QData = Event
 type QMem = Vec QMemSize QData
@@ -272,7 +272,7 @@ hlc inputs = out
 
 -- maxTag must be at least the size of the maximum window to avoid duplicate tags in the window
 -- also to avoid having to do modulo operations maxTag must be at least as big as the largest offset
-maxTag = 2 :: Tag
+maxTag = 3 :: Tag
 invalidTag = maxTag + 1
 
 getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> a
@@ -340,12 +340,12 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut5 = (.pacingOut5) <$> pacings
         
         tIn0 = genTag (getPacing <$> pIn0)
-        tOut2 = genTag (getPacing <$> pOut2)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut4 = genTag (getPacing <$> pOut4)
+        tOut2 = genTag (getPacing <$> pOut2)
         tOut1 = genTag (getPacing <$> pOut1)
-        tOut3 = genTag (getPacing <$> pOut3)
         tOut5 = genTag (getPacing <$> pOut5)
+        tOut3 = genTag (getPacing <$> pOut3)
 
         -- tag generation takes 1 cycle so we need to delay the input data
         input0Data = delay 0 (((.value). (.input0)) <$> inputs)
@@ -361,12 +361,12 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         nullT = invalidTag
 
         enIn0 = delayFor d1 nullPacingIn0 pIn0
-        enOut2 = delayFor d1 nullPacingOut2 pOut2
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut4 = delayFor d3 nullPacingOut4 pOut4
+        enOut2 = delayFor d3 nullPacingOut2 pOut2
         enOut1 = delayFor d4 nullPacingOut1 pOut1
-        enOut3 = delayFor d4 nullPacingOut3 pOut3
         enOut5 = delayFor d5 nullPacingOut5 pOut5
+        enOut3 = delayFor d5 nullPacingOut3 pOut3
 
         output0Aktv = delayFor d6 False (getPacing <$> pOut0)
         output1Aktv = delayFor d6 False (getPacing <$> pOut1)
@@ -384,20 +384,20 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         -- Evaluation of output 1: level 3
         out1 = outputStream1 enOut1 ((.output1) <$> curTagsLevel3) out1Data0 out1Data1 
-        out1Data0 = getLatestValueFromNonVec <$> out0 <*> out1Data0Dflt
+        out1Data0 = getLatestValue <$> out0 <*> out1Data0Dflt
         out1Data0Dflt = pure (0)
         out1Data1 = getLatestValueFromNonVec <$> out4 <*> out1Data1Dflt
         out1Data1Dflt = pure (1)
 
-        -- Evaluation of output 2: level 0
-        out2 = outputStream2 enOut2 tOut2 out2Data0 out2Data1 
+        -- Evaluation of output 2: level 2
+        out2 = outputStream2 enOut2 ((.output2) <$> curTagsLevel2) out2Data0 out2Data1 
         out2Data0 = getLatestValueFromNonVec <$> out1 <*> out2Data0Dflt
         out2Data0Dflt = pure (0)
         out2Data1 = getLatestValueFromNonVec <$> out5 <*> out2Data1Dflt
         out2Data1Dflt = pure (1)
 
-        -- Evaluation of output 3: level 3
-        out3 = outputStream3 enOut3 ((.output3) <$> curTagsLevel3) out3Data0 
+        -- Evaluation of output 3: level 4
+        out3 = outputStream3 enOut3 ((.output3) <$> curTagsLevel4) out3Data0 
         out3Data0 = getLatestValueFromNonVec <$> out2 <*> out3Data0Dflt
         out3Data0Dflt = pure (3)
 
@@ -405,7 +405,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         out4 = outputStream4 enOut4 ((.output4) <$> curTagsLevel2) out4Data0 out4Data1 
         out4Data0 = getLatestValueFromNonVec <$> out3 <*> out4Data0Dflt
         out4Data0Dflt = pure (0)
-        out4Data1 = getMatchingTagFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure (0))
+        out4Data1 = getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure (0))
 
         -- Evaluation of output 5: level 4
         out5 = outputStream5 enOut5 ((.output5) <$> curTagsLevel4) out5Data0 
@@ -414,7 +414,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         -- Outputing all results: level 5
         output0 = ValidInt <$> output0Data <*> output0Aktv
-        (_, output0Data) = unbundle out0
+        output0Data = getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel5) <*> (pure 0)
         output1 = ValidInt <$> output1Data <*> output1Aktv
         (_, output1Data) = unbundle out1
         output2 = ValidInt <$> output2Data <*> output2Aktv
@@ -448,7 +448,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 pipelineReady :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
 pipelineReady rst = toWait .==. pure 0 
     where 
-        waitTime = pure 4 :: Signal dom Int
+        waitTime = pure 2 :: Signal dom Int
         toWait = register (0 :: Int) next
         next = mux rst waitTime (mux (toWait .>. pure 0) (toWait - 1) toWait)
 
@@ -460,10 +460,11 @@ input0Window en tag val = result
 
 
 
-outputStream0 :: HiddenClockResetEnable dom => Signal dom PacingOut0 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream0 :: HiddenClockResetEnable dom => Signal dom PacingOut0 -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 2 (Tag, Int))
 outputStream0 en tag in0_0 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
+        next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in0_0 + 1
 

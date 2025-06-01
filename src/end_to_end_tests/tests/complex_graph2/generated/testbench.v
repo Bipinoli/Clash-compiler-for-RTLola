@@ -37,26 +37,6 @@ module testbench;
     wire signed [63:0] output_13;
     wire output_13_aktv;
 
-    wire q_push;
-    wire q_pop;
-    wire q_push_valid;
-    wire q_pop_valid;
-
-    wire enable_in0;
-    wire enable_out0;
-    wire enable_out1;
-    wire enable_out2;
-    wire enable_out3;
-    wire enable_out4;
-    wire enable_out5;
-    wire enable_out6;
-    wire enable_out7;
-    wire enable_out8;
-    wire enable_out9;
-    wire enable_out10;
-    wire enable_out11;
-    wire enable_out12;
-    wire enable_out13;
     
 
     topEntity monitor (
@@ -76,22 +56,6 @@ module testbench;
                         ,output_11, output_11_aktv
                         ,output_12, output_12_aktv
                         ,output_13, output_13_aktv
-                        ,q_push, q_pop, q_push_valid, q_pop_valid
-                        ,enable_in0
-                        ,enable_out0
-                        ,enable_out1
-                        ,enable_out2
-                        ,enable_out3
-                        ,enable_out4
-                        ,enable_out5
-                        ,enable_out6
-                        ,enable_out7
-                        ,enable_out8
-                        ,enable_out9
-                        ,enable_out10
-                        ,enable_out11
-                        ,enable_out12
-                        ,enable_out13
                        );
 
     always begin

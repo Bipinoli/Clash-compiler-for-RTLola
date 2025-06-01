@@ -35,20 +35,20 @@ import Clash.Prelude
 -- i
 
 -- Memory Window
--- window m = 1
--- window x = 1
--- window f = 1
--- window a = 1
--- window y = 1
--- window n = 2
--- window b = 2
--- window d = 1
--- window c = 1
--- window e = 1
 -- window g = 1
 -- window h = 1
--- window i = 1
+-- window f = 1
 -- window o = 1
+-- window c = 1
+-- window i = 1
+-- window x = 1
+-- window e = 1
+-- window m = 1
+-- window n = 2
+-- window b = 2
+-- window a = 1
+-- window y = 1
+-- window d = 1
 
 -- Pipeline Visualization
 -- n,b,x,y |         |         |         |         | n,b,x,y |         |         |         |        

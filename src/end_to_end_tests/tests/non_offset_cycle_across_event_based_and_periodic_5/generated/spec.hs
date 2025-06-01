@@ -22,30 +22,30 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- x, y, d
--- a, e, b
--- f, c
--- g
+-- x, y
+-- a, d, e
+-- f, b
+-- g, c
 
 -- Memory Window
--- window x = 1
--- window f = 1
 -- window a = 1
--- window g = 1
--- window b = 1
--- window y = 1
 -- window e = 1
--- window d = 2
+-- window y = 1
+-- window b = 1
+-- window g = 1
+-- window f = 1
+-- window d = 1
+-- window x = 1
 -- window c = 1
 
 -- Pipeline Visualization
--- x,y,d |       |       | x,y,d |       |       | x,y,d |       |       | x,y,d
+-- x,y   |       |       | x,y   |       |       | x,y   |       |       | x,y  
 -- -----------------------------------------------------------------------------
---       | a,e,b |       |       | a,e,b |       |       | a,e,b |       |      
+--       | a,d,e |       |       | a,d,e |       |       | a,d,e |       |      
 -- -----------------------------------------------------------------------------
---       |       | f,c   |       |       | f,c   |       |       | f,c   |      
+--       |       | f,b   |       |       | f,b   |       |       | f,b   |      
 -- -----------------------------------------------------------------------------
---       |       |       | g     |       |       | g     |       |       | g    
+--       |       |       | g,c   |       |       | g,c   |       |       | g,c  
 -- -----------------------------------------------------------------------------
 
 -- input0 = x
@@ -287,7 +287,7 @@ hlc inputs = out
 
 -- maxTag must be at least the size of the maximum window to avoid duplicate tags in the window
 -- also to avoid having to do modulo operations maxTag must be at least as big as the largest offset
-maxTag = 3 :: Tag
+maxTag = 2 :: Tag
 invalidTag = maxTag + 1
 
 getOffset :: KnownNat n => Vec n (Tag, a) -> Tag -> Tag -> a -> a
@@ -359,13 +359,13 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         
         tIn0 = genTag (getPacing <$> pIn0)
         tIn1 = genTag (getPacing <$> pIn1)
-        tOut3 = genTag (getPacing <$> pOut3)
         tOut0 = genTag (getPacing <$> pOut0)
+        tOut3 = genTag (getPacing <$> pOut3)
         tOut4 = genTag (getPacing <$> pOut4)
-        tOut1 = genTag (getPacing <$> pOut1)
         tOut5 = genTag (getPacing <$> pOut5)
-        tOut2 = genTag (getPacing <$> pOut2)
+        tOut1 = genTag (getPacing <$> pOut1)
         tOut6 = genTag (getPacing <$> pOut6)
+        tOut2 = genTag (getPacing <$> pOut2)
 
         -- tag generation takes 1 cycle so we need to delay the input data
         input0Data = delay 0 (((.value). (.input0)) <$> inputs)
@@ -382,13 +382,13 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         enIn0 = delayFor d1 nullPacingIn0 pIn0
         enIn1 = delayFor d1 nullPacingIn1 pIn1
-        enOut3 = delayFor d1 nullPacingOut3 pOut3
         enOut0 = delayFor d2 nullPacingOut0 pOut0
+        enOut3 = delayFor d2 nullPacingOut3 pOut3
         enOut4 = delayFor d2 nullPacingOut4 pOut4
-        enOut1 = delayFor d2 nullPacingOut1 pOut1
         enOut5 = delayFor d3 nullPacingOut5 pOut5
-        enOut2 = delayFor d3 nullPacingOut2 pOut2
+        enOut1 = delayFor d3 nullPacingOut1 pOut1
         enOut6 = delayFor d4 nullPacingOut6 pOut6
+        enOut2 = delayFor d4 nullPacingOut2 pOut2
 
         output0Aktv = delayFor d5 False (getPacing <$> pOut0)
         output1Aktv = delayFor d5 False (getPacing <$> pOut1)
@@ -406,22 +406,22 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         out0 = outputStream0 enOut0 ((.output0) <$> curTagsLevel1) out0Data0 
         out0Data0 = getMatchingTagFromNonVec <$> input0Win <*> ((.input0) <$> curTagsLevel1) <*> (pure (0))
 
-        -- Evaluation of output 1: level 1
-        out1 = outputStream1 enOut1 ((.output1) <$> curTagsLevel1) out1Data0 out1Data1 
+        -- Evaluation of output 1: level 2
+        out1 = outputStream1 enOut1 ((.output1) <$> curTagsLevel2) out1Data0 out1Data1 
         out1Data0 = getLatestValueFromNonVec <$> input1Win <*> out1Data0Dflt
         out1Data0Dflt = pure (1)
-        out1Data1 = getLatestValue <$> out3 <*> out1Data1Dflt
+        out1Data1 = getLatestValueFromNonVec <$> out3 <*> out1Data1Dflt
         out1Data1Dflt = pure (2)
 
-        -- Evaluation of output 2: level 2
-        out2 = outputStream2 enOut2 ((.output2) <$> curTagsLevel2) out2Data0 out2Data1 
+        -- Evaluation of output 2: level 3
+        out2 = outputStream2 enOut2 ((.output2) <$> curTagsLevel3) out2Data0 out2Data1 
         out2Data0 = getLatestValueFromNonVec <$> out1 <*> out2Data0Dflt
         out2Data0Dflt = pure (10)
         out2Data1 = getLatestValueFromNonVec <$> out0 <*> out2Data1Dflt
         out2Data1Dflt = pure (11)
 
-        -- Evaluation of output 3: level 0
-        out3 = outputStream3 enOut3 tOut3 out3Data0 
+        -- Evaluation of output 3: level 1
+        out3 = outputStream3 enOut3 ((.output3) <$> curTagsLevel1) out3Data0 
         out3Data0 = getLatestValueFromNonVec <$> out2 <*> out3Data0Dflt
         out3Data0Dflt = pure (0)
 
@@ -446,7 +446,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         output2 = ValidInt <$> output2Data <*> output2Aktv
         (_, output2Data) = unbundle out2
         output3 = ValidInt <$> output3Data <*> output3Aktv
-        output3Data = getMatchingTag <$> out3 <*> ((.output3) <$> curTagsLevel4) <*> (pure 0)
+        (_, output3Data) = unbundle out3
         output4 = ValidInt <$> output4Data <*> output4Aktv
         (_, output4Data) = unbundle out4
         output5 = ValidInt <$> output5Data <*> output5Aktv
@@ -519,11 +519,10 @@ outputStream2 en tag out1_0 out0_1 = result
         nextVal = out1_0 + out0_1
 
 
-outputStream3 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 2 (Tag, Int))
+outputStream3 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
 outputStream3 en tag out2_0 = result
     where
-        result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
-        next = (<<+) <$> result <*> nextValWithTag
+        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out2_0 + 1
 
