@@ -49,10 +49,10 @@ fn calculate_pipeline_wait(
 
 pub fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLolaMir) -> usize {
     let all_nodes: HashSet<Node> = eval_order.iter().flatten().map(|x| x.clone()).collect();
-    let max_shift = all_nodes
+    let max_wait = all_nodes
         .iter()
         .map(|node| {
-            let shift_from_offsets = node
+            let wait_from_offsets = node
                 .get_offset_parents(mir)
                 .into_iter()
                 .map(|(parent, offset)| {
@@ -60,7 +60,7 @@ pub fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLo
                 })
                 .max()
                 .unwrap_or(0);
-            let shift_from_holds = {
+            let wait_from_holds = {
                 // There could be a cycle with holds
                 //
                 // For example:
@@ -94,10 +94,10 @@ pub fn calculate_necessary_pipeline_wait(eval_order: &Vec<Vec<Node>>, mir: &RtLo
                     .max()
                     .unwrap_or(0)
             };
-            std::cmp::max(shift_from_holds, shift_from_offsets)
+            std::cmp::max(wait_from_holds, wait_from_offsets)
         })
         .max();
-    max_shift.unwrap_or(0)
+    max_wait.unwrap_or(0)
 }
 
 pub fn visualize_pipeline(
@@ -120,14 +120,14 @@ pub fn visualize_pipeline(
     let mut visual: Vec<String> = Vec::new();
     for (i, x) in orders.iter().enumerate() {
         let mut line: Vec<String> = Vec::new();
-        let mut shift_cnt = 0;
+        let mut wait_cnt = 0;
         for j in 0..time_steps {
-            let padded_str = if j >= i && shift_cnt == 0 {
-                shift_cnt = pipeline_wait;
+            let padded_str = if j >= i && wait_cnt == 0 {
+                wait_cnt = pipeline_wait;
                 format!("{:width$}", x.as_str(), width = max_len)
             } else {
                 if j >= i {
-                    shift_cnt -= 1;
+                    wait_cnt -= 1;
                 }
                 format!("{:width$}", "", width = max_len)
             };
