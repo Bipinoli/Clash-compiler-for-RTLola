@@ -21,9 +21,9 @@ import Clash.Prelude
 -- b
 
 -- Memory Window
--- window b = 1
 -- window x = 1
 -- window a = 1
+-- window b = 1
 
 -- Pipeline Visualization
 -- x |   | x |   | x |   | x |   | x |  

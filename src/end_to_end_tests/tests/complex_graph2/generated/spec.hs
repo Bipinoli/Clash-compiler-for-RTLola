@@ -31,32 +31,32 @@ import Clash.Prelude
 -- Evaluation Order
 -- x, l
 -- a, d, h, m
--- b, e, f, i, j, n
+-- b, e, f, j, i, n
 -- c, g, k
 
 -- Memory Window
--- window l = 2
--- window m = 1
 -- window n = 1
--- window j = 1
--- window e = 1
--- window a = 1
--- window c = 1
--- window k = 1
--- window g = 1
 -- window b = 1
 -- window d = 1
--- window x = 1
+-- window m = 1
 -- window f = 1
--- window h = 1
+-- window j = 1
+-- window c = 1
+-- window a = 1
 -- window i = 1
+-- window g = 1
+-- window l = 2
+-- window k = 1
+-- window e = 1
+-- window x = 1
+-- window h = 1
 
 -- Pipeline Visualization
 -- x,l         |             |             | x,l         |             |             | x,l         |             |             | x,l        
 -- -----------------------------------------------------------------------------------------------------------------------------------------
 --             | a,d,h,m     |             |             | a,d,h,m     |             |             | a,d,h,m     |             |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
---             |             | b,e,f,i,j,n |             |             | b,e,f,i,j,n |             |             | b,e,f,i,j,n |            
+--             |             | b,e,f,j,i,n |             |             | b,e,f,j,i,n |             |             | b,e,f,j,i,n |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
 --             |             |             | c,g,k       |             |             | c,g,k       |             |             | c,g,k      
 -- -----------------------------------------------------------------------------------------------------------------------------------------
@@ -418,8 +418,8 @@ llc event = bundle (toPop, outputs)
         tOut1 = genTag (getPacing <$> pOut1)
         tOut4 = genTag (getPacing <$> pOut4)
         tOut5 = genTag (getPacing <$> pOut5)
-        tOut8 = genTag (getPacing <$> pOut8)
         tOut9 = genTag (getPacing <$> pOut9)
+        tOut8 = genTag (getPacing <$> pOut8)
         tOut13 = genTag (getPacing <$> pOut13)
         tOut2 = genTag (getPacing <$> pOut2)
         tOut6 = genTag (getPacing <$> pOut6)
@@ -446,8 +446,8 @@ llc event = bundle (toPop, outputs)
         enOut1 = delayFor d3 nullPacingOut1 pOut1
         enOut4 = delayFor d3 nullPacingOut4 pOut4
         enOut5 = delayFor d3 nullPacingOut5 pOut5
-        enOut8 = delayFor d3 nullPacingOut8 pOut8
         enOut9 = delayFor d3 nullPacingOut9 pOut9
+        enOut8 = delayFor d3 nullPacingOut8 pOut8
         enOut13 = delayFor d3 nullPacingOut13 pOut13
         enOut2 = delayFor d4 nullPacingOut2 pOut2
         enOut6 = delayFor d4 nullPacingOut6 pOut6

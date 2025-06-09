@@ -27,21 +27,21 @@ import Clash.Prelude
 -- a
 -- b, g
 -- c, i
--- f, d, j
+-- d, f, j
 -- h, e
 
 -- Memory Window
--- window a = 2
--- window b = 1
--- window f = 2
--- window g = 1
 -- window i = 1
+-- window j = 2
 -- window c = 1
 -- window d = 1
--- window h = 4
 -- window e = 1
 -- window x = 1
--- window j = 2
+-- window h = 4
+-- window f = 2
+-- window a = 2
+-- window b = 1
+-- window g = 1
 
 -- Pipeline Visualization
 -- x     |       |       |       | x     |       |       |       | x     |      
@@ -52,7 +52,7 @@ import Clash.Prelude
 -- -----------------------------------------------------------------------------
 --       |       |       | c,i   |       |       |       | c,i   |       |      
 -- -----------------------------------------------------------------------------
---       |       |       |       | f,d,j |       |       |       | f,d,j |      
+--       |       |       |       | d,f,j |       |       |       | d,f,j |      
 -- -----------------------------------------------------------------------------
 --       |       |       |       |       | h,e   |       |       |       | h,e  
 -- -----------------------------------------------------------------------------
@@ -379,8 +379,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tOut6 = genTag (getPacing <$> pOut6)
         tOut2 = genTag (getPacing <$> pOut2)
         tOut8 = genTag (getPacing <$> pOut8)
-        tOut5 = genTag (getPacing <$> pOut5)
         tOut3 = genTag (getPacing <$> pOut3)
+        tOut5 = genTag (getPacing <$> pOut5)
         tOut9 = genTag (getPacing <$> pOut9)
         tOut7 = genTag (getPacing <$> pOut7)
         tOut4 = genTag (getPacing <$> pOut4)
@@ -405,8 +405,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enOut6 = delayFor d3 nullPacingOut6 pOut6
         enOut2 = delayFor d4 nullPacingOut2 pOut2
         enOut8 = delayFor d4 nullPacingOut8 pOut8
-        enOut5 = delayFor d5 nullPacingOut5 pOut5
         enOut3 = delayFor d5 nullPacingOut3 pOut3
+        enOut5 = delayFor d5 nullPacingOut5 pOut5
         enOut9 = delayFor d5 nullPacingOut9 pOut9
         enOut7 = delayFor d6 nullPacingOut7 pOut7
         enOut4 = delayFor d6 nullPacingOut4 pOut4

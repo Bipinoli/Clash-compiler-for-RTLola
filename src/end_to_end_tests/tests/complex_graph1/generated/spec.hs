@@ -25,26 +25,26 @@ import Clash.Prelude
 -- Evaluation Order
 -- x, f, i, a
 -- h, b
--- g, e, d, c
+-- g, d, e, c
 
 -- Memory Window
--- window b = 1
--- window g = 1
--- window h = 1
--- window f = 1
--- window x = 2
--- window e = 1
 -- window d = 1
--- window c = 1
--- window a = 1
+-- window f = 1
+-- window e = 1
+-- window h = 1
+-- window x = 2
+-- window b = 1
 -- window i = 1
+-- window g = 1
+-- window a = 1
+-- window c = 1
 
 -- Pipeline Visualization
 -- x,f,i,a |         |         | x,f,i,a |         |         | x,f,i,a |         |         | x,f,i,a
 -- -------------------------------------------------------------------------------------------------
 --         | h,b     |         |         | h,b     |         |         | h,b     |         |        
 -- -------------------------------------------------------------------------------------------------
---         |         | g,e,d,c |         |         | g,e,d,c |         |         | g,e,d,c |        
+--         |         | g,d,e,c |         |         | g,d,e,c |         |         | g,d,e,c |        
 -- -------------------------------------------------------------------------------------------------
 
 -- input0 = x
@@ -360,8 +360,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tOut7 = genTag (getPacing <$> pOut7)
         tOut1 = genTag (getPacing <$> pOut1)
         tOut6 = genTag (getPacing <$> pOut6)
-        tOut4 = genTag (getPacing <$> pOut4)
         tOut3 = genTag (getPacing <$> pOut3)
+        tOut4 = genTag (getPacing <$> pOut4)
         tOut2 = genTag (getPacing <$> pOut2)
 
         -- tag generation takes 1 cycle so we need to delay the input data
@@ -382,8 +382,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enOut7 = delayFor d2 nullPacingOut7 pOut7
         enOut1 = delayFor d2 nullPacingOut1 pOut1
         enOut6 = delayFor d3 nullPacingOut6 pOut6
-        enOut4 = delayFor d3 nullPacingOut4 pOut4
         enOut3 = delayFor d3 nullPacingOut3 pOut3
+        enOut4 = delayFor d3 nullPacingOut4 pOut4
         enOut2 = delayFor d3 nullPacingOut2 pOut2
 
         output0Aktv = delayFor d4 False (getPacing <$> pOut0)

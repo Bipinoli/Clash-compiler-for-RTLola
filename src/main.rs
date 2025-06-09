@@ -37,6 +37,10 @@ struct Args {
     #[arg(long)]
     verilog: bool,
 
+    /// Should generate vhdl code & scripts
+    #[arg(long)]
+    vhdl: bool,
+
     /// Should output RTLolaMIR into a json file
     #[arg(long)]
     mir: bool,
@@ -106,6 +110,15 @@ fn main() {
                         write_to_file(args.output.join("dump_waveform.sh"), dump_wv);
                         write_to_file(args.output.join("open_waveform.sh"), open_wv);
                     };
+                    if args.vhdl {
+                       let (vhdl_exp, gen_vhdl_sh) =
+                            codegen::scripts::generate_vhdl_gen_script(
+                                extract_file_stem(&spec_path) + ".hs",
+                                to_pascal_case(&extract_file_stem(&spec_path)),
+                            );
+                        write_to_file(args.output.join("vhdl.exp"), vhdl_exp);
+                        write_to_file(args.output.join("gen_vhdl.sh"), gen_vhdl_sh);
+                    }
                     println!(
                         "Compilation successful! Output at: {}",
                         args.output.to_str().unwrap()

@@ -27,13 +27,13 @@ import Clash.Prelude
 -- f, d
 
 -- Memory Window
--- window x = 1
--- window a = 2
 -- window e = 1
 -- window c = 1
+-- window x = 1
+-- window b = 1
+-- window a = 2
 -- window f = 1
 -- window d = 1
--- window b = 1
 
 -- Pipeline Visualization
 -- x   |     |     | x   |     |     | x   |     |     | x  

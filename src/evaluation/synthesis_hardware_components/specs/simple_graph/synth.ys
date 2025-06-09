@@ -1,0 +1,5 @@
+ghdl --std=08 ./generated/vhdl/Spec.topEntity/Spec_topEntity_types.vhdl
+ghdl --std=08 ./generated/vhdl/Spec.topEntity/topEntity.vhdl -e top
+
+synth -top top
+stat

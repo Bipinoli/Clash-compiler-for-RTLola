@@ -15,7 +15,7 @@ pub fn generate_verilog_gen_script(
 
     register_template(
         "verilog.exp".to_string(),
-        "src/codegen/scripts/expect_script.hbs".to_string(),
+        "src/codegen/scripts/verilog_expect_script.hbs".to_string(),
         &mut reg,
     );
     register_template(
@@ -72,6 +72,48 @@ pub fn generate_verilog_gen_script(
         gen_verilog_sh.unwrap(),
         dump_wv.unwrap(),
         open_wv.unwrap(),
+    )
+}
+
+pub fn generate_vhdl_gen_script(
+    generated_clash_filename: String,
+    monitor_name: String,
+) -> (String, String) {
+    let mut reg = Handlebars::new();
+
+    register_template(
+        "vhdl.exp".to_string(),
+        "src/codegen/scripts/vhdl_except_script.hbs".to_string(),
+        &mut reg,
+    );
+    register_template(
+        "gen_vhdl".to_string(),
+        "src/codegen/scripts/gen_vhdl.hbs".to_string(),
+        &mut reg,
+    );
+
+    let data = Data {
+        generated_clash_filename,
+        monitor_name,
+    };
+
+    let vhdl_exp = match reg.render("vhdl.exp", &data) {
+        Ok(result) => Some(result),
+        Err(e) => {
+            println!("Rendering error: {}", e);
+            None
+        }
+    };
+    let gen_vhdl_sh = match reg.render("gen_vhdl", &data) {
+        Ok(result) => Some(result),
+        Err(e) => {
+            println!("Rendering error: {}", e);
+            None
+        }
+    };
+    (
+        vhdl_exp.unwrap(),
+        gen_vhdl_sh.unwrap(),
     )
 }
 

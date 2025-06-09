@@ -1,0 +1,6 @@
+input x : Int
+output a := x + c.offset(by: -1).defaults(to: 0)
+output b := a + e.offset(by: -1).defaults(to: 0) 
+output c := x + b
+output d := c.offset(by: -1).defaults(to: 1)
+output e := d * 2
