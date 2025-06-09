@@ -1,0 +1,5 @@
+ghdl --std=08 Spec_topEntity_types.vhdl topEntity.vhdl -e topEntity
+
+prep -top topEntity
+
+stat

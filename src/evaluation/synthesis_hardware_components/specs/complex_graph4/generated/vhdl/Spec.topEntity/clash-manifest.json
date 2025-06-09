@@ -42,18 +42,18 @@
         },
         {
             "name": "Spec_topEntity_types.vhdl",
-            "sha256": "ebba168307c2388fda24ae9c8f1d4e26a1067caed350697e6acb6fb7554dec9b"
+            "sha256": "6fb9dc2ca8905057db9720b6076950d410a38c23ead71c138102c4e5d594e26c"
         },
         {
             "name": "topEntity.vhdl",
-            "sha256": "273380b66592261b9e11f9944d82d059c1c794d383e9de9df42f8e847347a85d"
+            "sha256": "1fd5e6a9403092f3eac32193d47a1523f1825d683af329cb3662be712650a21c"
         }
     ],
     "flags": [
         20,
         20
     ],
-    "hash": "6e05970b2caf34faa98e5f9481125c7daf9ba4aed18325e80bd51335a5a3236e",
+    "hash": "78aca1949d72f85caecd226254271e582e2f8d42dea92c6f9932f740c872f61f",
     "top_component": {
         "name": "topEntity",
         "ports_flat": [
@@ -84,14 +84,28 @@
             {
                 "direction": "in",
                 "is_clock": false,
-                "name": "inputs_0",
+                "name": "inputs_0_0",
                 "type_name": "signed(63 downto 0)",
                 "width": 64
             },
             {
                 "direction": "in",
                 "is_clock": false,
-                "name": "inputs_1",
+                "name": "inputs_0_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_1_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_1_1",
                 "type_name": "boolean",
                 "width": 1
             },
@@ -148,6 +162,118 @@
                 "direction": "out",
                 "is_clock": false,
                 "name": "result_3_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_4_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_4_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_5_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_5_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_6_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_6_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_7_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_7_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_8_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_8_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_9_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_9_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_10_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_10_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_11_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_11_1",
                 "type_name": "boolean",
                 "width": 1
             }
