@@ -253,6 +253,6 @@ Found and reported 0 problems.
      $not                            1
      $sub                            5
 
-End of script. Logfile hash: 8f092799d5, CPU: user 0.40s system 0.01s, MEM: 28.29 MB peak
+End of script. Logfile hash: 8f092799d5, CPU: user 0.48s system 0.02s, MEM: 28.34 MB peak
 Yosys 0.36+42 (git sha1 70d35314d, clang 11.0.1-2 -fPIC -Os)
-Time spent: 28% 1x ghdl (0 sec), 26% 5x opt_clean (0 sec), ...
+Time spent: 29% 1x ghdl (0 sec), 25% 5x opt_clean (0 sec), ...

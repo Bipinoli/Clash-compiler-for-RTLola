@@ -1,0 +1,3 @@
+[submodule "src/evaluation/synthesis_hardware_components/rtlola-compilation-vhdl"]
+	path = src/evaluation/synthesis_hardware_components/rtlola-compilation-vhdl
+	url = https://github.com/reactive-systems/rtlola-compilation-vhdl.git

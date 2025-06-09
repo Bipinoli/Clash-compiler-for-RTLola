@@ -14,7 +14,7 @@ def extract_synthesis_specs(content):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print(f"{bcolors.FAIL}Please provide a file path to specs directory as an argument{bcolors.ENDC}")
+        print(f"{bcolors.FAIL}Please provide a path to the specs directory as an argument{bcolors.ENDC}")
         exit()
     specs_path = sys.argv[1]
 
@@ -23,6 +23,8 @@ if __name__ == "__main__":
         content = subprocess.run(["yosys", "-m", "ghdl", "synth.ys"], cwd=work_dir, stdout=subprocess.PIPE, text=True).stdout
         with open(f"{work_dir}/../../stats.txt", "w") as f:
             f.write(content)
+
+    subprocess.run(["bash"])
 
 
 
