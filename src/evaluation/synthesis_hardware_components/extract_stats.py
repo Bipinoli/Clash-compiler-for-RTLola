@@ -19,11 +19,11 @@ if __name__ == "__main__":
     specs_path = sys.argv[1]
 
     for folder in os.listdir(specs_path):
-        # work_dir1 = f"{specs_path}/{folder}/generated/vhdl/Spec.topEntity"
-        # content = subprocess.run(["yosys", "-m", "ghdl", "synth.ys"], cwd=work_dir1, stdout=subprocess.PIPE, text=True).stdout
-        # with open(f"{work_dir1}/../../stats.txt", "w") as f:
-        #     f.write(content)
-        #     f.flush()
+        work_dir1 = f"{specs_path}/{folder}/generated/vhdl/Spec.topEntity"
+        content = subprocess.run(["yosys", "-m", "ghdl", "synth.ys"], cwd=work_dir1, stdout=subprocess.PIPE, text=True).stdout
+        with open(f"{work_dir1}/../../stats.txt", "w") as f:
+            f.write(content)
+            f.flush()
         work_dir2 = f"{specs_path}/{folder}/generated_vhdl_comp_related"
         subprocess.run(["chmod", "+x", "synth.sh"], cwd=work_dir2)
         subprocess.run(["./synth.sh"], cwd=work_dir2)

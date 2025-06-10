@@ -2,3 +2,4 @@ input x: Int
 output a := x + c.offset(by: -3).defaults(to: 0) 
 output b := a + 1
 output c := b + 1
+output xx @1kHz := a.hold(or: 0) 

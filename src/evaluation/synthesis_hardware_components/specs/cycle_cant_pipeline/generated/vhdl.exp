@@ -1,0 +1,22 @@
+#!/usr/bin/expect -f
+
+# For convinience reason we are running clash interpreter 
+
+proc wait_for_prompt {} {
+   expect {
+      -re "clashi> $" { return }
+      timeout { wait_for_prompt } ;# retry
+   }
+}
+
+spawn stack exec -- clashi
+
+wait_for_prompt
+send ":l spec.hs\r"
+
+wait_for_prompt
+send ":vhdl\r"
+
+# CTRL + D to exit
+wait_for_prompt
+send "/004"

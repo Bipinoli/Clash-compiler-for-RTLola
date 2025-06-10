@@ -1,0 +1,157 @@
+{
+    "components": [
+        "topEntity"
+    ],
+    "dependencies": {
+        "transitive": []
+    },
+    "domains": {
+        "IntelSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "System": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "TestDomain": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 2000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "XilinxSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Synchronous",
+            "reset_polarity": "ActiveHigh"
+        }
+    },
+    "files": [
+        {
+            "name": "topEntity.sdc",
+            "sha256": "5931af56eff7648c501fd106363fb26420b398eeea306d9edd80c5a89a153fc1"
+        },
+        {
+            "name": "Spec_topEntity_types.vhdl",
+            "sha256": "7bdd1d3e70f7b316601b0d79357327aeede9b88cdaa73c862e80c44037815b08"
+        },
+        {
+            "name": "topEntity.vhdl",
+            "sha256": "cbf70a3e3d420c9098f5d095269718955ae274a70ccb0a02d8b241879a4ec840"
+        }
+    ],
+    "flags": [
+        20,
+        20
+    ],
+    "hash": "4aa8d1b931b0d41db8ef23ece2b4d9f50f82a0af4334567867cf0050c5169f65",
+    "top_component": {
+        "name": "topEntity",
+        "ports_flat": [
+            {
+                "direction": "in",
+                "domain": "TestDomain",
+                "is_clock": true,
+                "name": "clk",
+                "type_name": "clk.Spec_topEntity_types.clk_TestDomain",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "TestDomain",
+                "is_clock": false,
+                "name": "rst",
+                "type_name": "rst.Spec_topEntity_types.rst_TestDomain",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "TestDomain",
+                "is_clock": false,
+                "name": "en",
+                "type_name": "en.Spec_topEntity_types.en_TestDomain",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_2_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_2_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_3_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_3_1",
+                "type_name": "boolean",
+                "width": 1
+            }
+        ]
+    },
+    "version": "unstable"
+}
