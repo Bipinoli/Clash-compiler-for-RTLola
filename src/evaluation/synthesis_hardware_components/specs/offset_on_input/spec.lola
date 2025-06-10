@@ -1,0 +1,4 @@
+input x: Int
+output a := x.offset(by: -1).defaults(to: 10)
+output b := x.offset(by: -1).defaults(to: 100)
+output c @1Hz := x.hold().defaults(to:6)

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# python3 setup.py
+python3 setup.py
 
 # run container by mounting the diretory to /thesis in container
 docker build -t thesis .

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-dir="src/evaluation/synthesis_hardware_components/specs/complex_graph4"
+dir="src/evaluation/synthesis_hardware_components/specs/cycle_cant_pipeline"
 
 rm -rf generated
 mkdir generated
@@ -11,4 +11,4 @@ cd $dir/generated
 chmod +x gen_vhdl.sh
 ./gen_vhdl.sh
 
-cp ../../../synth_template.ys ./vhdl/Spec.topEntity/synth.ys
+cp ../../../synth_script_our_compiler.ys ./vhdl/Spec.topEntity/synth.ys
