@@ -19,14 +19,13 @@ if __name__ == "__main__":
     specs_path = sys.argv[1]
 
     for folder in os.listdir(specs_path):
-        work_dir1 = f"{specs_path}/{folder}/generated/vhdl/Spec.topEntity"
-        subprocess.run(["chmod", "+x", "synth.sh"], cwd=work_dir1)
-        subprocess.run(["./synth.sh"], cwd=work_dir1)
-        work_dir2 = f"{specs_path}/{folder}/generated_vhdl_comp_related"
-        subprocess.run(["chmod", "+x", "synth.sh"], cwd=work_dir2)
-        subprocess.run(["./synth.sh"], cwd=work_dir2)
-
-    subprocess.run(["bash"])
+        if os.path.isdir(f"{specs_path}/{folder}"):
+            work_dir1 = f"{specs_path}/{folder}/generated/vhdl/Spec.topEntity"
+            subprocess.run(["chmod", "+x", "synth.sh"], cwd=work_dir1)
+            subprocess.run(["./synth.sh"], cwd=work_dir1)
+            work_dir2 = f"{specs_path}/{folder}/generated_vhdl_comp_related"
+            subprocess.run(["chmod", "+x", "synth.sh"], cwd=work_dir2)
+            subprocess.run(["./synth.sh"], cwd=work_dir2)
 
 
 

@@ -23,4 +23,9 @@ ghdl -a --std=08 --work=work pre_processing/input_pre_processing.vhdl
 ghdl -a --std=08 --work=work pre_processing/clock_pre_processing.vhdl
 ghdl -a --std=08 --work=work implementation.vhdl
 ghdl -e --std=08 --work=work implementation
-yosys -m ghdl -p "ghdl --latches --std=08 --work=work implementation; synth -top implementation; stat" > stats.txt
+
+yosys -m ghdl -p "
+ghdl --latches --std=08 --work=work implementation; 
+synth -top implementation; 
+stat;
+" > stats.txt

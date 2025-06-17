@@ -33,7 +33,7 @@ def gen_script(vhdl_project_path):
     content += analyze_bulk(f"{vhdl_project_path}/pre_processing")
     content += analyze("implementation.vhdl")
     content += "ghdl -e --std=08 --work=work implementation\n"
-    content += f'yosys -m ghdl -p "ghdl --latches --std=08 --work=work implementation; synth -top implementation; stat" > stats.txt\n'
+    content += f'\nyosys -m ghdl -p "\nghdl --latches --std=08 --work=work implementation; \nsynth -top implementation; \nstat;\n" > stats.txt\n'
     with open(f"{vhdl_project_path}/synth.sh", "w") as f:
         f.write(content)
 

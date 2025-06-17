@@ -22,7 +22,11 @@
  Yosys 0.36+42 (git sha1 70d35314d, clang 11.0.1-2 -fPIC -Os)
 
 
--- Running command `ghdl --latches --std=08 --work=work implementation; synth -top implementation; stat' --
+-- Running command `
+ghdl --latches --std=08 --work=work implementation; 
+synth -top implementation; 
+stat;
+' --
 
 1. Executing GHDL.
 Importing module implementation.
@@ -4303,6 +4307,6 @@ Found and reported 0 problems.
      $_XNOR_                       151
      $_XOR_                        401
 
-End of script. Logfile hash: cfba57d6bd, CPU: user 3.49s system 0.14s, MEM: 54.75 MB peak
+End of script. Logfile hash: fc44f5d70d, CPU: user 3.51s system 0.16s, MEM: 54.56 MB peak
 Yosys 0.36+42 (git sha1 70d35314d, clang 11.0.1-2 -fPIC -Os)
-Time spent: 26% 1x abc (1 sec), 15% 33x opt_expr (0 sec), ...
+Time spent: 25% 1x abc (1 sec), 15% 33x opt_expr (0 sec), ...

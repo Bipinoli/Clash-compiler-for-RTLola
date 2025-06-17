@@ -22,7 +22,11 @@
  Yosys 0.36+42 (git sha1 70d35314d, clang 11.0.1-2 -fPIC -Os)
 
 
--- Running command `ghdl --latches --std=08 --work=work topEntity; synth -top topEntity; stat' --
+-- Running command `
+ghdl --latches --std=08 --work=work topEntity;
+synth -top topEntity;
+stat;
+' --
 
 1. Executing GHDL.
 Importing module topEntity.
@@ -874,6 +878,6 @@ Found and reported 0 problems.
      $_XNOR_                       103
      $_XOR_                        477
 
-End of script. Logfile hash: 52c20bc3f7, CPU: user 3.30s system 0.06s, MEM: 58.96 MB peak
+End of script. Logfile hash: 0c87e5f291, CPU: user 3.14s system 0.05s, MEM: 58.47 MB peak
 Yosys 0.36+42 (git sha1 70d35314d, clang 11.0.1-2 -fPIC -Os)
-Time spent: 25% 26x opt_clean (0 sec), 22% 31x opt_expr (0 sec), ...
+Time spent: 24% 26x opt_clean (0 sec), 22% 31x opt_expr (0 sec), ...
