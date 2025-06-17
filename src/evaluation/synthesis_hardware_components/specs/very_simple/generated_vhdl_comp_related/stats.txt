@@ -4303,6 +4303,6 @@ Found and reported 0 problems.
      $_XNOR_                       151
      $_XOR_                        401
 
-End of script. Logfile hash: cfba57d6bd, CPU: user 4.24s system 0.16s, MEM: 54.72 MB peak
+End of script. Logfile hash: cfba57d6bd, CPU: user 3.49s system 0.14s, MEM: 54.75 MB peak
 Yosys 0.36+42 (git sha1 70d35314d, clang 11.0.1-2 -fPIC -Os)
-Time spent: 24% 1x abc (1 sec), 16% 33x opt_expr (0 sec), ...
+Time spent: 26% 1x abc (1 sec), 15% 33x opt_expr (0 sec), ...

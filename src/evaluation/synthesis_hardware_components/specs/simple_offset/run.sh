@@ -11,4 +11,4 @@ cd $dir/generated
 chmod +x gen_vhdl.sh
 ./gen_vhdl.sh
 
-cp ../../../synth_script_our_compiler.ys ./vhdl/Spec.topEntity/synth.ys
+cp ../../../new_compiler_synth_script.sh ./vhdl/Spec.topEntity/synth.sh

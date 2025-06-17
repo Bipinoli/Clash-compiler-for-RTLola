@@ -17,20 +17,20 @@ import Clash.Prelude
 
 -- Evaluation Order
 -- x
--- a, b, xx
+-- b, a, xx
 -- c
 
 -- Memory Window
--- window a = 2
+-- window c = 1
 -- window b = 2
 -- window x = 1
--- window c = 1
+-- window a = 2
 -- window xx = 2
 
 -- Pipeline Visualization
 -- x      | x      | x      | x      | x      | x      | x      | x      | x      | x     
 -- ---------------------------------------------------------------------------------------
---        | a,b,xx | a,b,xx | a,b,xx | a,b,xx | a,b,xx | a,b,xx | a,b,xx | a,b,xx | a,b,xx
+--        | b,a,xx | b,a,xx | b,a,xx | b,a,xx | b,a,xx | b,a,xx | b,a,xx | b,a,xx | b,a,xx
 -- ---------------------------------------------------------------------------------------
 --        |        | c      | c      | c      | c      | c      | c      | c      | c     
 -- ---------------------------------------------------------------------------------------
@@ -292,8 +292,8 @@ llc event = bundle (toPop, outputs)
         pOut3 = (.pacingOut3) <$> pacings
         
         tIn0 = genTag (getPacing <$> pIn0)
-        tOut0 = genTag (getPacing <$> pOut0)
         tOut1 = genTag (getPacing <$> pOut1)
+        tOut0 = genTag (getPacing <$> pOut0)
         tOut3 = genTag (getPacing <$> pOut3)
         tOut2 = genTag (getPacing <$> pOut2)
 
@@ -309,8 +309,8 @@ llc event = bundle (toPop, outputs)
         nullT = invalidTag
 
         enIn0 = delayFor d1 nullPacingIn0 pIn0
-        enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut1 = delayFor d2 nullPacingOut1 pOut1
+        enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut3 = delayFor d2 nullPacingOut3 pOut3
         enOut2 = delayFor d3 nullPacingOut2 pOut2
 

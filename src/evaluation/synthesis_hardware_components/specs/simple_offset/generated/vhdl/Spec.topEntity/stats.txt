@@ -1,0 +1,872 @@
+
+ /----------------------------------------------------------------------------\
+ |                                                                            |
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |                                                                            |
+ |  Copyright (C) 2012 - 2020  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |                                                                            |
+ |  Permission to use, copy, modify, and/or distribute this software for any  |
+ |  purpose with or without fee is hereby granted, provided that the above    |
+ |  copyright notice and this permission notice appear in all copies.         |
+ |                                                                            |
+ |  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES  |
+ |  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF          |
+ |  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR   |
+ |  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES    |
+ |  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN     |
+ |  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF   |
+ |  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.            |
+ |                                                                            |
+ \----------------------------------------------------------------------------/
+
+ Yosys 0.36+42 (git sha1 70d35314d, clang 11.0.1-2 -fPIC -Os)
+
+
+-- Running command `ghdl --latches --std=08 --work=work topEntity; synth -top topEntity; stat' --
+
+1. Executing GHDL.
+Importing module topEntity.
+
+2. Executing SYNTH pass.
+
+2.1. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1.1. Analyzing design hierarchy..
+Top module:  \topEntity
+
+2.1.2. Analyzing design hierarchy..
+Top module:  \topEntity
+Removed 0 unused modules.
+
+2.2. Executing PROC pass (convert processes to netlists).
+
+2.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+2.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+2.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+2.2.4. Executing PROC_INIT pass (extract init attributes).
+
+2.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+2.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+2.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+
+2.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+2.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+2.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+2.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+2.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~11 debug messages>
+
+2.3. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 9 unused cells and 146 unused wires.
+<suppressed ~16 debug messages>
+
+2.5. Executing CHECK pass (checking for obvious problems).
+Checking module topEntity...
+Found and reported 0 problems.
+
+2.6. Executing OPT pass (performing simple optimizations).
+
+2.6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+<suppressed ~9 debug messages>
+Removed a total of 3 cells.
+
+2.6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux \676.
+Removed 1 multiplexer ports.
+<suppressed ~61 debug messages>
+
+2.6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+    New ctrl vector for $pmux cell \216: $auto$ghdl.cc:806:import_module$39
+    New ctrl vector for $pmux cell \294: $auto$ghdl.cc:806:import_module$54
+    New ctrl vector for $pmux cell \653: $auto$ghdl.cc:806:import_module$135
+    New ctrl vector for $pmux cell \657: $auto$ghdl.cc:806:import_module$135
+    New ctrl vector for $pmux cell \682: $auto$ghdl.cc:806:import_module$135
+    New ctrl vector for $pmux cell \763: $auto$ghdl.cc:806:import_module$135
+  Optimizing cells in module \topEntity.
+Performed a total of 6 changes.
+
+2.6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.6.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~1 debug messages>
+
+2.6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~2 debug messages>
+
+2.6.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.6.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~60 debug messages>
+
+2.6.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.6.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.6.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.6.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 2 unused cells and 2 unused wires.
+<suppressed ~3 debug messages>
+
+2.6.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.6.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.6.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~60 debug messages>
+
+2.6.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.6.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.6.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.6.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.6.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.6.23. Finished OPT passes. (There is nothing left to do.)
+
+2.7. Executing FSM pass (extract and optimize FSM).
+
+2.7.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+2.7.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+2.7.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+2.7.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.7.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+2.7.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+2.7.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+2.7.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+2.8. Executing OPT pass (performing simple optimizations).
+
+2.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~60 debug messages>
+
+2.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.8.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on \87 ($dff) from module topEntity (D = \iteratei.iteratei_ho1_2_res, Q = \iteratei.r_block_34.\c$bb_res_res_2\).
+Adding EN signal on \818 ($adff) from module topEntity (D = \\c$cursor_case_alt\, Q = \cursor).
+Adding EN signal on \816 ($adff) from module topEntity (D = \\c$buffer_case_alt_0\, Q = \buffer).
+Adding EN signal on \812 ($adff) from module topEntity (D = \\c$case_alt_5\, Q = \\c$app_arg_13\).
+Adding EN signal on \810 ($adff) from module topEntity (D = \\c$case_alt\, Q = \\c$app_arg_12\).
+Adding EN signal on \808 ($adff) from module topEntity (D = \result_44, Q = \towait).
+Adding EN signal on \806 ($adff) from module topEntity (D = \result_42, Q = \t_6).
+Adding EN signal on \804 ($adff) from module topEntity (D = \result_40, Q = \t_5).
+Adding EN signal on \802 ($adff) from module topEntity (D = \result_38, Q = \t_4).
+Adding EN signal on \800 ($adff) from module topEntity (D = \result_36, Q = \t_3).
+Adding EN signal on \798 ($adff) from module topEntity (D = \result_34, Q = \t_2).
+Adding EN signal on \796 ($dff) from module topEntity (D = \\c$app_arg_12\ [63:0], Q = \\c$ds_app_arg\).
+Adding EN signal on \794 ($adff) from module topEntity (D = { \\c$ds_app_arg\ \t_6 }, Q = \result_28).
+Adding EN signal on \792 ($adff) from module topEntity (D = { \t_1 [71:8] \iteratei_10.r_block_62.\c$bb_res_res_30\ [15:8] }, Q = \result_26).
+Adding EN signal on \790 ($adff) from module topEntity (D = { \result_22 [71:0] \t_0 [71:8] \t_4 }, Q = \result_22).
+Adding EN signal on \79 ($dff) from module topEntity (D = \iteratei.iteratei_ho1_1_res, Q = \iteratei.iteratei_ho1_2_res).
+Adding EN signal on \784 ($adff) from module topEntity (D = { \t [71:8] \iteratei_9.r_block_61.\c$bb_res_res_29\ [31:24] }, Q = \result_14).
+Adding EN signal on \782 ($adff) from module topEntity (D = { \\c$ds2_case_alt\ \iteratei_9.r_block_61.\c$bb_res_res_29\ [39:32] }, Q = \result_10).
+Adding EN signal on \780 ($adff) from module topEntity (D = \result_4, Q = \result_5).
+Adding EN signal on \71 ($dff) from module topEntity (D = \iteratei.iteratei_ho1_0_res, Q = \iteratei.iteratei_ho1_1_res).
+Adding EN signal on \63 ($dff) from module topEntity (D = \\c$app_arg_12\ [69], Q = \iteratei.iteratei_ho1_0_res).
+Adding EN signal on \535 ($dff) from module topEntity (D = { \t_2 \t_3 \t_4 \t_5 \t_6 }, Q = \iteratei_10.r_block_62.\c$bb_res_res_30\).
+Adding EN signal on \521 ($dff) from module topEntity (D = \iteratei_9.iteratei_ho1_0_res_9, Q = \iteratei_9.r_block_61.\c$bb_res_res_29\).
+Adding EN signal on \513 ($dff) from module topEntity (D = { \t_2 \t_3 \t_4 \t_5 \t_6 }, Q = \iteratei_9.iteratei_ho1_0_res_9).
+Adding EN signal on \501 ($dff) from module topEntity (D = \iteratei_8.iteratei_ho1_0_res_8, Q = \iteratei_8.r_block_59.\c$bb_res_res_27\).
+Adding EN signal on \493 ($dff) from module topEntity (D = \\c$app_arg_12\ [66], Q = \iteratei_8.iteratei_ho1_0_res_8).
+Adding EN signal on \483 ($dff) from module topEntity (D = \\c$app_arg_12\ [65], Q = \b_0).
+Adding EN signal on \438 ($dff) from module topEntity (D = \\c$app_arg_12\ [67], Q = \iteratei_6.r_block_56.\c$bb_res_res_24\).
+Adding EN signal on \399 ($dff) from module topEntity (D = \iteratei_5.iteratei_ho1_2_res_5, Q = \iteratei_5.r_block_55.\c$bb_res_res_23\).
+Adding EN signal on \391 ($dff) from module topEntity (D = \iteratei_5.iteratei_ho1_1_res_5, Q = \iteratei_5.iteratei_ho1_2_res_5).
+Adding EN signal on \383 ($dff) from module topEntity (D = \iteratei_5.iteratei_ho1_0_res_5, Q = \iteratei_5.iteratei_ho1_1_res_5).
+Adding EN signal on \375 ($dff) from module topEntity (D = \\c$app_arg_12\ [66], Q = \iteratei_5.iteratei_ho1_0_res_5).
+Adding EN signal on \363 ($dff) from module topEntity (D = \iteratei_4.iteratei_ho1_1_res_4, Q = \iteratei_4.r_block_51.\c$bb_res_res_19\).
+Adding EN signal on \355 ($dff) from module topEntity (D = \iteratei_4.iteratei_ho1_0_res_4, Q = \iteratei_4.iteratei_ho1_1_res_4).
+Adding EN signal on \347 ($dff) from module topEntity (D = { \t_2 \t_3 \t_4 \t_5 \t_6 }, Q = \iteratei_4.iteratei_ho1_0_res_4).
+Adding EN signal on \334 ($dff) from module topEntity (D = \iteratei_3.iteratei_ho1_2_res_3, Q = \iteratei_3.r_block_48.\c$bb_res_res_16\).
+Adding EN signal on \326 ($dff) from module topEntity (D = \iteratei_3.iteratei_ho1_1_res_3, Q = \iteratei_3.iteratei_ho1_2_res_3).
+Adding EN signal on \318 ($dff) from module topEntity (D = \iteratei_3.iteratei_ho1_0_res_3, Q = \iteratei_3.iteratei_ho1_1_res_3).
+Adding EN signal on \310 ($dff) from module topEntity (D = \\c$app_arg_12\ [67], Q = \iteratei_3.iteratei_ho1_0_res_3).
+Adding EN signal on \252 ($dff) from module topEntity (D = \iteratei_2.iteratei_ho1_1_res_2, Q = \iteratei_2.r_block_44.\c$bb_res_res_12\).
+Adding EN signal on \244 ($dff) from module topEntity (D = \iteratei_2.iteratei_ho1_0_res_2, Q = \iteratei_2.iteratei_ho1_1_res_2).
+Adding EN signal on \236 ($dff) from module topEntity (D = \\c$app_arg_12\ [68], Q = \iteratei_2.iteratei_ho1_0_res_2).
+Adding EN signal on \162 ($dff) from module topEntity (D = \iteratei_1.iteratei_ho1_2_res_1, Q = \iteratei_1.r_block_41.\c$bb_res_res_9\).
+Adding EN signal on \154 ($dff) from module topEntity (D = \iteratei_1.iteratei_ho1_1_res_1, Q = \iteratei_1.iteratei_ho1_2_res_1).
+Adding EN signal on \146 ($dff) from module topEntity (D = \iteratei_1.iteratei_ho1_0_res_1, Q = \iteratei_1.iteratei_ho1_1_res_1).
+Adding EN signal on \138 ($dff) from module topEntity (D = \\c$app_arg_12\ [68], Q = \iteratei_1.iteratei_ho1_0_res_1).
+Adding EN signal on \128 ($dff) from module topEntity (D = \iteratei_0.iteratei_ho1_1_res_0, Q = \b).
+Adding EN signal on \120 ($dff) from module topEntity (D = \iteratei_0.iteratei_ho1_0_res_0, Q = \iteratei_0.iteratei_ho1_1_res_0).
+Adding EN signal on \112 ($dff) from module topEntity (D = \\c$app_arg_12\ [69], Q = \iteratei_0.iteratei_ho1_0_res_0).
+
+2.8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 60 unused cells and 60 unused wires.
+<suppressed ~72 debug messages>
+
+2.8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~3 debug messages>
+
+2.8.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.8.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~23 debug messages>
+
+2.8.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.8.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+<suppressed ~36 debug messages>
+Removed a total of 12 cells.
+
+2.8.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.8.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.8.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.8.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.8.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~23 debug messages>
+
+2.8.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.8.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.8.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.8.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.8.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.8.23. Finished OPT passes. (There is nothing left to do.)
+
+2.9. Executing WREDUCE pass (reducing word size of cells).
+Removed top 2 bits (of 3) from port B of cell topEntity.$auto$opt_dff.cc:195:make_patterns_logic$212 ($ne).
+Removed top 53 bits (of 64) from port B of cell topEntity.\30 ($add).
+Removed top 43 bits (of 64) from port B of cell topEntity.\45 ($ge).
+Removed top 5 bits (of 8) from port B of cell topEntity.\102 ($eq).
+Removed top 16 bits (of 40) from FF cell topEntity.$auto$ff.cc:266:slice$275 ($dffe).
+Removed top 63 bits (of 64) from port B of cell topEntity.\412 ($add).
+Removed top 7 bits (of 8) from port B of cell topEntity.\425 ($gt).
+Removed top 6 bits (of 8) from port B of cell topEntity.\428 ($add).
+Removed top 7 bits (of 8) from port B of cell topEntity.\430 ($sub).
+Removed top 63 bits (of 64) from port B of cell topEntity.\451 ($add).
+Removed top 6 bits (of 8) from port B of cell topEntity.\549 ($eq).
+Removed top 7 bits (of 8) from port B of cell topEntity.\551 ($add).
+Removed top 6 bits (of 8) from port B of cell topEntity.\564 ($eq).
+Removed top 7 bits (of 8) from port B of cell topEntity.\566 ($add).
+Removed top 6 bits (of 8) from port B of cell topEntity.\579 ($eq).
+Removed top 7 bits (of 8) from port B of cell topEntity.\581 ($add).
+Removed top 6 bits (of 8) from port B of cell topEntity.\594 ($eq).
+Removed top 7 bits (of 8) from port B of cell topEntity.\596 ($add).
+Removed top 6 bits (of 8) from port B of cell topEntity.\609 ($eq).
+Removed top 7 bits (of 8) from port B of cell topEntity.\611 ($add).
+Removed top 63 bits (of 64) from port B of cell topEntity.\629 ($gt).
+Removed top 63 bits (of 64) from port B of cell topEntity.\631 ($sub).
+Removed top 63 bits (of 64) from port B of cell topEntity.\742 ($add).
+Removed top 62 bits (of 64) from port B of cell topEntity.\755 ($eq).
+Removed top 63 bits (of 64) from mux cell topEntity.\756 ($mux).
+Removed top 63 bits (of 64) from port B of cell topEntity.\765 ($sub).
+Removed top 63 bits (of 64) from wire topEntity.\\c$cursor_app_arg\.
+Removed top 16 bits (of 40) from wire topEntity.iteratei_4.iteratei_ho1_2_res_4.
+Removed top 16 bits (of 40) from wire topEntity.result_19.
+
+2.10. Executing PEEPOPT pass (run peephole optimizers).
+
+2.11. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~1 debug messages>
+
+2.12. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module topEntity:
+  creating $macc model for \175 ($add).
+  creating $macc model for \207 ($sub).
+  creating $macc model for \285 ($sub).
+  creating $macc model for \30 ($add).
+  creating $macc model for \412 ($add).
+  creating $macc model for \428 ($add).
+  creating $macc model for \430 ($sub).
+  creating $macc model for \451 ($add).
+  creating $macc model for \551 ($add).
+  creating $macc model for \566 ($add).
+  creating $macc model for \581 ($add).
+  creating $macc model for \596 ($add).
+  creating $macc model for \611 ($add).
+  creating $macc model for \631 ($sub).
+  creating $macc model for \661 ($sub).
+  creating $macc model for \742 ($add).
+  creating $macc model for \765 ($sub).
+  creating $alu model for $macc \765.
+  creating $alu model for $macc \742.
+  creating $alu model for $macc \661.
+  creating $alu model for $macc \631.
+  creating $alu model for $macc \611.
+  creating $alu model for $macc \596.
+  creating $alu model for $macc \581.
+  creating $alu model for $macc \566.
+  creating $alu model for $macc \551.
+  creating $alu model for $macc \451.
+  creating $alu model for $macc \430.
+  creating $alu model for $macc \428.
+  creating $alu model for $macc \412.
+  creating $alu model for $macc \30.
+  creating $alu model for $macc \285.
+  creating $alu model for $macc \207.
+  creating $alu model for $macc \175.
+  creating $alu model for \425 ($gt): new $alu
+  creating $alu model for \45 ($ge): new $alu
+  creating $alu model for \629 ($gt): new $alu
+  creating $alu cell for \629: $auto$alumacc.cc:485:replace_alu$298
+  creating $alu cell for \45: $auto$alumacc.cc:485:replace_alu$305
+  creating $alu cell for \175: $auto$alumacc.cc:485:replace_alu$316
+  creating $alu cell for \207: $auto$alumacc.cc:485:replace_alu$319
+  creating $alu cell for \285: $auto$alumacc.cc:485:replace_alu$322
+  creating $alu cell for \30: $auto$alumacc.cc:485:replace_alu$325
+  creating $alu cell for \412: $auto$alumacc.cc:485:replace_alu$328
+  creating $alu cell for \428: $auto$alumacc.cc:485:replace_alu$331
+  creating $alu cell for \430: $auto$alumacc.cc:485:replace_alu$334
+  creating $alu cell for \451: $auto$alumacc.cc:485:replace_alu$337
+  creating $alu cell for \551: $auto$alumacc.cc:485:replace_alu$340
+  creating $alu cell for \566: $auto$alumacc.cc:485:replace_alu$343
+  creating $alu cell for \581: $auto$alumacc.cc:485:replace_alu$346
+  creating $alu cell for \425: $auto$alumacc.cc:485:replace_alu$349
+  creating $alu cell for \596: $auto$alumacc.cc:485:replace_alu$354
+  creating $alu cell for \611: $auto$alumacc.cc:485:replace_alu$357
+  creating $alu cell for \631: $auto$alumacc.cc:485:replace_alu$360
+  creating $alu cell for \661: $auto$alumacc.cc:485:replace_alu$363
+  creating $alu cell for \742: $auto$alumacc.cc:485:replace_alu$366
+  creating $alu cell for \765: $auto$alumacc.cc:485:replace_alu$369
+  created 20 $alu and 0 $macc cells.
+
+2.13. Executing SHARE pass (SAT-based resource sharing).
+
+2.14. Executing OPT pass (performing simple optimizations).
+
+2.14.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~1 debug messages>
+
+2.14.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.14.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~23 debug messages>
+
+2.14.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.14.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.14.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.14.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 1 unused cells and 4 unused wires.
+<suppressed ~3 debug messages>
+
+2.14.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.14.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.14.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~23 debug messages>
+
+2.14.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.14.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.14.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.14.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.14.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.14.16. Finished OPT passes. (There is nothing left to do.)
+
+2.15. Executing MEMORY pass.
+
+2.15.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+2.15.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+2.15.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+2.15.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+2.15.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+2.15.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.15.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+2.15.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+2.15.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.15.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+2.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.17. Executing OPT pass (performing simple optimizations).
+
+2.17.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~37 debug messages>
+
+2.17.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.17.3. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $auto$ff.cc:266:slice$261 ($adffe) from module topEntity (D = \result_4 [3:0], Q = \result_5 [3:0]).
+
+2.17.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 3 unused cells and 14 unused wires.
+<suppressed ~4 debug messages>
+
+2.17.5. Rerunning OPT passes. (Removed registers in this run.)
+
+2.17.6. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~1 debug messages>
+
+2.17.7. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.17.8. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.17.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 0 unused cells and 1 unused wires.
+<suppressed ~1 debug messages>
+
+2.17.10. Finished fast OPT passes.
+
+2.18. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+2.19. Executing OPT pass (performing simple optimizations).
+
+2.19.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.19.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.19.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~20 debug messages>
+
+2.19.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+    Consolidated identical input bits for $mux cell \28:
+      Old ports: A={ $auto$ghdl.cc:806:import_module$2 [63:4] 4'x }, B=64'0000000000000000000000000000000000000000000000000000011111010000, Y=\result_4
+      New ports: A={ $auto$ghdl.cc:806:import_module$2 [63:4] 1'x }, B=61'0000000000000000000000000000000000000000000000000000011111010, Y={ \result_4 [63:4] \result_4 [0] }
+      New connections: \result_4 [3:1] = { \result_4 [0] \result_4 [0] \result_4 [0] }
+  Optimizing cells in module \topEntity.
+Performed a total of 1 changes.
+
+2.19.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.19.6. Executing OPT_SHARE pass.
+
+2.19.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.19.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.19.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.19.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.19.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~20 debug messages>
+
+2.19.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.19.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.19.14. Executing OPT_SHARE pass.
+
+2.19.15. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.19.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.19.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.19.18. Finished OPT passes. (There is nothing left to do.)
+
+2.20. Executing TECHMAP pass (map to technology primitives).
+
+2.20.1. Executing Verilog-2005 frontend: /usr/local/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/usr/local/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `\$__div_mod_u'.
+Generating RTLIL representation for module `\$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `\$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Successfully finished Verilog frontend.
+
+2.20.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $xor.
+Using extmapper simplemap for cells of type $dffe.
+Using extmapper simplemap for cells of type $ne.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $mux.
+Using template $paramod$cc80a4e89b0341cb117f5d28b0e7244620640141\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $or.
+Using template $paramod$039520c137afc9cd69dd56c3fb11a4e1fbe5f664\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $adffe.
+Using extmapper simplemap for cells of type $eq.
+Using template $paramod$c66b509f0dbff04a70da2bd22d8e6a343f873dbd\_90_alu for cells of type $alu.
+Using template $paramod$9cfaa5b7a62bd2391802c1be28bdae97aa527b15\_90_alu for cells of type $alu.
+Using template $paramod$403a3c2fa431a154c52a6a5429d7a6260b5d144f\_90_alu for cells of type $alu.
+Using template $paramod$a950948e19702336540a1f557d0a91306bdb9188\_90_alu for cells of type $alu.
+Using template $paramod$c3cd1564c35d873179656addd6052d7ea8b6d991\_90_alu for cells of type $alu.
+Using template $paramod$38e8498ccdc425801fe5312e427e3cf0d9089c58\_90_alu for cells of type $alu.
+Using template $paramod$54969db7f41ab9ffc93887c2d8e2d7f68e10b42f\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $logic_not.
+Using template $paramod$89e6018118041664448800cd912a3b31e5316ca7\_90_alu for cells of type $alu.
+Using template $paramod$7e708ae28ab761f11d0fb59d3ffc72f6a4baf5d9\_90_alu for cells of type $alu.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000001000000 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000111100 for cells of type $lcu.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000001000 for cells of type $lcu.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000000111 for cells of type $lcu.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000000010 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~4111 debug messages>
+
+2.21. Executing OPT pass (performing simple optimizations).
+
+2.21.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~3809 debug messages>
+
+2.21.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+<suppressed ~1431 debug messages>
+Removed a total of 477 cells.
+
+2.21.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.21.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 744 unused cells and 2052 unused wires.
+<suppressed ~761 debug messages>
+
+2.21.5. Finished fast OPT passes.
+
+2.22. Executing ABC pass (technology mapping using ABC).
+
+2.22.1. Extracting gate netlist of module `\topEntity' to `<abc-temp-dir>/input.blif'..
+Replacing 3 occurrences of constant undef bits with constant zero bits
+Extracted 3827 gates and 4633 wires to a netlist network with 803 inputs and 610 outputs.
+
+2.22.1.1. Executing ABC.
+Running ABC command: "<yosys-exe-dir>/yosys-abc" -s -f <abc-temp-dir>/abc.script 2>&1
+ABC: ABC command line: "source <abc-temp-dir>/abc.script".
+ABC: 
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: Entered genlib library with 13 gates from file "<abc-temp-dir>/stdcells.genlib".
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+2.22.1.2. Re-integrating ABC results.
+ABC RESULTS:               NOT cells:      485
+ABC RESULTS:               MUX cells:      464
+ABC RESULTS:             ORNOT cells:      136
+ABC RESULTS:               NOR cells:      362
+ABC RESULTS:              XNOR cells:      100
+ABC RESULTS:                OR cells:      463
+ABC RESULTS:              NAND cells:      208
+ABC RESULTS:            ANDNOT cells:     1001
+ABC RESULTS:               AND cells:      107
+ABC RESULTS:               XOR cells:      495
+ABC RESULTS:              ZERO cells:        1
+ABC RESULTS:        internal signals:     3220
+ABC RESULTS:           input signals:      803
+ABC RESULTS:          output signals:      610
+Removing temp directory.
+
+2.23. Executing OPT pass (performing simple optimizations).
+
+2.23.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~66 debug messages>
+
+2.23.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+<suppressed ~198 debug messages>
+Removed a total of 66 cells.
+
+2.23.3. Executing OPT_DFF pass (perform DFF optimizations).
+Setting constant 0-bit at position 0 on $auto$ff.cc:266:slice$2541 ($_DFFE_PP0P_) from module topEntity.
+
+2.23.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 1 unused cells and 2537 unused wires.
+<suppressed ~41 debug messages>
+
+2.23.5. Rerunning OPT passes. (Removed registers in this run.)
+
+2.23.6. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.23.7. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.23.8. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.23.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.23.10. Finished fast OPT passes.
+
+2.24. Executing HIERARCHY pass (managing design hierarchy).
+
+2.24.1. Analyzing design hierarchy..
+Top module:  \topEntity
+
+2.24.2. Analyzing design hierarchy..
+Top module:  \topEntity
+Removed 0 unused modules.
+
+2.25. Printing statistics.
+
+=== topEntity ===
+
+   Number of wires:               3370
+   Number of wire bits:          10755
+   Number of public wires:         216
+   Number of public wire bits:    7601
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:               4767
+     $_ANDNOT_                    1000
+     $_AND_                        106
+     $_DFFE_PP0P_                  886
+     $_DFFE_PP1P_                    7
+     $_DFFE_PP_                    120
+     $_MUX_                        464
+     $_NAND_                       208
+     $_NOR_                        299
+     $_NOT_                        485
+     $_ORNOT_                      136
+     $_OR_                         462
+     $_XNOR_                       100
+     $_XOR_                        494
+
+2.26. Executing CHECK pass (checking for obvious problems).
+Checking module topEntity...
+Found and reported 0 problems.
+
+3. Printing statistics.
+
+=== topEntity ===
+
+   Number of wires:               3370
+   Number of wire bits:          10755
+   Number of public wires:         216
+   Number of public wire bits:    7601
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:               4767
+     $_ANDNOT_                    1000
+     $_AND_                        106
+     $_DFFE_PP0P_                  886
+     $_DFFE_PP1P_                    7
+     $_DFFE_PP_                    120
+     $_MUX_                        464
+     $_NAND_                       208
+     $_NOR_                        299
+     $_NOT_                        485
+     $_ORNOT_                      136
+     $_OR_                         462
+     $_XNOR_                       100
+     $_XOR_                        494
+
+End of script. Logfile hash: b9097d2d48, CPU: user 2.99s system 0.04s, MEM: 59.73 MB peak
+Yosys 0.36+42 (git sha1 70d35314d, clang 11.0.1-2 -fPIC -Os)
+Time spent: 23% 31x opt_expr (0 sec), 22% 26x opt_clean (0 sec), ...
