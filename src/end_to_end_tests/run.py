@@ -7,7 +7,8 @@ def extract_output_names(spec):
         content = f.read().strip().split("\n")
         content = list(filter(lambda data: len(data) > 0, content)) 
         content = list(filter(lambda line: line.strip().startswith("output"), content))
-        output_names = list(map(lambda line: line.strip().split(" ")[1].strip(), content))
+        name_extractor_regex = r'\boutput\s+([a-zA-Z_]\w*)[:\s]'
+        output_names = list(map(lambda line: re.search(name_extractor_regex, line).group(1), content))
         return output_names
     raise Exception(f"couldn't extract output names from {spec}")
 

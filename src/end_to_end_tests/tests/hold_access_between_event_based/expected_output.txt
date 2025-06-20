@@ -1,0 +1,15 @@
+[0.001000000][Input][x][Value] = 1
+[0.001000000][Output][a][Value] = 1
+[0.001000000][Output][b][Value] = 1
+[0.002000000][Input][x][Value] = 2
+[0.002000000][Output][a][Value] = 1
+[0.002000000][Output][b][Value] = 1
+[0.030000000][Input][x][Value] = 3
+[0.030000000][Output][a][Value] = 1
+[0.030000000][Output][b][Value] = 1
+[0.004000000][Input][x][Value] = 4
+[0.004000000][Output][a][Value] = 1
+[0.004000000][Output][b][Value] = 1
+[0.005000000][Input][x][Value] = 5
+[0.005000000][Output][a][Value] = 1
+[0.005000000][Output][b][Value] = 1

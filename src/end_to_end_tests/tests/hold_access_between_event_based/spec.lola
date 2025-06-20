@@ -1,0 +1,3 @@
+input x: Int
+output a: Int := b.offset(by: -1).defaults(to: x)
+output b: Int := a.hold().defaults(to: 2 + x)
