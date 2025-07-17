@@ -20,8 +20,8 @@ import Clash.Prelude
 
 -- Memory Window
 -- window a = 1
--- window b = 1
 -- window x = 1
+-- window b = 1
 
 -- Pipeline Visualization
 -- x,b |     | x,b |     | x,b |     | x,b |     | x,b |    

@@ -37,6 +37,7 @@ pub enum Pacing {
     Input,
     Stream(String),
     And(Vec<Pacing>),
+    Or(Vec<Pacing>),
     Periodic(Frequency),
 }
 impl Pacing {
@@ -62,6 +63,24 @@ impl Pacing {
                     params.join(" "),
                     clauses.join(" && ")
                 )
+            },
+            Pacing::Or(v) => {
+                let params: Vec<String> = v
+                    .iter()
+                    .enumerate()
+                    .map(|(i, _)| format!("x{}", i))
+                    .collect();
+                let clauses: Vec<String> = v
+                    .iter()
+                    .enumerate()
+                    .map(|(i, _)| format!("getPacing x{}", i))
+                    .collect();
+                format!(
+                    "getPacing (Pacing{} {}) = {}",
+                    stream_name,
+                    params.join(" "),
+                    clauses.join(" || ")
+                )
             }
         }
     }
@@ -71,6 +90,7 @@ impl Pacing {
             Pacing::Periodic(_) => vec![format!("Bool")],
             Pacing::Stream(x) => vec![format!("{}", x)],
             Pacing::And(v) => v.iter().map(|it| it.get_pacing_deps()).flatten().collect(),
+            Pacing::Or(v) => v.iter().map(|it| it.get_pacing_deps()).flatten().collect(),
         }
     }
     pub fn is_periodic(&self) -> bool {
@@ -184,6 +204,13 @@ fn get_pacing_from_activation_cond(ac: &ActivationCondition) -> Pacing {
                 .map(|a| get_pacing_from_activation_cond(a))
                 .collect();
             Pacing::And(pacings)
+        }
+        ActivationCondition::Disjunction(v) => {
+            let pacings: Vec<Pacing> = v
+                .into_iter()
+                .map(|a| get_pacing_from_activation_cond(a))
+                .collect();
+            Pacing::Or(pacings)
         }
         ActivationCondition::Stream(s) => Pacing::Stream(match s {
             StreamReference::In(x) => format!("In{}", x),

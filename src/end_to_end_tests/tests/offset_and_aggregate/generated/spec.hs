@@ -24,12 +24,12 @@ import Clash.Prelude
 -- c
 
 -- Memory Window
--- window x = 1
 -- window y = 2
--- window a = 4
+-- window x = 1
+-- window b = 3
 -- window sw(b,c) = 1
 -- window c = 1
--- window b = 3
+-- window a = 4
 
 -- Pipeline Visualization
 -- y,x     | y,x     | y,x     | y,x     | y,x     | y,x     | y,x     | y,x     | y,x     | y,x    

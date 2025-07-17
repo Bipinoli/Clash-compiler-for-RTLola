@@ -24,10 +24,10 @@ import Clash.Prelude
 
 -- Memory Window
 -- window x = 1
--- window c = 1
 -- window y = 1
 -- window b = 1
 -- window a = 1
+-- window c = 1
 
 -- Pipeline Visualization
 -- x,y |     |     | x,y |     |     | x,y |     |     | x,y

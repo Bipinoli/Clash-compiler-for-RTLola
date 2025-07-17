@@ -1,6 +1,6 @@
 input x : Int
-output a := x + c.offset(by: -1).defaults(to: 0)
-output b := a + e.offset(by: -1).defaults(to: 0) 
-output c := x + b
-output d := c.offset(by: -1).defaults(to: 1)
-output e := d * 2
+input y : Int
+
+output a @(x and y) := x + y
+output b @1kHz := x.aggregate(over: 0.01s, using: sum) + y.hold(or: 0)
+output c @100Hz := x.hold(or: 1) + b.hold(or: 0)  

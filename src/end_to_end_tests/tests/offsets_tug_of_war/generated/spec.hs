@@ -36,17 +36,17 @@ import Clash.Prelude
 -- f
 
 -- Memory Window
--- window c = 1
--- window x = 1
--- window i = 1
--- window f = 1
 -- window j = 1
 -- window b = 2
--- window h = 1
--- window d = 1
+-- window x = 1
 -- window g = 1
--- window a = 2
 -- window e = 1
+-- window a = 2
+-- window c = 1
+-- window i = 1
+-- window d = 1
+-- window h = 1
+-- window f = 1
 
 -- Pipeline Visualization
 -- x   |     |     |     |     |     |     | x   |     |    

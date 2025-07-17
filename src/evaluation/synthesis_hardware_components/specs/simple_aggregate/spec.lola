@@ -1,0 +1,2 @@
+input x: Int
+output a @1kHz := x.aggregate(over: 0.01s, using: sum)

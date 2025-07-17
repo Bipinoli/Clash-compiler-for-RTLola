@@ -28,15 +28,15 @@ import Clash.Prelude
 -- g, c
 
 -- Memory Window
--- window g = 1
 -- window x = 1
+-- window a = 1
 -- window e = 1
+-- window f = 1
+-- window b = 1
 -- window y = 1
 -- window c = 1
--- window b = 1
--- window a = 1
 -- window d = 1
--- window f = 1
+-- window g = 1
 
 -- Pipeline Visualization
 -- x,y   |       |       | x,y   |       |       | x,y   |       |       | x,y  

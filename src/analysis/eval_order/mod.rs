@@ -21,7 +21,7 @@ pub fn find_eval_order(mir: &RtLolaMir) -> Vec<Vec<Node>> {
     // Idea:
     // 1. Break cycles across event-based & periodic by splitting graph into only event-based & periodic streams
     // 2. Break cycle due to -ve offset by ignoring -ve offsets
-    // 3. Get eval order from the resulting DAGs and merge them according to -ve offsets & event-based/periodic periority rule
+    // 3. Get eval order from the resulting DAGs and merge them according to -ve offsets & event-based/periodic priority rule
     //
     // Algorithm:
     // step 1: Separate event-based and periodic

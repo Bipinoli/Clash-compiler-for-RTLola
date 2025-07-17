@@ -85,6 +85,11 @@ fn get_pacing_deps_names(pacing: datatypes::Pacing, all_periods: &Vec<String>) -
             .map(|p| get_pacing_deps_names(p.clone(), all_periods))
             .flatten()
             .collect(),
+        datatypes::Pacing::Or(v) => v
+            .iter()
+            .map(|p| get_pacing_deps_names(p.clone(), all_periods))
+            .flatten()
+            .collect(),
         datatypes::Pacing::Input => unreachable!(),
     }
 }

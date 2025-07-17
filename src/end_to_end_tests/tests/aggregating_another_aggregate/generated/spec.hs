@@ -20,29 +20,29 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- x, z, y
--- b, a
+-- z, y, x
+-- a, b
 -- sw(b,c), sw(a,c)
 -- c
 -- sw(c,d)
 -- d
 
 -- Memory Window
--- window d = 1
+-- window a = 5
+-- window y = 1
+-- window sw(a,c) = 1
 -- window x = 1
 -- window z = 1
--- window a = 5
--- window sw(c,d) = 1
--- window c = 3
--- window y = 1
--- window sw(b,c) = 1
--- window sw(a,c) = 1
+-- window d = 1
 -- window b = 5
+-- window sw(c,d) = 1
+-- window sw(b,c) = 1
+-- window c = 3
 
 -- Pipeline Visualization
--- x,z,y           | x,z,y           | x,z,y           | x,z,y           | x,z,y           | x,z,y           | x,z,y           | x,z,y           | x,z,y           | x,z,y          
+-- z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x          
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                 | b,a             | b,a             | b,a             | b,a             | b,a             | b,a             | b,a             | b,a             | b,a            
+--                 | a,b             | a,b             | a,b             | a,b             | a,b             | a,b             | a,b             | a,b             | a,b            
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                 |                 | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c)
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -361,11 +361,11 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut2 = (.pacingOut2) <$> pacings
         pOut3 = (.pacingOut3) <$> pacings
         
-        tIn0 = genTag (getPacing <$> pIn0)
         tIn2 = genTag (getPacing <$> pIn2)
         tIn1 = genTag (getPacing <$> pIn1)
-        tOut1 = genTag (getPacing <$> pOut1)
+        tIn0 = genTag (getPacing <$> pIn0)
         tOut0 = genTag (getPacing <$> pOut0)
+        tOut1 = genTag (getPacing <$> pOut1)
         tSw1 = genTag (getPacing <$> pOut1)
         tSw0 = genTag (getPacing <$> pOut0)
         tOut2 = genTag (getPacing <$> pOut2)
@@ -388,11 +388,11 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel6 = delayFor d6 tagsDefault curTags
         nullT = invalidTag
 
-        enIn0 = delayFor d1 nullPacingIn0 pIn0
         enIn2 = delayFor d1 nullPacingIn2 pIn2
         enIn1 = delayFor d1 nullPacingIn1 pIn1
-        enOut1 = delayFor d2 nullPacingOut1 pOut1
+        enIn0 = delayFor d1 nullPacingIn0 pIn0
         enOut0 = delayFor d2 nullPacingOut0 pOut0
+        enOut1 = delayFor d2 nullPacingOut1 pOut1
         enSw1 = delayFor d3 nullPacingOut1 pOut1
         sld1 = delayFor d3 False slide1
         enSw0 = delayFor d3 nullPacingOut0 pOut0

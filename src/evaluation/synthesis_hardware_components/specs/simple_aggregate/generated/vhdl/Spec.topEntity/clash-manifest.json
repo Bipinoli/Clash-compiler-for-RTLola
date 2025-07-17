@@ -1,0 +1,115 @@
+{
+    "components": [
+        "topEntity"
+    ],
+    "dependencies": {
+        "transitive": []
+    },
+    "domains": {
+        "IntelSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "System": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "TestDomain": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 2000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "XilinxSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Synchronous",
+            "reset_polarity": "ActiveHigh"
+        }
+    },
+    "files": [
+        {
+            "name": "topEntity.sdc",
+            "sha256": "5931af56eff7648c501fd106363fb26420b398eeea306d9edd80c5a89a153fc1"
+        },
+        {
+            "name": "Spec_topEntity_types.vhdl",
+            "sha256": "b1486236f094b9f2f223821b9f8c06d0ffa546e69e76fa39193cac70405c7e42"
+        },
+        {
+            "name": "topEntity.vhdl",
+            "sha256": "4f673b58d1ec71ba2de8a0c16ee7e38aca61782ef92133b9d62481c6e7be4ea8"
+        }
+    ],
+    "flags": [
+        20,
+        20
+    ],
+    "hash": "5ce209c535c48677b92f498c96e87467408aacd6f41002a20d56f8a4c5e025c6",
+    "top_component": {
+        "name": "topEntity",
+        "ports_flat": [
+            {
+                "direction": "in",
+                "domain": "TestDomain",
+                "is_clock": true,
+                "name": "clk",
+                "type_name": "clk.Spec_topEntity_types.clk_TestDomain",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "TestDomain",
+                "is_clock": false,
+                "name": "rst",
+                "type_name": "rst.Spec_topEntity_types.rst_TestDomain",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "TestDomain",
+                "is_clock": false,
+                "name": "en",
+                "type_name": "en.Spec_topEntity_types.en_TestDomain",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1",
+                "type_name": "boolean",
+                "width": 1
+            }
+        ]
+    },
+    "version": "unstable"
+}
