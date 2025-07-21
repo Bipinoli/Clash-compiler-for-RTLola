@@ -19,9 +19,9 @@ import Clash.Prelude
 -- a
 
 -- Memory Window
--- window a = 1
--- window x = 1
 -- window b = 1
+-- window x = 1
+-- window a = 1
 
 -- Pipeline Visualization
 -- x,b |     | x,b |     | x,b |     | x,b |     | x,b |    
@@ -355,7 +355,7 @@ outputStream0 en tag out0_0 out1_1 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out0_0 + out1_1
+        nextVal = (out0_0 + out1_1)
 
 
 outputStream1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
@@ -363,7 +363,7 @@ outputStream1 en tag out0_0 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out0_0 + 1
+        nextVal = (out0_0 + (1))
 
 
 

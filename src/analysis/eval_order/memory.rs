@@ -71,6 +71,7 @@ fn get_datatype_memory_of_node(node: &Node, mir: &RtLolaMir) -> usize {
 fn get_memory_by_datatype(typ: &Type) -> usize {
     match typ {
         Type::Int(_) => 64,
+        Type::UInt(_) => 64,
         Type::Bool => 1,
         _ => unimplemented!(),
     }

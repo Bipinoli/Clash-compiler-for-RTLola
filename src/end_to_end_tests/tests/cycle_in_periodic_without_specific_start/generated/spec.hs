@@ -14,7 +14,7 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- c, a, b
+-- b, c, a
 
 -- Memory Window
 -- window c = 1
@@ -22,7 +22,7 @@ import Clash.Prelude
 -- window b = 1
 
 -- Pipeline Visualization
--- c,a,b | c,a,b | c,a,b | c,a,b | c,a,b | c,a,b | c,a,b | c,a,b | c,a,b | c,a,b
+-- b,c,a | b,c,a | b,c,a | b,c,a | b,c,a | b,c,a | b,c,a | b,c,a | b,c,a | b,c,a
 -- -----------------------------------------------------------------------------
 
 -- output0 = a
@@ -262,9 +262,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut1 = (.pacingOut1) <$> pacings
         pOut2 = (.pacingOut2) <$> pacings
         
+        tOut1 = genTag (getPacing <$> pOut1)
         tOut2 = genTag (getPacing <$> pOut2)
         tOut0 = genTag (getPacing <$> pOut0)
-        tOut1 = genTag (getPacing <$> pOut1)
 
         -- tag generation takes 1 cycle so we need to delay the input data
 
@@ -274,9 +274,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         nullT = invalidTag
 
+        enOut1 = delayFor d1 nullPacingOut1 pOut1
         enOut2 = delayFor d1 nullPacingOut2 pOut2
         enOut0 = delayFor d1 nullPacingOut0 pOut0
-        enOut1 = delayFor d1 nullPacingOut1 pOut1
 
         output0Aktv = delayFor d2 False (getPacing <$> pOut0)
         output1Aktv = delayFor d2 False (getPacing <$> pOut1)
@@ -331,7 +331,7 @@ outputStream0 en tag out2_0 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out2_0 + 1
+        nextVal = (out2_0 + (1))
 
 
 outputStream1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)

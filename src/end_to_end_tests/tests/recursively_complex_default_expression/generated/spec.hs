@@ -20,9 +20,9 @@ import Clash.Prelude
 -- a
 
 -- Memory Window
--- window a = 1
 -- window y = 2
 -- window x = 3
+-- window a = 1
 
 -- Pipeline Visualization
 -- y,x | y,x | y,x | y,x | y,x | y,x | y,x | y,x | y,x | y,x
@@ -338,7 +338,7 @@ outputStream0 en tag in1_0 in0_1 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = in1_0 + in0_1
+        nextVal = (in1_0 + in0_1)
 
 
 

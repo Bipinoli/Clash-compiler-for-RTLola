@@ -8,6 +8,7 @@ use rtlola_frontend::mir::{
 };
 use serde::Serialize;
 
+use crate::analysis::eval_order::memory;
 use crate::analysis::node::Node;
 use crate::{analysis::HardwareIR, codegen::monitor::register_template};
 
@@ -682,6 +683,12 @@ fn get_default_expr_statements_and_depending_tags(
             Constant::Int(x) => {
                 statements.push(format!("{} = pure ({})", name_prefix, x));
             }
+            Constant::UInt(x) => {
+                statements.push(format!("{} = pure ({})", name_prefix, x));
+            }
+            Constant::Bool(x) => {
+                statements.push(format!("{} = pure ({})", name_prefix, if *x { "True" } else { "False" }));
+            }
             _ => unimplemented!(),
         },
         _ => unimplemented!(),
@@ -695,9 +702,10 @@ fn get_default_expr_statements_and_depending_tags(
 }
 
 fn get_max_tag(ir: &HardwareIR) -> usize {
-    let max_window_size = streams::get_sliding_windows(ir)
+    let max_window_size = ir.mir.sliding_windows 
         .iter()
-        .map(|sw| sw.window_size.clone())
+        .enumerate()
+        .map(|(i, _)| memory::get_sliding_window_size(i, &ir.mir))
         .max()
         .unwrap_or(0);
     let max_offset = get_max_offset(ir);

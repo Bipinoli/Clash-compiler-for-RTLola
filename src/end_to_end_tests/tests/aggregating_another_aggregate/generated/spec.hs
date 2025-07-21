@@ -20,31 +20,31 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- z, y, x
+-- x, y, z
 -- a, b
--- sw(b,c), sw(a,c)
+-- sw(a,c), sw(b,c)
 -- c
 -- sw(c,d)
 -- d
 
 -- Memory Window
--- window a = 5
--- window y = 1
--- window sw(a,c) = 1
+-- window c = 3
+-- window sw(c,d) = 1
 -- window x = 1
+-- window a = 5
 -- window z = 1
 -- window d = 1
--- window b = 5
--- window sw(c,d) = 1
+-- window y = 1
+-- window sw(a,c) = 1
 -- window sw(b,c) = 1
--- window c = 3
+-- window b = 5
 
 -- Pipeline Visualization
--- z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x           | z,y,x          
+-- x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z           | x,y,z          
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                 | a,b             | a,b             | a,b             | a,b             | a,b             | a,b             | a,b             | a,b             | a,b            
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                 |                 | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c) | sw(b,c),sw(a,c)
+--                 |                 | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c) | sw(a,c),sw(b,c)
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                 |                 |                 | c               | c               | c               | c               | c               | c               | c              
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -361,13 +361,13 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut2 = (.pacingOut2) <$> pacings
         pOut3 = (.pacingOut3) <$> pacings
         
-        tIn2 = genTag (getPacing <$> pIn2)
-        tIn1 = genTag (getPacing <$> pIn1)
         tIn0 = genTag (getPacing <$> pIn0)
+        tIn1 = genTag (getPacing <$> pIn1)
+        tIn2 = genTag (getPacing <$> pIn2)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut1 = genTag (getPacing <$> pOut1)
-        tSw1 = genTag (getPacing <$> pOut1)
         tSw0 = genTag (getPacing <$> pOut0)
+        tSw1 = genTag (getPacing <$> pOut1)
         tOut2 = genTag (getPacing <$> pOut2)
         tSw2 = genTag (getPacing <$> pOut2)
         tOut3 = genTag (getPacing <$> pOut3)
@@ -388,15 +388,15 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel6 = delayFor d6 tagsDefault curTags
         nullT = invalidTag
 
-        enIn2 = delayFor d1 nullPacingIn2 pIn2
-        enIn1 = delayFor d1 nullPacingIn1 pIn1
         enIn0 = delayFor d1 nullPacingIn0 pIn0
+        enIn1 = delayFor d1 nullPacingIn1 pIn1
+        enIn2 = delayFor d1 nullPacingIn2 pIn2
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut1 = delayFor d2 nullPacingOut1 pOut1
-        enSw1 = delayFor d3 nullPacingOut1 pOut1
-        sld1 = delayFor d3 False slide1
         enSw0 = delayFor d3 nullPacingOut0 pOut0
         sld0 = delayFor d3 False slide0
+        enSw1 = delayFor d3 nullPacingOut1 pOut1
+        sld1 = delayFor d3 False slide1
         enOut2 = delayFor d4 nullPacingOut2 pOut2
         enSw2 = delayFor d5 nullPacingOut2 pOut2
         sld2 = delayFor d5 False slide2
@@ -497,7 +497,7 @@ outputStream0 en tag in0_0 in1_1 = result
         result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = in0_0 + in1_1
+        nextVal = (in0_0 + in1_1)
 
 
 outputStream1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Vec 5 (Tag, Int))
@@ -506,7 +506,7 @@ outputStream1 en tag in1_0 in2_1 = result
         result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = in1_0 + in2_1
+        nextVal = (in1_0 + in2_1)
 
 
 outputStream2 :: HiddenClockResetEnable dom => Signal dom PacingOut2 -> Signal dom Tag -> Signal dom (Vec 11 Int) -> Signal dom (Vec 21 Int) -> Signal dom (Vec 3 (Tag, Int))
@@ -515,11 +515,11 @@ outputStream2 en tag sw0 sw1 = result
         result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = (merge0 <$> sw0) + (merge1 <$> sw1)
+        nextVal = ((merge0 <$> sw0) + (merge1 <$> sw1))
         merge0 :: Vec 11 Int -> Int
-        merge0 win = fold windowBucketFunc0 (tail win)
+        merge0 win = fold windowAggregateFunc0 (tail win)
         merge1 :: Vec 21 Int -> Int
-        merge1 win = fold windowBucketFunc1 (tail win)
+        merge1 win = fold windowAggregateFunc0 (tail win)
 
 
 outputStream3 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Tag -> Signal dom (Vec 11 Int) -> Signal dom (Tag, Int)
@@ -527,20 +527,17 @@ outputStream3 en tag sw2 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = (merge2 <$> sw2) + 1
+        nextVal = ((merge2 <$> sw2) + (1))
         merge2 :: Vec 11 Int -> Int
-        merge2 win = fold windowBucketFunc2 (tail win)
+        merge2 win = fold windowAggregateFunc0 (tail win)
 
 
 
-windowBucketFunc0 :: Int -> Int -> Int
-windowBucketFunc0 acc item = acc + item
+windowUpdateFunc0 :: Int -> Int -> Int
+windowUpdateFunc0 acc item = acc + item
 
-windowBucketFunc1 :: Int -> Int -> Int
-windowBucketFunc1 acc item = acc + item
-
-windowBucketFunc2 :: Int -> Int -> Int
-windowBucketFunc2 acc item = acc + item
+windowAggregateFunc0 :: Int -> Int -> Int
+windowAggregateFunc0 acc item = acc + item
 
 
 slidingWindow0 :: HiddenClockResetEnable dom => Signal dom PacingOut0 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 11 Int)) 
@@ -559,7 +556,7 @@ slidingWindow0 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowBucketFunc0 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
 
 slidingWindow1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 21 Int)) 
 slidingWindow1 newData slide tag inpt = window
@@ -577,7 +574,7 @@ slidingWindow1 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowBucketFunc1 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
 
 slidingWindow2 :: HiddenClockResetEnable dom => Signal dom PacingOut2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 11 Int)) 
 slidingWindow2 newData slide tag inpt = window
@@ -595,7 +592,7 @@ slidingWindow2 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowBucketFunc2 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
 
 
 

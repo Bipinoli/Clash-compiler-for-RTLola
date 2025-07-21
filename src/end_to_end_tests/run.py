@@ -26,6 +26,8 @@ def read_expected_output(test_dir):
     output_names = extract_output_names(f"{test_dir}/spec.lola")
     with open(f"{test_dir}/expected_output.txt", 'r') as f:
         content = f.read().strip().split("\n")
+        content = list(map(lambda line: line.replace("true", "1"), content)) 
+        content = list(map(lambda line: line.replace("false", "0"), content)) 
         content = list(filter(lambda data: len(data) > 0, content))
         expected = list(map(parse, content))
         expected = list(filter(lambda data: data[1] != "Input", expected))

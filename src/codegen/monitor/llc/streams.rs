@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use handlebars::Handlebars;
 use rtlola_frontend::mir::{
     self as MIR, ArithLogOp, Constant, Expression, ExpressionKind, StreamAccessKind,
@@ -18,8 +20,9 @@ struct Data {
     has_sliding_window: bool,
     input_streams: Vec<InputStream>,
     output_streams: Vec<OutputStream>,
-    bucket_functions: Vec<BucketFunction>,
     sliding_windows: Vec<SlidingWindow>,
+    sliding_window_update_fxs: Vec<SlidingWindowFunction>,
+    sliding_window_aggregate_fxs: Vec<SlidingWindowFunction>,
 }
 
 #[derive(Serialize)]
@@ -42,8 +45,9 @@ struct OutputStream {
     is_accessed_by_offset: bool,
 }
 
-#[derive(Serialize)]
-struct BucketFunction {
+#[derive(PartialEq, Eq, Clone, Debug, Hash, PartialOrd, Ord, Serialize)]
+struct SlidingWindowFunction {
+    input_type: String,
     data_type: String,
     expression: String,
 }
@@ -52,10 +56,13 @@ struct BucketFunction {
 pub struct SlidingWindow {
     pub window_idx: usize,
     pub window_size: usize,
+    pub input_type: String,
     pub data_type: String,
     pub default_value: String,
     pub memory: usize,
     pub pacing: String,
+    pub window_update_fx_idx: usize,
+    pub window_aggregate_fx_idx: usize,
 }
 
 pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
@@ -64,13 +71,20 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         "src/codegen/monitor/llc/streams.hbs".to_string(),
         handlebars,
     );
+    let WindowFunctionsDeduped { 
+        update_functions, 
+        aggregate_functions, 
+        win_idx_to_agg_fx_map, 
+        win_idx_to_upd_fx_map
+    } = get_window_functions(ir);
     let data = Data {
         pipeline_wait: ir.pipeline_wait,
         has_sliding_window: ir.mir.sliding_windows.len() > 0,
         input_streams: get_input_streams(ir),
-        output_streams: get_output_streams(ir),
-        bucket_functions: get_bucket_functions(ir),
-        sliding_windows: get_sliding_windows(ir),
+        output_streams: get_output_streams(ir, &win_idx_to_upd_fx_map, &win_idx_to_agg_fx_map),
+        sliding_windows: get_sliding_windows(ir, &win_idx_to_upd_fx_map, &win_idx_to_agg_fx_map),
+        sliding_window_update_fxs: update_functions,
+        sliding_window_aggregate_fxs: aggregate_functions,
     };
     match handlebars.render("streams", &data) {
         Ok(result) => Some(result),
@@ -103,7 +117,7 @@ fn get_input_streams(ir: &HardwareIR) -> Vec<InputStream> {
         .collect()
 }
 
-fn get_output_streams(ir: &HardwareIR) -> Vec<OutputStream> {
+fn get_output_streams(ir: &HardwareIR, win_idx_to_upd_fx_map: &Vec<usize>, win_idx_to_agg_fx_map: &Vec<usize>) -> Vec<OutputStream> {
     ir.mir
         .outputs
         .iter()
@@ -136,44 +150,79 @@ fn get_output_streams(ir: &HardwareIR) -> Vec<OutputStream> {
                     .unwrap()
                     .clone(),
                 is_accessed_by_offset: true,
-                sliding_window_inputs: get_sliding_window_inputs(out, ir),
+                sliding_window_inputs: get_sliding_window_inputs(out, ir, win_idx_to_upd_fx_map, win_idx_to_agg_fx_map),
             }
         })
         .collect()
 }
 
-fn get_bucket_functions(ir: &HardwareIR) -> Vec<BucketFunction> {
-    ir.mir
-        .sliding_windows
-        .iter()
-        .map(|sw| {
-            let data_type = datatypes::get_type(&sw.ty);
-            let expression = match sw.op {
-                WindowOperation::Sum => "acc + item".to_string(),
-                _ => unimplemented!(),
-            };
-            BucketFunction {
-                data_type,
-                expression,
-            }
-        })
-        .collect()
+struct WindowFunctionsDeduped {
+    update_functions: Vec<SlidingWindowFunction>,
+    aggregate_functions: Vec<SlidingWindowFunction>,
+    win_idx_to_agg_fx_map: Vec<usize>,
+    win_idx_to_upd_fx_map: Vec<usize>,
 }
 
-pub fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
+fn window_functions_deduper(ir: &HardwareIR, expression_builder: &dyn Fn(&WindowOperation) -> String) -> (Vec<SlidingWindowFunction>, Vec<usize>) {
+    let mut map: HashMap<SlidingWindowFunction, Vec<usize>> = HashMap::new();
+    for (i, sw) in ir.mir.sliding_windows.iter().cloned().enumerate() {
+        let (input_type, data_type, _) = get_sliding_window_datatypes(&sw, ir);
+        let expression = expression_builder(&sw.op);
+        let fx = SlidingWindowFunction { input_type, data_type, expression };
+        let existing = map.get(&fx);
+        let updated = match existing {
+            Some(e) => vec![&e[..], &vec![i]].concat(),
+            None => vec![i],
+        };
+        map.insert(fx.clone(), updated);
+    } 
+    let mut fxs: Vec<SlidingWindowFunction> = Vec::new();
+    let mut idxs: Vec<usize> = vec![0; ir.mir.sliding_windows.len()];
+    map.into_iter().for_each(|(k, v)| {
+        let idx = fxs.len();
+        fxs.push(k);
+        for i in v {
+            idxs[i] = idx;
+        }
+    });
+    (fxs, idxs)
+}
+
+fn get_window_functions(ir: &HardwareIR) -> WindowFunctionsDeduped {
+    let (update_fxs, update_idx_map) = window_functions_deduper(ir, &|op: &WindowOperation| {
+        match op {
+            WindowOperation::Sum => "acc + item".to_string(),
+            WindowOperation::Count => "acc + 1".to_string(),
+            _ => unimplemented!(), 
+        }
+    });
+    let (agg_fxs, agg_idx_map) = window_functions_deduper(ir, &|op: &WindowOperation| {
+        match op {
+            WindowOperation::Sum => "acc + item".to_string(),
+            WindowOperation::Count => "acc + item".to_string(),
+            _ => unimplemented!(), 
+        }
+    });
+    WindowFunctionsDeduped { 
+        update_functions: update_fxs, 
+        aggregate_functions: agg_fxs, 
+        win_idx_to_agg_fx_map: agg_idx_map, 
+        win_idx_to_upd_fx_map: update_idx_map 
+    }
+}
+
+pub fn get_sliding_windows(ir: &HardwareIR, win_idx_to_upd_fx_map: &Vec<usize>, win_idx_to_agg_fx_map: &Vec<usize>) -> Vec<SlidingWindow> {
     ir.mir
         .sliding_windows
         .iter()
         .enumerate()
         .map(|(i, sw)| {
-            let default_value = match sw.op {
-                WindowOperation::Sum => "0".to_string(),
-                _ => unimplemented!(),
-            };
+            let (input_type, data_type, default_value) = get_sliding_window_datatypes(&sw, ir);
             SlidingWindow {
                 window_idx: i,
+                input_type,
+                data_type,
                 default_value,
-                data_type: datatypes::get_type(&sw.ty),
                 window_size: memory::get_sliding_window_size(i, &ir.mir),
                 memory: ir
                     .required_memory
@@ -181,6 +230,8 @@ pub fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
                     .unwrap()
                     .clone(),
                 pacing: datatypes::get_target_from_sliding_window(sw),
+                window_update_fx_idx: win_idx_to_upd_fx_map[i],
+                window_aggregate_fx_idx: win_idx_to_agg_fx_map[i],
             }
         })
         .collect()
@@ -193,7 +244,9 @@ pub fn get_sliding_windows(ir: &HardwareIR) -> Vec<SlidingWindow> {
 fn get_expression(suffix: String, expr: &Expression, ir: &HardwareIR) -> String {
     match &expr.kind {
         ExpressionKind::LoadConstant(con) => match con {
-            Constant::Int(x) => format!("{}", x),
+            Constant::Int(x) => format!("({})", x),
+            Constant::UInt(x) => format!("({})", x),
+            Constant::Bool(x) => format!("({})", if *x {"True"} else {"False"}),
             _ => unimplemented!(),
         },
         ExpressionKind::StreamAccess {
@@ -221,9 +274,15 @@ fn get_expression(suffix: String, expr: &Expression, ir: &HardwareIR) -> String 
                 ArithLogOp::Sub => expressions.join(" - "),
                 ArithLogOp::Mul => expressions.join(" * "),
                 ArithLogOp::Div => expressions.join(" / "),
+                ArithLogOp::Gt => expressions.join(" .>. "),
+                ArithLogOp::Ge => expressions.join(" .>=. "),
+                ArithLogOp::Lt => expressions.join(" .<. "),
+                ArithLogOp::Le => expressions.join(" .<=. "),
+                ArithLogOp::And => expressions.join(" .&&. "),
+                ArithLogOp::Or => expressions.join(" .||. "),
                 _ => unimplemented!(),
             };
-            final_expression
+            format!("({})", final_expression)
         }
         _ => unimplemented!(),
     }
@@ -287,27 +346,27 @@ fn get_input_types(output_node: &Node, ir: &HardwareIR) -> Vec<String> {
             Node::InputStream(x) => datatypes::get_type(&ir.mir.inputs[x].ty),
             Node::OutputStream(x) => datatypes::get_type(&ir.mir.outputs[x].ty),
             Node::SlidingWindow(x) => {
-                let stream_data_type = datatypes::get_type(&ir.mir.outputs[x].ty);
+                let (_, data_type, _) = get_sliding_window_datatypes(&ir.mir.sliding_windows[x], ir);
                 let window_size = memory::get_sliding_window_size(x.clone(), &ir.mir);
-                format!("(Vec {} {})", window_size, stream_data_type)
+                format!("(Vec {} {})", window_size, data_type)
             }
         })
         .collect()
 }
 
-fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<SlidingWindow> {
+fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR, win_idx_to_upd_fx_map: &Vec<usize>, win_idx_to_agg_fx_map: &Vec<usize>) -> Vec<SlidingWindow> {
     let mut windows: Vec<SlidingWindow> = Vec::new();
     out.accesses.iter().for_each(|access| {
         for (_, access_kind) in &access.1 {
             match access_kind {
                 StreamAccessKind::SlidingWindow(sw) => {
+                    let (input_type, data_type, default_value) = get_sliding_window_datatypes(&ir.mir.sliding_windows[sw.idx()], ir);
                     windows.push(SlidingWindow {
                         window_idx: sw.idx(),
                         window_size: memory::get_sliding_window_size(sw.idx(), &ir.mir),
-                        data_type: datatypes::get_type(&ir.mir.sliding_windows[sw.idx()].ty),
-                        default_value: datatypes::get_default_for_type(
-                            &ir.mir.sliding_windows[sw.idx()].ty,
-                        ),
+                        data_type, 
+                        default_value,
+                        input_type, 
                         memory: ir
                             .required_memory
                             .get(&Node::SlidingWindow(sw.idx()))
@@ -316,6 +375,8 @@ fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<Sl
                         pacing: datatypes::get_target_from_sliding_window(
                             &ir.mir.sliding_windows[sw.idx()],
                         ),
+                        window_aggregate_fx_idx: win_idx_to_agg_fx_map[sw.idx()],
+                        window_update_fx_idx: win_idx_to_upd_fx_map[sw.idx()],
                     });
                 }
                 _ => (),
@@ -323,4 +384,21 @@ fn get_sliding_window_inputs(out: &MIR::OutputStream, ir: &HardwareIR) -> Vec<Sl
         }
     });
     windows
+}
+
+fn get_sliding_window_datatypes(sw: &MIR::SlidingWindow, ir: &HardwareIR) -> (String, String, String) {
+    let data_type = datatypes::get_type(&sw.ty);
+    let input_type = {
+        let typ = match sw.target {
+            StreamReference::In(x) => &ir.mir.inputs[x.clone()].ty,
+            StreamReference::Out(x) => &ir.mir.outputs[x.clone()].ty,
+        };
+        datatypes::get_type(typ)
+    };
+    let default_value = match sw.op {
+        WindowOperation::Sum => "0".to_string(),
+        WindowOperation::Count => "0".to_string(),
+        _ => unimplemented!(),
+    };
+    (input_type, data_type, default_value)
 }

@@ -82,6 +82,8 @@ fn get_inputs(ir: &HardwareIR) -> Vec<Input> {
             datatype: {
                 match inpt.ty {
                     Type::Int(_) => "signed [63:0]".to_string(),
+                    Type::UInt(_) => "unsigned [63:0]".to_string(),
+                    Type::Bool => "".to_string(),
                     _ => unimplemented!(),
                 }
             },
@@ -97,6 +99,8 @@ fn get_outputs(ir: &HardwareIR) -> Vec<Output> {
             datatype: {
                 match outpt.ty {
                     Type::Int(_) => "signed [63:0]".to_string(),
+                    Type::UInt(_) => "unsigned [63:0]".to_string(),
+                    Type::Bool => "".to_string(),
                     _ => unimplemented!(),
                 }
             },

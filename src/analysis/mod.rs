@@ -1,7 +1,7 @@
 use crate::analysis::node::Node;
 use rtlola_frontend::mir::RtLolaMir;
 use serde::Serialize;
-use std::{collections::HashMap, usize};
+use std::{collections::HashMap, time::Instant, usize};
 
 pub mod eval_order;
 pub mod node;
@@ -26,9 +26,15 @@ pub struct HardwareIR {
 
 impl HardwareIR {
     pub fn new(mir: RtLolaMir, spec: String, spec_name: String, debug: bool) -> Self {
+        let t = Instant::now();
+        println!("finding eval order");
         let eval_order = eval_order::find_eval_order(&mir);
+        println!("It took {} nanoseconds to find the evaluation order", t.elapsed().as_nanos());
+        println!("finding pipeline wait");
         let pipeline_wait = pipeline::calculate_necessary_pipeline_wait(&eval_order, &mir);
+        println!("finding required memory");
         let required_memory = memory::calculate_required_memory(&eval_order, &mir);
+        println!("analysis completed!");
         HardwareIR {
             evaluation_order: eval_order,
             mir,

@@ -1,0 +1,6 @@
+input x : Int
+
+output a @2kHz := x.hold(or: 0)
+output b := delta(a, dft: a) > 5
+output c := delta(a, dft: a) < -5
+output d := (b ∧ c.offset(by: -1).defaults(to: false)) ∨ (b.offset(by: -1).defaults(to: false) ∧ c)

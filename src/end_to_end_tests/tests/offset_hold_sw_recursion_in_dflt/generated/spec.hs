@@ -24,12 +24,12 @@ import Clash.Prelude
 -- c
 
 -- Memory Window
--- window sw(b,c) = 1
--- window sw(a,c) = 1
--- window c = 1
 -- window x = 2
--- window b = 1
+-- window c = 1
+-- window sw(b,c) = 1
 -- window a = 2
+-- window b = 1
+-- window sw(a,c) = 1
 
 -- Pipeline Visualization
 -- x               |                 |                 | x               |                 |                 | x               |                 |                 | x              
@@ -419,7 +419,7 @@ outputStream0 en tag in0_0 out1_1 = result
         result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = in0_0 + out1_1
+        nextVal = (in0_0 + out1_1)
 
 
 outputStream1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
@@ -427,7 +427,7 @@ outputStream1 en tag out2_0 out0_1 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = out2_0 - out0_1
+        nextVal = (out2_0 - out0_1)
 
 
 outputStream2 :: HiddenClockResetEnable dom => Signal dom PacingOut2 -> Signal dom Tag -> Signal dom (Vec 101 Int) -> Signal dom (Vec 11 Int) -> Signal dom (Tag, Int)
@@ -435,19 +435,19 @@ outputStream2 en tag sw0 sw1 = result
     where
         result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
-        nextVal = (merge0 <$> sw0) + (merge1 <$> sw1)
+        nextVal = ((merge0 <$> sw0) + (merge1 <$> sw1))
         merge1 :: Vec 11 Int -> Int
-        merge1 win = fold windowBucketFunc1 (tail win)
+        merge1 win = fold windowAggregateFunc0 (tail win)
         merge0 :: Vec 101 Int -> Int
-        merge0 win = fold windowBucketFunc0 (tail win)
+        merge0 win = fold windowAggregateFunc0 (tail win)
 
 
 
-windowBucketFunc0 :: Int -> Int -> Int
-windowBucketFunc0 acc item = acc + item
+windowUpdateFunc0 :: Int -> Int -> Int
+windowUpdateFunc0 acc item = acc + item
 
-windowBucketFunc1 :: Int -> Int -> Int
-windowBucketFunc1 acc item = acc + item
+windowAggregateFunc0 :: Int -> Int -> Int
+windowAggregateFunc0 acc item = acc + item
 
 
 slidingWindow0 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 101 Int)) 
@@ -466,7 +466,7 @@ slidingWindow0 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowBucketFunc0 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
 
 slidingWindow1 :: HiddenClockResetEnable dom => Signal dom PacingOut0 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 11 Int)) 
 slidingWindow1 newData slide tag inpt = window
@@ -484,7 +484,7 @@ slidingWindow1 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowBucketFunc1 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
 
 
 

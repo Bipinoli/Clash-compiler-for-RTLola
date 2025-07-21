@@ -129,7 +129,7 @@ fn get_all_periods(ir: &HardwareIR) -> Vec<String> {
         .cloned()
         .collect();
     all_periods.sort_by_key(|p| {
-        let num: u32 = p.parse().expect("couldn't parse");
+        let num: u64 = p.parse().expect("couldn't parse");
         num
     });
     all_periods

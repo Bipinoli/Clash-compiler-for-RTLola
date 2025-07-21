@@ -242,6 +242,9 @@ fn get_all_unique_types(ir: &HardwareIR) -> Vec<String> {
 pub fn get_type(typ: &RF::mir::Type) -> String {
     match typ {
         RF::mir::Type::Int(_) => "Int".to_string(),
+        RF::mir::Type::UInt(_) => "Int".to_string(),
+        // TODO: RF::mir::Type::UInt(_) => "Word".to_string(), 
+        RF::mir::Type::Bool => "Bool".to_string(),
         _ => unreachable!("unknown type {}", typ),
     }
 }
@@ -249,6 +252,8 @@ pub fn get_type(typ: &RF::mir::Type) -> String {
 pub fn get_default_for_type(typ: &RF::mir::Type) -> String {
     match typ {
         RF::mir::Type::Int(_) => "0".to_string(),
+        RF::mir::Type::UInt(_) => "0".to_string(),
+        RF::mir::Type::Bool => "False".to_string(),
         _ => unreachable!("unknown type {}", typ),
     }
 }
