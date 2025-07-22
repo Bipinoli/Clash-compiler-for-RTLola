@@ -349,6 +349,7 @@ fn is_valid_merge(
     true
 }
 
+#[derive(Debug)]
 struct Edge {
     periodic: Node,
     event_based: Node,
