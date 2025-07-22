@@ -28,34 +28,34 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- e, y, x, i
+-- e, x, i, y
 -- a, g
 -- b, c, d
 -- h
 -- f
--- j, sw(f,l), sw(b,l)
--- k, l
+-- sw(f,l), sw(b,l), j
+-- l, k
 
 -- Memory Window
--- window sw(b,l) = 1
 -- window y = 1
--- window l = 1
--- window d = 2
--- window b = 1
--- window a = 1
--- window j = 1
--- window sw(f,l) = 1
--- window g = 1
 -- window e = 1
+-- window sw(b,l) = 1
 -- window c = 1
+-- window sw(f,l) = 1
 -- window x = 3
--- window i = 1
--- window k = 1
 -- window h = 1
+-- window d = 2
+-- window l = 1
 -- window f = 1
+-- window i = 1
+-- window b = 1
+-- window j = 1
+-- window g = 1
+-- window k = 1
+-- window a = 1
 
 -- Pipeline Visualization
--- e,y,x,i           |                   |                   |                   |                   |                   |                   | e,y,x,i           |                   |                  
+-- e,x,i,y           |                   |                   |                   |                   |                   |                   | e,x,i,y           |                   |                  
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                   | a,g               |                   |                   |                   |                   |                   |                   | a,g               |                  
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,9 +65,9 @@ import Clash.Prelude
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                   |                   |                   |                   | f                 |                   |                   |                   |                   |                  
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                   |                   |                   |                   |                   | j,sw(f,l),sw(b,l) |                   |                   |                   |                  
+--                   |                   |                   |                   |                   | sw(f,l),sw(b,l),j |                   |                   |                   |                  
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                   |                   |                   |                   |                   |                   | k,l               |                   |                   |                  
+--                   |                   |                   |                   |                   |                   | l,k               |                   |                   |                  
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- input0 = x
@@ -444,9 +444,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut11 = (.pacingOut11) <$> pacings
         
         tOut4 = genTag (getPacing <$> pOut4)
-        tIn1 = genTag (getPacing <$> pIn1)
         tIn0 = genTag (getPacing <$> pIn0)
         tOut8 = genTag (getPacing <$> pOut8)
+        tIn1 = genTag (getPacing <$> pIn1)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut6 = genTag (getPacing <$> pOut6)
         tOut1 = genTag (getPacing <$> pOut1)
@@ -454,11 +454,11 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tOut3 = genTag (getPacing <$> pOut3)
         tOut7 = genTag (getPacing <$> pOut7)
         tOut5 = genTag (getPacing <$> pOut5)
-        tOut9 = genTag (getPacing <$> pOut9)
         tSw0 = genTag (getPacing <$> pOut5)
         tSw1 = genTag (getPacing <$> pOut1)
-        tOut10 = genTag (getPacing <$> pOut10)
+        tOut9 = genTag (getPacing <$> pOut9)
         tOut11 = genTag (getPacing <$> pOut11)
+        tOut10 = genTag (getPacing <$> pOut10)
 
         -- tag generation takes 1 cycle so we need to delay the input data
         input0Data = delay 0 (((.value). (.input0)) <$> inputs)
@@ -477,9 +477,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         nullT = invalidTag
 
         enOut4 = delayFor d1 nullPacingOut4 pOut4
-        enIn1 = delayFor d1 nullPacingIn1 pIn1
         enIn0 = delayFor d1 nullPacingIn0 pIn0
         enOut8 = delayFor d1 nullPacingOut8 pOut8
+        enIn1 = delayFor d1 nullPacingIn1 pIn1
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut6 = delayFor d2 nullPacingOut6 pOut6
         enOut1 = delayFor d3 nullPacingOut1 pOut1
@@ -487,13 +487,13 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enOut3 = delayFor d3 nullPacingOut3 pOut3
         enOut7 = delayFor d4 nullPacingOut7 pOut7
         enOut5 = delayFor d5 nullPacingOut5 pOut5
-        enOut9 = delayFor d6 nullPacingOut9 pOut9
         enSw0 = delayFor d6 nullPacingOut5 pOut5
         sld0 = delayFor d6 False slide0
         enSw1 = delayFor d6 nullPacingOut1 pOut1
         sld1 = delayFor d6 False slide1
-        enOut10 = delayFor d7 nullPacingOut10 pOut10
+        enOut9 = delayFor d6 nullPacingOut9 pOut9
         enOut11 = delayFor d7 nullPacingOut11 pOut11
+        enOut10 = delayFor d7 nullPacingOut10 pOut10
 
         output0Aktv = delayFor d8 False (getPacing <$> pOut0)
         output1Aktv = delayFor d8 False (getPacing <$> pOut1)
@@ -762,17 +762,14 @@ outputStream11 en tag sw0 sw1 = result
         nextValWithTag = bundle (tag, nextVal)
         nextVal = ((merge0 <$> sw0) + (merge1 <$> sw1))
         merge1 :: Vec 2 Int -> Int
-        merge1 win = fold windowAggregateFunc0 (tail win)
+        merge1 win = fold windowFunc0 (tail win)
         merge0 :: Vec 2 Int -> Int
-        merge0 win = fold windowAggregateFunc0 (tail win)
+        merge0 win = fold windowFunc0 (tail win)
 
 
 
-windowUpdateFunc0 :: Int -> Int -> Int
-windowUpdateFunc0 acc item = acc + item
-
-windowAggregateFunc0 :: Int -> Int -> Int
-windowAggregateFunc0 acc item = acc + item
+windowFunc0 :: Int -> Int -> Int
+windowFunc0 acc item = acc + item
 
 
 slidingWindow0 :: HiddenClockResetEnable dom => Signal dom PacingOut5 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
@@ -791,7 +788,7 @@ slidingWindow0 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc0 (head win) dta) win
 
 slidingWindow1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
 slidingWindow1 newData slide tag inpt = window
@@ -809,7 +806,7 @@ slidingWindow1 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc0 (head win) dta) win
 
 
 

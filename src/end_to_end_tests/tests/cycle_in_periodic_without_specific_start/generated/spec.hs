@@ -14,15 +14,15 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- b, c, a
+-- c, b, a
 
 -- Memory Window
--- window c = 1
 -- window a = 1
+-- window c = 1
 -- window b = 1
 
 -- Pipeline Visualization
--- b,c,a | b,c,a | b,c,a | b,c,a | b,c,a | b,c,a | b,c,a | b,c,a | b,c,a | b,c,a
+-- c,b,a | c,b,a | c,b,a | c,b,a | c,b,a | c,b,a | c,b,a | c,b,a | c,b,a | c,b,a
 -- -----------------------------------------------------------------------------
 
 -- output0 = a
@@ -262,8 +262,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut1 = (.pacingOut1) <$> pacings
         pOut2 = (.pacingOut2) <$> pacings
         
-        tOut1 = genTag (getPacing <$> pOut1)
         tOut2 = genTag (getPacing <$> pOut2)
+        tOut1 = genTag (getPacing <$> pOut1)
         tOut0 = genTag (getPacing <$> pOut0)
 
         -- tag generation takes 1 cycle so we need to delay the input data
@@ -274,8 +274,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         nullT = invalidTag
 
-        enOut1 = delayFor d1 nullPacingOut1 pOut1
         enOut2 = delayFor d1 nullPacingOut2 pOut2
+        enOut1 = delayFor d1 nullPacingOut1 pOut1
         enOut0 = delayFor d1 nullPacingOut0 pOut0
 
         output0Aktv = delayFor d2 False (getPacing <$> pOut0)

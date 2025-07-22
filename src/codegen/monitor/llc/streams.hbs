@@ -32,7 +32,7 @@ outputStream{{@index}} en tag {{#each this.inputs}}{{this}} {{/each}}= result
         {{#if this.is_sliding_window_based}}
         {{#each this.sliding_window_inputs}}
         merge{{this.window_idx}} :: Vec {{this.window_size}} {{this.data_type}} -> {{this.data_type}}
-        merge{{this.window_idx}} win = fold windowAggregateFunc{{this.window_aggregate_fx_idx}} (tail win)
+        merge{{this.window_idx}} win = fold windowFunc{{this.window_aggregate_fx_idx}} (tail win)
         {{/each}}
         {{/if}}
 
@@ -40,14 +40,9 @@ outputStream{{@index}} en tag {{#each this.inputs}}{{this}} {{/each}}= result
 {{/each}}
 
 {{#if has_sliding_window}}
-{{#each sliding_window_update_fxs}}
-windowUpdateFunc{{@index}} :: {{this.data_type}} -> {{this.input_type}} -> {{this.data_type}}
-windowUpdateFunc{{@index}} acc item = {{this.expression}}
-
-{{/each}}
-{{#each sliding_window_aggregate_fxs}}
-windowAggregateFunc{{@index}} :: {{this.data_type}} -> {{this.data_type}} -> {{this.data_type}}
-windowAggregateFunc{{@index}} acc item = {{this.expression}}
+{{#each sliding_window_functions}}
+windowFunc{{@index}} :: {{this.data_type}} -> {{this.input_type}} -> {{this.data_type}}
+windowFunc{{@index}} acc item = {{this.expression}}
 
 {{/each}}
 {{/if}}
@@ -80,7 +75,7 @@ slidingWindow{{@index}} newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> {{this.default_value}} +>> win
                     (True, True) -> {{this.default_value}} +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc{{this.window_update_fx_idx}} (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc{{this.window_update_fx_idx}} (head win) dta) win
 
 {{/each}}
 {{/if}}

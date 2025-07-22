@@ -21,8 +21,7 @@ struct Data {
     input_streams: Vec<InputStream>,
     output_streams: Vec<OutputStream>,
     sliding_windows: Vec<SlidingWindow>,
-    sliding_window_update_fxs: Vec<SlidingWindowFunction>,
-    sliding_window_aggregate_fxs: Vec<SlidingWindowFunction>,
+    sliding_window_functions: Vec<SlidingWindowFunction>,
 }
 
 #[derive(Serialize)]
@@ -72,8 +71,7 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         handlebars,
     );
     let WindowFunctionsDeduped { 
-        update_functions, 
-        aggregate_functions, 
+        functions, 
         win_idx_to_agg_fx_map, 
         win_idx_to_upd_fx_map
     } = get_window_functions(ir);
@@ -83,8 +81,7 @@ pub fn render(ir: &HardwareIR, handlebars: &mut Handlebars) -> Option<String> {
         input_streams: get_input_streams(ir),
         output_streams: get_output_streams(ir, &win_idx_to_upd_fx_map, &win_idx_to_agg_fx_map),
         sliding_windows: get_sliding_windows(ir, &win_idx_to_upd_fx_map, &win_idx_to_agg_fx_map),
-        sliding_window_update_fxs: update_functions,
-        sliding_window_aggregate_fxs: aggregate_functions,
+        sliding_window_functions: functions,
     };
     match handlebars.render("streams", &data) {
         Ok(result) => Some(result),
@@ -156,19 +153,10 @@ fn get_output_streams(ir: &HardwareIR, win_idx_to_upd_fx_map: &Vec<usize>, win_i
         .collect()
 }
 
-struct WindowFunctionsDeduped {
-    update_functions: Vec<SlidingWindowFunction>,
-    aggregate_functions: Vec<SlidingWindowFunction>,
-    win_idx_to_agg_fx_map: Vec<usize>,
-    win_idx_to_upd_fx_map: Vec<usize>,
-}
-
-fn window_functions_deduper(ir: &HardwareIR, expression_builder: &dyn Fn(&WindowOperation) -> String) -> (Vec<SlidingWindowFunction>, Vec<usize>) {
+fn window_functions_deduper(ir: &HardwareIR, function_builder: &dyn Fn(&MIR::SlidingWindow, &HardwareIR) -> SlidingWindowFunction) -> (Vec<SlidingWindowFunction>, Vec<usize>) {
     let mut map: HashMap<SlidingWindowFunction, Vec<usize>> = HashMap::new();
     for (i, sw) in ir.mir.sliding_windows.iter().cloned().enumerate() {
-        let (input_type, data_type, _) = get_sliding_window_datatypes(&sw, ir);
-        let expression = expression_builder(&sw.op);
-        let fx = SlidingWindowFunction { input_type, data_type, expression };
+        let fx = function_builder(&sw, ir);
         let existing = map.get(&fx);
         let updated = match existing {
             Some(e) => vec![&e[..], &vec![i]].concat(),
@@ -188,24 +176,47 @@ fn window_functions_deduper(ir: &HardwareIR, expression_builder: &dyn Fn(&Window
     (fxs, idxs)
 }
 
+struct WindowFunctionsDeduped {
+    functions: Vec<SlidingWindowFunction>,
+    win_idx_to_agg_fx_map: Vec<usize>,
+    win_idx_to_upd_fx_map: Vec<usize>,
+}
+
 fn get_window_functions(ir: &HardwareIR) -> WindowFunctionsDeduped {
-    let (update_fxs, update_idx_map) = window_functions_deduper(ir, &|op: &WindowOperation| {
-        match op {
+    let (update_fxs, update_idx_map) = window_functions_deduper(ir, &|sw: &MIR::SlidingWindow, ir: &HardwareIR| {
+        let expression = match sw.op {
             WindowOperation::Sum => "acc + item".to_string(),
             WindowOperation::Count => "acc + 1".to_string(),
             _ => unimplemented!(), 
-        }
+        };
+        let (input_type, data_type, _) = get_sliding_window_datatypes(sw, ir);
+        SlidingWindowFunction { input_type, data_type, expression }
     });
-    let (agg_fxs, agg_idx_map) = window_functions_deduper(ir, &|op: &WindowOperation| {
-        match op {
+    let (agg_fxs, agg_idx_map) = window_functions_deduper(ir, &|sw: &MIR::SlidingWindow, ir: &HardwareIR| {
+        let expression = match sw.op {
             WindowOperation::Sum => "acc + item".to_string(),
             WindowOperation::Count => "acc + item".to_string(),
             _ => unimplemented!(), 
-        }
+        };
+        let (_, data_type, _) = get_sliding_window_datatypes(sw, ir);
+        SlidingWindowFunction { input_type: data_type.clone(), data_type, expression }
     });
+    let mut map: HashMap<SlidingWindowFunction, usize> = HashMap::new();
+    let mut functions: Vec<SlidingWindowFunction> = Vec::new();
+    for f in vec![&update_fxs[..], &agg_fxs[..]].concat().iter() {
+        if !map.contains_key(f) {
+            map.insert(f.clone(), functions.len());
+            functions.push(f.clone());
+        }
+    }
+    let update_idx_map: Vec<usize> = update_idx_map.iter().map(|i| 
+        map.get(update_fxs.get(i.clone()).unwrap()).unwrap().clone()
+    ).collect();
+    let agg_idx_map: Vec<usize> = agg_idx_map.iter().map(|i| 
+        map.get(agg_fxs.get(i.clone()).unwrap()).unwrap().clone()
+    ).collect();
     WindowFunctionsDeduped { 
-        update_functions: update_fxs, 
-        aggregate_functions: agg_fxs, 
+        functions,
         win_idx_to_agg_fx_map: agg_idx_map, 
         win_idx_to_upd_fx_map: update_idx_map 
     }

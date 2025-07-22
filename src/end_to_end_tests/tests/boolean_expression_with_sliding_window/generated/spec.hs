@@ -28,14 +28,14 @@ import Clash.Prelude
 -- e, f
 
 -- Memory Window
--- window a = 5
--- window f = 1
--- window e = 1
--- window c = 4
--- window x = 5
--- window sw(d,e) = 1
--- window d = 3
 -- window b = 4
+-- window c = 4
+-- window e = 1
+-- window f = 1
+-- window d = 3
+-- window sw(d,e) = 1
+-- window x = 5
+-- window a = 5
 
 -- Pipeline Visualization
 -- x       | x       | x       | x       | x       | x       | x       | x       | x       | x      
@@ -521,7 +521,7 @@ outputStream4 en tag sw0 = result
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (merge0 <$> sw0)
         merge0 :: Vec 21 Int -> Int
-        merge0 win = fold windowAggregateFunc0 (tail win)
+        merge0 win = fold windowFunc1 (tail win)
 
 
 outputStream5 :: HiddenClockResetEnable dom => Signal dom PacingOut5 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Bool)
@@ -533,11 +533,11 @@ outputStream5 en tag in0_0 = result
 
 
 
-windowUpdateFunc0 :: Int -> Bool -> Int
-windowUpdateFunc0 acc item = acc + 1
+windowFunc0 :: Int -> Bool -> Int
+windowFunc0 acc item = acc + 1
 
-windowAggregateFunc0 :: Int -> Int -> Int
-windowAggregateFunc0 acc item = acc + item
+windowFunc1 :: Int -> Int -> Int
+windowFunc1 acc item = acc + item
 
 
 slidingWindow0 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Bool -> Signal dom Tag -> Signal dom Bool -> Signal dom (Tag, (Vec 21 Int)) 
@@ -556,7 +556,7 @@ slidingWindow0 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc0 (head win) dta) win
 
 
 

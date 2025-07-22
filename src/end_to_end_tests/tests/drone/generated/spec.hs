@@ -30,39 +30,39 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- acceleration_x, gps_sats, lat_gps
+-- lat_gps, gps_sats, acceleration_x
 -- acceleration_x_periodic
 -- acceleration_x_rising, acceleration_x_sinking
 -- acceleration_x_direction_change
 -- sw(acceleration_x_direction_change,acceleration_x_changes)
--- acceleration_x_changes, sw(lat_gps,gps_high_loss), sw(lat_gps,gps_high_loss), sw(lat_gps,gps_very_high_loss), sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_missed_beat)
--- trigger_acc, gps_high_loss, gps_very_high_loss, gps_medium_loss, gps_missed_beat, trigger_gps_sats
+-- acceleration_x_changes, sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_high_loss), sw(lat_gps,gps_high_loss), sw(lat_gps,gps_missed_beat), sw(lat_gps,gps_very_high_loss)
+-- trigger_acc, gps_medium_loss, gps_high_loss, gps_missed_beat, gps_very_high_loss, trigger_gps_sats
 
 -- Memory Window
--- window sw(lat_gps,gps_very_high_loss) = 1
--- window sw(lat_gps,gps_missed_beat) = 1
--- window gps_sats = 6
--- window acceleration_x_direction_change = 4
--- window sw(lat_gps,gps_medium_loss) = 1
--- window gps_missed_beat = 1
--- window sw(acceleration_x_direction_change,acceleration_x_changes) = 1
--- window sw(lat_gps,gps_high_loss) = 1
--- window lat_gps = 5
--- window sw(lat_gps,gps_medium_loss) = 1
--- window trigger_gps_sats = 1
--- window sw(lat_gps,gps_high_loss) = 1
--- window acceleration_x_rising = 5
 -- window acceleration_x_sinking = 5
--- window gps_very_high_loss = 1
+-- window sw(lat_gps,gps_high_loss) = 1
 -- window gps_high_loss = 1
--- window gps_medium_loss = 1
--- window acceleration_x_changes = 2
--- window acceleration_x = 1
+-- window acceleration_x_direction_change = 4
+-- window sw(lat_gps,gps_missed_beat) = 1
+-- window sw(lat_gps,gps_high_loss) = 1
 -- window acceleration_x_periodic = 6
+-- window sw(lat_gps,gps_medium_loss) = 1
+-- window gps_medium_loss = 1
+-- window gps_missed_beat = 1
+-- window lat_gps = 5
+-- window trigger_gps_sats = 1
+-- window sw(acceleration_x_direction_change,acceleration_x_changes) = 1
+-- window gps_sats = 6
+-- window acceleration_x = 1
+-- window acceleration_x_changes = 2
+-- window sw(lat_gps,gps_medium_loss) = 1
+-- window acceleration_x_rising = 5
 -- window trigger_acc = 1
+-- window sw(lat_gps,gps_very_high_loss) = 1
+-- window gps_very_high_loss = 1
 
 -- Pipeline Visualization
--- acceleration_x,gps_sats,lat_gps                                                                                                                                                               | acceleration_x,gps_sats,lat_gps                                                                                                                                                               | acceleration_x,gps_sats,lat_gps                                                                                                                                                               | acceleration_x,gps_sats,lat_gps                                                                                                                                                               | acceleration_x,gps_sats,lat_gps                                                                                                                                                               | acceleration_x,gps_sats,lat_gps                                                                                                                                                               | acceleration_x,gps_sats,lat_gps                                                                                                                                                               | acceleration_x,gps_sats,lat_gps                                                                                                                                                               | acceleration_x,gps_sats,lat_gps                                                                                                                                                               | acceleration_x,gps_sats,lat_gps                                                                                                                                                              
+-- lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                              
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                                                                                                                                                                                               | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                      
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -72,9 +72,9 @@ import Clash.Prelude
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                   
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_very_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_very_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_very_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_very_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_very_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat)
+--                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | acceleration_x_changes,sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss)
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | trigger_acc,gps_high_loss,gps_very_high_loss,gps_medium_loss,gps_missed_beat,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_very_high_loss,gps_medium_loss,gps_missed_beat,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_very_high_loss,gps_medium_loss,gps_missed_beat,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_very_high_loss,gps_medium_loss,gps_missed_beat,trigger_gps_sats                                                                                                
+--                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | trigger_acc,gps_medium_loss,gps_high_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_medium_loss,gps_high_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_medium_loss,gps_high_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_medium_loss,gps_high_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- input0 = acceleration_x
@@ -480,26 +480,26 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut9 = (.pacingOut9) <$> pacings
         pOut10 = (.pacingOut10) <$> pacings
         
-        tIn0 = genTag (getPacing <$> pIn0)
-        tIn1 = genTag (getPacing <$> pIn1)
         tIn2 = genTag (getPacing <$> pIn2)
+        tIn1 = genTag (getPacing <$> pIn1)
+        tIn0 = genTag (getPacing <$> pIn0)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut1 = genTag (getPacing <$> pOut1)
         tOut2 = genTag (getPacing <$> pOut2)
         tOut3 = genTag (getPacing <$> pOut3)
         tSw0 = genTag (getPacing <$> pOut3)
         tOut4 = genTag (getPacing <$> pOut4)
-        tSw4 = genTag (getPacing <$> pIn2)
-        tSw5 = genTag (getPacing <$> pIn2)
-        tSw6 = genTag (getPacing <$> pIn2)
-        tSw3 = genTag (getPacing <$> pIn2)
         tSw2 = genTag (getPacing <$> pIn2)
+        tSw3 = genTag (getPacing <$> pIn2)
+        tSw5 = genTag (getPacing <$> pIn2)
+        tSw4 = genTag (getPacing <$> pIn2)
         tSw1 = genTag (getPacing <$> pIn2)
+        tSw6 = genTag (getPacing <$> pIn2)
         tOut5 = genTag (getPacing <$> pOut5)
-        tOut8 = genTag (getPacing <$> pOut8)
-        tOut9 = genTag (getPacing <$> pOut9)
         tOut7 = genTag (getPacing <$> pOut7)
+        tOut8 = genTag (getPacing <$> pOut8)
         tOut6 = genTag (getPacing <$> pOut6)
+        tOut9 = genTag (getPacing <$> pOut9)
         tOut10 = genTag (getPacing <$> pOut10)
 
         -- tag generation takes 1 cycle so we need to delay the input data
@@ -519,9 +519,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel7 = delayFor d7 tagsDefault curTags
         nullT = invalidTag
 
-        enIn0 = delayFor d1 nullPacingIn0 pIn0
-        enIn1 = delayFor d1 nullPacingIn1 pIn1
         enIn2 = delayFor d1 nullPacingIn2 pIn2
+        enIn1 = delayFor d1 nullPacingIn1 pIn1
+        enIn0 = delayFor d1 nullPacingIn0 pIn0
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut1 = delayFor d3 nullPacingOut1 pOut1
         enOut2 = delayFor d3 nullPacingOut2 pOut2
@@ -529,23 +529,23 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enSw0 = delayFor d5 nullPacingOut3 pOut3
         sld0 = delayFor d5 False slide0
         enOut4 = delayFor d6 nullPacingOut4 pOut4
-        enSw4 = delayFor d6 nullPacingIn2 pIn2
-        sld4 = delayFor d6 False slide4
-        enSw5 = delayFor d6 nullPacingIn2 pIn2
-        sld5 = delayFor d6 False slide5
-        enSw6 = delayFor d6 nullPacingIn2 pIn2
-        sld6 = delayFor d6 False slide6
-        enSw3 = delayFor d6 nullPacingIn2 pIn2
-        sld3 = delayFor d6 False slide3
         enSw2 = delayFor d6 nullPacingIn2 pIn2
         sld2 = delayFor d6 False slide2
+        enSw3 = delayFor d6 nullPacingIn2 pIn2
+        sld3 = delayFor d6 False slide3
+        enSw5 = delayFor d6 nullPacingIn2 pIn2
+        sld5 = delayFor d6 False slide5
+        enSw4 = delayFor d6 nullPacingIn2 pIn2
+        sld4 = delayFor d6 False slide4
         enSw1 = delayFor d6 nullPacingIn2 pIn2
         sld1 = delayFor d6 False slide1
+        enSw6 = delayFor d6 nullPacingIn2 pIn2
+        sld6 = delayFor d6 False slide6
         enOut5 = delayFor d7 nullPacingOut5 pOut5
-        enOut8 = delayFor d7 nullPacingOut8 pOut8
-        enOut9 = delayFor d7 nullPacingOut9 pOut9
         enOut7 = delayFor d7 nullPacingOut7 pOut7
+        enOut8 = delayFor d7 nullPacingOut8 pOut8
         enOut6 = delayFor d7 nullPacingOut6 pOut6
+        enOut9 = delayFor d7 nullPacingOut9 pOut9
         enOut10 = delayFor d7 nullPacingOut10 pOut10
 
         output0Aktv = delayFor d8 False (getPacing <$> pOut0)
@@ -763,7 +763,7 @@ outputStream4 en tag sw0 = result
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (merge0 <$> sw0)
         merge0 :: Vec 101 Int -> Int
-        merge0 win = fold windowAggregateFunc0 (tail win)
+        merge0 win = fold windowFunc2 (tail win)
 
 
 outputStream5 :: HiddenClockResetEnable dom => Signal dom PacingOut5 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Bool)
@@ -781,7 +781,7 @@ outputStream6 en tag sw1 = result
         nextValWithTag = bundle (tag, nextVal)
         nextVal = ((merge1 <$> sw1) .<. (1))
         merge1 :: Vec 111 Int -> Int
-        merge1 win = fold windowAggregateFunc1 (tail win)
+        merge1 win = fold windowFunc2 (tail win)
 
 
 outputStream7 :: HiddenClockResetEnable dom => Signal dom PacingOut7 -> Signal dom Tag -> Signal dom (Vec 2 Int) -> Signal dom (Vec 2 Int) -> Signal dom (Tag, Bool)
@@ -791,9 +791,9 @@ outputStream7 en tag sw2 sw3 = result
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (((merge2 <$> sw2) .<. (15)) .&&. ((merge3 <$> sw3) .>=. (10)))
         merge2 :: Vec 2 Int -> Int
-        merge2 win = fold windowAggregateFunc1 (tail win)
+        merge2 win = fold windowFunc2 (tail win)
         merge3 :: Vec 2 Int -> Int
-        merge3 win = fold windowAggregateFunc1 (tail win)
+        merge3 win = fold windowFunc2 (tail win)
 
 
 outputStream8 :: HiddenClockResetEnable dom => Signal dom PacingOut8 -> Signal dom Tag -> Signal dom (Vec 2 Int) -> Signal dom (Vec 2 Int) -> Signal dom (Tag, Bool)
@@ -803,9 +803,9 @@ outputStream8 en tag sw4 sw5 = result
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (((merge4 <$> sw4) .<. (10)) .&&. ((merge5 <$> sw5) .>=. (5)))
         merge4 :: Vec 2 Int -> Int
-        merge4 win = fold windowAggregateFunc1 (tail win)
+        merge4 win = fold windowFunc2 (tail win)
         merge5 :: Vec 2 Int -> Int
-        merge5 win = fold windowAggregateFunc1 (tail win)
+        merge5 win = fold windowFunc2 (tail win)
 
 
 outputStream9 :: HiddenClockResetEnable dom => Signal dom PacingOut9 -> Signal dom Tag -> Signal dom (Vec 2 Int) -> Signal dom (Tag, Bool)
@@ -815,7 +815,7 @@ outputStream9 en tag sw6 = result
         nextValWithTag = bundle (tag, nextVal)
         nextVal = ((merge6 <$> sw6) .<. (5))
         merge6 :: Vec 2 Int -> Int
-        merge6 win = fold windowAggregateFunc1 (tail win)
+        merge6 win = fold windowFunc2 (tail win)
 
 
 outputStream10 :: HiddenClockResetEnable dom => Signal dom PacingOut10 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Bool)
@@ -827,17 +827,14 @@ outputStream10 en tag in1_0 = result
 
 
 
-windowUpdateFunc0 :: Int -> Bool -> Int
-windowUpdateFunc0 acc item = acc + 1
+windowFunc0 :: Int -> Bool -> Int
+windowFunc0 acc item = acc + 1
 
-windowUpdateFunc1 :: Int -> Int -> Int
-windowUpdateFunc1 acc item = acc + 1
+windowFunc1 :: Int -> Int -> Int
+windowFunc1 acc item = acc + 1
 
-windowAggregateFunc0 :: Int -> Int -> Int
-windowAggregateFunc0 acc item = acc + item
-
-windowAggregateFunc1 :: Int -> Int -> Int
-windowAggregateFunc1 acc item = acc + item
+windowFunc2 :: Int -> Int -> Int
+windowFunc2 acc item = acc + item
 
 
 slidingWindow0 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Bool -> Signal dom Tag -> Signal dom Bool -> Signal dom (Tag, (Vec 101 Int)) 
@@ -856,7 +853,7 @@ slidingWindow0 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc0 (head win) dta) win
 
 slidingWindow1 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 111 Int)) 
 slidingWindow1 newData slide tag inpt = window
@@ -874,7 +871,7 @@ slidingWindow1 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc1 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
 
 slidingWindow2 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
 slidingWindow2 newData slide tag inpt = window
@@ -892,7 +889,7 @@ slidingWindow2 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc1 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
 
 slidingWindow3 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
 slidingWindow3 newData slide tag inpt = window
@@ -910,7 +907,7 @@ slidingWindow3 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc1 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
 
 slidingWindow4 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
 slidingWindow4 newData slide tag inpt = window
@@ -928,7 +925,7 @@ slidingWindow4 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc1 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
 
 slidingWindow5 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
 slidingWindow5 newData slide tag inpt = window
@@ -946,7 +943,7 @@ slidingWindow5 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc1 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
 
 slidingWindow6 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
 slidingWindow6 newData slide tag inpt = window
@@ -964,7 +961,7 @@ slidingWindow6 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc1 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
 
 
 

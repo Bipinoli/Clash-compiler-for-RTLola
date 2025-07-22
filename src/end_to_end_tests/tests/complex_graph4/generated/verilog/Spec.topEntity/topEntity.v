@@ -136,27 +136,27 @@ module topEntity
   wire  result_20;
   wire [8:0] c$app_arg_11;
   wire  result_21;
-  // spec.hs:778:1-157
+  // spec.hs:775:1-157
   wire signed [63:0] y;
-  // spec.hs:778:1-157
+  // spec.hs:775:1-157
   wire signed [63:0] x_7;
-  // spec.hs:778:1-157
+  // spec.hs:775:1-157
   wire [127:0] win;
-  // spec.hs:778:1-157
+  // spec.hs:775:1-157
   reg [135:0] window = {8'd5,   {64'sd0,   64'sd0}};
   wire [135:0] result_22;
-  // spec.hs:778:1-157
+  // spec.hs:775:1-157
   wire [135:0] t;
   wire [127:0] result_23;
-  // spec.hs:778:1-157
+  // spec.hs:775:1-157
   wire [127:0] c$t_case_alt;
-  // spec.hs:778:1-157
+  // spec.hs:775:1-157
   wire [127:0] c$t_case_alt_0;
-  // spec.hs:778:1-157
+  // spec.hs:775:1-157
   wire [127:0] lastBucketUpdated;
-  // spec.hs:778:1-157
+  // spec.hs:775:1-157
   wire  b;
-  // spec.hs:778:1-157
+  // spec.hs:775:1-157
   wire  c$b_case_alt;
   // spec.hs:143:34-42
   wire  x1_2;
@@ -213,25 +213,25 @@ module topEntity
   wire [71:0] t_2;
   wire signed [63:0] x_13;
   wire signed [63:0] y_5;
-  // spec.hs:796:1-157
+  // spec.hs:793:1-157
   wire signed [63:0] y_6;
-  // spec.hs:796:1-157
+  // spec.hs:793:1-157
   wire signed [63:0] x_14;
-  // spec.hs:796:1-157
+  // spec.hs:793:1-157
   wire [127:0] win_0;
-  // spec.hs:796:1-157
+  // spec.hs:793:1-157
   reg [135:0] window_0 = {8'd5,   {64'sd0,   64'sd0}};
   wire [135:0] result_30;
-  // spec.hs:796:1-157
+  // spec.hs:793:1-157
   wire [135:0] t_3;
   wire [127:0] result_31;
-  // spec.hs:796:1-157
+  // spec.hs:793:1-157
   wire [127:0] c$t_case_alt_1;
-  // spec.hs:796:1-157
+  // spec.hs:793:1-157
   wire [127:0] c$t_case_alt_2;
-  // spec.hs:796:1-157
+  // spec.hs:793:1-157
   wire [127:0] lastBucketUpdated_0;
-  // spec.hs:796:1-157
+  // spec.hs:793:1-157
   wire  b_1;
   // spec.hs:139:34-42
   wire  x_15;
@@ -833,11 +833,11 @@ module topEntity
   reg signed [63:0] c$cursor_case_alt_3;
   // spec.hs:250:1-78
   wire signed [63:0] c$cursor_case_alt_4;
-  // spec.hs:819:1-141
+  // spec.hs:816:1-141
   wire  qPopValid;
-  // spec.hs:819:1-141
+  // spec.hs:816:1-141
   wire  qPush;
-  // spec.hs:819:1-141
+  // spec.hs:816:1-141
   wire  qPop;
   wire [129:0] inputs;
   wire [3:0] c$vec2;

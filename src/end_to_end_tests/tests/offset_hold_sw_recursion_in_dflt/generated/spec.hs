@@ -20,16 +20,16 @@ import Clash.Prelude
 -- x
 -- a
 -- b
--- sw(b,c), sw(a,c)
+-- sw(a,c), sw(b,c)
 -- c
 
 -- Memory Window
 -- window x = 2
--- window c = 1
--- window sw(b,c) = 1
 -- window a = 2
 -- window b = 1
 -- window sw(a,c) = 1
+-- window sw(b,c) = 1
+-- window c = 1
 
 -- Pipeline Visualization
 -- x               |                 |                 | x               |                 |                 | x               |                 |                 | x              
@@ -38,7 +38,7 @@ import Clash.Prelude
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                 |                 | b               |                 |                 | b               |                 |                 | b               |                
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                 |                 |                 | sw(b,c),sw(a,c) |                 |                 | sw(b,c),sw(a,c) |                 |                 | sw(b,c),sw(a,c)
+--                 |                 |                 | sw(a,c),sw(b,c) |                 |                 | sw(a,c),sw(b,c) |                 |                 | sw(a,c),sw(b,c)
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                 |                 |                 |                 | c               |                 |                 | c               |                 |                
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -316,8 +316,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tIn0 = genTag (getPacing <$> pIn0)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut1 = genTag (getPacing <$> pOut1)
-        tSw0 = genTag (getPacing <$> pOut1)
         tSw1 = genTag (getPacing <$> pOut0)
+        tSw0 = genTag (getPacing <$> pOut1)
         tOut2 = genTag (getPacing <$> pOut2)
 
         -- tag generation takes 1 cycle so we need to delay the input data
@@ -336,10 +336,10 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enIn0 = delayFor d1 nullPacingIn0 pIn0
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut1 = delayFor d3 nullPacingOut1 pOut1
-        enSw0 = delayFor d4 nullPacingOut1 pOut1
-        sld0 = delayFor d4 False slide0
         enSw1 = delayFor d4 nullPacingOut0 pOut0
         sld1 = delayFor d4 False slide1
+        enSw0 = delayFor d4 nullPacingOut1 pOut1
+        sld0 = delayFor d4 False slide0
         enOut2 = delayFor d5 nullPacingOut2 pOut2
 
         output0Aktv = delayFor d6 False (getPacing <$> pOut0)
@@ -437,17 +437,14 @@ outputStream2 en tag sw0 sw1 = result
         nextValWithTag = bundle (tag, nextVal)
         nextVal = ((merge0 <$> sw0) + (merge1 <$> sw1))
         merge1 :: Vec 11 Int -> Int
-        merge1 win = fold windowAggregateFunc0 (tail win)
+        merge1 win = fold windowFunc0 (tail win)
         merge0 :: Vec 101 Int -> Int
-        merge0 win = fold windowAggregateFunc0 (tail win)
+        merge0 win = fold windowFunc0 (tail win)
 
 
 
-windowUpdateFunc0 :: Int -> Int -> Int
-windowUpdateFunc0 acc item = acc + item
-
-windowAggregateFunc0 :: Int -> Int -> Int
-windowAggregateFunc0 acc item = acc + item
+windowFunc0 :: Int -> Int -> Int
+windowFunc0 acc item = acc + item
 
 
 slidingWindow0 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 101 Int)) 
@@ -466,7 +463,7 @@ slidingWindow0 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc0 (head win) dta) win
 
 slidingWindow1 :: HiddenClockResetEnable dom => Signal dom PacingOut0 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 11 Int)) 
 slidingWindow1 newData slide tag inpt = window
@@ -484,7 +481,7 @@ slidingWindow1 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc0 (head win) dta) win
 
 
 

@@ -24,12 +24,12 @@ import Clash.Prelude
 -- c
 
 -- Memory Window
--- window y = 2
 -- window b = 3
--- window a = 4
--- window sw(b,c) = 1
--- window x = 1
 -- window c = 1
+-- window x = 1
+-- window sw(b,c) = 1
+-- window a = 4
+-- window y = 2
 
 -- Pipeline Visualization
 -- x,y     | x,y     | x,y     | x,y     | x,y     | x,y     | x,y     | x,y     | x,y     | x,y    
@@ -440,15 +440,12 @@ outputStream2 en tag out0_0 sw0 = result
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out0_0 + (merge0 <$> sw0))
         merge0 :: Vec 4 Int -> Int
-        merge0 win = fold windowAggregateFunc0 (tail win)
+        merge0 win = fold windowFunc0 (tail win)
 
 
 
-windowUpdateFunc0 :: Int -> Int -> Int
-windowUpdateFunc0 acc item = acc + item
-
-windowAggregateFunc0 :: Int -> Int -> Int
-windowAggregateFunc0 acc item = acc + item
+windowFunc0 :: Int -> Int -> Int
+windowFunc0 acc item = acc + item
 
 
 slidingWindow0 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 4 Int)) 
@@ -467,7 +464,7 @@ slidingWindow0 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc0 (head win) dta) win
 
 
 

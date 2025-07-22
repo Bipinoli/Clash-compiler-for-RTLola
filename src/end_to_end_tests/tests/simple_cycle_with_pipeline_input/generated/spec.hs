@@ -20,14 +20,14 @@ import Clash.Prelude
 -- x
 -- a
 -- b
--- d, c
+-- c, d
 
 -- Memory Window
 -- window b = 1
 -- window d = 1
--- window a = 1
--- window x = 1
 -- window c = 1
+-- window x = 1
+-- window a = 1
 
 -- Pipeline Visualization
 -- x   |     |     | x   |     |     | x   |     |     | x  
@@ -36,7 +36,7 @@ import Clash.Prelude
 -- ---------------------------------------------------------
 --     |     | b   |     |     | b   |     |     | b   |    
 -- ---------------------------------------------------------
---     |     |     | d,c |     |     | d,c |     |     | d,c
+--     |     |     | c,d |     |     | c,d |     |     | c,d
 -- ---------------------------------------------------------
 
 -- input0 = x
@@ -290,8 +290,8 @@ llc event = bundle (toPop, outputs)
         tIn0 = genTag (getPacing <$> pIn0)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut1 = genTag (getPacing <$> pOut1)
-        tOut3 = genTag (getPacing <$> pOut3)
         tOut2 = genTag (getPacing <$> pOut2)
+        tOut3 = genTag (getPacing <$> pOut3)
 
         -- tag generation takes 1 cycle so we need to delay the input data
         input0Data = delay 0 (((.value). (.input0)) <$> inputs)
@@ -308,8 +308,8 @@ llc event = bundle (toPop, outputs)
         enIn0 = delayFor d1 nullPacingIn0 pIn0
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut1 = delayFor d3 nullPacingOut1 pOut1
-        enOut3 = delayFor d4 nullPacingOut3 pOut3
         enOut2 = delayFor d4 nullPacingOut2 pOut2
+        enOut3 = delayFor d4 nullPacingOut3 pOut3
 
         output0Aktv = delayFor d5 False (getPacing <$> pOut0)
         output1Aktv = delayFor d5 False (getPacing <$> pOut1)

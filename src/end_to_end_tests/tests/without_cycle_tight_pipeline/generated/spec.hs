@@ -21,25 +21,25 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- x, z, y
+-- z, x, y
 -- b, a
 -- c, d
 -- sw(d,e)
 -- e
 
 -- Memory Window
--- window sw(d,e) = 1
 -- window e = 1
--- window d = 3
--- window a = 4
--- window y = 1
--- window z = 2
 -- window c = 3
--- window x = 1
 -- window b = 4
+-- window z = 2
+-- window d = 3
+-- window sw(d,e) = 1
+-- window y = 1
+-- window x = 1
+-- window a = 4
 
 -- Pipeline Visualization
--- x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y   | x,z,y  
+-- z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y  
 -- -------------------------------------------------------------------------------------------------
 --         | b,a     | b,a     | b,a     | b,a     | b,a     | b,a     | b,a     | b,a     | b,a    
 -- -------------------------------------------------------------------------------------------------
@@ -357,8 +357,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut3 = (.pacingOut3) <$> pacings
         pOut4 = (.pacingOut4) <$> pacings
         
-        tIn0 = genTag (getPacing <$> pIn0)
         tIn2 = genTag (getPacing <$> pIn2)
+        tIn0 = genTag (getPacing <$> pIn0)
         tIn1 = genTag (getPacing <$> pIn1)
         tOut1 = genTag (getPacing <$> pOut1)
         tOut0 = genTag (getPacing <$> pOut0)
@@ -382,8 +382,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel5 = delayFor d5 tagsDefault curTags
         nullT = invalidTag
 
-        enIn0 = delayFor d1 nullPacingIn0 pIn0
         enIn2 = delayFor d1 nullPacingIn2 pIn2
+        enIn0 = delayFor d1 nullPacingIn0 pIn0
         enIn1 = delayFor d1 nullPacingIn1 pIn1
         enOut1 = delayFor d2 nullPacingOut1 pOut1
         enOut0 = delayFor d2 nullPacingOut0 pOut0
@@ -525,15 +525,12 @@ outputStream4 en tag sw0 = result
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (merge0 <$> sw0)
         merge0 :: Vec 11 Int -> Int
-        merge0 win = fold windowAggregateFunc0 (tail win)
+        merge0 win = fold windowFunc0 (tail win)
 
 
 
-windowUpdateFunc0 :: Int -> Int -> Int
-windowUpdateFunc0 acc item = acc + item
-
-windowAggregateFunc0 :: Int -> Int -> Int
-windowAggregateFunc0 acc item = acc + item
+windowFunc0 :: Int -> Int -> Int
+windowFunc0 acc item = acc + item
 
 
 slidingWindow0 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 11 Int)) 
@@ -552,7 +549,7 @@ slidingWindow0 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowUpdateFunc0 (head win) dta) win
+                lastBucketUpdated = replace 0 (windowFunc0 (head win) dta) win
 
 
 
