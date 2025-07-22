@@ -1,5 +1,0 @@
-input x: Int
-output a := x + 1
-output b := x + 2
-output c := a + b
-output xx @1kHz := x.hold(or: 0)

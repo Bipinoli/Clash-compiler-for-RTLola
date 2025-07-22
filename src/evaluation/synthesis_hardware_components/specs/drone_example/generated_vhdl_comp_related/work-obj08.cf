@@ -1,0 +1,112 @@
+v 4
+file . "implementation.vhdl" "d3dabdea871118c2826ea93c3dbc2c6c07b5e391" "20250722174448.634":
+  entity implementation at 1( 0) + 0 on 83;
+  architecture structural of implementation at 38( 1425) + 0 on 84;
+file . "pre_processing/input_pre_processing.vhdl" "d2fb33fcd398a10bb2ba483750e6ef7c810a8f78" "20250722174448.528":
+  entity input_pre_processing at 1( 0) + 0 on 79;
+  architecture behavioral of input_pre_processing at 27( 930) + 0 on 80;
+file . "queue/queue.vhdl" "c0bc4a252d4173ecde80b63b2f280adc7dbce5d4" "20250722174448.420":
+  entity queue at 1( 0) + 0 on 75;
+  architecture behavioral of queue at 53( 1913) + 0 on 76;
+file . "llc/gps_missed_beat_output_stream_entity.vhdl" "c628dc3de8857f581db52608972eaefd1556eab6" "20250722174448.241":
+  entity gps_missed_beat_output_stream_entity at 1( 0) + 0 on 71;
+  architecture behavioral of gps_missed_beat_output_stream_entity at 31( 900) + 0 on 72;
+file . "llc/lat_gps_count_4_sliding_window_entity.vhdl" "5b84ec050323c06a0628196bf86be9620a5d26af" "20250722174448.064":
+  entity lat_gps_count_4_sliding_window_entity at 1( 0) + 0 on 67;
+  architecture behavioral of lat_gps_count_4_sliding_window_entity at 29( 831) + 0 on 68;
+file . "llc/lat_gps_count_5_sliding_window_entity.vhdl" "18da029817ab595c9273b87d74d8536c3c36c283" "20250722174447.884":
+  entity lat_gps_count_5_sliding_window_entity at 1( 0) + 0 on 63;
+  architecture behavioral of lat_gps_count_5_sliding_window_entity at 29( 831) + 0 on 64;
+file . "llc/lat_gps_count_2_sliding_window_entity.vhdl" "1d826d6729be19a8bfcd57c6b1aa30441060f4a4" "20250722174447.701":
+  entity lat_gps_count_2_sliding_window_entity at 1( 0) + 0 on 59;
+  architecture behavioral of lat_gps_count_2_sliding_window_entity at 29( 833) + 0 on 60;
+file . "llc/acceleration_x_changes_output_stream_entity.vhdl" "aea0a867273f397dd481e81febfda79f6dee755c" "20250722174447.499":
+  entity acceleration_x_changes_output_stream_entity at 1( 0) + 0 on 55;
+  architecture behavioral of acceleration_x_changes_output_stream_entity at 33( 1082) + 0 on 56;
+file . "llc/low_level_controller.vhdl" "765175d218ffd967e30ca47c19954761ba3d041f" "20250722174447.286":
+  entity low_level_controller at 1( 0) + 0 on 51;
+  architecture mixed of low_level_controller at 45( 1477) + 0 on 52;
+file . "llc/acceleration_x_input_stream_entity.vhdl" "0d2423e327766163c989f84edd037e19ee4015ce" "20250722174447.106":
+  entity acceleration_x_input_stream_entity at 1( 0) + 0 on 47;
+  architecture behavioral of acceleration_x_input_stream_entity at 24( 619) + 0 on 48;
+file . "llc/lat_gps_input_stream_entity.vhdl" "bbaa14a20ca04223e45194bdb9bec0747414b048" "20250722174446.922":
+  entity lat_gps_input_stream_entity at 1( 0) + 0 on 43;
+  architecture behavioral of lat_gps_input_stream_entity at 34( 904) + 0 on 44;
+file . "llc/gps_very_high_loss_output_stream_entity.vhdl" "2a785f08c983e871e3d32bb8dbf6a7436560b11c" "20250722174446.739":
+  entity gps_very_high_loss_output_stream_entity at 1( 0) + 0 on 39;
+  architecture behavioral of gps_very_high_loss_output_stream_entity at 31( 907) + 0 on 40;
+file . "llc/trigger_gps_sats_output_stream_entity.vhdl" "c0433da608bfc145c6fdc24042b8c56fb9ad9074" "20250722174446.547":
+  entity trigger_gps_sats_output_stream_entity at 1( 0) + 0 on 35;
+  architecture behavioral of trigger_gps_sats_output_stream_entity at 29( 768) + 0 on 36;
+file . "llc/trigger_acc_output_stream_entity.vhdl" "7f7419d0d50f2c7f77a1478dcfc2d4aea93aaea2" "20250722174446.363":
+  entity trigger_acc_output_stream_entity at 1( 0) + 0 on 31;
+  architecture behavioral of trigger_acc_output_stream_entity at 29( 786) + 0 on 32;
+file . "hlc/time_unit.vhdl" "0d2361b4c77963ba87339db5070c27014f4d48b1" "20250722174446.182":
+  entity time_unit at 1( 0) + 0 on 27;
+  architecture behavioral of time_unit at 13( 228) + 0 on 28;
+file . "hlc/scheduler.vhdl" "f3622dd3e0ec9946a89f1ffb0fc920e9c7a1ef75" "20250722174446.080":
+  entity scheduler at 1( 0) + 0 on 23;
+  architecture behavioral of scheduler at 32( 1097) + 0 on 24;
+file . "hlc/check_new_input.vhdl" "0372bc4d5f396e0a5fc13de56eb7c4171e9214b0" "20250722174445.893":
+  entity check_new_input at 1( 0) + 0 on 19;
+  architecture behavioral of check_new_input at 14( 266) + 0 on 20;
+file . "hlc/hl_qinterface.vhdl" "da8a791d934b82b6c056d96fa4f0b6f7f67e2c70" "20250722174445.693":
+  entity hlqinterface at 1( 0) + 0 on 15;
+  architecture behavioral of hlqinterface at 63( 5390) + 0 on 16;
+file . "my_array_package.vhdl" "3d61f698155627714a2abc59d9c87daf7a038737" "20250722174445.506":
+  package array_type_pkg at 1( 0) + 0 on 11 body;
+  package body array_type_pkg at 26( 1377) + 0 on 12;
+file . "my_math_package.vhdl" "688f5ee99530b4bd8b0dd7201a9fc94ac53674a7" "20250722174445.599":
+  package my_math_pkg at 1( 0) + 0 on 13 body;
+  package body my_math_pkg at 14( 438) + 0 on 14;
+file . "hlc/high_level_controller.vhdl" "b3e6b2ed06638d86fa61ec04356b1742902c1ebd" "20250722174445.781":
+  entity high_level_controller at 1( 0) + 0 on 17;
+  architecture mixed of high_level_controller at 41( 1501) + 0 on 18;
+file . "hlc/event_delay.vhdl" "2bc6cd173d5c38d7595e6805964512e421e7273b" "20250722174445.985":
+  entity event_delay at 1( 0) + 0 on 21;
+  architecture behavioral of event_delay at 34( 1037) + 0 on 22;
+file . "hlc/extInterface.vhdl" "03926d96152d2c33e6b29dd872bf00e6529c7dcf" "20250722174446.164":
+  entity extinterface at 1( 0) + 0 on 25;
+  architecture behavioral of extinterface at 31( 977) + 0 on 26;
+file . "llc/lat_gps_count_6_sliding_window_entity.vhdl" "e7b883515a0cd10f9d1fd84ed26bf3d6c6c0340e" "20250722174446.272":
+  entity lat_gps_count_6_sliding_window_entity at 1( 0) + 0 on 29;
+  architecture behavioral of lat_gps_count_6_sliding_window_entity at 29( 836) + 0 on 30;
+file . "llc/acceleration_x_direction_change_count_0_sliding_window_entity.vhdl" "29c123121001937448429a8f9943257749e32076" "20250722174446.453":
+  entity acceleration_x_direction_change_count_0_sliding_window_entity at 1( 0) + 0 on 33;
+  architecture behavioral of acceleration_x_direction_change_count_0_sliding_window_entity at 29( 906) + 0 on 34;
+file . "llc/lat_gps_count_1_sliding_window_entity.vhdl" "32e4d0aab04100781708c9059d52783302eb4571" "20250722174446.647":
+  entity lat_gps_count_1_sliding_window_entity at 1( 0) + 0 on 37;
+  architecture behavioral of lat_gps_count_1_sliding_window_entity at 29( 839) + 0 on 38;
+file . "llc/acceleration_x_sinking_output_stream_entity.vhdl" "568d476cee24637f82da3ddbb3aedd7a84143c21" "20250722174446.832":
+  entity acceleration_x_sinking_output_stream_entity at 1( 0) + 0 on 41;
+  architecture behavioral of acceleration_x_sinking_output_stream_entity at 33( 1090) + 0 on 42;
+file . "llc/evaluator.vhdl" "9ec26d991c6a53c3a2fccb5170a4b3d77ba3013e" "20250722174447.018":
+  entity evaluator at 1( 0) + 0 on 45;
+  architecture mixed of evaluator at 61( 2821) + 0 on 46;
+file . "llc/acceleration_x_rising_output_stream_entity.vhdl" "c8a44b59f865f148c21d788450d1c1e7e59d83fb" "20250722174447.198":
+  entity acceleration_x_rising_output_stream_entity at 1( 0) + 0 on 49;
+  architecture behavioral of acceleration_x_rising_output_stream_entity at 33( 1086) + 0 on 50;
+file . "llc/acceleration_x_direction_change_output_stream_entity.vhdl" "7b19f02f679ef2218f2738b3fe8ef7e6d9f83ef5" "20250722174447.378":
+  entity acceleration_x_direction_change_output_stream_entity at 1( 0) + 0 on 53;
+  architecture behavioral of acceleration_x_direction_change_output_stream_entity at 40( 1452) + 0 on 54;
+file . "llc/gps_sats_input_stream_entity.vhdl" "9063a83605ad626337c50975e09ada922d2a0526" "20250722174447.605":
+  entity gps_sats_input_stream_entity at 1( 0) + 0 on 57;
+  architecture behavioral of gps_sats_input_stream_entity at 24( 599) + 0 on 58;
+file . "llc/gps_high_loss_output_stream_entity.vhdl" "1e0d11c7d7e9c78813006786dfb2d73f2449c0c0" "20250722174447.795":
+  entity gps_high_loss_output_stream_entity at 1( 0) + 0 on 61;
+  architecture behavioral of gps_high_loss_output_stream_entity at 34( 1139) + 0 on 62;
+file . "llc/acceleration_x_periodic_output_stream_entity.vhdl" "c81931a17d49098289d8a695ec34d268d992407c" "20250722174447.976":
+  entity acceleration_x_periodic_output_stream_entity at 1( 0) + 0 on 65;
+  architecture behavioral of acceleration_x_periodic_output_stream_entity at 32( 901) + 0 on 66;
+file . "llc/lat_gps_count_3_sliding_window_entity.vhdl" "2e8e0d556ac06ca947ecd0f837c198a4614b3314" "20250722174448.153":
+  entity lat_gps_count_3_sliding_window_entity at 1( 0) + 0 on 69;
+  architecture behavioral of lat_gps_count_3_sliding_window_entity at 29( 833) + 0 on 70;
+file . "llc/gps_medium_loss_output_stream_entity.vhdl" "462e43715dd15e687f6ecb33c555cc287160b1e1" "20250722174448.330":
+  entity gps_medium_loss_output_stream_entity at 1( 0) + 0 on 73;
+  architecture behavioral of gps_medium_loss_output_stream_entity at 34( 1146) + 0 on 74;
+file . "monitor.vhdl" "1af564c10ad7c47ad3c60ec34e9501d97352a547" "20250722174448.506":
+  entity monitor at 1( 0) + 0 on 77;
+  architecture mixed of monitor at 37( 1417) + 0 on 78;
+file . "pre_processing/clock_pre_processing.vhdl" "f79bdce42c8045e867f60590ddcd0a419cf6a4fb" "20250722174448.547":
+  entity clock_pre_processing at 1( 0) + 0 on 81;
+  architecture behaviour of clock_pre_processing at 15( 275) + 0 on 82;

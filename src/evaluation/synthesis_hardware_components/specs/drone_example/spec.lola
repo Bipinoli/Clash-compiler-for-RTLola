@@ -1,0 +1,18 @@
+input acceleration_x: Int64
+input gps_sats: UInt64
+input lat_gps: Int64
+
+output acceleration_x_periodic @2kHz := acceleration_x.hold(or: 0) 
+output acceleration_x_rising := delta(acceleration_x_periodic, dft: acceleration_x_periodic) > 5
+output acceleration_x_sinking := delta(acceleration_x_periodic, dft: acceleration_x_periodic) < -5 
+
+output acceleration_x_direction_change := (acceleration_x_rising ∧ acceleration_x_sinking.offset(by: -1).defaults(to: false)) ∨ (acceleration_x_sinking ∧ acceleration_x_rising.offset(by: -1).defaults(to: false))
+
+output acceleration_x_changes @2kHz := acceleration_x_direction_change.aggregate(over: 0.05s, using: count)
+output trigger_acc := acceleration_x_changes > 5
+
+output gps_missed_beat: Bool @ 2kHz := lat_gps.aggregate(over: 0.055s, using: count) < 1
+output gps_medium_loss: Bool @ 0.1kHz := lat_gps.aggregate(over: 0.01s, using: count) < 15 && lat_gps.aggregate(over: 0.01s, using: count) >= 10
+output gps_high_loss: Bool @ 0.1kHz := lat_gps.aggregate(over: 0.01s, using: count) < 10 && lat_gps.aggregate(over: 0.01s, using: count) >= 5
+output gps_very_high_loss: Bool @ 0.1kHz := lat_gps.aggregate(over: 0.01s, using: count) < 5
+output trigger_gps_sats: Bool @ 0.1kHz := gps_sats.hold(or: 0)  < 6

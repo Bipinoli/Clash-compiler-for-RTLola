@@ -1,0 +1,143 @@
+{
+    "components": [
+        "topEntity"
+    ],
+    "dependencies": {
+        "transitive": []
+    },
+    "domains": {
+        "IntelSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "System": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "TestDomain": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 2000,
+            "reset_kind": "Asynchronous",
+            "reset_polarity": "ActiveHigh"
+        },
+        "XilinxSystem": {
+            "active_edge": "Rising",
+            "init_behavior": "Defined",
+            "period": 10000,
+            "reset_kind": "Synchronous",
+            "reset_polarity": "ActiveHigh"
+        }
+    },
+    "files": [
+        {
+            "name": "topEntity.sdc",
+            "sha256": "5931af56eff7648c501fd106363fb26420b398eeea306d9edd80c5a89a153fc1"
+        },
+        {
+            "name": "Spec_topEntity_types.vhdl",
+            "sha256": "565d12cf08517dc790212dc91da50b3c5b37492715f31a0f1040d51bd95d1d23"
+        },
+        {
+            "name": "topEntity.vhdl",
+            "sha256": "ed7f4ff33037691cd6f520b99bddc313a700aa3ba3553132f3b30319c63eea11"
+        }
+    ],
+    "flags": [
+        20,
+        20
+    ],
+    "hash": "d28010327dde5726597fc968655ed4477866642cfecc058457d94186c7b3ddfd",
+    "top_component": {
+        "name": "topEntity",
+        "ports_flat": [
+            {
+                "direction": "in",
+                "domain": "TestDomain",
+                "is_clock": true,
+                "name": "clk",
+                "type_name": "clk.Spec_topEntity_types.clk_TestDomain",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "TestDomain",
+                "is_clock": false,
+                "name": "rst",
+                "type_name": "rst.Spec_topEntity_types.rst_TestDomain",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "domain": "TestDomain",
+                "is_clock": false,
+                "name": "en",
+                "type_name": "en.Spec_topEntity_types.en_TestDomain",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_0_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_0_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_1_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "in",
+                "is_clock": false,
+                "name": "inputs_1_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_0_1",
+                "type_name": "boolean",
+                "width": 1
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_0",
+                "type_name": "signed(63 downto 0)",
+                "width": 64
+            },
+            {
+                "direction": "out",
+                "is_clock": false,
+                "name": "result_1_1",
+                "type_name": "boolean",
+                "width": 1
+            }
+        ]
+    },
+    "version": "unstable"
+}

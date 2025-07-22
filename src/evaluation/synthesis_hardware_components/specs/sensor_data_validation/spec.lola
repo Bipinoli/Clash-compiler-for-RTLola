@@ -1,0 +1,8 @@
+input gps_x : Int
+input num_satellites: Int
+input imu_acc_x: Int 
+
+output gps_emitted_enough @1Hz := gps_x.aggregate(over: 3s, using: count) < 10
+output few_satellites := num_satellites < 9
+output is_unreliable_gps_data @1Hz := 
+    few_satellites.aggregate(over: 5s, using: count) > 12

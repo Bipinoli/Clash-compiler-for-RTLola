@@ -1,0 +1,10 @@
+input lat: Int
+input lon: Int
+constant intruder_lat: Int := 249
+constant intruder_lon: Int := 23
+
+output distance: Int := (intruder_lat - lat) + (intruder_lon - lon)
+output closer: Bool := distance.offset(by: -1).defaults(to: distance) >= distance
+output trigger_closer := closer && distance < 1
+output is_good @1kHz := 
+    trigger_closer.aggregate(over: 0.01s, using: count) < 5
