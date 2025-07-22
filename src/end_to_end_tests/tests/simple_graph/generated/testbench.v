@@ -17,16 +17,6 @@ module testbench;
     wire signed [63:0] output_3;
     wire output_3_aktv;
 
-    wire q_push;
-    wire q_pop;
-    wire q_push_valid;
-    wire q_pop_valid;
-
-    wire enable_in0;
-    wire enable_out0;
-    wire enable_out1;
-    wire enable_out2;
-    wire enable_out3;
     
 
     topEntity monitor (
@@ -36,12 +26,6 @@ module testbench;
                         ,output_1, output_1_aktv
                         ,output_2, output_2_aktv
                         ,output_3, output_3_aktv
-                        ,q_push, q_pop, q_push_valid, q_pop_valid
-                        ,enable_in0
-                        ,enable_out0
-                        ,enable_out1
-                        ,enable_out2
-                        ,enable_out3
                        );
 
     always begin

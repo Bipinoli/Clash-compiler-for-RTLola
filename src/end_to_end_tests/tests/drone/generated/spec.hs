@@ -30,39 +30,43 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
--- lat_gps, gps_sats, acceleration_x
+--------------------
+-- gps_sats, acceleration_x, lat_gps
 -- acceleration_x_periodic
 -- acceleration_x_rising, acceleration_x_sinking
 -- acceleration_x_direction_change
 -- sw(acceleration_x_direction_change,acceleration_x_changes)
--- acceleration_x_changes, sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_high_loss), sw(lat_gps,gps_high_loss), sw(lat_gps,gps_missed_beat), sw(lat_gps,gps_very_high_loss)
--- trigger_acc, gps_medium_loss, gps_high_loss, gps_missed_beat, gps_very_high_loss, trigger_gps_sats
+-- acceleration_x_changes, sw(lat_gps,gps_high_loss), sw(lat_gps,gps_high_loss), sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_missed_beat), sw(lat_gps,gps_very_high_loss)
+-- trigger_acc, gps_high_loss, gps_medium_loss, gps_missed_beat, gps_very_high_loss, trigger_gps_sats
 
 -- Memory Window
--- window acceleration_x_sinking = 5
--- window sw(lat_gps,gps_high_loss) = 1
--- window gps_high_loss = 1
--- window acceleration_x_direction_change = 4
--- window sw(lat_gps,gps_missed_beat) = 1
--- window sw(lat_gps,gps_high_loss) = 1
--- window acceleration_x_periodic = 6
--- window sw(lat_gps,gps_medium_loss) = 1
--- window gps_medium_loss = 1
--- window gps_missed_beat = 1
--- window lat_gps = 5
--- window trigger_gps_sats = 1
+-----------------
 -- window sw(acceleration_x_direction_change,acceleration_x_changes) = 1
--- window gps_sats = 6
--- window acceleration_x = 1
--- window acceleration_x_changes = 2
 -- window sw(lat_gps,gps_medium_loss) = 1
+-- window sw(lat_gps,gps_missed_beat) = 1
+-- window lat_gps = 5
+-- window acceleration_x = 1
+-- window acceleration_x_direction_change = 4
+-- window acceleration_x_periodic = 6
+-- window sw(lat_gps,gps_high_loss) = 1
+-- window gps_medium_loss = 1
+-- window gps_sats = 6
 -- window acceleration_x_rising = 5
--- window trigger_acc = 1
+-- window sw(lat_gps,gps_high_loss) = 1
+-- window sw(lat_gps,gps_medium_loss) = 1
 -- window sw(lat_gps,gps_very_high_loss) = 1
+-- window trigger_gps_sats = 1
+-- window acceleration_x_changes = 2
+-- window trigger_acc = 1
+-- window acceleration_x_sinking = 5
+-- window gps_missed_beat = 1
+-- window gps_high_loss = 1
 -- window gps_very_high_loss = 1
 
 -- Pipeline Visualization
--- lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                               | lat_gps,gps_sats,acceleration_x                                                                                                                                                              
+--------------------------
+
+-- gps_sats,acceleration_x,lat_gps                                                                                                                                                               | gps_sats,acceleration_x,lat_gps                                                                                                                                                               | gps_sats,acceleration_x,lat_gps                                                                                                                                                               | gps_sats,acceleration_x,lat_gps                                                                                                                                                               | gps_sats,acceleration_x,lat_gps                                                                                                                                                               | gps_sats,acceleration_x,lat_gps                                                                                                                                                               | gps_sats,acceleration_x,lat_gps                                                                                                                                                               | gps_sats,acceleration_x,lat_gps                                                                                                                                                               | gps_sats,acceleration_x,lat_gps                                                                                                                                                               | gps_sats,acceleration_x,lat_gps                                                                                                                                                              
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                                                                                                                                                                                               | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                      
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -72,11 +76,13 @@ import Clash.Prelude
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                   
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | acceleration_x_changes,sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss)
+--                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss)
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | trigger_acc,gps_medium_loss,gps_high_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_medium_loss,gps_high_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_medium_loss,gps_high_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_medium_loss,gps_high_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                
+--                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | trigger_acc,gps_high_loss,gps_medium_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_medium_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_medium_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_medium_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+-- Nicknames
+-------------
 -- input0 = acceleration_x
 -- input1 = gps_sats
 -- input2 = lat_gps
@@ -101,13 +107,13 @@ import Clash.Prelude
 
 ---------------------------------------------------------------
 
-data ValidInt = ValidInt {
-    value :: Int,
+data ValidBool = ValidBool {
+    value :: Bool,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
-data ValidBool = ValidBool {
-    value :: Bool,
+data ValidInt = ValidInt {
+    value :: Int,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
@@ -241,7 +247,21 @@ nullEvent :: Event
 nullEvent = (nullInputs, nullSlides, nullPacings)
 nullInputs = Inputs (ValidInt 0 False) (ValidInt 0 False) (ValidInt 0 False) 
 nullSlides = Slides False False False False False False False 
-nullPacings = Pacings nullPacingIn0 nullPacingIn1 nullPacingIn2 nullPacingOut0 nullPacingOut1 nullPacingOut2 nullPacingOut3 nullPacingOut4 nullPacingOut5 nullPacingOut6 nullPacingOut7 nullPacingOut8 nullPacingOut9 nullPacingOut10 
+nullPacings = Pacings 
+                nullPacingIn0
+                nullPacingIn1
+                nullPacingIn2
+                nullPacingOut0
+                nullPacingOut1
+                nullPacingOut2
+                nullPacingOut3
+                nullPacingOut4
+                nullPacingOut5
+                nullPacingOut6
+                nullPacingOut7
+                nullPacingOut8
+                nullPacingOut9
+                nullPacingOut10
 nullPacingIn0 = PacingIn0 False
 nullPacingIn1 = PacingIn1 False
 nullPacingIn2 = PacingIn2 False
@@ -274,10 +294,11 @@ type QState = (QMem, QCursor)
 type QInput = (QPush, QPop, QData)
 type QOutput = (QPushValid, QPopValid, QData)
 
-queue :: HiddenClockResetEnable dom => Signal dom QInput -> Signal dom QOutput
+queue :: HiddenClockResetEnable dom 
+    => Signal dom QInput 
+    -> Signal dom QOutput
 queue input = output
     where 
-        -- keeping in registers to avoid any combinational output
         output = bundle (pushValid, popValid, outData)
         state = bundle (buffer, cursor)
         buffer = register (repeat nullEvent :: QMem) nextBufferSignal
@@ -286,10 +307,16 @@ queue input = output
         popValid = register False nextPopValidSignal
         outData = register nullEvent nextOutDataSignal
 
-        nextBufferSignal = nextBuffer <$> buffer <*> bundle (input, cursor)
-        nextCursorSignal = nextCursor <$> cursor <*> bundle (input, buffer)
-        nextOutDataSignal = nextOutData <$> bundle (input, cursor, buffer)
-        nextPushValidSignal = nextPushValid <$> bundle (input, cursor, buffer)
+        nextBufferSignal = nextBuffer  
+                            <$> buffer 
+                            <*> bundle (input, cursor)
+        nextCursorSignal = nextCursor 
+                            <$> cursor 
+                            <*> bundle (input, buffer)
+        nextOutDataSignal = nextOutData 
+                            <$> bundle (input, cursor, buffer)
+        nextPushValidSignal = nextPushValid 
+                            <$> bundle (input, cursor, buffer)
         nextPopValidSignal = nextPopValid <$> bundle (input, cursor)
         
         nextBuffer :: QMem -> (QInput, QCursor) -> QMem
@@ -297,14 +324,16 @@ queue input = output
             where 
                 out = case (push, pop) of
                     (True, True) -> qData +>> buf 
-                    (True, False) -> if cur == length buf then buf else qData +>> buf
+                    (True, False) -> if cur == length buf 
+                                    then buf else qData +>> buf
                     (False, _) -> buf
 
         nextCursor :: QCursor -> (QInput, QMem) -> QCursor
         nextCursor cur ((push, pop, _), buf) = out
             where 
                 out = case (push, pop) of
-                    (True, False) -> if cur == length buf then cur else cur + 1
+                    (True, False) -> if cur == length buf 
+                                    then cur else cur + 1
                     (False, True) -> if cur == 0 then 0 else cur - 1
                     (_, _) -> cur
 
@@ -312,8 +341,10 @@ queue input = output
         nextOutData ((push, pop, qData), cur, buf) = out
             where 
                 out = case (push, pop) of
-                    (True, True) -> if cur == 0 then qData else buf !! (cur - 1)
-                    (False, True) -> if cur == 0 then nullEvent else buf !! (cur - 1)
+                    (True, True) -> if cur == 0 
+                                    then qData else buf !! (cur - 1)
+                    (False, True) -> if cur == 0 
+                                    then nullEvent else buf !! (cur - 1)
                     (_, _) -> nullEvent
 
         nextPushValid :: (QInput, QCursor, QMem) -> QPush
@@ -336,14 +367,19 @@ queue input = output
 ---------------------------------------------------------------
 
 -- Clock domain with 2 microseconds period (500 kHz)
--- It has been arbitrarily chosen for both monitor and the verilog testbench simulation
-createDomain vSystem{vName="TestDomain", vPeriod=2000} -- period in nanoseconds
+-- It has been arbitrarily chosen for both monitor 
+--  and the verilog testbench simulation
+createDomain vSystem{vName="TestDomain", vPeriod=2000} 
+-- period in nanoseconds
 
 systemClockPeriodNs :: Int
-systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @TestDomain)
+systemClockPeriodNs = fromInteger  
+    (snatToInteger $ clockPeriod @TestDomain)
 
 
-hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Event)
+hlc :: HiddenClockResetEnable dom 
+    => Signal dom Inputs 
+    -> Signal dom (Bool, Event)
 hlc inputs = out
     where 
         out = bundle (newEvent, event)
@@ -351,8 +387,27 @@ hlc inputs = out
 
         event = bundle (inputs, slides, pacings)
 
-        slides = Slides <$> s0 <*> s1 <*> s2 <*> s3 <*> s4 <*> s5 <*> s6
-        pacings = Pacings <$> pIn0 <*> pIn1 <*> pIn2 <*> pOut0 <*> pOut1 <*> pOut2 <*> pOut3 <*> pOut4 <*> pOut5 <*> pOut6 <*> pOut7 <*> pOut8 <*> pOut9 <*> pOut10
+        slides = Slides <$> s0 
+                    <*> s1 
+                    <*> s2 
+                    <*> s3 
+                    <*> s4 
+                    <*> s5 
+                    <*> s6
+        pacings = Pacings <$> pIn0 
+                    <*> pIn1 
+                    <*> pIn2 
+                    <*> pOut0 
+                    <*> pOut1 
+                    <*> pOut2 
+                    <*> pOut3 
+                    <*> pOut4 
+                    <*> pOut5 
+                    <*> pOut6 
+                    <*> pOut7 
+                    <*> pOut8 
+                    <*> pOut9 
+                    <*> pOut10
 
         hasInput0 = ((.valid). (.input0)) <$> inputs
         hasInput1 = ((.valid). (.input1)) <$> inputs
@@ -388,7 +443,9 @@ hlc inputs = out
         timer1 = timer timer1Over
         period1InNs = 10000000
 
-        timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
+        timer :: HiddenClockResetEnable dom 
+            => Signal dom Bool 
+            -> Signal dom Int
         timer reset = register 0 (mux reset (pure deltaTime) nextTime)
             where 
                 nextTime = timer reset + pure deltaTime
@@ -397,8 +454,10 @@ hlc inputs = out
 
 ---------------------------------------------------------------
 
--- maxTag must be at least the size of the maximum window to avoid duplicate tags in the window
--- also to avoid having to do modulo operations maxTag must be at least as big as the largest offset
+-- To avoid duplidate tags in a window 
+-- maxTag must be at least the size of the maximum window 
+-- Also to avoid having to do modulo operations 
+-- maxTag must be at least as big as the largest offset
 maxTag = 112 :: Tag
 invalidTag = maxTag + 1
 
@@ -424,27 +483,39 @@ getOffsetFromNonVec (winTag, winData) tag offset dflt = out
         out = if offsetTag == winTag then winData else dflt
 
 getMatchingTagFromNonVec :: (Tag, a) -> Tag -> a -> a
-getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then dta else dflt
+getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = 
+    if tag == tagToMatch then dta else dflt
 
 getLatestValue :: KnownNat n => Vec (n + 1) (Tag, a) -> a -> a
 getLatestValue win dflt =
-  let (tag, dta) = last win
-  in if tag == invalidTag then dflt else dta
+    let (tag, dta) = last win
+    in if tag == invalidTag then dflt else dta
 
 getLatestValueFromNonVec :: (Tag, a) -> a -> a
-getLatestValueFromNonVec (tag, dta) dflt = if tag == invalidTag then dflt else dta
+getLatestValueFromNonVec (tag, dta) dflt = 
+    if tag == invalidTag then dflt else dta
 
 earlierTag :: Tag -> Tag -> Tag
-earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
+earlierTag curTag cyclesBefore = 
+    if curTag > cyclesBefore 
+    then curTag - cyclesBefore 
+    else curTag - cyclesBefore + maxTag
 
-delayFor :: forall dom n a . (HiddenClockResetEnable dom, KnownNat n, NFDataX a) => SNat n -> a -> Signal dom a -> Signal dom a
+delayFor :: forall dom n a . 
+    (HiddenClockResetEnable dom, KnownNat n, NFDataX a)
+    => SNat n
+    -> a
+    -> Signal dom a
+    -> Signal dom a
 delayFor n initVal sig = last delayedVec
     where
-      delayedVec :: Vec (n + 1) (Signal dom a)
-      delayedVec = iterateI (delay initVal) sig
-     
+        delayedVec :: Vec (n + 1) (Signal dom a)
+        delayedVec = iterateI (delay initVal) sig
+    
 
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom ((Bool, Outputs), (Slides, DebugEnables))
+llc :: HiddenClockResetEnable dom 
+    => Signal dom (Bool, Event) 
+    -> Signal dom ((Bool, Outputs), (Slides, DebugEnables))
 llc event = bundle (bundle (toPop, outputs), debugSignals)
     where 
         (isValidEvent, poppedEvent) = unbundle event
@@ -480,36 +551,78 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut9 = (.pacingOut9) <$> pacings
         pOut10 = (.pacingOut10) <$> pacings
         
-        tIn2 = genTag (getPacing <$> pIn2)
         tIn1 = genTag (getPacing <$> pIn1)
         tIn0 = genTag (getPacing <$> pIn0)
+        tIn2 = genTag (getPacing <$> pIn2)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut1 = genTag (getPacing <$> pOut1)
         tOut2 = genTag (getPacing <$> pOut2)
         tOut3 = genTag (getPacing <$> pOut3)
         tSw0 = genTag (getPacing <$> pOut3)
         tOut4 = genTag (getPacing <$> pOut4)
-        tSw2 = genTag (getPacing <$> pIn2)
-        tSw3 = genTag (getPacing <$> pIn2)
         tSw5 = genTag (getPacing <$> pIn2)
         tSw4 = genTag (getPacing <$> pIn2)
+        tSw2 = genTag (getPacing <$> pIn2)
+        tSw3 = genTag (getPacing <$> pIn2)
         tSw1 = genTag (getPacing <$> pIn2)
         tSw6 = genTag (getPacing <$> pIn2)
         tOut5 = genTag (getPacing <$> pOut5)
-        tOut7 = genTag (getPacing <$> pOut7)
         tOut8 = genTag (getPacing <$> pOut8)
+        tOut7 = genTag (getPacing <$> pOut7)
         tOut6 = genTag (getPacing <$> pOut6)
         tOut9 = genTag (getPacing <$> pOut9)
         tOut10 = genTag (getPacing <$> pOut10)
 
-        -- tag generation takes 1 cycle so we need to delay the input data
+        -- tag generation takes 1 cycle so we need to delay the input
         input0Data = delay 0 (((.value). (.input0)) <$> inputs)
         input1Data = delay 0 (((.value). (.input1)) <$> inputs)
         input2Data = delay 0 (((.value). (.input2)) <$> inputs)
 
         -- delayed tags to be used in different levels 
-        tagsDefault = Tags nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT 
-        curTags = Tags <$> tIn0 <*> tIn1 <*> tIn2 <*> tOut0 <*> tOut1 <*> tOut2 <*> tOut3 <*> tOut4 <*> tOut5 <*> tOut6 <*> tOut7 <*> tOut8 <*> tOut9 <*> tOut10 <*> tSw0 <*> tSw1 <*> tSw2 <*> tSw3 <*> tSw4 <*> tSw5 <*> tSw6
+        tagsDefault = Tags 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+        curTags = Tags 
+                <$> tIn0 
+                <*> tIn1 
+                <*> tIn2 
+                <*> tOut0 
+                <*> tOut1 
+                <*> tOut2 
+                <*> tOut3 
+                <*> tOut4 
+                <*> tOut5 
+                <*> tOut6 
+                <*> tOut7 
+                <*> tOut8 
+                <*> tOut9 
+                <*> tOut10 
+                <*> tSw0 
+                <*> tSw1 
+                <*> tSw2 
+                <*> tSw3 
+                <*> tSw4 
+                <*> tSw5 
+                <*> tSw6
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags
@@ -519,9 +632,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel7 = delayFor d7 tagsDefault curTags
         nullT = invalidTag
 
-        enIn2 = delayFor d1 nullPacingIn2 pIn2
         enIn1 = delayFor d1 nullPacingIn1 pIn1
         enIn0 = delayFor d1 nullPacingIn0 pIn0
+        enIn2 = delayFor d1 nullPacingIn2 pIn2
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut1 = delayFor d3 nullPacingOut1 pOut1
         enOut2 = delayFor d3 nullPacingOut2 pOut2
@@ -529,21 +642,21 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enSw0 = delayFor d5 nullPacingOut3 pOut3
         sld0 = delayFor d5 False slide0
         enOut4 = delayFor d6 nullPacingOut4 pOut4
-        enSw2 = delayFor d6 nullPacingIn2 pIn2
-        sld2 = delayFor d6 False slide2
-        enSw3 = delayFor d6 nullPacingIn2 pIn2
-        sld3 = delayFor d6 False slide3
         enSw5 = delayFor d6 nullPacingIn2 pIn2
         sld5 = delayFor d6 False slide5
         enSw4 = delayFor d6 nullPacingIn2 pIn2
         sld4 = delayFor d6 False slide4
+        enSw2 = delayFor d6 nullPacingIn2 pIn2
+        sld2 = delayFor d6 False slide2
+        enSw3 = delayFor d6 nullPacingIn2 pIn2
+        sld3 = delayFor d6 False slide3
         enSw1 = delayFor d6 nullPacingIn2 pIn2
         sld1 = delayFor d6 False slide1
         enSw6 = delayFor d6 nullPacingIn2 pIn2
         sld6 = delayFor d6 False slide6
         enOut5 = delayFor d7 nullPacingOut5 pOut5
-        enOut7 = delayFor d7 nullPacingOut7 pOut7
         enOut8 = delayFor d7 nullPacingOut8 pOut8
+        enOut7 = delayFor d7 nullPacingOut7 pOut7
         enOut6 = delayFor d7 nullPacingOut6 pOut6
         enOut9 = delayFor d7 nullPacingOut9 pOut9
         enOut10 = delayFor d7 nullPacingOut10 pOut10
@@ -566,101 +679,213 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         input2Win = input2Window enIn2 tIn2 input2Data
 
         -- Evaluation of output 0: level 1
-        out0 = outputStream0 enOut0 ((.output0) <$> curTagsLevel1) out0Data0 
-        out0Data0 = getLatestValueFromNonVec <$> input0Win <*> out0Data0Dflt
+        out0 = outputStream0 enOut0 
+            ((.output0) <$> curTagsLevel1) 
+            out0Data0 
+        out0Data0 = getLatestValueFromNonVec 
+            <$> input0Win 
+            <*> out0Data0Dflt
         out0Data0Dflt = pure (0)
 
         -- Evaluation of output 1: level 2
-        out1 = outputStream1 enOut1 ((.output1) <$> curTagsLevel2) out1Data0 out1Data1 
-        out1Data0 = getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure (0))
-        out1Data1 = getOffset <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure 1) <*> out1Data1Dflt
+        out1 = outputStream1 enOut1 
+            ((.output1) <$> curTagsLevel2) 
+            out1Data0 
+            out1Data1 
+        out1Data0 = getMatchingTag 
+            <$> out0 
+            <*> ((.output0) <$> curTagsLevel2) 
+            <*> (pure (0))
+        out1Data1 = getOffset         
+            <$> out0 
+            <*> ((.output0) <$> curTagsLevel2) 
+            <*> (pure 1) 
+            <*> out1Data1Dflt
         out1Data1Dflt =  getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure (0))
 
         -- Evaluation of output 2: level 2
-        out2 = outputStream2 enOut2 ((.output2) <$> curTagsLevel2) out2Data0 out2Data1 
-        out2Data0 = getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure (0))
-        out2Data1 = getOffset <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure 1) <*> out2Data1Dflt
+        out2 = outputStream2 enOut2 
+            ((.output2) <$> curTagsLevel2) 
+            out2Data0 
+            out2Data1 
+        out2Data0 = getMatchingTag 
+            <$> out0 
+            <*> ((.output0) <$> curTagsLevel2) 
+            <*> (pure (0))
+        out2Data1 = getOffset         
+            <$> out0 
+            <*> ((.output0) <$> curTagsLevel2) 
+            <*> (pure 1) 
+            <*> out2Data1Dflt
         out2Data1Dflt =  getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure (0))
 
         -- Evaluation of output 3: level 3
-        out3 = outputStream3 enOut3 ((.output3) <$> curTagsLevel3) out3Data0 out3Data1 out3Data2 out3Data3 
-        out3Data0 = getMatchingTag <$> out1 <*> ((.output1) <$> curTagsLevel3) <*> (pure (False))
-        out3Data1 = getOffset <$> out2 <*> ((.output2) <$> curTagsLevel3) <*> (pure 1) <*> out3Data1Dflt
+        out3 = outputStream3 enOut3 
+            ((.output3) <$> curTagsLevel3) 
+            out3Data0 
+            out3Data1 
+            out3Data2 
+            out3Data3 
+        out3Data0 = getMatchingTag 
+            <$> out1 
+            <*> ((.output1) <$> curTagsLevel3) 
+            <*> (pure (False))
+        out3Data1 = getOffset         
+            <$> out2 
+            <*> ((.output2) <$> curTagsLevel3) 
+            <*> (pure 1) 
+            <*> out3Data1Dflt
         out3Data1Dflt = pure (False)
-        out3Data2 = getMatchingTag <$> out2 <*> ((.output2) <$> curTagsLevel3) <*> (pure (False))
-        out3Data3 = getOffset <$> out1 <*> ((.output1) <$> curTagsLevel3) <*> (pure 1) <*> out3Data3Dflt
+        out3Data2 = getMatchingTag 
+            <$> out2 
+            <*> ((.output2) <$> curTagsLevel3) 
+            <*> (pure (False))
+        out3Data3 = getOffset         
+            <$> out1 
+            <*> ((.output1) <$> curTagsLevel3) 
+            <*> (pure 1) 
+            <*> out3Data3Dflt
         out3Data3Dflt = pure (False)
 
         -- Evaluation of output 4: level 5
-        out4 = outputStream4 enOut4 ((.output4) <$> curTagsLevel5) out4Data0 
+        out4 = outputStream4 enOut4 
+            ((.output4) <$> curTagsLevel5) 
+            out4Data0 
         (_, out4Data0) = unbundle sw0
 
         -- Evaluation of output 5: level 6
-        out5 = outputStream5 enOut5 ((.output5) <$> curTagsLevel6) out5Data0 
-        out5Data0 = getMatchingTag <$> out4 <*> ((.output4) <$> curTagsLevel6) <*> (pure (0))
+        out5 = outputStream5 enOut5 
+            ((.output5) <$> curTagsLevel6) 
+            out5Data0 
+        out5Data0 = getMatchingTag 
+            <$> out4 
+            <*> ((.output4) <$> curTagsLevel6) 
+            <*> (pure (0))
 
         -- Evaluation of output 6: level 6
-        out6 = outputStream6 enOut6 ((.output6) <$> curTagsLevel6) out6Data0 
+        out6 = outputStream6 enOut6 
+            ((.output6) <$> curTagsLevel6) 
+            out6Data0 
         (_, out6Data0) = unbundle sw1
 
         -- Evaluation of output 7: level 6
-        out7 = outputStream7 enOut7 ((.output7) <$> curTagsLevel6) out7Data0 out7Data1 
+        out7 = outputStream7 enOut7 
+            ((.output7) <$> curTagsLevel6) 
+            out7Data0 
+            out7Data1 
         (_, out7Data0) = unbundle sw2
         (_, out7Data1) = unbundle sw3
 
         -- Evaluation of output 8: level 6
-        out8 = outputStream8 enOut8 ((.output8) <$> curTagsLevel6) out8Data0 out8Data1 
+        out8 = outputStream8 enOut8 
+            ((.output8) <$> curTagsLevel6) 
+            out8Data0 
+            out8Data1 
         (_, out8Data0) = unbundle sw4
         (_, out8Data1) = unbundle sw5
 
         -- Evaluation of output 9: level 6
-        out9 = outputStream9 enOut9 ((.output9) <$> curTagsLevel6) out9Data0 
+        out9 = outputStream9 enOut9 
+            ((.output9) <$> curTagsLevel6) 
+            out9Data0 
         (_, out9Data0) = unbundle sw6
 
         -- Evaluation of output 10: level 6
-        out10 = outputStream10 enOut10 ((.output10) <$> curTagsLevel6) out10Data0 
-        out10Data0 = getLatestValue <$> input1Win <*> out10Data0Dflt
+        out10 = outputStream10 enOut10 
+            ((.output10) <$> curTagsLevel6) 
+            out10Data0 
+        out10Data0 = getLatestValue 
+            <$> input1Win 
+            <*> out10Data0Dflt
         out10Data0Dflt = pure (0)
 
         -- Evaluation of sliding window 0: level 4
-        sw0 = slidingWindow0 enSw0 sld0 ((.slide0) <$> curTagsLevel4) sw0Data
-        sw0Data = getMatchingTag <$> out3 <*> ((.output3) <$> curTagsLevel4) <*> (pure False)
+        sw0 = slidingWindow0 enSw0 sld0 
+            ((.slide0) <$> curTagsLevel4) sw0Data
+        sw0Data = getMatchingTag 
+            <$> out3 
+            <*> ((.output3) <$> curTagsLevel4) 
+            <*> (pure False)
 
         -- Evaluation of sliding window 1: level 5
-        sw1 = slidingWindow1 enSw1 sld1 ((.slide1) <$> curTagsLevel5) sw1Data
-        sw1Data = getMatchingTag <$> input2Win <*> ((.input2) <$> curTagsLevel5) <*> (pure 0)
+        sw1 = slidingWindow1 enSw1 sld1 
+            ((.slide1) <$> curTagsLevel5) sw1Data
+        sw1Data = getMatchingTag 
+            <$> input2Win 
+            <*> ((.input2) <$> curTagsLevel5) 
+            <*> (pure 0)
 
         -- Evaluation of sliding window 2: level 5
-        sw2 = slidingWindow2 enSw2 sld2 ((.slide2) <$> curTagsLevel5) sw2Data
-        sw2Data = getMatchingTag <$> input2Win <*> ((.input2) <$> curTagsLevel5) <*> (pure 0)
+        sw2 = slidingWindow2 enSw2 sld2 
+            ((.slide2) <$> curTagsLevel5) sw2Data
+        sw2Data = getMatchingTag 
+            <$> input2Win 
+            <*> ((.input2) <$> curTagsLevel5) 
+            <*> (pure 0)
 
         -- Evaluation of sliding window 3: level 5
-        sw3 = slidingWindow3 enSw3 sld3 ((.slide3) <$> curTagsLevel5) sw3Data
-        sw3Data = getMatchingTag <$> input2Win <*> ((.input2) <$> curTagsLevel5) <*> (pure 0)
+        sw3 = slidingWindow3 enSw3 sld3 
+            ((.slide3) <$> curTagsLevel5) sw3Data
+        sw3Data = getMatchingTag 
+            <$> input2Win 
+            <*> ((.input2) <$> curTagsLevel5) 
+            <*> (pure 0)
 
         -- Evaluation of sliding window 4: level 5
-        sw4 = slidingWindow4 enSw4 sld4 ((.slide4) <$> curTagsLevel5) sw4Data
-        sw4Data = getMatchingTag <$> input2Win <*> ((.input2) <$> curTagsLevel5) <*> (pure 0)
+        sw4 = slidingWindow4 enSw4 sld4 
+            ((.slide4) <$> curTagsLevel5) sw4Data
+        sw4Data = getMatchingTag 
+            <$> input2Win 
+            <*> ((.input2) <$> curTagsLevel5) 
+            <*> (pure 0)
 
         -- Evaluation of sliding window 5: level 5
-        sw5 = slidingWindow5 enSw5 sld5 ((.slide5) <$> curTagsLevel5) sw5Data
-        sw5Data = getMatchingTag <$> input2Win <*> ((.input2) <$> curTagsLevel5) <*> (pure 0)
+        sw5 = slidingWindow5 enSw5 sld5 
+            ((.slide5) <$> curTagsLevel5) sw5Data
+        sw5Data = getMatchingTag 
+            <$> input2Win 
+            <*> ((.input2) <$> curTagsLevel5) 
+            <*> (pure 0)
 
         -- Evaluation of sliding window 6: level 5
-        sw6 = slidingWindow6 enSw6 sld6 ((.slide6) <$> curTagsLevel5) sw6Data
-        sw6Data = getMatchingTag <$> input2Win <*> ((.input2) <$> curTagsLevel5) <*> (pure 0)
+        sw6 = slidingWindow6 enSw6 sld6 
+            ((.slide6) <$> curTagsLevel5) sw6Data
+        sw6Data = getMatchingTag 
+            <$> input2Win 
+            <*> ((.input2) <$> curTagsLevel5) 
+            <*> (pure 0)
 
         -- Outputing all results: level 7
         output0 = ValidInt <$> output0Data <*> output0Aktv
-        output0Data = getMatchingTag <$> out0 <*> ((.output0) <$> curTagsLevel7) <*> (pure 0)
+        output0Data = getMatchingTag 
+            <$> out0 
+            <*> ((.output0) 
+            <$> curTagsLevel7) 
+            <*> (pure 0)
         output1 = ValidBool <$> output1Data <*> output1Aktv
-        output1Data = getMatchingTag <$> out1 <*> ((.output1) <$> curTagsLevel7) <*> (pure False)
+        output1Data = getMatchingTag 
+            <$> out1 
+            <*> ((.output1) 
+            <$> curTagsLevel7) 
+            <*> (pure False)
         output2 = ValidBool <$> output2Data <*> output2Aktv
-        output2Data = getMatchingTag <$> out2 <*> ((.output2) <$> curTagsLevel7) <*> (pure False)
+        output2Data = getMatchingTag 
+            <$> out2 
+            <*> ((.output2) 
+            <$> curTagsLevel7) 
+            <*> (pure False)
         output3 = ValidBool <$> output3Data <*> output3Aktv
-        output3Data = getMatchingTag <$> out3 <*> ((.output3) <$> curTagsLevel7) <*> (pure False)
+        output3Data = getMatchingTag 
+            <$> out3 
+            <*> ((.output3) 
+            <$> curTagsLevel7) 
+            <*> (pure False)
         output4 = ValidInt <$> output4Data <*> output4Aktv
-        output4Data = getMatchingTag <$> out4 <*> ((.output4) <$> curTagsLevel7) <*> (pure 0)
+        output4Data = getMatchingTag 
+            <$> out4 
+            <*> ((.output4) 
+            <$> curTagsLevel7) 
+            <*> (pure 0)
         output5 = ValidBool <$> output5Data <*> output5Aktv
         (_, output5Data) = unbundle out5
         output6 = ValidBool <$> output6Data <*> output6Aktv
@@ -674,7 +899,18 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         output10 = ValidBool <$> output10Data <*> output10Aktv
         (_, output10Data) = unbundle out10
 
-        outputs = Outputs <$> output0 <*> output1 <*> output2 <*> output3 <*> output4 <*> output5 <*> output6 <*> output7 <*> output8 <*> output9 <*> output10
+        outputs = Outputs 
+            <$> output0 
+            <*> output1 
+            <*> output2 
+            <*> output3 
+            <*> output4 
+            <*> output5 
+            <*> output6 
+            <*> output7 
+            <*> output8 
+            <*> output9 
+            <*> output10
 
         debugSignals = bundle (slides, debugEnables)
         debugEnables = DebugEnables <$>
@@ -693,7 +929,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
                             (getPacing <$> enOut9) <*>
                             (getPacing <$> enOut10)
 
-        genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
+        genTag :: HiddenClockResetEnable dom 
+            => Signal dom Bool 
+            -> Signal dom Tag
         genTag en = t
             where 
                 t = register 1 (mux en next_t t)
@@ -703,62 +941,111 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
 
 
-input0Window :: HiddenClockResetEnable dom => Signal dom PacingIn0 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+input0Window :: HiddenClockResetEnable dom 
+    => Signal dom PacingIn0 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 input0Window en tag val = result
-    where result = register (invalidTag, 0) (mux (getPacing <$> en) (bundle (tag, val)) result)
+    where result = register (invalidTag, 0) 
+                    (mux (getPacing <$> en) (bundle (tag, val)) result)
 
 
-input1Window :: HiddenClockResetEnable dom => Signal dom PacingIn1 -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 6 (Tag, Int))
+input1Window :: HiddenClockResetEnable dom 
+    => Signal dom PacingIn1 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Vec 6 (Tag, Int))
 input1Window en tag val = result
-    where result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) ((<<+) <$> result <*> (bundle (tag, val))) result)
+    where result = register (repeat (invalidTag, 0)) 
+                    (mux (getPacing <$> en) 
+                        ((<<+) <$> result <*> (bundle (tag, val)))
+                        result)
 
 
-input2Window :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 5 (Tag, Int))
+input2Window :: HiddenClockResetEnable dom 
+    => Signal dom PacingIn2 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Vec 5 (Tag, Int))
 input2Window en tag val = result
-    where result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) ((<<+) <$> result <*> (bundle (tag, val))) result)
+    where result = register (repeat (invalidTag, 0)) 
+                    (mux (getPacing <$> en) 
+                        ((<<+) <$> result <*> (bundle (tag, val)))
+                        result)
 
 
 
-outputStream0 :: HiddenClockResetEnable dom => Signal dom PacingOut0 -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 6 (Tag, Int))
+outputStream0 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut0 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Vec 6 (Tag, Int))
 outputStream0 en tag in0_ = result
     where
-        result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
+        result = register (repeat (invalidTag, 0)) 
+                (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = in0_
 
 
-outputStream1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Vec 5 (Tag, Bool))
+outputStream1 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut1 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom Int 
+    -> Signal dom (Vec 5 (Tag, Bool))
 outputStream1 en tag out0_00 out0_01 = result
     where
-        result = register (repeat (invalidTag, False)) (mux (getPacing <$> en) next result)
+        result = register (repeat (invalidTag, False)) 
+                (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = ((out0_00 - out0_01) .>. (5))
 
 
-outputStream2 :: HiddenClockResetEnable dom => Signal dom PacingOut2 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Vec 5 (Tag, Bool))
+outputStream2 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut2 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom Int 
+    -> Signal dom (Vec 5 (Tag, Bool))
 outputStream2 en tag out0_00 out0_01 = result
     where
-        result = register (repeat (invalidTag, False)) (mux (getPacing <$> en) next result)
+        result = register (repeat (invalidTag, False)) 
+                (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = ((out0_00 - out0_01) .<. (-5))
 
 
-outputStream3 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Tag -> Signal dom Bool -> Signal dom Bool -> Signal dom Bool -> Signal dom Bool -> Signal dom (Vec 4 (Tag, Bool))
+outputStream3 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut3 
+    -> Signal dom Tag 
+    -> Signal dom Bool 
+    -> Signal dom Bool 
+    -> Signal dom Bool 
+    -> Signal dom Bool 
+    -> Signal dom (Vec 4 (Tag, Bool))
 outputStream3 en tag out1_00 out2_01 out2_10 out1_11 = result
     where
-        result = register (repeat (invalidTag, False)) (mux (getPacing <$> en) next result)
+        result = register (repeat (invalidTag, False)) 
+                (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = ((out1_00 .&&. out2_01) .||. (out2_10 .&&. out1_11))
 
 
-outputStream4 :: HiddenClockResetEnable dom => Signal dom PacingOut4 -> Signal dom Tag -> Signal dom (Vec 101 Int) -> Signal dom (Vec 2 (Tag, Int))
+outputStream4 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut4 
+    -> Signal dom Tag 
+    -> Signal dom (Vec 101 Int) 
+    -> Signal dom (Vec 2 (Tag, Int))
 outputStream4 en tag sw0 = result
     where
-        result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
+        result = register (repeat (invalidTag, 0)) 
+                (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (merge0 <$> sw0)
@@ -766,28 +1053,44 @@ outputStream4 en tag sw0 = result
         merge0 win = fold windowFunc2 (tail win)
 
 
-outputStream5 :: HiddenClockResetEnable dom => Signal dom PacingOut5 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Bool)
+outputStream5 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut5 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Bool)
 outputStream5 en tag out4_0 = result
     where
-        result = register (invalidTag, False) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, False) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out4_0 .>. (5))
 
 
-outputStream6 :: HiddenClockResetEnable dom => Signal dom PacingOut6 -> Signal dom Tag -> Signal dom (Vec 111 Int) -> Signal dom (Tag, Bool)
+outputStream6 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut6 
+    -> Signal dom Tag 
+    -> Signal dom (Vec 111 Int) 
+    -> Signal dom (Tag, Bool)
 outputStream6 en tag sw1 = result
     where
-        result = register (invalidTag, False) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, False) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = ((merge1 <$> sw1) .<. (1))
         merge1 :: Vec 111 Int -> Int
         merge1 win = fold windowFunc2 (tail win)
 
 
-outputStream7 :: HiddenClockResetEnable dom => Signal dom PacingOut7 -> Signal dom Tag -> Signal dom (Vec 2 Int) -> Signal dom (Vec 2 Int) -> Signal dom (Tag, Bool)
+outputStream7 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut7 
+    -> Signal dom Tag 
+    -> Signal dom (Vec 2 Int) 
+    -> Signal dom (Vec 2 Int) 
+    -> Signal dom (Tag, Bool)
 outputStream7 en tag sw2 sw3 = result
     where
-        result = register (invalidTag, False) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, False) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (((merge2 <$> sw2) .<. (15)) .&&. ((merge3 <$> sw3) .>=. (10)))
         merge2 :: Vec 2 Int -> Int
@@ -796,10 +1099,16 @@ outputStream7 en tag sw2 sw3 = result
         merge3 win = fold windowFunc2 (tail win)
 
 
-outputStream8 :: HiddenClockResetEnable dom => Signal dom PacingOut8 -> Signal dom Tag -> Signal dom (Vec 2 Int) -> Signal dom (Vec 2 Int) -> Signal dom (Tag, Bool)
+outputStream8 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut8 
+    -> Signal dom Tag 
+    -> Signal dom (Vec 2 Int) 
+    -> Signal dom (Vec 2 Int) 
+    -> Signal dom (Tag, Bool)
 outputStream8 en tag sw4 sw5 = result
     where
-        result = register (invalidTag, False) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, False) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (((merge4 <$> sw4) .<. (10)) .&&. ((merge5 <$> sw5) .>=. (5)))
         merge4 :: Vec 2 Int -> Int
@@ -808,20 +1117,30 @@ outputStream8 en tag sw4 sw5 = result
         merge5 win = fold windowFunc2 (tail win)
 
 
-outputStream9 :: HiddenClockResetEnable dom => Signal dom PacingOut9 -> Signal dom Tag -> Signal dom (Vec 2 Int) -> Signal dom (Tag, Bool)
+outputStream9 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut9 
+    -> Signal dom Tag 
+    -> Signal dom (Vec 2 Int) 
+    -> Signal dom (Tag, Bool)
 outputStream9 en tag sw6 = result
     where
-        result = register (invalidTag, False) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, False) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = ((merge6 <$> sw6) .<. (5))
         merge6 :: Vec 2 Int -> Int
         merge6 win = fold windowFunc2 (tail win)
 
 
-outputStream10 :: HiddenClockResetEnable dom => Signal dom PacingOut10 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Bool)
+outputStream10 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut10 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Bool)
 outputStream10 en tag in1_0 = result
     where
-        result = register (invalidTag, False) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, False) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (in1_0 .<. (6))
 
@@ -837,15 +1156,25 @@ windowFunc2 :: Int -> Int -> Int
 windowFunc2 acc item = acc + item
 
 
-slidingWindow0 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Bool -> Signal dom Tag -> Signal dom Bool -> Signal dom (Tag, (Vec 101 Int)) 
+slidingWindow0 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut3 
+    -> Signal dom Bool 
+    -> Signal dom Tag 
+    -> Signal dom Bool 
+    -> Signal dom (Tag, (Vec 101 Int)) 
 slidingWindow0 newData slide tag inpt = window
     where
         window = register (invalidTag, dflt) (mux en next window)
-        next = bundle (tag, nextWindow <$> (snd <$> window) <*> slide <*> (getPacing <$> newData) <*> inpt)
+        next = bundle (tag, nextWindow <$> (snd <$> window) 
+                <*> slide <*> (getPacing <$> newData) <*> inpt)
         en = (getPacing <$> newData) .||. slide
         dflt = repeat 0 :: Vec 101 Int
 
-        nextWindow :: Vec 101 Int -> Bool -> Bool -> Bool -> Vec 101 Int
+        nextWindow :: Vec 101 Int 
+            -> Bool 
+            -> Bool 
+            -> Bool 
+            -> Vec 101 Int
         nextWindow win toSlide newData dta = out
             where
                 out = case (toSlide, newData) of
@@ -853,17 +1182,28 @@ slidingWindow0 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowFunc0 (head win) dta) win
+                lastBucketUpdated = 
+                    replace 0 (windowFunc0 (head win) dta) win
 
-slidingWindow1 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 111 Int)) 
+slidingWindow1 :: HiddenClockResetEnable dom 
+    => Signal dom PacingIn2 
+    -> Signal dom Bool 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, (Vec 111 Int)) 
 slidingWindow1 newData slide tag inpt = window
     where
         window = register (invalidTag, dflt) (mux en next window)
-        next = bundle (tag, nextWindow <$> (snd <$> window) <*> slide <*> (getPacing <$> newData) <*> inpt)
+        next = bundle (tag, nextWindow <$> (snd <$> window) 
+                <*> slide <*> (getPacing <$> newData) <*> inpt)
         en = (getPacing <$> newData) .||. slide
         dflt = repeat 0 :: Vec 111 Int
 
-        nextWindow :: Vec 111 Int -> Bool -> Bool -> Int -> Vec 111 Int
+        nextWindow :: Vec 111 Int 
+            -> Bool 
+            -> Bool 
+            -> Int 
+            -> Vec 111 Int
         nextWindow win toSlide newData dta = out
             where
                 out = case (toSlide, newData) of
@@ -871,17 +1211,28 @@ slidingWindow1 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
+                lastBucketUpdated = 
+                    replace 0 (windowFunc1 (head win) dta) win
 
-slidingWindow2 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
+slidingWindow2 :: HiddenClockResetEnable dom 
+    => Signal dom PacingIn2 
+    -> Signal dom Bool 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, (Vec 2 Int)) 
 slidingWindow2 newData slide tag inpt = window
     where
         window = register (invalidTag, dflt) (mux en next window)
-        next = bundle (tag, nextWindow <$> (snd <$> window) <*> slide <*> (getPacing <$> newData) <*> inpt)
+        next = bundle (tag, nextWindow <$> (snd <$> window) 
+                <*> slide <*> (getPacing <$> newData) <*> inpt)
         en = (getPacing <$> newData) .||. slide
         dflt = repeat 0 :: Vec 2 Int
 
-        nextWindow :: Vec 2 Int -> Bool -> Bool -> Int -> Vec 2 Int
+        nextWindow :: Vec 2 Int 
+            -> Bool 
+            -> Bool 
+            -> Int 
+            -> Vec 2 Int
         nextWindow win toSlide newData dta = out
             where
                 out = case (toSlide, newData) of
@@ -889,17 +1240,28 @@ slidingWindow2 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
+                lastBucketUpdated = 
+                    replace 0 (windowFunc1 (head win) dta) win
 
-slidingWindow3 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
+slidingWindow3 :: HiddenClockResetEnable dom 
+    => Signal dom PacingIn2 
+    -> Signal dom Bool 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, (Vec 2 Int)) 
 slidingWindow3 newData slide tag inpt = window
     where
         window = register (invalidTag, dflt) (mux en next window)
-        next = bundle (tag, nextWindow <$> (snd <$> window) <*> slide <*> (getPacing <$> newData) <*> inpt)
+        next = bundle (tag, nextWindow <$> (snd <$> window) 
+                <*> slide <*> (getPacing <$> newData) <*> inpt)
         en = (getPacing <$> newData) .||. slide
         dflt = repeat 0 :: Vec 2 Int
 
-        nextWindow :: Vec 2 Int -> Bool -> Bool -> Int -> Vec 2 Int
+        nextWindow :: Vec 2 Int 
+            -> Bool 
+            -> Bool 
+            -> Int 
+            -> Vec 2 Int
         nextWindow win toSlide newData dta = out
             where
                 out = case (toSlide, newData) of
@@ -907,17 +1269,28 @@ slidingWindow3 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
+                lastBucketUpdated = 
+                    replace 0 (windowFunc1 (head win) dta) win
 
-slidingWindow4 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
+slidingWindow4 :: HiddenClockResetEnable dom 
+    => Signal dom PacingIn2 
+    -> Signal dom Bool 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, (Vec 2 Int)) 
 slidingWindow4 newData slide tag inpt = window
     where
         window = register (invalidTag, dflt) (mux en next window)
-        next = bundle (tag, nextWindow <$> (snd <$> window) <*> slide <*> (getPacing <$> newData) <*> inpt)
+        next = bundle (tag, nextWindow <$> (snd <$> window) 
+                <*> slide <*> (getPacing <$> newData) <*> inpt)
         en = (getPacing <$> newData) .||. slide
         dflt = repeat 0 :: Vec 2 Int
 
-        nextWindow :: Vec 2 Int -> Bool -> Bool -> Int -> Vec 2 Int
+        nextWindow :: Vec 2 Int 
+            -> Bool 
+            -> Bool 
+            -> Int 
+            -> Vec 2 Int
         nextWindow win toSlide newData dta = out
             where
                 out = case (toSlide, newData) of
@@ -925,17 +1298,28 @@ slidingWindow4 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
+                lastBucketUpdated = 
+                    replace 0 (windowFunc1 (head win) dta) win
 
-slidingWindow5 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
+slidingWindow5 :: HiddenClockResetEnable dom 
+    => Signal dom PacingIn2 
+    -> Signal dom Bool 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, (Vec 2 Int)) 
 slidingWindow5 newData slide tag inpt = window
     where
         window = register (invalidTag, dflt) (mux en next window)
-        next = bundle (tag, nextWindow <$> (snd <$> window) <*> slide <*> (getPacing <$> newData) <*> inpt)
+        next = bundle (tag, nextWindow <$> (snd <$> window) 
+                <*> slide <*> (getPacing <$> newData) <*> inpt)
         en = (getPacing <$> newData) .||. slide
         dflt = repeat 0 :: Vec 2 Int
 
-        nextWindow :: Vec 2 Int -> Bool -> Bool -> Int -> Vec 2 Int
+        nextWindow :: Vec 2 Int 
+            -> Bool 
+            -> Bool 
+            -> Int 
+            -> Vec 2 Int
         nextWindow win toSlide newData dta = out
             where
                 out = case (toSlide, newData) of
@@ -943,17 +1327,28 @@ slidingWindow5 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
+                lastBucketUpdated = 
+                    replace 0 (windowFunc1 (head win) dta) win
 
-slidingWindow6 :: HiddenClockResetEnable dom => Signal dom PacingIn2 -> Signal dom Bool -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, (Vec 2 Int)) 
+slidingWindow6 :: HiddenClockResetEnable dom 
+    => Signal dom PacingIn2 
+    -> Signal dom Bool 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, (Vec 2 Int)) 
 slidingWindow6 newData slide tag inpt = window
     where
         window = register (invalidTag, dflt) (mux en next window)
-        next = bundle (tag, nextWindow <$> (snd <$> window) <*> slide <*> (getPacing <$> newData) <*> inpt)
+        next = bundle (tag, nextWindow <$> (snd <$> window) 
+                <*> slide <*> (getPacing <$> newData) <*> inpt)
         en = (getPacing <$> newData) .||. slide
         dflt = repeat 0 :: Vec 2 Int
 
-        nextWindow :: Vec 2 Int -> Bool -> Bool -> Int -> Vec 2 Int
+        nextWindow :: Vec 2 Int 
+            -> Bool 
+            -> Bool 
+            -> Int 
+            -> Vec 2 Int
         nextWindow win toSlide newData dta = out
             where
                 out = case (toSlide, newData) of
@@ -961,19 +1356,23 @@ slidingWindow6 newData slide tag inpt = window
                     (False, True) -> lastBucketUpdated
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
-                lastBucketUpdated = replace 0 (windowFunc1 (head win) dta) win
+                lastBucketUpdated = 
+                    replace 0 (windowFunc1 (head win) dta) win
 
 
 
 
 ---------------------------------------------------------------
 
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs ->Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
+monitor :: HiddenClockResetEnable dom 
+    => Signal dom Inputs 
+    -> Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
 monitor inputs = bundle (outputs, debugSignals)
     where 
         (newEvent, event) = unbundle (hlc inputs)
 
-        (qPushValid, qPopValid, qPopData) = unbundle (queue (bundle (qPush, qPop, qInptData)))
+        (qPushValid, qPopValid, qPopData) = 
+            unbundle (queue (bundle (qPush, qPop, qInptData)))
         qPush = newEvent
         qPop = toPop
         qInptData = event
@@ -987,6 +1386,10 @@ monitor inputs = bundle (outputs, debugSignals)
 
 ---------------------------------------------------------------
 
-topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
-topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en
+topEntity :: Clock TestDomain 
+    -> Reset TestDomain 
+    -> Enable TestDomain 
+    -> Signal TestDomain Inputs 
+    -> Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
+topEntity clk rst en inputs = 
+    exposeClockResetEnable (monitor inputs) clk rst en

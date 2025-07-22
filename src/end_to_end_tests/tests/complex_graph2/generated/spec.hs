@@ -29,38 +29,44 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
+--------------------
 -- x, l
 -- a, d, h, m
--- b, f, e, i, j, n
+-- b, f, e, j, i, n
 -- c, g, k
 
 -- Memory Window
--- window i = 1
--- window h = 1
--- window g = 1
+-----------------
 -- window x = 1
--- window b = 1
--- window m = 1
--- window e = 1
--- window f = 1
+-- window i = 1
 -- window k = 1
--- window a = 1
+-- window b = 1
 -- window c = 1
--- window j = 1
 -- window l = 2
 -- window d = 1
+-- window f = 1
+-- window j = 1
+-- window g = 1
+-- window m = 1
+-- window a = 1
+-- window h = 1
 -- window n = 1
+-- window e = 1
 
 -- Pipeline Visualization
+--------------------------
+
 -- x,l         |             |             | x,l         |             |             | x,l         |             |             | x,l        
 -- -----------------------------------------------------------------------------------------------------------------------------------------
 --             | a,d,h,m     |             |             | a,d,h,m     |             |             | a,d,h,m     |             |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
---             |             | b,f,e,i,j,n |             |             | b,f,e,i,j,n |             |             | b,f,e,i,j,n |            
+--             |             | b,f,e,j,i,n |             |             | b,f,e,j,i,n |             |             | b,f,e,j,i,n |            
 -- -----------------------------------------------------------------------------------------------------------------------------------------
 --             |             |             | c,g,k       |             |             | c,g,k       |             |             | c,g,k      
 -- -----------------------------------------------------------------------------------------------------------------------------------------
 
+-- Nicknames
+-------------
 -- input0 = x
 -- output0 = a
 -- output1 = b
@@ -187,7 +193,22 @@ type Event = (Inputs, Pacings)
 nullEvent :: Event
 nullEvent = (nullInputs, nullPacings)
 nullInputs = Inputs (ValidInt 0 False) 
-nullPacings = Pacings nullPacingIn0 nullPacingOut0 nullPacingOut1 nullPacingOut2 nullPacingOut3 nullPacingOut4 nullPacingOut5 nullPacingOut6 nullPacingOut7 nullPacingOut8 nullPacingOut9 nullPacingOut10 nullPacingOut11 nullPacingOut12 nullPacingOut13 
+nullPacings = Pacings 
+                nullPacingIn0
+                nullPacingOut0
+                nullPacingOut1
+                nullPacingOut2
+                nullPacingOut3
+                nullPacingOut4
+                nullPacingOut5
+                nullPacingOut6
+                nullPacingOut7
+                nullPacingOut8
+                nullPacingOut9
+                nullPacingOut10
+                nullPacingOut11
+                nullPacingOut12
+                nullPacingOut13
 nullPacingIn0 = PacingIn0 False
 nullPacingOut0 = PacingOut0 nullPacingIn0 
 nullPacingOut1 = PacingOut1 nullPacingIn0 
@@ -221,10 +242,11 @@ type QState = (QMem, QCursor)
 type QInput = (QPush, QPop, QData)
 type QOutput = (QPushValid, QPopValid, QData)
 
-queue :: HiddenClockResetEnable dom => Signal dom QInput -> Signal dom QOutput
+queue :: HiddenClockResetEnable dom 
+    => Signal dom QInput 
+    -> Signal dom QOutput
 queue input = output
     where 
-        -- keeping in registers to avoid any combinational output
         output = bundle (pushValid, popValid, outData)
         state = bundle (buffer, cursor)
         buffer = register (repeat nullEvent :: QMem) nextBufferSignal
@@ -233,10 +255,16 @@ queue input = output
         popValid = register False nextPopValidSignal
         outData = register nullEvent nextOutDataSignal
 
-        nextBufferSignal = nextBuffer <$> buffer <*> bundle (input, cursor)
-        nextCursorSignal = nextCursor <$> cursor <*> bundle (input, buffer)
-        nextOutDataSignal = nextOutData <$> bundle (input, cursor, buffer)
-        nextPushValidSignal = nextPushValid <$> bundle (input, cursor, buffer)
+        nextBufferSignal = nextBuffer  
+                            <$> buffer 
+                            <*> bundle (input, cursor)
+        nextCursorSignal = nextCursor 
+                            <$> cursor 
+                            <*> bundle (input, buffer)
+        nextOutDataSignal = nextOutData 
+                            <$> bundle (input, cursor, buffer)
+        nextPushValidSignal = nextPushValid 
+                            <$> bundle (input, cursor, buffer)
         nextPopValidSignal = nextPopValid <$> bundle (input, cursor)
         
         nextBuffer :: QMem -> (QInput, QCursor) -> QMem
@@ -244,14 +272,16 @@ queue input = output
             where 
                 out = case (push, pop) of
                     (True, True) -> qData +>> buf 
-                    (True, False) -> if cur == length buf then buf else qData +>> buf
+                    (True, False) -> if cur == length buf 
+                                    then buf else qData +>> buf
                     (False, _) -> buf
 
         nextCursor :: QCursor -> (QInput, QMem) -> QCursor
         nextCursor cur ((push, pop, _), buf) = out
             where 
                 out = case (push, pop) of
-                    (True, False) -> if cur == length buf then cur else cur + 1
+                    (True, False) -> if cur == length buf 
+                                    then cur else cur + 1
                     (False, True) -> if cur == 0 then 0 else cur - 1
                     (_, _) -> cur
 
@@ -259,8 +289,10 @@ queue input = output
         nextOutData ((push, pop, qData), cur, buf) = out
             where 
                 out = case (push, pop) of
-                    (True, True) -> if cur == 0 then qData else buf !! (cur - 1)
-                    (False, True) -> if cur == 0 then nullEvent else buf !! (cur - 1)
+                    (True, True) -> if cur == 0 
+                                    then qData else buf !! (cur - 1)
+                    (False, True) -> if cur == 0 
+                                    then nullEvent else buf !! (cur - 1)
                     (_, _) -> nullEvent
 
         nextPushValid :: (QInput, QCursor, QMem) -> QPush
@@ -283,14 +315,19 @@ queue input = output
 ---------------------------------------------------------------
 
 -- Clock domain with 2 microseconds period (500 kHz)
--- It has been arbitrarily chosen for both monitor and the verilog testbench simulation
-createDomain vSystem{vName="TestDomain", vPeriod=2000} -- period in nanoseconds
+-- It has been arbitrarily chosen for both monitor 
+--  and the verilog testbench simulation
+createDomain vSystem{vName="TestDomain", vPeriod=2000} 
+-- period in nanoseconds
 
 systemClockPeriodNs :: Int
-systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @TestDomain)
+systemClockPeriodNs = fromInteger  
+    (snatToInteger $ clockPeriod @TestDomain)
 
 
-hlc :: HiddenClockResetEnable dom => Signal dom Inputs -> Signal dom (Bool, Event)
+hlc :: HiddenClockResetEnable dom 
+    => Signal dom Inputs 
+    -> Signal dom (Bool, Event)
 hlc inputs = out
     where 
         out = bundle (newEvent, event)
@@ -298,7 +335,21 @@ hlc inputs = out
 
         event = bundle (inputs, pacings)
 
-        pacings = Pacings <$> pIn0 <*> pOut0 <*> pOut1 <*> pOut2 <*> pOut3 <*> pOut4 <*> pOut5 <*> pOut6 <*> pOut7 <*> pOut8 <*> pOut9 <*> pOut10 <*> pOut11 <*> pOut12 <*> pOut13
+        pacings = Pacings <$> pIn0 
+                    <*> pOut0 
+                    <*> pOut1 
+                    <*> pOut2 
+                    <*> pOut3 
+                    <*> pOut4 
+                    <*> pOut5 
+                    <*> pOut6 
+                    <*> pOut7 
+                    <*> pOut8 
+                    <*> pOut9 
+                    <*> pOut10 
+                    <*> pOut11 
+                    <*> pOut12 
+                    <*> pOut13
 
         hasInput0 = ((.valid). (.input0)) <$> inputs
 
@@ -323,7 +374,9 @@ hlc inputs = out
         timer0 = timer timer0Over
         period0InNs = 1000000
 
-        timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
+        timer :: HiddenClockResetEnable dom 
+            => Signal dom Bool 
+            -> Signal dom Int
         timer reset = register 0 (mux reset (pure deltaTime) nextTime)
             where 
                 nextTime = timer reset + pure deltaTime
@@ -332,8 +385,10 @@ hlc inputs = out
 
 ---------------------------------------------------------------
 
--- maxTag must be at least the size of the maximum window to avoid duplicate tags in the window
--- also to avoid having to do modulo operations maxTag must be at least as big as the largest offset
+-- To avoid duplidate tags in a window 
+-- maxTag must be at least the size of the maximum window 
+-- Also to avoid having to do modulo operations 
+-- maxTag must be at least as big as the largest offset
 maxTag = 3 :: Tag
 invalidTag = maxTag + 1
 
@@ -359,33 +414,46 @@ getOffsetFromNonVec (winTag, winData) tag offset dflt = out
         out = if offsetTag == winTag then winData else dflt
 
 getMatchingTagFromNonVec :: (Tag, a) -> Tag -> a -> a
-getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = if tag == tagToMatch then dta else dflt
+getMatchingTagFromNonVec (tag, dta) tagToMatch dflt = 
+    if tag == tagToMatch then dta else dflt
 
 getLatestValue :: KnownNat n => Vec (n + 1) (Tag, a) -> a -> a
 getLatestValue win dflt =
-  let (tag, dta) = last win
-  in if tag == invalidTag then dflt else dta
+    let (tag, dta) = last win
+    in if tag == invalidTag then dflt else dta
 
 getLatestValueFromNonVec :: (Tag, a) -> a -> a
-getLatestValueFromNonVec (tag, dta) dflt = if tag == invalidTag then dflt else dta
+getLatestValueFromNonVec (tag, dta) dflt = 
+    if tag == invalidTag then dflt else dta
 
 earlierTag :: Tag -> Tag -> Tag
-earlierTag curTag cyclesBefore = if curTag > cyclesBefore then curTag - cyclesBefore else curTag - cyclesBefore + maxTag
+earlierTag curTag cyclesBefore = 
+    if curTag > cyclesBefore 
+    then curTag - cyclesBefore 
+    else curTag - cyclesBefore + maxTag
 
-delayFor :: forall dom n a . (HiddenClockResetEnable dom, KnownNat n, NFDataX a) => SNat n -> a -> Signal dom a -> Signal dom a
+delayFor :: forall dom n a . 
+    (HiddenClockResetEnable dom, KnownNat n, NFDataX a)
+    => SNat n
+    -> a
+    -> Signal dom a
+    -> Signal dom a
 delayFor n initVal sig = last delayedVec
     where
-      delayedVec :: Vec (n + 1) (Signal dom a)
-      delayedVec = iterateI (delay initVal) sig
-     
+        delayedVec :: Vec (n + 1) (Signal dom a)
+        delayedVec = iterateI (delay initVal) sig
+    
 
-llc :: HiddenClockResetEnable dom => Signal dom (Bool, Event) -> Signal dom (Bool, Outputs)
+llc :: HiddenClockResetEnable dom 
+    => Signal dom (Bool, Event) 
+    -> Signal dom (Bool, Outputs)
 llc event = bundle (toPop, outputs)
     where 
         (isValidEvent, poppedEvent) = unbundle event
 
         isPipelineReady = pipelineReady startNewPipeline
-        startNewPipeline = mux (isPipelineReady .&&. isValidEvent) (pure True) (pure False)
+        startNewPipeline = mux (isPipelineReady .&&. isValidEvent) 
+                            (pure True) (pure False)
         toPop = isPipelineReady .&&. not <$> startNewPipeline
 
         (inputs, pacings) = unbundle poppedEvent
@@ -418,19 +486,49 @@ llc event = bundle (toPop, outputs)
         tOut1 = genTag (getPacing <$> pOut1)
         tOut5 = genTag (getPacing <$> pOut5)
         tOut4 = genTag (getPacing <$> pOut4)
-        tOut8 = genTag (getPacing <$> pOut8)
         tOut9 = genTag (getPacing <$> pOut9)
+        tOut8 = genTag (getPacing <$> pOut8)
         tOut13 = genTag (getPacing <$> pOut13)
         tOut2 = genTag (getPacing <$> pOut2)
         tOut6 = genTag (getPacing <$> pOut6)
         tOut10 = genTag (getPacing <$> pOut10)
 
-        -- tag generation takes 1 cycle so we need to delay the input data
+        -- tag generation takes 1 cycle so we need to delay the input
         input0Data = delay 0 (((.value). (.input0)) <$> inputs)
 
         -- delayed tags to be used in different levels 
-        tagsDefault = Tags nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT nullT 
-        curTags = Tags <$> tIn0 <*> tOut0 <*> tOut1 <*> tOut2 <*> tOut3 <*> tOut4 <*> tOut5 <*> tOut6 <*> tOut7 <*> tOut8 <*> tOut9 <*> tOut10 <*> tOut11 <*> tOut12 <*> tOut13
+        tagsDefault = Tags 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+                nullT 
+        curTags = Tags 
+                <$> tIn0 
+                <*> tOut0 
+                <*> tOut1 
+                <*> tOut2 
+                <*> tOut3 
+                <*> tOut4 
+                <*> tOut5 
+                <*> tOut6 
+                <*> tOut7 
+                <*> tOut8 
+                <*> tOut9 
+                <*> tOut10 
+                <*> tOut11 
+                <*> tOut12 
+                <*> tOut13
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags
@@ -446,8 +544,8 @@ llc event = bundle (toPop, outputs)
         enOut1 = delayFor d3 nullPacingOut1 pOut1
         enOut5 = delayFor d3 nullPacingOut5 pOut5
         enOut4 = delayFor d3 nullPacingOut4 pOut4
-        enOut8 = delayFor d3 nullPacingOut8 pOut8
         enOut9 = delayFor d3 nullPacingOut9 pOut9
+        enOut8 = delayFor d3 nullPacingOut8 pOut8
         enOut13 = delayFor d3 nullPacingOut13 pOut13
         enOut2 = delayFor d4 nullPacingOut2 pOut2
         enOut6 = delayFor d4 nullPacingOut6 pOut6
@@ -472,76 +570,181 @@ llc event = bundle (toPop, outputs)
         input0Win = input0Window enIn0 tIn0 input0Data
 
         -- Evaluation of output 0: level 1
-        out0 = outputStream0 enOut0 ((.output0) <$> curTagsLevel1) out0Data0 out0Data1 
-        out0Data0 = getMatchingTagFromNonVec <$> input0Win <*> ((.input0) <$> curTagsLevel1) <*> (pure (0))
-        out0Data1 = getOffsetFromNonVec <$> out2 <*> ((.output2) <$> curTagsLevel1) <*> (pure 1) <*> out0Data1Dflt
+        out0 = outputStream0 enOut0 
+            ((.output0) <$> curTagsLevel1) 
+            out0Data0 
+            out0Data1 
+        out0Data0 = getMatchingTagFromNonVec 
+            <$> input0Win 
+            <*> ((.input0) <$> curTagsLevel1) 
+            <*> (pure (0))
+        out0Data1 = getOffsetFromNonVec 
+            <$> out2 
+            <*> ((.output2) <$> curTagsLevel1) 
+            <*> (pure 1) 
+            <*> out0Data1Dflt
         out0Data1Dflt = pure (0)
 
         -- Evaluation of output 1: level 2
-        out1 = outputStream1 enOut1 ((.output1) <$> curTagsLevel2) out1Data0 out1Data1 
-        out1Data0 = getMatchingTagFromNonVec <$> input0Win <*> ((.input0) <$> curTagsLevel2) <*> (pure (0))
-        out1Data1 = getMatchingTagFromNonVec <$> out0 <*> ((.output0) <$> curTagsLevel2) <*> (pure (0))
+        out1 = outputStream1 enOut1 
+            ((.output1) <$> curTagsLevel2) 
+            out1Data0 
+            out1Data1 
+        out1Data0 = getMatchingTagFromNonVec 
+            <$> input0Win 
+            <*> ((.input0) <$> curTagsLevel2) 
+            <*> (pure (0))
+        out1Data1 = getMatchingTagFromNonVec 
+            <$> out0 
+            <*> ((.output0) <$> curTagsLevel2) 
+            <*> (pure (0))
 
         -- Evaluation of output 2: level 3
-        out2 = outputStream2 enOut2 ((.output2) <$> curTagsLevel3) out2Data0 out2Data1 
-        out2Data0 = getMatchingTagFromNonVec <$> out1 <*> ((.output1) <$> curTagsLevel3) <*> (pure (0))
-        out2Data1 = getOffsetFromNonVec <$> out10 <*> ((.output10) <$> curTagsLevel3) <*> (pure 1) <*> out2Data1Dflt
+        out2 = outputStream2 enOut2 
+            ((.output2) <$> curTagsLevel3) 
+            out2Data0 
+            out2Data1 
+        out2Data0 = getMatchingTagFromNonVec 
+            <$> out1 
+            <*> ((.output1) <$> curTagsLevel3) 
+            <*> (pure (0))
+        out2Data1 = getOffsetFromNonVec 
+            <$> out10 
+            <*> ((.output10) <$> curTagsLevel3) 
+            <*> (pure 1) 
+            <*> out2Data1Dflt
         out2Data1Dflt = pure (-1)
 
         -- Evaluation of output 3: level 1
-        out3 = outputStream3 enOut3 ((.output3) <$> curTagsLevel1) out3Data0 
-        out3Data0 = getOffsetFromNonVec <$> out2 <*> ((.output2) <$> curTagsLevel1) <*> (pure 1) <*> out3Data0Dflt
+        out3 = outputStream3 enOut3 
+            ((.output3) <$> curTagsLevel1) 
+            out3Data0 
+        out3Data0 = getOffsetFromNonVec 
+            <$> out2 
+            <*> ((.output2) <$> curTagsLevel1) 
+            <*> (pure 1) 
+            <*> out3Data0Dflt
         out3Data0Dflt = pure (0)
 
         -- Evaluation of output 4: level 2
-        out4 = outputStream4 enOut4 ((.output4) <$> curTagsLevel2) out4Data0 
-        out4Data0 = getMatchingTagFromNonVec <$> out3 <*> ((.output3) <$> curTagsLevel2) <*> (pure (0))
+        out4 = outputStream4 enOut4 
+            ((.output4) <$> curTagsLevel2) 
+            out4Data0 
+        out4Data0 = getMatchingTagFromNonVec 
+            <$> out3 
+            <*> ((.output3) <$> curTagsLevel2) 
+            <*> (pure (0))
 
         -- Evaluation of output 5: level 2
-        out5 = outputStream5 enOut5 ((.output5) <$> curTagsLevel2) out5Data0 
-        out5Data0 = getMatchingTagFromNonVec <$> out3 <*> ((.output3) <$> curTagsLevel2) <*> (pure (0))
+        out5 = outputStream5 enOut5 
+            ((.output5) <$> curTagsLevel2) 
+            out5Data0 
+        out5Data0 = getMatchingTagFromNonVec 
+            <$> out3 
+            <*> ((.output3) <$> curTagsLevel2) 
+            <*> (pure (0))
 
         -- Evaluation of output 6: level 3
-        out6 = outputStream6 enOut6 ((.output6) <$> curTagsLevel3) out6Data0 out6Data1 
-        out6Data0 = getMatchingTagFromNonVec <$> out4 <*> ((.output4) <$> curTagsLevel3) <*> (pure (0))
-        out6Data1 = getMatchingTagFromNonVec <$> out5 <*> ((.output5) <$> curTagsLevel3) <*> (pure (0))
+        out6 = outputStream6 enOut6 
+            ((.output6) <$> curTagsLevel3) 
+            out6Data0 
+            out6Data1 
+        out6Data0 = getMatchingTagFromNonVec 
+            <$> out4 
+            <*> ((.output4) <$> curTagsLevel3) 
+            <*> (pure (0))
+        out6Data1 = getMatchingTagFromNonVec 
+            <$> out5 
+            <*> ((.output5) <$> curTagsLevel3) 
+            <*> (pure (0))
 
         -- Evaluation of output 7: level 1
-        out7 = outputStream7 enOut7 ((.output7) <$> curTagsLevel1) out7Data0 out7Data1 
-        out7Data0 = getOffsetFromNonVec <$> out6 <*> ((.output6) <$> curTagsLevel1) <*> (pure 1) <*> out7Data0Dflt
+        out7 = outputStream7 enOut7 
+            ((.output7) <$> curTagsLevel1) 
+            out7Data0 
+            out7Data1 
+        out7Data0 = getOffsetFromNonVec 
+            <$> out6 
+            <*> ((.output6) <$> curTagsLevel1) 
+            <*> (pure 1) 
+            <*> out7Data0Dflt
         out7Data0Dflt = pure (0)
-        out7Data1 = getLatestValueFromNonVec <$> out13 <*> out7Data1Dflt
+        out7Data1 = getLatestValueFromNonVec 
+            <$> out13 
+            <*> out7Data1Dflt
         out7Data1Dflt = pure (0)
 
         -- Evaluation of output 8: level 2
-        out8 = outputStream8 enOut8 ((.output8) <$> curTagsLevel2) out8Data0 
-        out8Data0 = getMatchingTagFromNonVec <$> out7 <*> ((.output7) <$> curTagsLevel2) <*> (pure (0))
+        out8 = outputStream8 enOut8 
+            ((.output8) <$> curTagsLevel2) 
+            out8Data0 
+        out8Data0 = getMatchingTagFromNonVec 
+            <$> out7 
+            <*> ((.output7) <$> curTagsLevel2) 
+            <*> (pure (0))
 
         -- Evaluation of output 9: level 2
-        out9 = outputStream9 enOut9 ((.output9) <$> curTagsLevel2) out9Data0 out9Data1 
-        out9Data0 = getOffsetFromNonVec <$> out8 <*> ((.output8) <$> curTagsLevel2) <*> (pure 1) <*> out9Data0Dflt
+        out9 = outputStream9 enOut9 
+            ((.output9) <$> curTagsLevel2) 
+            out9Data0 
+            out9Data1 
+        out9Data0 = getOffsetFromNonVec 
+            <$> out8 
+            <*> ((.output8) <$> curTagsLevel2) 
+            <*> (pure 1) 
+            <*> out9Data0Dflt
         out9Data0Dflt = pure (0)
-        out9Data1 = getOffsetFromNonVec <$> out10 <*> ((.output10) <$> curTagsLevel2) <*> (pure 1) <*> out9Data1Dflt
+        out9Data1 = getOffsetFromNonVec 
+            <$> out10 
+            <*> ((.output10) <$> curTagsLevel2) 
+            <*> (pure 1) 
+            <*> out9Data1Dflt
         out9Data1Dflt = pure (0)
 
         -- Evaluation of output 10: level 3
-        out10 = outputStream10 enOut10 ((.output10) <$> curTagsLevel3) out10Data0 
-        out10Data0 = getMatchingTagFromNonVec <$> out9 <*> ((.output9) <$> curTagsLevel3) <*> (pure (0))
+        out10 = outputStream10 enOut10 
+            ((.output10) <$> curTagsLevel3) 
+            out10Data0 
+        out10Data0 = getMatchingTagFromNonVec 
+            <$> out9 
+            <*> ((.output9) <$> curTagsLevel3) 
+            <*> (pure (0))
 
         -- Evaluation of output 11: level 0
-        out11 = outputStream11 enOut11 tOut11 out11Data0 
-        out11Data0 = getOffset <$> out11 <*> tOut11 <*> (pure 1) <*> out11Data0Dflt
+        out11 = outputStream11 enOut11 
+            tOut11 
+            out11Data0 
+        out11Data0 = getOffset         
+            <$> out11 
+            <*> tOut11 
+            <*> (pure 1) 
+            <*> out11Data0Dflt
         out11Data0Dflt = pure (0)
 
         -- Evaluation of output 12: level 1
-        out12 = outputStream12 enOut12 ((.output12) <$> curTagsLevel1) out12Data0 out12Data1 
-        out12Data0 = getMatchingTag <$> out11 <*> ((.output11) <$> curTagsLevel1) <*> (pure (0))
-        out12Data1 = getOffsetFromNonVec <$> out13 <*> ((.output13) <$> curTagsLevel1) <*> (pure 1) <*> out12Data1Dflt
+        out12 = outputStream12 enOut12 
+            ((.output12) <$> curTagsLevel1) 
+            out12Data0 
+            out12Data1 
+        out12Data0 = getMatchingTag 
+            <$> out11 
+            <*> ((.output11) <$> curTagsLevel1) 
+            <*> (pure (0))
+        out12Data1 = getOffsetFromNonVec 
+            <$> out13 
+            <*> ((.output13) <$> curTagsLevel1) 
+            <*> (pure 1) 
+            <*> out12Data1Dflt
         out12Data1Dflt = pure (0)
 
         -- Evaluation of output 13: level 2
-        out13 = outputStream13 enOut13 ((.output13) <$> curTagsLevel2) out13Data0 
-        out13Data0 = getMatchingTagFromNonVec <$> out12 <*> ((.output12) <$> curTagsLevel2) <*> (pure (0))
+        out13 = outputStream13 enOut13 
+            ((.output13) <$> curTagsLevel2) 
+            out13Data0 
+        out13Data0 = getMatchingTagFromNonVec 
+            <$> out12 
+            <*> ((.output12) <$> curTagsLevel2) 
+            <*> (pure (0))
 
         -- Outputing all results: level 4
         output0 = ValidInt <$> output0Data <*> output0Aktv
@@ -567,146 +770,251 @@ llc event = bundle (toPop, outputs)
         output10 = ValidInt <$> output10Data <*> output10Aktv
         (_, output10Data) = unbundle out10
         output11 = ValidInt <$> output11Data <*> output11Aktv
-        output11Data = getMatchingTag <$> out11 <*> ((.output11) <$> curTagsLevel4) <*> (pure 0)
+        output11Data = getMatchingTag 
+            <$> out11 
+            <*> ((.output11) 
+            <$> curTagsLevel4) 
+            <*> (pure 0)
         output12 = ValidInt <$> output12Data <*> output12Aktv
         (_, output12Data) = unbundle out12
         output13 = ValidInt <$> output13Data <*> output13Aktv
         (_, output13Data) = unbundle out13
 
-        outputs = Outputs <$> output0 <*> output1 <*> output2 <*> output3 <*> output4 <*> output5 <*> output6 <*> output7 <*> output8 <*> output9 <*> output10 <*> output11 <*> output12 <*> output13
+        outputs = Outputs 
+            <$> output0 
+            <*> output1 
+            <*> output2 
+            <*> output3 
+            <*> output4 
+            <*> output5 
+            <*> output6 
+            <*> output7 
+            <*> output8 
+            <*> output9 
+            <*> output10 
+            <*> output11 
+            <*> output12 
+            <*> output13
 
 
-        genTag :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Tag
+        genTag :: HiddenClockResetEnable dom 
+            => Signal dom Bool 
+            -> Signal dom Tag
         genTag en = t
             where 
                 t = register 1 (mux en next_t t)
                 next_t = mux (t .==. (pure maxTag)) (pure 1) (t + 1)
 
 
-pipelineReady :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Bool
+pipelineReady :: HiddenClockResetEnable dom 
+    => Signal dom Bool 
+    -> Signal dom Bool
 pipelineReady rst = toWait .==. pure 0 
     where 
         waitTime = pure 2 :: Signal dom Int
         toWait = register (0 :: Int) next
-        next = mux rst waitTime (mux (toWait .>. pure 0) (toWait - 1) toWait)
+        next = mux rst waitTime 
+                (mux (toWait .>. pure 0) (toWait - 1) toWait)
 
 
 
-input0Window :: HiddenClockResetEnable dom => Signal dom PacingIn0 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+input0Window :: HiddenClockResetEnable dom 
+    => Signal dom PacingIn0 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 input0Window en tag val = result
-    where result = register (invalidTag, 0) (mux (getPacing <$> en) (bundle (tag, val)) result)
+    where result = register (invalidTag, 0) 
+                    (mux (getPacing <$> en) (bundle (tag, val)) result)
 
 
 
-outputStream0 :: HiddenClockResetEnable dom => Signal dom PacingOut0 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream0 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut0 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream0 en tag in0_0 out2_1 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (in0_0 + out2_1)
 
 
-outputStream1 :: HiddenClockResetEnable dom => Signal dom PacingOut1 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream1 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut1 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream1 en tag in0_0 out0_1 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (in0_0 + out0_1)
 
 
-outputStream2 :: HiddenClockResetEnable dom => Signal dom PacingOut2 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream2 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut2 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream2 en tag out1_0 out10_1 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out1_0 + out10_1)
 
 
-outputStream3 :: HiddenClockResetEnable dom => Signal dom PacingOut3 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream3 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut3 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream3 en tag out2_ = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = out2_
 
 
-outputStream4 :: HiddenClockResetEnable dom => Signal dom PacingOut4 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream4 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut4 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream4 en tag out3_0 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out3_0 + (1))
 
 
-outputStream5 :: HiddenClockResetEnable dom => Signal dom PacingOut5 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream5 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut5 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream5 en tag out3_0 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out3_0 + (1))
 
 
-outputStream6 :: HiddenClockResetEnable dom => Signal dom PacingOut6 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream6 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut6 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream6 en tag out4_0 out5_1 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out4_0 + out5_1)
 
 
-outputStream7 :: HiddenClockResetEnable dom => Signal dom PacingOut7 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream7 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut7 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream7 en tag out6_0 out13_1 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out6_0 + out13_1)
 
 
-outputStream8 :: HiddenClockResetEnable dom => Signal dom PacingOut8 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream8 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut8 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream8 en tag out7_0 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out7_0 + (1))
 
 
-outputStream9 :: HiddenClockResetEnable dom => Signal dom PacingOut9 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream9 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut9 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream9 en tag out8_0 out10_1 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out8_0 + out10_1)
 
 
-outputStream10 :: HiddenClockResetEnable dom => Signal dom PacingOut10 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream10 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut10 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream10 en tag out9_0 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out9_0 + (1))
 
 
-outputStream11 :: HiddenClockResetEnable dom => Signal dom PacingOut11 -> Signal dom Tag -> Signal dom Int -> Signal dom (Vec 2 (Tag, Int))
+outputStream11 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut11 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Vec 2 (Tag, Int))
 outputStream11 en tag out11_0 = result
     where
-        result = register (repeat (invalidTag, 0)) (mux (getPacing <$> en) next result)
+        result = register (repeat (invalidTag, 0)) 
+                (mux (getPacing <$> en) next result)
         next = (<<+) <$> result <*> nextValWithTag
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out11_0 + (1))
 
 
-outputStream12 :: HiddenClockResetEnable dom => Signal dom PacingOut12 -> Signal dom Tag -> Signal dom Int -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream12 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut12 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream12 en tag out11_0 out13_1 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out11_0 + out13_1)
 
 
-outputStream13 :: HiddenClockResetEnable dom => Signal dom PacingOut13 -> Signal dom Tag -> Signal dom Int -> Signal dom (Tag, Int)
+outputStream13 :: HiddenClockResetEnable dom 
+    => Signal dom PacingOut13 
+    -> Signal dom Tag 
+    -> Signal dom Int 
+    -> Signal dom (Tag, Int)
 outputStream13 en tag out12_0 = result
     where
-        result = register (invalidTag, 0) (mux (getPacing <$> en) nextValWithTag result)
+        result = register (invalidTag, 0) 
+                (mux (getPacing <$> en) nextValWithTag result)
         nextValWithTag = bundle (tag, nextVal)
         nextVal = (out12_0 + (1))
 
@@ -718,12 +1026,15 @@ outputStream13 en tag out12_0 = result
 
 ---------------------------------------------------------------
 
-monitor :: HiddenClockResetEnable dom => Signal dom Inputs ->Signal dom Outputs
+monitor :: HiddenClockResetEnable dom 
+    => Signal dom Inputs 
+    -> Signal dom Outputs
 monitor inputs = outputs
     where 
         (newEvent, event) = unbundle (hlc inputs)
 
-        (qPushValid, qPopValid, qPopData) = unbundle (queue (bundle (qPush, qPop, qInptData)))
+        (qPushValid, qPopValid, qPopData) = 
+            unbundle (queue (bundle (qPush, qPop, qInptData)))
         qPush = newEvent
         qPop = toPop
         qInptData = event
@@ -733,6 +1044,10 @@ monitor inputs = outputs
 
 ---------------------------------------------------------------
 
-topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    Signal TestDomain Inputs -> Signal TestDomain Outputs
-topEntity clk rst en inputs = exposeClockResetEnable (monitor inputs) clk rst en
+topEntity :: Clock TestDomain 
+    -> Reset TestDomain 
+    -> Enable TestDomain 
+    -> Signal TestDomain Inputs 
+    -> Signal TestDomain Outputs
+topEntity clk rst en inputs = 
+    exposeClockResetEnable (monitor inputs) clk rst en

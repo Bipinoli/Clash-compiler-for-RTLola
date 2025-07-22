@@ -44,248 +44,248 @@ module topEntity
   wire signed [63:0] x_0;
   reg signed [63:0] result_5 = (64'sd0);
   wire [73:0] result_6;
-  // spec.hs:250:1-82
+  // spec.hs:(277,1)-(279,31)
   wire  hasInput0;
-  // spec.hs:250:1-82
+  // spec.hs:(277,1)-(279,31)
   wire  timer0Over;
-  // spec.hs:250:1-82
+  // spec.hs:(277,1)-(279,31)
   wire  timer1Over;
   wire [146:0] result_7;
   wire [7:0] c$app_arg;
   wire  result_8;
   wire [8:0] result_9;
-  // spec.hs:527:1-130
+  // spec.hs:(708,1)-(712,29)
   reg [8:0] result_10 = {8'd23,   1'b0};
-  // spec.hs:527:1-130
+  // spec.hs:(708,1)-(712,29)
   wire  b;
-  // spec.hs:527:1-130
+  // spec.hs:(708,1)-(712,29)
   wire [8:0] t;
   wire [7:0] c$app_arg_0;
   wire  result_11;
-  // spec.hs:517:1-138
+  // spec.hs:(693,1)-(697,28)
   wire signed [63:0] c$t_app_arg;
   wire [71:0] result_12;
-  // spec.hs:517:1-138
+  // spec.hs:(693,1)-(697,28)
   reg [71:0] result_13 = {8'd23,   64'sd0};
-  // spec.hs:517:1-138
+  // spec.hs:(693,1)-(697,28)
   wire  b_0;
-  // spec.hs:517:1-138
+  // spec.hs:(693,1)-(697,28)
   wire [71:0] t_0;
-  // spec.hs:543:1-159
+  // spec.hs:(729,1)-(734,37)
   wire signed [63:0] x_1;
-  // spec.hs:543:1-159
+  // spec.hs:(729,1)-(734,37)
   wire [1343:0] win;
-  // spec.hs:543:1-159
+  // spec.hs:(729,1)-(734,37)
   reg [1351:0] window = {8'd23,   {64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0,
            64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0,
            64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0,   64'sd0}};
   wire [1351:0] result_14;
-  // spec.hs:543:1-159
+  // spec.hs:(729,1)-(734,37)
   wire [1351:0] t_1;
   wire [1343:0] result_15;
-  // spec.hs:543:1-159
+  // spec.hs:(729,1)-(734,37)
   wire [1343:0] c$t_case_alt;
-  // spec.hs:543:1-159
+  // spec.hs:(729,1)-(734,37)
   wire [1343:0] c$t_case_alt_0;
-  // spec.hs:543:1-159
+  // spec.hs:(729,1)-(734,37)
   wire [1343:0] lastBucketUpdated;
-  // spec.hs:543:1-159
+  // spec.hs:(729,1)-(734,37)
   wire  b_1;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [35:0] c$ws_app_arg;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [8:0] c$ws_app_arg_0;
   wire [8:0] c$case_scrut;
   wire [2:0] c$case_scrut_0;
   wire  result_16;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [1:0] i;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [11:0] ws;
   wire [5:0] c$app_arg_1;
   wire  result_17;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire  slides;
   wire [5:0] c$app_arg_2;
   wire  result_18;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [35:0] c$ws_app_arg_1;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [8:0] c$ws_app_arg_2;
   wire [8:0] c$case_scrut_1;
   wire [2:0] c$case_scrut_2;
   wire  result_19;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [1:0] i_0;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [11:0] ws_0;
   wire [7:0] c$app_arg_3;
   wire  result_20;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [47:0] c$ws_app_arg_3;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [11:0] c$ws_app_arg_4;
   wire [8:0] c$case_scrut_3;
   wire [2:0] c$case_scrut_4;
   wire  result_21;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [1:0] i_1;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [14:0] ws_1;
   wire [7:0] c$app_arg_4;
   wire  result_22;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [47:0] c$ws_app_arg_5;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [11:0] c$ws_app_arg_6;
   wire [8:0] c$case_scrut_5;
   wire [2:0] c$case_scrut_6;
   wire  result_23;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [1:0] i_2;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [14:0] ws_2;
   wire [7:0] c$app_arg_5;
   wire  result_24;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [379:0] c$ws_app_arg_7;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [19:0] c$ws_app_arg_8;
   wire [71:0] c$case_scrut_7;
   wire [3:0] c$case_scrut_8;
   wire signed [63:0] result_25;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [2:0] i_3;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [23:0] ws_3;
   wire [7:0] c$app_arg_6;
   wire  result_26;
   wire [26:0] result_27;
-  // spec.hs:508:1-196
+  // spec.hs:(676,1)-(683,37)
   reg [26:0] result_28 = {{8'd23,   1'b0},   {8'd23,   1'b0},   {8'd23,   1'b0}};
-  // spec.hs:508:1-196
+  // spec.hs:(676,1)-(683,37)
   wire  b_2;
-  // spec.hs:508:1-196
+  // spec.hs:(676,1)-(683,37)
   wire [26:0] t_2;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [47:0] c$ws_app_arg_9;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [11:0] c$ws_app_arg_10;
   wire [8:0] c$case_scrut_9;
   wire [2:0] c$case_scrut_10;
   wire  result_29;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [1:0] i_4;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [14:0] ws_4;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [47:0] c$ws_app_arg_11;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [11:0] c$ws_app_arg_12;
   wire [8:0] c$case_scrut_11;
   wire [2:0] c$case_scrut_12;
   wire  result_30;
   wire [7:0] result_31;
   wire [7:0] c$app_arg_7;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [1:0] i_5;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [14:0] ws_5;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [47:0] c$ws_app_arg_13;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [11:0] c$ws_app_arg_14;
   wire [8:0] c$case_scrut_13;
   wire [2:0] c$case_scrut_14;
   wire  result_32;
   wire [7:0] result_33;
   wire [7:0] c$app_arg_8;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [1:0] i_6;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [14:0] ws_6;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [47:0] c$ws_app_arg_15;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [11:0] c$ws_app_arg_16;
   wire [8:0] c$case_scrut_15;
   wire [2:0] c$case_scrut_16;
   wire  result_34;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [1:0] i_7;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [14:0] ws_7;
   wire [35:0] result_35;
-  // spec.hs:499:1-156
+  // spec.hs:(661,1)-(666,37)
   reg [35:0] result_36 = {{8'd23,   1'b0},   {8'd23,   1'b0},   {8'd23,   1'b0},   {8'd23,   1'b0}};
-  // spec.hs:499:1-156
+  // spec.hs:(661,1)-(666,37)
   wire  b_3;
-  // spec.hs:499:1-156
+  // spec.hs:(661,1)-(666,37)
   wire [35:0] t_3;
   wire signed [63:0] x_2;
   wire signed [63:0] y;
   wire [35:0] result_37;
-  // spec.hs:490:1-156
+  // spec.hs:(646,1)-(651,37)
   reg [35:0] result_38 = {{8'd23,   1'b0},   {8'd23,   1'b0},   {8'd23,   1'b0},   {8'd23,   1'b0}};
-  // spec.hs:490:1-156
+  // spec.hs:(646,1)-(651,37)
   wire  b_4;
-  // spec.hs:490:1-156
+  // spec.hs:(646,1)-(651,37)
   wire [35:0] t_4;
   wire signed [63:0] x_3;
   wire signed [63:0] y_0;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [379:0] c$ws_app_arg_17;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [19:0] c$ws_app_arg_18;
   wire [71:0] c$case_scrut_17;
   wire [3:0] c$case_scrut_18;
   wire signed [63:0] result_39;
   wire [7:0] result_40;
   wire [7:0] c$app_arg_9;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [2:0] i_8;
-  // spec.hs:294:1-65
+  // spec.hs:333:1-65
   wire [23:0] ws_8;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [379:0] c$ws_app_arg_19;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [19:0] c$ws_app_arg_20;
   wire [71:0] c$case_scrut_19;
   wire [3:0] c$case_scrut_20;
   wire signed [63:0] result_41;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [2:0] i_9;
-  // spec.hs:302:1-63
+  // spec.hs:341:1-63
   wire [23:0] ws_9;
   wire [359:0] result_42;
-  // spec.hs:481:1-137
+  // spec.hs:(632,1)-(636,36)
   reg [359:0] result_43 = {{8'd23,   64'sd0},   {8'd23,   64'sd0},   {8'd23,   64'sd0},   {8'd23,
                                                                  64'sd0},
  {8'd23,   64'sd0}};
-  // spec.hs:481:1-137
+  // spec.hs:(632,1)-(636,36)
   wire  b_5;
-  // spec.hs:481:1-137
+  // spec.hs:(632,1)-(636,36)
   wire [359:0] t_5;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire signed [63:0] c$out0_case_alt;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire signed [63:0] dta;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire [7:0] tag;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire [71:0] c$out0_case_scrut;
   wire [127:0] c$app_arg_10;
   wire [63:0] result_44;
   wire [359:0] result_45;
-  // spec.hs:475:1-135
+  // spec.hs:(619,1)-(623,36)
   reg [359:0] result_46 = {{8'd23,   64'sd0},   {8'd23,   64'sd0},   {8'd23,   64'sd0},   {8'd23,
                                                                  64'sd0},
  {8'd23,   64'sd0}};
-  // spec.hs:475:1-135
+  // spec.hs:(619,1)-(623,36)
   wire  b_6;
-  // spec.hs:475:1-135
+  // spec.hs:(619,1)-(623,36)
   wire [359:0] t_6;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   reg signed [63:0] c$input0Win_app_arg = (64'sd0);
   wire [6:0] c$app_arg_11;
   wire  result_47;
@@ -299,89 +299,89 @@ module topEntity
   wire [63:0] result_51;
   wire [191:0] c$app_arg_16;
   wire [63:0] result_52;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   reg [7:0] t_7 = 8'd1;
   wire [7:0] result_53;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire  b_7;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire [7:0] f1;
   wire [7:0] result_54;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire  pOut5;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   reg [7:0] t_8 = 8'd1;
   wire [7:0] result_55;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire  b_8;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire [7:0] f1_0;
   wire [7:0] result_56;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   reg [7:0] t_9 = 8'd1;
   wire [7:0] result_57;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire  b_9;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire [7:0] f1_1;
   wire [7:0] result_58;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   reg [7:0] t_10 = 8'd1;
   wire [7:0] result_59;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire  b_10;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire [7:0] f1_2;
   wire [7:0] result_60;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   reg [7:0] t_11 = 8'd1;
   wire [7:0] result_61;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire  b_11;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire [7:0] f1_3;
   wire [7:0] result_62;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   reg [7:0] t_12 = 8'd1;
   wire [7:0] result_63;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire  b_12;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire [7:0] f1_4;
   wire [7:0] result_64;
   wire [6:0] c$app_arg_17;
   wire  result_65;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire  pOut4;
   wire [4:0] c$app_arg_18;
   wire  result_66;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire  pOut3;
   wire [3:0] c$app_arg_19;
   wire  result_67;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire  pOut2;
   wire [3:0] c$app_arg_20;
   wire  result_68;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire  pOut1;
   wire [2:0] c$app_arg_21;
   wire  result_69;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire  pOut0;
   wire [1:0] c$app_arg_22;
   wire  result_70;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   reg [7:0] t_13 = 8'd1;
   wire [7:0] result_71;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire  b_13;
-  // spec.hs:465:9-81
+  // spec.hs:(607,9)-(609,29)
   wire [7:0] f1_5;
   wire [7:0] result_72;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire  pIn0;
-  // spec.hs:336:1-117
+  // spec.hs:(385,1)-(387,59)
   wire [6:0] pacings;
   wire [74:0] result_73;
   reg [72:0] c$app_arg_23 = {{64'sd0,   1'b0},   1'b0,   {1'b0,   1'b0,   1'b0,   1'b0,   1'b0,   1'b0,
@@ -402,7 +402,7 @@ module topEntity
   wire  c$case_alt_10;
   wire  c$case_alt_11;
   wire  c$case_alt_12;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   reg [145:0] buffer = {{{64'sd0,   1'b0},   1'b0,   {1'b0,   1'b0,   1'b0,   1'b0,   1'b0,   1'b0,
                                1'b0}},   {{64'sd0,   1'b0},   1'b0,   {1'b0,
                                                                        1'b0,
@@ -411,37 +411,37 @@ module topEntity
                                                                        1'b0,
                                                                        1'b0,
                                                                        1'b0}}};
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   wire [145:0] c$buffer_case_alt;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   wire [145:0] c$buffer_case_alt_0;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   wire [145:0] c$buffer_case_alt_1;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   wire [72:0] qData;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   wire signed [63:0] x_4;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   reg signed [63:0] cursor = (64'sd0);
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   wire signed [63:0] c$cursor_case_alt;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   wire signed [63:0] c$cursor_case_alt_0;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   wire signed [63:0] c$cursor_case_alt_1;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   wire  c$cursor_case_scrut;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   wire signed [63:0] c$cursor_case_alt_2;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   reg signed [63:0] c$cursor_case_alt_3;
-  // spec.hs:181:1-78
+  // spec.hs:(194,1)-(196,25)
   wire signed [63:0] c$cursor_case_alt_4;
-  // spec.hs:566:1-141
+  // spec.hs:(763,1)-(765,87)
   wire  qPopValid;
-  // spec.hs:566:1-141
+  // spec.hs:(763,1)-(765,87)
   wire  qPush;
-  // spec.hs:566:1-141
+  // spec.hs:(763,1)-(765,87)
   wire  qPop;
   wire [64:0] inputs;
   wire [1343:0] c$vec;
@@ -1197,9 +1197,9 @@ module topEntity
 
     assign map_index = 2'd2 - i_12[0+:2];
     wire [2:0] c$case_alt_32;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [7:0] t_15;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [8:0] x_25;
     assign map_out = c$case_alt_32;
 
@@ -1424,9 +1424,9 @@ module topEntity
 
     assign map_index_0 = 2'd2 - i_16[0+:2];
     wire [2:0] c$case_alt_33;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [7:0] t_16;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [8:0] x_26;
     assign map_out_0 = c$case_alt_33;
 
@@ -1602,9 +1602,9 @@ module topEntity
 
     assign map_index_1 = 2'd3 - i_19[0+:2];
     wire [2:0] c$case_alt_34;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [7:0] t_17;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [8:0] x_27;
     assign map_out_1 = c$case_alt_34;
 
@@ -1780,9 +1780,9 @@ module topEntity
 
     assign map_index_2 = 2'd3 - i_22[0+:2];
     wire [2:0] c$case_alt_35;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [7:0] t_18;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [8:0] x_28;
     assign map_out_2 = c$case_alt_35;
 
@@ -1958,9 +1958,9 @@ module topEntity
 
     assign map_index_3 = 3'd4 - i_25[0+:3];
     wire [3:0] c$case_alt_36;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [7:0] t_19;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [71:0] x_29;
     assign map_out_3 = c$case_alt_36;
 
@@ -2154,9 +2154,9 @@ module topEntity
 
     assign map_index_4 = 2'd3 - i_28[0+:2];
     wire [2:0] c$case_alt_37;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [7:0] t_20;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [8:0] x_30;
     assign map_out_4 = c$case_alt_37;
 
@@ -2221,9 +2221,9 @@ module topEntity
 
     assign map_index_5 = 2'd3 - i_31[0+:2];
     wire [2:0] c$case_alt_38;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [7:0] t_21;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [8:0] x_31;
     assign map_out_5 = c$case_alt_38;
 
@@ -2292,9 +2292,9 @@ module topEntity
 
     assign map_index_6 = 2'd3 - i_34[0+:2];
     wire [2:0] c$case_alt_39;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [7:0] t_22;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [8:0] x_32;
     assign map_out_6 = c$case_alt_39;
 
@@ -2363,9 +2363,9 @@ module topEntity
 
     assign map_index_7 = 2'd3 - i_37[0+:2];
     wire [2:0] c$case_alt_40;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [7:0] t_23;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [8:0] x_33;
     assign map_out_7 = c$case_alt_40;
 
@@ -2474,9 +2474,9 @@ module topEntity
 
     assign map_index_8 = 3'd4 - i_40[0+:3];
     wire [3:0] c$case_alt_41;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [7:0] t_24;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [71:0] x_34;
     assign map_out_8 = c$case_alt_41;
 
@@ -2545,9 +2545,9 @@ module topEntity
 
     assign map_index_9 = 3'd4 - i_43[0+:3];
     wire [3:0] c$case_alt_42;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [7:0] t_25;
-    // spec.hs:302:1-63
+    // spec.hs:341:1-63
     wire [71:0] x_35;
     assign map_out_9 = c$case_alt_42;
 
