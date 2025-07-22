@@ -1,14 +1,19 @@
 -- Clock domain with 2 microseconds period (500 kHz)
--- It has been arbitrarily chosen for both monitor and the verilog testbench simulation
-createDomain vSystem{vName="TestDomain", vPeriod=2000} -- period in nanoseconds
+-- It has been arbitrarily chosen for both monitor 
+--  and the verilog testbench simulation
+createDomain vSystem{vName="TestDomain", vPeriod=2000} 
+-- period in nanoseconds
 
 {{#if has_periodic_pacing}}
 systemClockPeriodNs :: Int
-systemClockPeriodNs = fromInteger (snatToInteger $ clockPeriod @TestDomain)
+systemClockPeriodNs = fromInteger  
+    (snatToInteger $ clockPeriod @TestDomain)
 {{/if}}
 
 
-hlc :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs -> {{/if}}Signal dom (Bool, Event)
+hlc :: HiddenClockResetEnable dom 
+    => {{#if has_input}}Signal dom Inputs 
+    -> {{/if}}Signal dom (Bool, Event)
 hlc {{#if has_input}}inputs {{/if}}= out
     where 
         out = bundle (newEvent, event)
@@ -23,11 +28,13 @@ hlc {{#if has_input}}inputs {{/if}}= out
         {{/if}}
 
         {{#if has_sliding_window}}
-        slides = Slides <$> {{#each slides}}s{{@index}}{{#unless @last}} <*> {{/unless}}{{/each}}
+        slides = Slides <$> {{#each slides}}s{{@index}}{{#unless @last}} 
+                    <*> {{/unless}}{{/each}}
         {{/if}}
-        pacings = Pacings <$> {{#each inputs}}pIn{{@index}}{{#unless @last}} <*> {{/unless}}{{/each}}
-                              {{~#if (and (gt (len inputs) 0) (gt (len  output_pacings) 0))}} <*> {{/if}}
-                              {{~#each output_pacings}}pOut{{@index}}{{#unless @last}} <*> {{/unless}}{{/each}}
+        pacings = Pacings <$> {{#each inputs}}pIn{{@index}}{{#unless @last}} 
+                    <*> {{/unless}}{{/each}} {{~#if (and (gt (len inputs) 0) (gt (len  output_pacings) 0))}} 
+                    <*> {{/if}} {{~#each output_pacings}}pOut{{@index}}{{#unless @last}} 
+                    <*> {{/unless}}{{/each}}
 
         {{#each inputs}}
         hasInput{{this.index}} = ((.valid). (.input{{this.index}})) <$> inputs
@@ -51,7 +58,9 @@ hlc {{#if has_input}}inputs {{/if}}= out
         {{/each}}
 
 {{#if has_periodic_pacing}}
-        timer :: HiddenClockResetEnable dom => Signal dom Bool -> Signal dom Int
+        timer :: HiddenClockResetEnable dom 
+            => Signal dom Bool 
+            -> Signal dom Int
         timer reset = register 0 (mux reset (pure deltaTime) nextTime)
             where 
                 nextTime = timer reset + pure deltaTime

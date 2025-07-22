@@ -123,9 +123,13 @@ fn get_output_streams(ir: &HardwareIR, win_idx_to_upd_fx_map: &Vec<usize>, win_i
             let is_sliding_window_based = out
                 .accesses
                 .iter()
-                .filter(|access| match access.1.first().unwrap().1 {
-                    StreamAccessKind::SlidingWindow(_) => true,
-                    _ => false,
+                .map(|access| access.1.clone())
+                .flat_map(|x| x)
+                .filter(|(_, access_kind)| {
+                    match access_kind {
+                        StreamAccessKind::SlidingWindow(_) => true,
+                        _ => false,
+                    }
                 })
                 .count()
                 > 0;

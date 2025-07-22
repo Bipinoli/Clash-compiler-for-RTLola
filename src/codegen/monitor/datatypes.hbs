@@ -137,7 +137,9 @@ nullInputs = Inputs {{#each inputs}}(Valid{{this.ty}} {{this.default}} False) {{
 {{#if has_sliding_window}}
 nullSlides = Slides {{#each sliding_windows}}False {{/each}}
 {{/if}}
-nullPacings = Pacings {{#each inputs}}nullPacingIn{{@index}} {{/each}}{{#each outputs}}nullPacingOut{{@index}} {{/each}}
+nullPacings = Pacings {{#each inputs}}
+                nullPacingIn{{@index}}{{/each}}{{#each outputs}}
+                nullPacingOut{{@index}}{{/each}}
 {{#each inputs}}
 nullPacingIn{{@index}} = PacingIn{{@index}} False
 {{/each}}

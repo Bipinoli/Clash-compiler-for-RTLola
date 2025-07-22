@@ -12,14 +12,20 @@ import Clash.Prelude
 ---------------------------------------------------------------
 
 -- Evaluation Order
+--------------------
 {{{eval_order}}}
 
 -- Memory Window
+-----------------
 {{{required_memory}}}
 
 -- Pipeline Visualization
+--------------------------
+
 {{{pipeline_visualization}}}
 
+-- Nicknames
+-------------
 {{#each stream_names}}
 -- {{{this}}}
 {{/each}}
@@ -44,10 +50,11 @@ type QState = (QMem, QCursor)
 type QInput = (QPush, QPop, QData)
 type QOutput = (QPushValid, QPopValid, QData)
 
-queue :: HiddenClockResetEnable dom => Signal dom QInput -> Signal dom QOutput
+queue :: HiddenClockResetEnable dom 
+    => Signal dom QInput 
+    -> Signal dom QOutput
 queue input = output
     where 
-        -- keeping in registers to avoid any combinational output
         output = bundle (pushValid, popValid, outData)
         state = bundle (buffer, cursor)
         buffer = register (repeat nullEvent :: QMem) nextBufferSignal
@@ -56,10 +63,16 @@ queue input = output
         popValid = register False nextPopValidSignal
         outData = register nullEvent nextOutDataSignal
 
-        nextBufferSignal = nextBuffer <$> buffer <*> bundle (input, cursor)
-        nextCursorSignal = nextCursor <$> cursor <*> bundle (input, buffer)
-        nextOutDataSignal = nextOutData <$> bundle (input, cursor, buffer)
-        nextPushValidSignal = nextPushValid <$> bundle (input, cursor, buffer)
+        nextBufferSignal = nextBuffer  
+                            <$> buffer 
+                            <*> bundle (input, cursor)
+        nextCursorSignal = nextCursor 
+                            <$> cursor 
+                            <*> bundle (input, buffer)
+        nextOutDataSignal = nextOutData 
+                            <$> bundle (input, cursor, buffer)
+        nextPushValidSignal = nextPushValid 
+                            <$> bundle (input, cursor, buffer)
         nextPopValidSignal = nextPopValid <$> bundle (input, cursor)
         
         nextBuffer :: QMem -> (QInput, QCursor) -> QMem
@@ -67,14 +80,16 @@ queue input = output
             where 
                 out = case (push, pop) of
                     (True, True) -> qData +>> buf 
-                    (True, False) -> if cur == length buf then buf else qData +>> buf
+                    (True, False) -> if cur == length buf 
+                                    then buf else qData +>> buf
                     (False, _) -> buf
 
         nextCursor :: QCursor -> (QInput, QMem) -> QCursor
         nextCursor cur ((push, pop, _), buf) = out
             where 
                 out = case (push, pop) of
-                    (True, False) -> if cur == length buf then cur else cur + 1
+                    (True, False) -> if cur == length buf 
+                                    then cur else cur + 1
                     (False, True) -> if cur == 0 then 0 else cur - 1
                     (_, _) -> cur
 
@@ -82,8 +97,10 @@ queue input = output
         nextOutData ((push, pop, qData), cur, buf) = out
             where 
                 out = case (push, pop) of
-                    (True, True) -> if cur == 0 then qData else buf !! (cur - 1)
-                    (False, True) -> if cur == 0 then nullEvent else buf !! (cur - 1)
+                    (True, True) -> if cur == 0 
+                                    then qData else buf !! (cur - 1)
+                    (False, True) -> if cur == 0 
+                                    then nullEvent else buf !! (cur - 1)
                     (_, _) -> nullEvent
 
         nextPushValid :: (QInput, QCursor, QMem) -> QPush
@@ -115,19 +132,26 @@ queue input = output
 
 {{#if debug}}
     {{#if has_sliding_window}}
-monitor :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs ->{{/if}}Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
+monitor :: HiddenClockResetEnable dom 
+    => {{#if has_input}}Signal dom Inputs 
+    -> {{/if}}Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
     {{else}}
-monitor :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs ->{{/if}} Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, DebugEnables))
+monitor :: HiddenClockResetEnable dom 
+    => {{#if has_input}}Signal dom Inputs 
+    -> {{/if}} Signal dom (Outputs, (QPush, QPop, QPushValid, QPopValid, DebugEnables))
     {{/if}}
 monitor {{#if has_input}}inputs {{/if}}= bundle (outputs, debugSignals)
 {{else}}
-monitor :: HiddenClockResetEnable dom => {{#if has_input}}Signal dom Inputs ->{{/if}}Signal dom Outputs
+monitor :: HiddenClockResetEnable dom 
+    => {{#if has_input}}Signal dom Inputs 
+    -> {{/if}}Signal dom Outputs
 monitor {{#if has_input}}inputs {{/if}}= outputs
 {{/if}}
     where 
         (newEvent, event) = unbundle (hlc{{#if has_input}} inputs{{/if}})
 
-        (qPushValid, qPopValid, qPopData) = unbundle (queue (bundle (qPush, qPop, qInptData)))
+        (qPushValid, qPopValid, qPopData) = 
+            unbundle (queue (bundle (qPush, qPop, qInptData)))
         qPush = newEvent
         qPop = toPop
         qInptData = event
@@ -152,14 +176,23 @@ monitor {{#if has_input}}inputs {{/if}}= outputs
 
 {{#if debug}}
     {{#if has_sliding_window}}
-topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    {{#if has_input}}Signal TestDomain Inputs -> {{/if}}Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
+topEntity :: Clock TestDomain 
+    -> Reset TestDomain 
+    -> Enable TestDomain 
+    -> {{#if has_input}}Signal TestDomain Inputs 
+    -> {{/if}}Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, Slides, DebugEnables))
     {{else}}
-topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    {{#if has_input}}Signal TestDomain Inputs -> {{/if}}Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, DebugEnables))
+topEntity :: Clock TestDomain 
+    -> Reset TestDomain 
+    -> Enable TestDomain -> {{#if has_input}}Signal TestDomain Inputs 
+    -> {{/if}}Signal TestDomain (Outputs, (QPush, QPop, QPushValid, QPopValid, DebugEnables))
     {{/if}}
 {{else}}
-topEntity :: Clock TestDomain -> Reset TestDomain -> Enable TestDomain -> 
-    {{#if has_input}}Signal TestDomain Inputs -> {{/if}}Signal TestDomain Outputs
+topEntity :: Clock TestDomain 
+    -> Reset TestDomain 
+    -> Enable TestDomain 
+    -> {{#if has_input}}Signal TestDomain Inputs 
+    -> {{/if}}Signal TestDomain Outputs
 {{/if}}
-topEntity clk rst en {{#if has_input}}inputs {{/if}}= exposeClockResetEnable (monitor {{#if has_input}}inputs{{/if}}) clk rst en
+topEntity clk rst en {{#if has_input}}inputs {{/if}}= 
+    exposeClockResetEnable (monitor {{#if has_input}}inputs{{/if}}) clk rst en
