@@ -23,7 +23,7 @@ import Clash.Prelude
 --------------------
 -- x
 -- a
--- c, b
+-- b, c
 -- d
 -- sw(d,e)
 -- e, f
@@ -31,12 +31,12 @@ import Clash.Prelude
 -- Memory Window
 -----------------
 -- window e = 1
--- window a = 5
--- window f = 1
--- window x = 5
--- window b = 4
--- window c = 4
 -- window d = 3
+-- window a = 5
+-- window b = 4
+-- window x = 5
+-- window f = 1
+-- window c = 4
 -- window sw(d,e) = 1
 
 -- Pipeline Visualization
@@ -46,7 +46,7 @@ import Clash.Prelude
 -- -------------------------------------------------------------------------------------------------
 --         | a       | a       | a       | a       | a       | a       | a       | a       | a      
 -- -------------------------------------------------------------------------------------------------
---         |         | c,b     | c,b     | c,b     | c,b     | c,b     | c,b     | c,b     | c,b    
+--         |         | b,c     | b,c     | b,c     | b,c     | b,c     | b,c     | b,c     | b,c    
 -- -------------------------------------------------------------------------------------------------
 --         |         |         | d       | d       | d       | d       | d       | d       | d      
 -- -------------------------------------------------------------------------------------------------
@@ -68,13 +68,13 @@ import Clash.Prelude
 
 ---------------------------------------------------------------
 
-data ValidBool = ValidBool {
-    value :: Bool,
+data ValidInt = ValidInt {
+    value :: Int,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
-data ValidInt = ValidInt {
-    value :: Int,
+data ValidBool = ValidBool {
+    value :: Bool,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
@@ -407,8 +407,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         
         tIn0 = genTag (getPacing <$> pIn0)
         tOut0 = genTag (getPacing <$> pOut0)
-        tOut2 = genTag (getPacing <$> pOut2)
         tOut1 = genTag (getPacing <$> pOut1)
+        tOut2 = genTag (getPacing <$> pOut2)
         tOut3 = genTag (getPacing <$> pOut3)
         tSw0 = genTag (getPacing <$> pOut3)
         tOut4 = genTag (getPacing <$> pOut4)
@@ -436,6 +436,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
                 <*> tOut4 
                 <*> tOut5 
                 <*> tSw0
+        curTagsLevel0 = curTags
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags
@@ -446,8 +447,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         enIn0 = delayFor d1 nullPacingIn0 pIn0
         enOut0 = delayFor d2 nullPacingOut0 pOut0
-        enOut2 = delayFor d3 nullPacingOut2 pOut2
         enOut1 = delayFor d3 nullPacingOut1 pOut1
+        enOut2 = delayFor d3 nullPacingOut2 pOut2
         enOut3 = delayFor d4 nullPacingOut3 pOut3
         enSw0 = delayFor d5 nullPacingOut3 pOut3
         sld0 = delayFor d5 False slide0

@@ -19,24 +19,24 @@ import Clash.Prelude
 -- Evaluation Order
 --------------------
 -- x
--- b, a
+-- a, b
 -- c
 -- d
 
 -- Memory Window
 -----------------
--- window d = 1
--- window b = 3
 -- window x = 1
 -- window c = 2
+-- window d = 1
 -- window a = 3
+-- window b = 3
 
 -- Pipeline Visualization
 --------------------------
 
 -- x   | x   | x   | x   | x   | x   | x   | x   | x   | x  
 -- ---------------------------------------------------------
---     | b,a | b,a | b,a | b,a | b,a | b,a | b,a | b,a | b,a
+--     | a,b | a,b | a,b | a,b | a,b | a,b | a,b | a,b | a,b
 -- ---------------------------------------------------------
 --     |     | c   | c   | c   | c   | c   | c   | c   | c  
 -- ---------------------------------------------------------
@@ -338,8 +338,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut3 = (.pacingOut3) <$> pacings
         
         tIn0 = genTag (getPacing <$> pIn0)
-        tOut1 = genTag (getPacing <$> pOut1)
         tOut0 = genTag (getPacing <$> pOut0)
+        tOut1 = genTag (getPacing <$> pOut1)
         tOut2 = genTag (getPacing <$> pOut2)
         tOut3 = genTag (getPacing <$> pOut3)
 
@@ -359,6 +359,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
                 <*> tOut1 
                 <*> tOut2 
                 <*> tOut3
+        curTagsLevel0 = curTags
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags
@@ -366,8 +367,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         nullT = invalidTag
 
         enIn0 = delayFor d1 nullPacingIn0 pIn0
-        enOut1 = delayFor d2 nullPacingOut1 pOut1
         enOut0 = delayFor d2 nullPacingOut0 pOut0
+        enOut1 = delayFor d2 nullPacingOut1 pOut1
         enOut2 = delayFor d3 nullPacingOut2 pOut2
         enOut3 = delayFor d4 nullPacingOut3 pOut3
 

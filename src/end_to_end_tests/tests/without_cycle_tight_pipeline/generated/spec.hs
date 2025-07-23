@@ -22,7 +22,7 @@ import Clash.Prelude
 
 -- Evaluation Order
 --------------------
--- y, z, x
+-- z, x, y
 -- b, a
 -- d, c
 -- sw(d,e)
@@ -30,20 +30,20 @@ import Clash.Prelude
 
 -- Memory Window
 -----------------
+-- window b = 4
+-- window a = 4
+-- window sw(d,e) = 1
 -- window d = 3
 -- window z = 2
--- window e = 1
--- window a = 4
--- window y = 1
--- window b = 4
--- window sw(d,e) = 1
--- window x = 1
 -- window c = 3
+-- window e = 1
+-- window x = 1
+-- window y = 1
 
 -- Pipeline Visualization
 --------------------------
 
--- y,z,x   | y,z,x   | y,z,x   | y,z,x   | y,z,x   | y,z,x   | y,z,x   | y,z,x   | y,z,x   | y,z,x  
+-- z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y   | z,x,y  
 -- -------------------------------------------------------------------------------------------------
 --         | b,a     | b,a     | b,a     | b,a     | b,a     | b,a     | b,a     | b,a     | b,a    
 -- -------------------------------------------------------------------------------------------------
@@ -410,9 +410,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut3 = (.pacingOut3) <$> pacings
         pOut4 = (.pacingOut4) <$> pacings
         
-        tIn1 = genTag (getPacing <$> pIn1)
         tIn2 = genTag (getPacing <$> pIn2)
         tIn0 = genTag (getPacing <$> pIn0)
+        tIn1 = genTag (getPacing <$> pIn1)
         tOut1 = genTag (getPacing <$> pOut1)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut3 = genTag (getPacing <$> pOut3)
@@ -446,6 +446,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
                 <*> tOut3 
                 <*> tOut4 
                 <*> tSw0
+        curTagsLevel0 = curTags
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags
@@ -453,9 +454,9 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel5 = delayFor d5 tagsDefault curTags
         nullT = invalidTag
 
-        enIn1 = delayFor d1 nullPacingIn1 pIn1
         enIn2 = delayFor d1 nullPacingIn2 pIn2
         enIn0 = delayFor d1 nullPacingIn0 pIn0
+        enIn1 = delayFor d1 nullPacingIn1 pIn1
         enOut1 = delayFor d2 nullPacingOut1 pOut1
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut3 = delayFor d3 nullPacingOut3 pOut3

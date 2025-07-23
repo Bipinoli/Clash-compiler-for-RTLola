@@ -28,7 +28,7 @@ import Clash.Prelude
 
 -- Evaluation Order
 --------------------
--- b, n, x, y
+-- n, b, x, y
 -- o, a, m
 -- c
 -- d, e, g
@@ -37,25 +37,25 @@ import Clash.Prelude
 
 -- Memory Window
 -----------------
--- window g = 1
--- window h = 1
 -- window y = 1
--- window i = 1
 -- window m = 1
--- window c = 1
--- window d = 1
--- window a = 1
--- window f = 1
--- window o = 1
 -- window x = 1
--- window n = 2
--- window b = 2
+-- window c = 1
 -- window e = 1
+-- window h = 1
+-- window f = 1
+-- window i = 1
+-- window b = 2
+-- window o = 1
+-- window a = 1
+-- window d = 1
+-- window g = 1
+-- window n = 2
 
 -- Pipeline Visualization
 --------------------------
 
--- b,n,x,y |         |         |         |         | b,n,x,y |         |         |         |        
+-- n,b,x,y |         |         |         |         | n,b,x,y |         |         |         |        
 -- -------------------------------------------------------------------------------------------------
 --         | o,a,m   |         |         |         |         | o,a,m   |         |         |        
 -- -------------------------------------------------------------------------------------------------
@@ -486,8 +486,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         pOut10 = (.pacingOut10) <$> pacings
         pOut11 = (.pacingOut11) <$> pacings
         
-        tOut1 = genTag (getPacing <$> pOut1)
         tOut10 = genTag (getPacing <$> pOut10)
+        tOut1 = genTag (getPacing <$> pOut1)
         tIn0 = genTag (getPacing <$> pIn0)
         tIn1 = genTag (getPacing <$> pIn1)
         tOut11 = genTag (getPacing <$> pOut11)
@@ -536,6 +536,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
                 <*> tOut9 
                 <*> tOut10 
                 <*> tOut11
+        curTagsLevel0 = curTags
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags
@@ -544,8 +545,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         curTagsLevel6 = delayFor d6 tagsDefault curTags
         nullT = invalidTag
 
-        enOut1 = delayFor d1 nullPacingOut1 pOut1
         enOut10 = delayFor d1 nullPacingOut10 pOut10
+        enOut1 = delayFor d1 nullPacingOut1 pOut1
         enIn0 = delayFor d1 nullPacingIn0 pIn0
         enIn1 = delayFor d1 nullPacingIn1 pIn1
         enOut11 = delayFor d2 nullPacingOut11 pOut11

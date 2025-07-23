@@ -1,0 +1,8 @@
+input x : Int
+output a := x.offset(by: -1).defaults(to: 0) 
+            + b.offset(by: -1).defaults(to: 0)
+output b := a + c.hold(or: 0) 
+            + a.offset(by: -2).defaults(to: a + x) 
+output c @1kHz := b.hold(or: 0) + b.aggregate(over: 0.1s, using: sum) 
+output d @2kHz := (c.aggregate(over: 0.05s, using: count) < 10) 
+            and (c.hold(or: 0) > 15)

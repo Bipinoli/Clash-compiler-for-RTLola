@@ -124,6 +124,7 @@ llc event = bundle (toPop, outputs)
         curTags = Tags 
                 <$> {{#each all_tags_names}}{{this}}{{#unless @last}} 
                 <*> {{/unless}}{{/each}}
+        curTagsLevel0 = curTags
         {{#each cur_tags_levels}}
         curTagsLevel{{this.level}} = {{this.delayed_tags}}
         {{/each}}

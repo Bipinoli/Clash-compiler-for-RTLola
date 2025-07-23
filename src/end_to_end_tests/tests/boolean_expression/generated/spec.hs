@@ -20,16 +20,16 @@ import Clash.Prelude
 --------------------
 -- x
 -- a
--- c, b
+-- b, c
 -- d
 
 -- Memory Window
 -----------------
--- window x = 1
--- window d = 1
--- window b = 2
--- window c = 2
 -- window a = 3
+-- window b = 2
+-- window x = 1
+-- window c = 2
+-- window d = 1
 
 -- Pipeline Visualization
 --------------------------
@@ -38,7 +38,7 @@ import Clash.Prelude
 -- ---------------------------------------------------------
 --     | a   | a   | a   | a   | a   | a   | a   | a   | a  
 -- ---------------------------------------------------------
---     |     | c,b | c,b | c,b | c,b | c,b | c,b | c,b | c,b
+--     |     | b,c | b,c | b,c | b,c | b,c | b,c | b,c | b,c
 -- ---------------------------------------------------------
 --     |     |     | d   | d   | d   | d   | d   | d   | d  
 -- ---------------------------------------------------------
@@ -53,13 +53,13 @@ import Clash.Prelude
 
 ---------------------------------------------------------------
 
-data ValidInt = ValidInt {
-    value :: Int,
+data ValidBool = ValidBool {
+    value :: Bool,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
-data ValidBool = ValidBool {
-    value :: Bool,
+data ValidInt = ValidInt {
+    value :: Int,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
@@ -357,8 +357,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         
         tIn0 = genTag (getPacing <$> pIn0)
         tOut0 = genTag (getPacing <$> pOut0)
-        tOut2 = genTag (getPacing <$> pOut2)
         tOut1 = genTag (getPacing <$> pOut1)
+        tOut2 = genTag (getPacing <$> pOut2)
         tOut3 = genTag (getPacing <$> pOut3)
 
         -- tag generation takes 1 cycle so we need to delay the input
@@ -377,6 +377,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
                 <*> tOut1 
                 <*> tOut2 
                 <*> tOut3
+        curTagsLevel0 = curTags
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags
@@ -385,8 +386,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
 
         enIn0 = delayFor d1 nullPacingIn0 pIn0
         enOut0 = delayFor d2 nullPacingOut0 pOut0
-        enOut2 = delayFor d3 nullPacingOut2 pOut2
         enOut1 = delayFor d3 nullPacingOut1 pOut1
+        enOut2 = delayFor d3 nullPacingOut2 pOut2
         enOut3 = delayFor d4 nullPacingOut3 pOut3
 
         output0Aktv = delayFor d5 False (getPacing <$> pOut0)

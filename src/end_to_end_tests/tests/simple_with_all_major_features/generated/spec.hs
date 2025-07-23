@@ -29,13 +29,13 @@ import Clash.Prelude
 
 -- Memory Window
 -----------------
--- window sw(c,d) = 1
--- window d = 1
--- window b = 2
--- window c = 1
 -- window x = 1
+-- window sw(c,d) = 1
+-- window c = 1
 -- window a = 3
 -- window sw(b,c) = 1
+-- window b = 2
+-- window d = 1
 
 -- Pipeline Visualization
 --------------------------
@@ -65,13 +65,13 @@ import Clash.Prelude
 
 ---------------------------------------------------------------
 
-data ValidBool = ValidBool {
-    value :: Bool,
+data ValidInt = ValidInt {
+    value :: Int,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
-data ValidInt = ValidInt {
-    value :: Int,
+data ValidBool = ValidBool {
+    value :: Bool,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
@@ -406,6 +406,7 @@ llc event = bundle (toPop, outputs)
                 <*> tOut3 
                 <*> tSw0 
                 <*> tSw1
+        curTagsLevel0 = curTags
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags

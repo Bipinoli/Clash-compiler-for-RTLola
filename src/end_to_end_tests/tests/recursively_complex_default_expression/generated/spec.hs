@@ -22,8 +22,8 @@ import Clash.Prelude
 
 -- Memory Window
 -----------------
--- window y = 2
 -- window a = 1
+-- window y = 2
 -- window x = 3
 
 -- Pipeline Visualization
@@ -323,6 +323,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
                 <$> tIn0 
                 <*> tIn1 
                 <*> tOut0
+        curTagsLevel0 = curTags
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         nullT = invalidTag

@@ -28,7 +28,7 @@ import Clash.Prelude
 -- x
 -- a
 -- b
--- c, g
+-- g, c
 -- h
 -- i
 -- j
@@ -38,17 +38,17 @@ import Clash.Prelude
 
 -- Memory Window
 -----------------
--- window f = 1
--- window d = 1
--- window i = 1
 -- window x = 1
--- window a = 2
--- window c = 1
--- window j = 1
--- window e = 1
--- window b = 2
+-- window d = 1
 -- window g = 1
+-- window b = 2
 -- window h = 1
+-- window j = 1
+-- window f = 1
+-- window c = 1
+-- window i = 1
+-- window a = 2
+-- window e = 1
 
 -- Pipeline Visualization
 --------------------------
@@ -59,7 +59,7 @@ import Clash.Prelude
 -- ---------------------------------------------------------
 --     |     | b   |     |     |     |     |     |     | b  
 -- ---------------------------------------------------------
---     |     |     | c,g |     |     |     |     |     |    
+--     |     |     | g,c |     |     |     |     |     |    
 -- ---------------------------------------------------------
 --     |     |     |     | h   |     |     |     |     |    
 -- ---------------------------------------------------------
@@ -446,8 +446,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         tIn0 = genTag (getPacing <$> pIn0)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut1 = genTag (getPacing <$> pOut1)
-        tOut2 = genTag (getPacing <$> pOut2)
         tOut6 = genTag (getPacing <$> pOut6)
+        tOut2 = genTag (getPacing <$> pOut2)
         tOut7 = genTag (getPacing <$> pOut7)
         tOut8 = genTag (getPacing <$> pOut8)
         tOut9 = genTag (getPacing <$> pOut9)
@@ -483,6 +483,7 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
                 <*> tOut7 
                 <*> tOut8 
                 <*> tOut9
+        curTagsLevel0 = curTags
         curTagsLevel1 = delayFor d1 tagsDefault curTags
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         curTagsLevel3 = delayFor d3 tagsDefault curTags
@@ -498,8 +499,8 @@ llc event = bundle (bundle (toPop, outputs), debugSignals)
         enIn0 = delayFor d1 nullPacingIn0 pIn0
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut1 = delayFor d3 nullPacingOut1 pOut1
-        enOut2 = delayFor d4 nullPacingOut2 pOut2
         enOut6 = delayFor d4 nullPacingOut6 pOut6
+        enOut2 = delayFor d4 nullPacingOut2 pOut2
         enOut7 = delayFor d5 nullPacingOut7 pOut7
         enOut8 = delayFor d6 nullPacingOut8 pOut8
         enOut9 = delayFor d7 nullPacingOut9 pOut9

@@ -1,0 +1,110 @@
+specs:
+  - drone_example:
+      new_architecture: 
+        pipeline_wait: 0
+        eval_steps: 7
+        number_wire_bits: 321892
+        number_cells: 106034
+        number_sequential_cells: 16131
+        number_combinational_cells: 89903
+      old_architecture:
+        number_wire_bits: 117345
+        number_cells: 98108
+        number_sequential_cells: 17679
+        number_combinational_cells: 80429
+  - intruder:
+      new_architecture: 
+        pipeline_wait: 0
+        number_wire_bits: 34306
+        number_cells: 11121
+        number_sequential_cells: 2141
+        number_combinational_cells: 8980
+      old_architecture:
+        number_wire_bits: 18845
+        number_cells: 9867
+        number_sequential_cells: 2985
+        number_combinational_cells: 6882
+  - sensor_data_validation:
+      new_architecture: 
+        pipeline_wait: 0
+        number_wire_bits: 23466
+        number_cells: 6042
+        number_sequential_cells: 1199
+        number_combinational_cells: 4843
+      old_architecture:
+        number_wire_bits: 19926
+        number_cells: 9387
+        number_sequential_cells: 3356
+        number_combinational_cells: 6031
+  - hold_cycle: 
+      new_architecture: 
+        pipeline_wait: 2
+        number_wire_bits: 18240
+        number_cells: 7975
+        number_sequential_cells: 1867
+        number_combinational_cells: 6108
+      old_architecture:
+        number_wire_bits: 20723
+        number_cells: 7708
+        number_sequential_cells: 3007
+        number_combinational_cells: 4701
+  - with_pipeline_wait:
+      new_architecture: 
+        pipeline_wait: 2
+        number_wire_bits: 9985
+        number_cells: 4572
+        number_sequential_cells: 1049
+        number_combinational_cells: 3523
+      old_architecture:
+        number_wire_bits: 13312
+        number_cells: 5022
+        number_sequential_cells: 2008
+        number_combinational_cells: 3014 
+  - recursive_defaults:
+      new_architecture: 
+        pipeline_wait: 0
+        number_wire_bits: 30410
+        number_cells: 10314
+        number_sequential_cells: 2077
+        number_combinational_cells: 8237
+      old_architecture:
+        number_wire_bits: 20532
+        number_cells: 10352
+        number_sequential_cells: 3286
+        number_combinational_cells: 7066
+  - only_forward_offsets:
+      new_architecture: 
+        pipeline_wait: 0
+        number_wire_bits: 14490
+        number_cells: 5156
+        number_sequential_cells: 1184
+        number_combinational_cells: 3972
+      old_architecture:
+        number_wire_bits: 14592
+        number_cells: 5394
+        number_sequential_cells: 2333
+        number_combinational_cells: 3061
+  - offset_with_loop:
+      new_architecture: 
+        pipeline_wait: 1
+        number_wire_bits: 17955
+        number_cells: 7975
+        number_sequential_cells: 1261
+        number_combinational_cells: 6714
+      old_architecture:
+        number_wire_bits: 16496
+        number_cells: 6908
+        number_sequential_cells: 2398
+        number_combinational_cells: 4510
+  - all_major_supported:
+      new_architecture: 
+        pipeline_wait: 2
+        number_wire_bits: 
+        number_cells: 98493 
+        number_sequential_cells: 14254
+        number_combinational_cells: 84239 
+      old_architecture:
+        number_wire_bits: 94091
+        number_cells: 84245
+        number_sequential_cells: 15137
+        number_combinational_cells: 69108 

@@ -1,0 +1,1670 @@
+
+ /----------------------------------------------------------------------------\
+ |                                                                            |
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |                                                                            |
+ |  Copyright (C) 2012 - 2020  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |                                                                            |
+ |  Permission to use, copy, modify, and/or distribute this software for any  |
+ |  purpose with or without fee is hereby granted, provided that the above    |
+ |  copyright notice and this permission notice appear in all copies.         |
+ |                                                                            |
+ |  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES  |
+ |  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF          |
+ |  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR   |
+ |  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES    |
+ |  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN     |
+ |  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF   |
+ |  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.            |
+ |                                                                            |
+ \----------------------------------------------------------------------------/
+
+ Yosys 0.36+42 (git sha1 70d35314d, clang 11.0.1-2 -fPIC -Os)
+
+
+-- Running command `
+ghdl --latches --std=08 --work=work topEntity;
+synth -top topEntity;
+stat;
+' --
+
+1. Executing GHDL.
+Importing module topEntity.
+
+2. Executing SYNTH pass.
+
+2.1. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1.1. Analyzing design hierarchy..
+Top module:  \topEntity
+
+2.1.2. Analyzing design hierarchy..
+Top module:  \topEntity
+Removed 0 unused modules.
+
+2.2. Executing PROC pass (convert processes to netlists).
+
+2.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+2.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+2.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+2.2.4. Executing PROC_INIT pass (extract init attributes).
+
+2.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+2.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+2.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+
+2.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+2.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+2.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+2.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+2.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~637 debug messages>
+
+2.3. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 9 unused cells and 1067 unused wires.
+<suppressed ~16 debug messages>
+
+2.5. Executing CHECK pass (checking for obvious problems).
+Checking module topEntity...
+Found and reported 0 problems.
+
+2.6. Executing OPT pass (performing simple optimizations).
+
+2.6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+<suppressed ~9 debug messages>
+Removed a total of 3 cells.
+
+2.6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux \1858.
+Removed 1 multiplexer ports.
+<suppressed ~121 debug messages>
+
+2.6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+    New ctrl vector for $pmux cell \1291: $auto$ghdl.cc:806:import_module$375
+    New ctrl vector for $pmux cell \1413: $auto$ghdl.cc:806:import_module$398
+    New ctrl vector for $pmux cell \1474: $auto$ghdl.cc:806:import_module$407
+    New ctrl vector for $pmux cell \1835: $auto$ghdl.cc:806:import_module$490
+    New ctrl vector for $pmux cell \1839: $auto$ghdl.cc:806:import_module$490
+    New ctrl vector for $pmux cell \1864: $auto$ghdl.cc:806:import_module$490
+    New ctrl vector for $pmux cell \1945: $auto$ghdl.cc:806:import_module$490
+    New ctrl vector for $pmux cell \720: $auto$ghdl.cc:806:import_module$204
+    New ctrl vector for $pmux cell \841: $auto$ghdl.cc:806:import_module$227
+    New ctrl vector for $pmux cell \978: $auto$ghdl.cc:806:import_module$254
+  Optimizing cells in module \topEntity.
+Performed a total of 10 changes.
+
+2.6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.6.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~1 debug messages>
+
+2.6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~6 debug messages>
+
+2.6.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.6.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~120 debug messages>
+
+2.6.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.6.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.6.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.6.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 6 unused cells and 6 unused wires.
+<suppressed ~7 debug messages>
+
+2.6.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.6.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.6.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~120 debug messages>
+
+2.6.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.6.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.6.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.6.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.6.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.6.23. Finished OPT passes. (There is nothing left to do.)
+
+2.7. Executing FSM pass (extract and optimize FSM).
+
+2.7.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+2.7.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+2.7.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+2.7.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.7.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+2.7.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+2.7.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+2.7.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+2.8. Executing OPT pass (performing simple optimizations).
+
+2.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~120 debug messages>
+
+2.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.8.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on \96 ($dff) from module topEntity (D = \iteratei.iteratei_ho1_1_res, Q = \iteratei.iteratei_ho1_2_res).
+Adding EN signal on \905 ($dff) from module topEntity (D = \iteratei_7.iteratei_ho1_5_res_3, Q = \iteratei_7.r_block_130.\c$bb_res_res_51\).
+Adding EN signal on \897 ($dff) from module topEntity (D = \iteratei_7.iteratei_ho1_4_res_6, Q = \iteratei_7.iteratei_ho1_5_res_3).
+Adding EN signal on \889 ($dff) from module topEntity (D = \iteratei_7.iteratei_ho1_3_res_7, Q = \iteratei_7.iteratei_ho1_4_res_6).
+Adding EN signal on \881 ($dff) from module topEntity (D = \iteratei_7.iteratei_ho1_2_res_7, Q = \iteratei_7.iteratei_ho1_3_res_7).
+Adding EN signal on \88 ($dff) from module topEntity (D = \iteratei.iteratei_ho1_0_res, Q = \iteratei.iteratei_ho1_1_res).
+Adding EN signal on \873 ($dff) from module topEntity (D = \iteratei_7.iteratei_ho1_1_res_7, Q = \iteratei_7.iteratei_ho1_2_res_7).
+Adding EN signal on \865 ($dff) from module topEntity (D = \iteratei_7.iteratei_ho1_0_res_7, Q = \iteratei_7.iteratei_ho1_1_res_7).
+Adding EN signal on \857 ($dff) from module topEntity (D = \\c$app_arg_21\ [68], Q = \iteratei_7.iteratei_ho1_0_res_7).
+Adding EN signal on \80 ($dff) from module topEntity (D = \\c$app_arg_21\ [71], Q = \iteratei.iteratei_ho1_0_res).
+Adding EN signal on \784 ($dff) from module topEntity (D = \iteratei_6.iteratei_ho1_5_res_2, Q = \iteratei_6.r_block_123.\c$bb_res_res_44\).
+Adding EN signal on \776 ($dff) from module topEntity (D = \iteratei_6.iteratei_ho1_4_res_5, Q = \iteratei_6.iteratei_ho1_5_res_2).
+Adding EN signal on \768 ($dff) from module topEntity (D = \iteratei_6.iteratei_ho1_3_res_6, Q = \iteratei_6.iteratei_ho1_4_res_5).
+Adding EN signal on \760 ($dff) from module topEntity (D = \iteratei_6.iteratei_ho1_2_res_6, Q = \iteratei_6.iteratei_ho1_3_res_6).
+Adding EN signal on \752 ($dff) from module topEntity (D = \iteratei_6.iteratei_ho1_1_res_6, Q = \iteratei_6.iteratei_ho1_2_res_6).
+Adding EN signal on \744 ($dff) from module topEntity (D = \iteratei_6.iteratei_ho1_0_res_6, Q = \iteratei_6.iteratei_ho1_1_res_6).
+Adding EN signal on \736 ($dff) from module topEntity (D = \\c$app_arg_21\ [69], Q = \iteratei_6.iteratei_ho1_0_res_6).
+Adding EN signal on \676 ($dff) from module topEntity (D = \iteratei_5.iteratei_ho1_5_res_1, Q = \iteratei_5.r_block_116.\c$bb_res_res_37\).
+Adding EN signal on \668 ($dff) from module topEntity (D = \iteratei_5.iteratei_ho1_4_res_4, Q = \iteratei_5.iteratei_ho1_5_res_1).
+Adding EN signal on \660 ($dff) from module topEntity (D = \iteratei_5.iteratei_ho1_3_res_5, Q = \iteratei_5.iteratei_ho1_4_res_4).
+Adding EN signal on \652 ($dff) from module topEntity (D = \iteratei_5.iteratei_ho1_2_res_5, Q = \iteratei_5.iteratei_ho1_3_res_5).
+Adding EN signal on \644 ($dff) from module topEntity (D = \iteratei_5.iteratei_ho1_1_res_5, Q = \iteratei_5.iteratei_ho1_2_res_5).
+Adding EN signal on \636 ($dff) from module topEntity (D = \iteratei_5.iteratei_ho1_0_res_5, Q = \iteratei_5.iteratei_ho1_1_res_5).
+Adding EN signal on \628 ($dff) from module topEntity (D = \\c$app_arg_21\ [70], Q = \iteratei_5.iteratei_ho1_0_res_5).
+Adding EN signal on \616 ($dff) from module topEntity (D = \iteratei_4.iteratei_ho1_4_res_3, Q = \b).
+Adding EN signal on \608 ($dff) from module topEntity (D = \iteratei_4.iteratei_ho1_3_res_4, Q = \iteratei_4.iteratei_ho1_4_res_3).
+Adding EN signal on \600 ($dff) from module topEntity (D = \iteratei_4.iteratei_ho1_2_res_4, Q = \iteratei_4.iteratei_ho1_3_res_4).
+Adding EN signal on \592 ($dff) from module topEntity (D = \iteratei_4.iteratei_ho1_1_res_4, Q = \iteratei_4.iteratei_ho1_2_res_4).
+Adding EN signal on \584 ($dff) from module topEntity (D = \iteratei_4.iteratei_ho1_0_res_4, Q = \iteratei_4.iteratei_ho1_1_res_4).
+Adding EN signal on \576 ($dff) from module topEntity (D = \\c$app_arg_21\ [71], Q = \iteratei_4.iteratei_ho1_0_res_4).
+Adding EN signal on \561 ($dff) from module topEntity (D = \iteratei_3.iteratei_ho1_3_res_3, Q = \iteratei_3.r_block_103.\c$bb_res_res_24\).
+Adding EN signal on \553 ($dff) from module topEntity (D = \iteratei_3.iteratei_ho1_2_res_3, Q = \iteratei_3.iteratei_ho1_3_res_3).
+Adding EN signal on \545 ($dff) from module topEntity (D = \iteratei_3.iteratei_ho1_1_res_3, Q = \iteratei_3.iteratei_ho1_2_res_3).
+Adding EN signal on \537 ($dff) from module topEntity (D = \iteratei_3.iteratei_ho1_0_res_3, Q = \iteratei_3.iteratei_ho1_1_res_3).
+Adding EN signal on \529 ($dff) from module topEntity (D = { \t_6 \t_7 \t_5 \t_6 \t_7 \t_8 \t_9 }, Q = \iteratei_3.iteratei_ho1_0_res_3).
+Adding EN signal on \514 ($dff) from module topEntity (D = \iteratei_2.iteratei_ho1_3_res_2, Q = \\c$t_case_alt_selection_1\).
+Adding EN signal on \506 ($dff) from module topEntity (D = \iteratei_2.iteratei_ho1_2_res_2, Q = \iteratei_2.iteratei_ho1_3_res_2).
+Adding EN signal on \498 ($dff) from module topEntity (D = \iteratei_2.iteratei_ho1_1_res_2, Q = \iteratei_2.iteratei_ho1_2_res_2).
+Adding EN signal on \490 ($dff) from module topEntity (D = \iteratei_2.iteratei_ho1_0_res_2, Q = \iteratei_2.iteratei_ho1_1_res_2).
+Adding EN signal on \482 ($dff) from module topEntity (D = \\c$app_arg_21\ [70], Q = \iteratei_2.iteratei_ho1_0_res_2).
+Adding EN signal on \469 ($dff) from module topEntity (D = \iteratei_1.iteratei_ho1_3_res_1, Q = \iteratei_1.r_block_93.\c$bb_res_res_14\).
+Adding EN signal on \461 ($dff) from module topEntity (D = \iteratei_1.iteratei_ho1_2_res_1, Q = \iteratei_1.iteratei_ho1_3_res_1).
+Adding EN signal on \453 ($dff) from module topEntity (D = \iteratei_1.iteratei_ho1_1_res_1, Q = \iteratei_1.iteratei_ho1_2_res_1).
+Adding EN signal on \445 ($dff) from module topEntity (D = \iteratei_1.iteratei_ho1_0_res_1, Q = \iteratei_1.iteratei_ho1_1_res_1).
+Adding EN signal on \437 ($dff) from module topEntity (D = \\c$app_arg_21\ [66], Q = \iteratei_1.iteratei_ho1_0_res_1).
+Adding EN signal on \422 ($dff) from module topEntity (D = \iteratei_0.iteratei_ho1_2_res_0, Q = \iteratei_0.r_block_88.\c$bb_res_res_9\).
+Adding EN signal on \414 ($dff) from module topEntity (D = \iteratei_0.iteratei_ho1_1_res_0, Q = \iteratei_0.iteratei_ho1_2_res_0).
+Adding EN signal on \406 ($dff) from module topEntity (D = \iteratei_0.iteratei_ho1_0_res_0, Q = \iteratei_0.iteratei_ho1_1_res_0).
+Adding EN signal on \398 ($dff) from module topEntity (D = { \t_6 \t_7 \t_5 \t_6 \t_7 \t_8 \t_9 }, Q = \iteratei_0.iteratei_ho1_0_res_0).
+Adding EN signal on \2014 ($adff) from module topEntity (D = \\c$cursor_case_alt\, Q = \cursor).
+Adding EN signal on \2012 ($adff) from module topEntity (D = \\c$buffer_case_alt_0\, Q = \buffer).
+Adding EN signal on \2008 ($adff) from module topEntity (D = \\c$case_alt_5\, Q = \\c$app_arg_22\).
+Adding EN signal on \2006 ($adff) from module topEntity (D = \\c$case_alt\, Q = \\c$app_arg_21\).
+Adding EN signal on \2004 ($adff) from module topEntity (D = \result_63, Q = \towait).
+Adding EN signal on \2002 ($adff) from module topEntity (D = \result_61, Q = \t_9).
+Adding EN signal on \2000 ($adff) from module topEntity (D = \result_59, Q = \t_8).
+Adding EN signal on \1998 ($adff) from module topEntity (D = \result_57, Q = \t_7).
+Adding EN signal on \1996 ($adff) from module topEntity (D = \result_55, Q = \t_6).
+Adding EN signal on \1994 ($adff) from module topEntity (D = \result_53, Q = \t_5).
+Adding EN signal on \1992 ($dff) from module topEntity (D = \\c$app_arg_21\ [63:0], Q = \\c$input0Win_app_arg\).
+Adding EN signal on \1990 ($adff) from module topEntity (D = { \\c$input0Win_app_arg\ \t_9 }, Q = \result_47).
+Adding EN signal on \1986 ($adff) from module topEntity (D = { \result_38 [143:0] \t_4 [71:8] \t_8 }, Q = \result_38).
+Adding EN signal on \1980 ($adff) from module topEntity (D = \iteratei_16.r_block_155.\c$bb_res_res_76\ [47:40], Q = \window_0 [7:0]).
+Adding EN signal on \1980 ($adff) from module topEntity (D = \result_32 [6463:6400], Q = \window_0 [6471:6408]).
+Adding EN signal on \1980 ($adff) from module topEntity (D = \result_32 [6399:0], Q = \window_0 [6407:8]).
+Adding EN signal on \1978 ($adff) from module topEntity (D = { \t_2 [71:8] \iteratei_12.r_block_142.\c$bb_res_res_63\ [31:24] }, Q = \result_30).
+Adding EN signal on \1974 ($adff) from module topEntity (D = { \result_26 [71:0] \t_1 [71:8] \iteratei_17.r_block_156.\c$bb_res_res_77\ [23:16] }, Q = \result_26).
+Adding EN signal on \1968 ($adff) from module topEntity (D = \iteratei_0.r_block_88.\c$bb_res_res_9\ [55:48], Q = \window [7:0]).
+Adding EN signal on \1968 ($adff) from module topEntity (D = \result_14 [6463:6400], Q = \window [6471:6408]).
+Adding EN signal on \1968 ($adff) from module topEntity (D = \result_14 [6399:0], Q = \window [6407:8]).
+Adding EN signal on \1966 ($adff) from module topEntity (D = { \t [8] \iteratei_3.r_block_103.\c$bb_res_res_24\ [39:32] }, Q = \result_12).
+Adding EN signal on \1964 ($adff) from module topEntity (D = \result_6, Q = \result_7).
+Adding EN signal on \1962 ($adff) from module topEntity (D = \result_4, Q = \result_5).
+Adding EN signal on \1716 ($dff) from module topEntity (D = { \t_6 \t_7 \t_5 \t_6 \t_7 \t_8 \t_9 }, Q = \iteratei_17.r_block_156.\c$bb_res_res_77\).
+Adding EN signal on \1700 ($dff) from module topEntity (D = \iteratei_16.iteratei_ho1_0_res_16, Q = \iteratei_16.r_block_155.\c$bb_res_res_76\).
+Adding EN signal on \1692 ($dff) from module topEntity (D = { \t_6 \t_7 \t_5 \t_6 \t_7 \t_8 \t_9 }, Q = \iteratei_16.iteratei_ho1_0_res_16).
+Adding EN signal on \1674 ($dff) from module topEntity (D = \iteratei_15.iteratei_ho1_4_res_7, Q = \iteratei_15.r_block_153.\c$bb_res_res_74\).
+Adding EN signal on \1666 ($dff) from module topEntity (D = \iteratei_15.iteratei_ho1_3_res_9, Q = \iteratei_15.iteratei_ho1_4_res_7).
+Adding EN signal on \1658 ($dff) from module topEntity (D = \iteratei_15.iteratei_ho1_2_res_12, Q = \iteratei_15.iteratei_ho1_3_res_9).
+Adding EN signal on \1650 ($dff) from module topEntity (D = \iteratei_15.iteratei_ho1_1_res_13, Q = \iteratei_15.iteratei_ho1_2_res_12).
+Adding EN signal on \1642 ($dff) from module topEntity (D = \iteratei_15.iteratei_ho1_0_res_15, Q = \iteratei_15.iteratei_ho1_1_res_13).
+Adding EN signal on \1634 ($dff) from module topEntity (D = { \t_6 \t_7 \t_5 \t_6 \t_7 \t_8 \t_9 }, Q = \iteratei_15.iteratei_ho1_0_res_15).
+Adding EN signal on \1621 ($dff) from module topEntity (D = \\c$app_arg_21\ [67], Q = \b_3).
+Adding EN signal on \1593 ($dff) from module topEntity (D = \iteratei_13.iteratei_ho1_2_res_11, Q = \b_1).
+Adding EN signal on \1585 ($dff) from module topEntity (D = \iteratei_13.iteratei_ho1_1_res_12, Q = \iteratei_13.iteratei_ho1_2_res_11).
+Adding EN signal on \1577 ($dff) from module topEntity (D = \iteratei_13.iteratei_ho1_0_res_13, Q = \iteratei_13.iteratei_ho1_1_res_12).
+Adding EN signal on \1569 ($dff) from module topEntity (D = \\c$app_arg_21\ [70], Q = \iteratei_13.iteratei_ho1_0_res_13).
+Adding EN signal on \1556 ($dff) from module topEntity (D = \iteratei_12.iteratei_ho1_1_res_11, Q = \iteratei_12.r_block_142.\c$bb_res_res_63\).
+Adding EN signal on \1548 ($dff) from module topEntity (D = \iteratei_12.iteratei_ho1_0_res_12, Q = \iteratei_12.iteratei_ho1_1_res_11).
+Adding EN signal on \1540 ($dff) from module topEntity (D = { \t_6 \t_7 \t_5 \t_6 \t_7 \t_8 \t_9 }, Q = \iteratei_12.iteratei_ho1_0_res_12).
+Adding EN signal on \1527 ($dff) from module topEntity (D = \iteratei_11.iteratei_ho1_0_res_11, Q = \iteratei_11.r_block_139.\c$bb_res_res_60\).
+Adding EN signal on \1519 ($dff) from module topEntity (D = \\c$app_arg_21\ [69], Q = \iteratei_11.iteratei_ho1_0_res_11).
+Adding EN signal on \1509 ($dff) from module topEntity (D = \\c$app_arg_21\ [68], Q = \iteratei_10.r_block_137.\c$bb_res_res_58\).
+Adding EN signal on \1353 ($dff) from module topEntity (D = \iteratei_9.iteratei_ho1_1_res_9, Q = \\c$t_case_alt_selection_10\).
+Adding EN signal on \1345 ($dff) from module topEntity (D = \iteratei_9.iteratei_ho1_0_res_9, Q = \iteratei_9.iteratei_ho1_1_res_9).
+Adding EN signal on \1337 ($dff) from module topEntity (D = \\c$app_arg_21\ [69], Q = \iteratei_9.iteratei_ho1_0_res_9).
+Adding EN signal on \1324 ($dff) from module topEntity (D = \iteratei_8.iteratei_ho1_1_res_8, Q = \iteratei_8.r_block_133.\c$bb_res_res_54\).
+Adding EN signal on \1316 ($dff) from module topEntity (D = \iteratei_8.iteratei_ho1_0_res_8, Q = \iteratei_8.iteratei_ho1_1_res_8).
+Adding EN signal on \1308 ($dff) from module topEntity (D = \\c$app_arg_21\ [65], Q = \iteratei_8.iteratei_ho1_0_res_8).
+Adding EN signal on \128 ($dff) from module topEntity (D = \iteratei.iteratei_ho1_5_res, Q = \iteratei.r_block_84.\c$bb_res_res_5\).
+Adding EN signal on \120 ($dff) from module topEntity (D = \iteratei.iteratei_ho1_4_res, Q = \iteratei.iteratei_ho1_5_res).
+Adding EN signal on \112 ($dff) from module topEntity (D = \iteratei.iteratei_ho1_3_res, Q = \iteratei.iteratei_ho1_4_res).
+Adding EN signal on \104 ($dff) from module topEntity (D = \iteratei.iteratei_ho1_2_res, Q = \iteratei.iteratei_ho1_3_res).
+
+2.8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 120 unused cells and 114 unused wires.
+<suppressed ~134 debug messages>
+
+2.8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~7 debug messages>
+
+2.8.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.8.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~35 debug messages>
+
+2.8.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.8.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+<suppressed ~102 debug messages>
+Removed a total of 34 cells.
+
+2.8.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.8.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+2.8.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.8.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.8.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~35 debug messages>
+
+2.8.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.8.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.8.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.8.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.8.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.8.23. Finished OPT passes. (There is nothing left to do.)
+
+2.9. Executing WREDUCE pass (reducing word size of cells).
+Removed top 2 bits (of 3) from port B of cell topEntity.$auto$opt_dff.cc:195:make_patterns_logic$1252 ($ne).
+Removed top 1 bits (of 2) from port B of cell topEntity.$auto$opt_dff.cc:195:make_patterns_logic$1324 ($ne).
+Removed top 1 bits (of 2) from port B of cell topEntity.$auto$opt_dff.cc:195:make_patterns_logic$1303 ($ne).
+Removed top 53 bits (of 64) from port B of cell topEntity.\33 ($add).
+Removed top 53 bits (of 64) from port B of cell topEntity.\44 ($add).
+Removed top 44 bits (of 64) from port B of cell topEntity.\61 ($ge).
+Removed top 43 bits (of 64) from port B of cell topEntity.\63 ($ge).
+Removed top 59 bits (of 64) from port B of cell topEntity.\344 ($lt).
+Removed top 59 bits (of 64) from port B of cell topEntity.\346 ($gt).
+Removed top 64 bits (of 6464) from mux cell topEntity.\373 ($mux).
+Removed top 63 bits (of 64) from port B of cell topEntity.\384 ($add).
+Removed top 6 bits (of 8) from port B of cell topEntity.\981 ($gt).
+Removed top 1 bits (of 8) from port B of cell topEntity.\984 ($add).
+Removed top 6 bits (of 8) from port B of cell topEntity.\987 ($sub).
+Removed top 1 bits (of 8) from port B of cell topEntity.\997 ($eq).
+Removed top 64 bits (of 6464) from mux cell topEntity.\1238 ($mux).
+Removed top 1 bits (of 8) from port B of cell topEntity.\1357 ($eq).
+Removed top 7 bits (of 8) from port B of cell topEntity.\1476 ($gt).
+Removed top 1 bits (of 8) from port B of cell topEntity.\1479 ($add).
+Removed top 7 bits (of 8) from port B of cell topEntity.\1481 ($sub).
+Removed top 7 bits (of 8) from port B of cell topEntity.\1496 ($gt).
+Removed top 1 bits (of 8) from port B of cell topEntity.\1499 ($add).
+Removed top 7 bits (of 8) from port B of cell topEntity.\1501 ($sub).
+Removed top 32 bits (of 56) from FF cell topEntity.$auto$ff.cc:266:slice$1335 ($dffe).
+Removed top 1 bits (of 8) from port B of cell topEntity.\1731 ($eq).
+Removed top 7 bits (of 8) from port B of cell topEntity.\1733 ($add).
+Removed top 1 bits (of 8) from port B of cell topEntity.\1746 ($eq).
+Removed top 7 bits (of 8) from port B of cell topEntity.\1748 ($add).
+Removed top 1 bits (of 8) from port B of cell topEntity.\1761 ($eq).
+Removed top 7 bits (of 8) from port B of cell topEntity.\1763 ($add).
+Removed top 1 bits (of 8) from port B of cell topEntity.\1776 ($eq).
+Removed top 7 bits (of 8) from port B of cell topEntity.\1778 ($add).
+Removed top 1 bits (of 8) from port B of cell topEntity.\1791 ($eq).
+Removed top 7 bits (of 8) from port B of cell topEntity.\1793 ($add).
+Removed top 63 bits (of 64) from port B of cell topEntity.\1811 ($gt).
+Removed top 63 bits (of 64) from port B of cell topEntity.\1813 ($sub).
+Removed top 63 bits (of 64) from port B of cell topEntity.\1924 ($add).
+Removed top 61 bits (of 64) from port B of cell topEntity.\1937 ($eq).
+Removed top 63 bits (of 64) from mux cell topEntity.\1938 ($mux).
+Removed top 63 bits (of 64) from port B of cell topEntity.\1947 ($sub).
+Removed top 16 bits (of 56) from FF cell topEntity.$auto$ff.cc:266:slice$1336 ($dffe).
+Removed top 16 bits (of 56) from FF cell topEntity.$auto$ff.cc:266:slice$1230 ($dffe).
+Removed top 16 bits (of 56) from FF cell topEntity.$auto$ff.cc:266:slice$1231 ($dffe).
+Removed top 16 bits (of 56) from FF cell topEntity.$auto$ff.cc:266:slice$1232 ($dffe).
+Removed top 16 bits (of 56) from FF cell topEntity.$auto$ff.cc:266:slice$1233 ($dffe).
+Removed top 63 bits (of 64) from wire topEntity.\\c$cursor_app_arg\.
+Removed top 64 bits (of 6464) from wire topEntity.\\c$t_case_alt\.
+Removed top 64 bits (of 6464) from wire topEntity.\\c$t_case_alt_1\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_12.iteratei_ho1_0_res_12.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_12.iteratei_ho1_1_res_11.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_12.iteratei_ho1_2_res_10.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_12.r_block_140.\c$bb_res_res_61\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_12.r_block_141.\c$bb_res_res_62\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_12.r_block_142.\c$bb_res_res_63\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_15.iteratei_ho1_0_res_15.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_15.iteratei_ho1_1_res_13.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_15.iteratei_ho1_2_res_12.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_15.iteratei_ho1_3_res_9.
+Removed top 32 bits (of 56) from wire topEntity.iteratei_15.iteratei_ho1_5_res_4.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_15.r_block_148.\c$bb_res_res_69\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_15.r_block_149.\c$bb_res_res_70\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_15.r_block_150.\c$bb_res_res_71\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_15.r_block_151.\c$bb_res_res_72\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_15.r_block_152.\c$bb_res_res_73\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_16.iteratei_ho1_0_res_16.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_16.iteratei_ho1_1_res_14.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_16.r_block_154.\c$bb_res_res_75\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_16.r_block_155.\c$bb_res_res_76\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_17.iteratei_ho1_0_res_17.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_17.r_block_156.\c$bb_res_res_77\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_3.iteratei_ho1_4_res_2.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_3.r_block_100.\c$bb_res_res_21\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_3.r_block_101.\c$bb_res_res_22\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_3.r_block_102.\c$bb_res_res_23\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_3.r_block_103.\c$bb_res_res_24\.
+Removed top 16 bits (of 56) from wire topEntity.iteratei_3.r_block_99.\c$bb_res_res_20\.
+Removed top 16 bits (of 56) from wire topEntity.result_18.
+Removed top 16 bits (of 56) from wire topEntity.result_44.
+Removed top 32 bits (of 56) from wire topEntity.result_49.
+Removed top 16 bits (of 56) from wire topEntity.result_50.
+Removed top 16 bits (of 56) from wire topEntity.result_51.
+
+2.10. Executing PEEPOPT pass (run peephole optimizers).
+
+2.11. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 0 unused cells and 36 unused wires.
+<suppressed ~1 debug messages>
+
+2.12. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module topEntity:
+  creating $macc model for \1011 ($add).
+  creating $macc model for \1115 ($add).
+  creating $macc model for \1116 ($add).
+  creating $macc model for \1117 ($add).
+  creating $macc model for \1118 ($add).
+  creating $macc model for \1119 ($add).
+  creating $macc model for \1120 ($add).
+  creating $macc model for \1121 ($add).
+  creating $macc model for \1122 ($add).
+  creating $macc model for \1123 ($add).
+  creating $macc model for \1124 ($add).
+  creating $macc model for \1125 ($add).
+  creating $macc model for \1126 ($add).
+  creating $macc model for \1127 ($add).
+  creating $macc model for \1128 ($add).
+  creating $macc model for \1129 ($add).
+  creating $macc model for \1130 ($add).
+  creating $macc model for \1131 ($add).
+  creating $macc model for \1132 ($add).
+  creating $macc model for \1133 ($add).
+  creating $macc model for \1134 ($add).
+  creating $macc model for \1135 ($add).
+  creating $macc model for \1136 ($add).
+  creating $macc model for \1137 ($add).
+  creating $macc model for \1138 ($add).
+  creating $macc model for \1139 ($add).
+  creating $macc model for \1140 ($add).
+  creating $macc model for \1141 ($add).
+  creating $macc model for \1142 ($add).
+  creating $macc model for \1143 ($add).
+  creating $macc model for \1144 ($add).
+  creating $macc model for \1145 ($add).
+  creating $macc model for \1146 ($add).
+  creating $macc model for \1147 ($add).
+  creating $macc model for \1148 ($add).
+  creating $macc model for \1149 ($add).
+  creating $macc model for \1150 ($add).
+  creating $macc model for \1151 ($add).
+  creating $macc model for \1152 ($add).
+  creating $macc model for \1153 ($add).
+  creating $macc model for \1154 ($add).
+  creating $macc model for \1155 ($add).
+  creating $macc model for \1156 ($add).
+  creating $macc model for \1157 ($add).
+  creating $macc model for \1158 ($add).
+  creating $macc model for \1159 ($add).
+  creating $macc model for \1160 ($add).
+  creating $macc model for \1161 ($add).
+  creating $macc model for \1162 ($add).
+  creating $macc model for \1163 ($add).
+  creating $macc model for \1164 ($add).
+  creating $macc model for \1165 ($add).
+  creating $macc model for \1166 ($add).
+  creating $macc model for \1167 ($add).
+  creating $macc model for \1168 ($add).
+  creating $macc model for \1169 ($add).
+  creating $macc model for \1170 ($add).
+  creating $macc model for \1171 ($add).
+  creating $macc model for \1172 ($add).
+  creating $macc model for \1173 ($add).
+  creating $macc model for \1174 ($add).
+  creating $macc model for \1175 ($add).
+  creating $macc model for \1176 ($add).
+  creating $macc model for \1177 ($add).
+  creating $macc model for \1178 ($add).
+  creating $macc model for \1179 ($add).
+  creating $macc model for \1180 ($add).
+  creating $macc model for \1181 ($add).
+  creating $macc model for \1182 ($add).
+  creating $macc model for \1183 ($add).
+  creating $macc model for \1184 ($add).
+  creating $macc model for \1185 ($add).
+  creating $macc model for \1186 ($add).
+  creating $macc model for \1187 ($add).
+  creating $macc model for \1188 ($add).
+  creating $macc model for \1189 ($add).
+  creating $macc model for \1190 ($add).
+  creating $macc model for \1191 ($add).
+  creating $macc model for \1192 ($add).
+  creating $macc model for \1193 ($add).
+  creating $macc model for \1194 ($add).
+  creating $macc model for \1195 ($add).
+  creating $macc model for \1196 ($add).
+  creating $macc model for \1197 ($add).
+  creating $macc model for \1198 ($add).
+  creating $macc model for \1199 ($add).
+  creating $macc model for \1200 ($add).
+  creating $macc model for \1201 ($add).
+  creating $macc model for \1202 ($add).
+  creating $macc model for \1203 ($add).
+  creating $macc model for \1204 ($add).
+  creating $macc model for \1205 ($add).
+  creating $macc model for \1206 ($add).
+  creating $macc model for \1207 ($add).
+  creating $macc model for \1208 ($add).
+  creating $macc model for \1209 ($add).
+  creating $macc model for \1210 ($add).
+  creating $macc model for \1211 ($add).
+  creating $macc model for \1212 ($add).
+  creating $macc model for \1213 ($add).
+  creating $macc model for \1248 ($add).
+  creating $macc model for \1282 ($sub).
+  creating $macc model for \1404 ($sub).
+  creating $macc model for \1430 ($add).
+  creating $macc model for \1465 ($sub).
+  creating $macc model for \1479 ($add).
+  creating $macc model for \1481 ($sub).
+  creating $macc model for \1499 ($add).
+  creating $macc model for \1501 ($sub).
+  creating $macc model for \1733 ($add).
+  creating $macc model for \1748 ($add).
+  creating $macc model for \1763 ($add).
+  creating $macc model for \1778 ($add).
+  creating $macc model for \1793 ($add).
+  creating $macc model for \1813 ($sub).
+  creating $macc model for \1843 ($sub).
+  creating $macc model for \1924 ($add).
+  creating $macc model for \1947 ($sub).
+  creating $macc model for \235 ($add).
+  creating $macc model for \236 ($add).
+  creating $macc model for \237 ($add).
+  creating $macc model for \238 ($add).
+  creating $macc model for \239 ($add).
+  creating $macc model for \240 ($add).
+  creating $macc model for \241 ($add).
+  creating $macc model for \242 ($add).
+  creating $macc model for \243 ($add).
+  creating $macc model for \244 ($add).
+  creating $macc model for \245 ($add).
+  creating $macc model for \246 ($add).
+  creating $macc model for \247 ($add).
+  creating $macc model for \248 ($add).
+  creating $macc model for \249 ($add).
+  creating $macc model for \250 ($add).
+  creating $macc model for \251 ($add).
+  creating $macc model for \252 ($add).
+  creating $macc model for \253 ($add).
+  creating $macc model for \254 ($add).
+  creating $macc model for \255 ($add).
+  creating $macc model for \256 ($add).
+  creating $macc model for \257 ($add).
+  creating $macc model for \258 ($add).
+  creating $macc model for \259 ($add).
+  creating $macc model for \260 ($add).
+  creating $macc model for \261 ($add).
+  creating $macc model for \262 ($add).
+  creating $macc model for \263 ($add).
+  creating $macc model for \264 ($add).
+  creating $macc model for \265 ($add).
+  creating $macc model for \266 ($add).
+  creating $macc model for \267 ($add).
+  creating $macc model for \268 ($add).
+  creating $macc model for \269 ($add).
+  creating $macc model for \270 ($add).
+  creating $macc model for \271 ($add).
+  creating $macc model for \272 ($add).
+  creating $macc model for \273 ($add).
+  creating $macc model for \274 ($add).
+  creating $macc model for \275 ($add).
+  creating $macc model for \276 ($add).
+  creating $macc model for \277 ($add).
+  creating $macc model for \278 ($add).
+  creating $macc model for \279 ($add).
+  creating $macc model for \280 ($add).
+  creating $macc model for \281 ($add).
+  creating $macc model for \282 ($add).
+  creating $macc model for \283 ($add).
+  creating $macc model for \284 ($add).
+  creating $macc model for \285 ($add).
+  creating $macc model for \286 ($add).
+  creating $macc model for \287 ($add).
+  creating $macc model for \288 ($add).
+  creating $macc model for \289 ($add).
+  creating $macc model for \290 ($add).
+  creating $macc model for \291 ($add).
+  creating $macc model for \292 ($add).
+  creating $macc model for \293 ($add).
+  creating $macc model for \294 ($add).
+  creating $macc model for \295 ($add).
+  creating $macc model for \296 ($add).
+  creating $macc model for \297 ($add).
+  creating $macc model for \298 ($add).
+  creating $macc model for \299 ($add).
+  creating $macc model for \300 ($add).
+  creating $macc model for \301 ($add).
+  creating $macc model for \302 ($add).
+  creating $macc model for \303 ($add).
+  creating $macc model for \304 ($add).
+  creating $macc model for \305 ($add).
+  creating $macc model for \306 ($add).
+  creating $macc model for \307 ($add).
+  creating $macc model for \308 ($add).
+  creating $macc model for \309 ($add).
+  creating $macc model for \310 ($add).
+  creating $macc model for \311 ($add).
+  creating $macc model for \312 ($add).
+  creating $macc model for \313 ($add).
+  creating $macc model for \314 ($add).
+  creating $macc model for \315 ($add).
+  creating $macc model for \316 ($add).
+  creating $macc model for \317 ($add).
+  creating $macc model for \318 ($add).
+  creating $macc model for \319 ($add).
+  creating $macc model for \320 ($add).
+  creating $macc model for \321 ($add).
+  creating $macc model for \322 ($add).
+  creating $macc model for \323 ($add).
+  creating $macc model for \324 ($add).
+  creating $macc model for \325 ($add).
+  creating $macc model for \326 ($add).
+  creating $macc model for \327 ($add).
+  creating $macc model for \328 ($add).
+  creating $macc model for \329 ($add).
+  creating $macc model for \33 ($add).
+  creating $macc model for \330 ($add).
+  creating $macc model for \331 ($add).
+  creating $macc model for \332 ($add).
+  creating $macc model for \333 ($add).
+  creating $macc model for \384 ($add).
+  creating $macc model for \44 ($add).
+  creating $macc model for \711 ($sub).
+  creating $macc model for \832 ($sub).
+  creating $macc model for \921 ($add).
+  creating $macc model for \928 ($add).
+  creating $macc model for \929 ($add).
+  creating $macc model for \970 ($sub).
+  creating $macc model for \984 ($add).
+  creating $macc model for \987 ($sub).
+  merging $macc model for \928 into \921.
+  merging $macc model for \331 into \333.
+  merging $macc model for \328 into \333.
+  merging $macc model for \322 into \333.
+  merging $macc model for \310 into \333.
+  merging $macc model for \285 into \333.
+  merging $macc model for \235 into \333.
+  merging $macc model for \332 into \333.
+  merging $macc model for \330 into \333.
+  merging $macc model for \326 into \333.
+  merging $macc model for \318 into \333.
+  merging $macc model for \301 into \333.
+  merging $macc model for \267 into \333.
+  merging $macc model for \329 into \333.
+  merging $macc model for \324 into \333.
+  merging $macc model for \314 into \333.
+  merging $macc model for \293 into \333.
+  merging $macc model for \251 into \333.
+  merging $macc model for \323 into \333.
+  merging $macc model for \312 into \333.
+  merging $macc model for \289 into \333.
+  merging $macc model for \243 into \333.
+  merging $macc model for \311 into \333.
+  merging $macc model for \287 into \333.
+  merging $macc model for \239 into \333.
+  merging $macc model for \286 into \333.
+  merging $macc model for \237 into \333.
+  merging $macc model for \236 into \333.
+  merging $macc model for \309 into \333.
+  merging $macc model for \283 into \333.
+  merging $macc model for \327 into \333.
+  merging $macc model for \320 into \333.
+  merging $macc model for \305 into \333.
+  merging $macc model for \275 into \333.
+  merging $macc model for \319 into \333.
+  merging $macc model for \303 into \333.
+  merging $macc model for \271 into \333.
+  merging $macc model for \302 into \333.
+  merging $macc model for \269 into \333.
+  merging $macc model for \268 into \333.
+  merging $macc model for \325 into \333.
+  merging $macc model for \316 into \333.
+  merging $macc model for \297 into \333.
+  merging $macc model for \259 into \333.
+  merging $macc model for \315 into \333.
+  merging $macc model for \295 into \333.
+  merging $macc model for \255 into \333.
+  merging $macc model for \294 into \333.
+  merging $macc model for \253 into \333.
+  merging $macc model for \252 into \333.
+  merging $macc model for \313 into \333.
+  merging $macc model for \291 into \333.
+  merging $macc model for \247 into \333.
+  merging $macc model for \290 into \333.
+  merging $macc model for \245 into \333.
+  merging $macc model for \244 into \333.
+  merging $macc model for \288 into \333.
+  merging $macc model for \241 into \333.
+  merging $macc model for \240 into \333.
+  merging $macc model for \238 into \333.
+  merging $macc model for \284 into \333.
+  merging $macc model for \321 into \333.
+  merging $macc model for \307 into \333.
+  merging $macc model for \279 into \333.
+  merging $macc model for \306 into \333.
+  merging $macc model for \277 into \333.
+  merging $macc model for \276 into \333.
+  merging $macc model for \304 into \333.
+  merging $macc model for \273 into \333.
+  merging $macc model for \272 into \333.
+  merging $macc model for \270 into \333.
+  merging $macc model for \317 into \333.
+  merging $macc model for \299 into \333.
+  merging $macc model for \263 into \333.
+  merging $macc model for \298 into \333.
+  merging $macc model for \261 into \333.
+  merging $macc model for \260 into \333.
+  merging $macc model for \296 into \333.
+  merging $macc model for \257 into \333.
+  merging $macc model for \256 into \333.
+  merging $macc model for \254 into \333.
+  merging $macc model for \292 into \333.
+  merging $macc model for \249 into \333.
+  merging $macc model for \248 into \333.
+  merging $macc model for \246 into \333.
+  merging $macc model for \242 into \333.
+  merging $macc model for \308 into \333.
+  merging $macc model for \281 into \333.
+  merging $macc model for \280 into \333.
+  merging $macc model for \278 into \333.
+  merging $macc model for \274 into \333.
+  merging $macc model for \300 into \333.
+  merging $macc model for \265 into \333.
+  merging $macc model for \264 into \333.
+  merging $macc model for \262 into \333.
+  merging $macc model for \258 into \333.
+  merging $macc model for \250 into \333.
+  merging $macc model for \282 into \333.
+  merging $macc model for \266 into \333.
+  merging $macc model for \1211 into \1213.
+  merging $macc model for \1208 into \1213.
+  merging $macc model for \1202 into \1213.
+  merging $macc model for \1190 into \1213.
+  merging $macc model for \1165 into \1213.
+  merging $macc model for \1115 into \1213.
+  merging $macc model for \1212 into \1213.
+  merging $macc model for \1210 into \1213.
+  merging $macc model for \1206 into \1213.
+  merging $macc model for \1198 into \1213.
+  merging $macc model for \1181 into \1213.
+  merging $macc model for \1147 into \1213.
+  merging $macc model for \1209 into \1213.
+  merging $macc model for \1204 into \1213.
+  merging $macc model for \1194 into \1213.
+  merging $macc model for \1173 into \1213.
+  merging $macc model for \1131 into \1213.
+  merging $macc model for \1203 into \1213.
+  merging $macc model for \1192 into \1213.
+  merging $macc model for \1169 into \1213.
+  merging $macc model for \1123 into \1213.
+  merging $macc model for \1191 into \1213.
+  merging $macc model for \1167 into \1213.
+  merging $macc model for \1119 into \1213.
+  merging $macc model for \1166 into \1213.
+  merging $macc model for \1117 into \1213.
+  merging $macc model for \1116 into \1213.
+  merging $macc model for \1189 into \1213.
+  merging $macc model for \1163 into \1213.
+  merging $macc model for \1207 into \1213.
+  merging $macc model for \1200 into \1213.
+  merging $macc model for \1185 into \1213.
+  merging $macc model for \1155 into \1213.
+  merging $macc model for \1199 into \1213.
+  merging $macc model for \1183 into \1213.
+  merging $macc model for \1151 into \1213.
+  merging $macc model for \1182 into \1213.
+  merging $macc model for \1149 into \1213.
+  merging $macc model for \1148 into \1213.
+  merging $macc model for \1205 into \1213.
+  merging $macc model for \1196 into \1213.
+  merging $macc model for \1177 into \1213.
+  merging $macc model for \1139 into \1213.
+  merging $macc model for \1195 into \1213.
+  merging $macc model for \1175 into \1213.
+  merging $macc model for \1135 into \1213.
+  merging $macc model for \1174 into \1213.
+  merging $macc model for \1133 into \1213.
+  merging $macc model for \1132 into \1213.
+  merging $macc model for \1193 into \1213.
+  merging $macc model for \1171 into \1213.
+  merging $macc model for \1127 into \1213.
+  merging $macc model for \1170 into \1213.
+  merging $macc model for \1125 into \1213.
+  merging $macc model for \1124 into \1213.
+  merging $macc model for \1168 into \1213.
+  merging $macc model for \1121 into \1213.
+  merging $macc model for \1120 into \1213.
+  merging $macc model for \1118 into \1213.
+  merging $macc model for \1164 into \1213.
+  merging $macc model for \1201 into \1213.
+  merging $macc model for \1187 into \1213.
+  merging $macc model for \1159 into \1213.
+  merging $macc model for \1186 into \1213.
+  merging $macc model for \1157 into \1213.
+  merging $macc model for \1156 into \1213.
+  merging $macc model for \1184 into \1213.
+  merging $macc model for \1153 into \1213.
+  merging $macc model for \1152 into \1213.
+  merging $macc model for \1150 into \1213.
+  merging $macc model for \1197 into \1213.
+  merging $macc model for \1179 into \1213.
+  merging $macc model for \1143 into \1213.
+  merging $macc model for \1178 into \1213.
+  merging $macc model for \1141 into \1213.
+  merging $macc model for \1140 into \1213.
+  merging $macc model for \1176 into \1213.
+  merging $macc model for \1137 into \1213.
+  merging $macc model for \1136 into \1213.
+  merging $macc model for \1134 into \1213.
+  merging $macc model for \1172 into \1213.
+  merging $macc model for \1129 into \1213.
+  merging $macc model for \1128 into \1213.
+  merging $macc model for \1126 into \1213.
+  merging $macc model for \1122 into \1213.
+  merging $macc model for \1188 into \1213.
+  merging $macc model for \1161 into \1213.
+  merging $macc model for \1160 into \1213.
+  merging $macc model for \1158 into \1213.
+  merging $macc model for \1154 into \1213.
+  merging $macc model for \1180 into \1213.
+  merging $macc model for \1145 into \1213.
+  merging $macc model for \1144 into \1213.
+  merging $macc model for \1142 into \1213.
+  merging $macc model for \1138 into \1213.
+  merging $macc model for \1130 into \1213.
+  merging $macc model for \1162 into \1213.
+  merging $macc model for \1146 into \1213.
+  merging $macc model for \1213 into \1011.
+  creating $alu model for $macc \384.
+  creating $alu model for $macc \1843.
+  creating $alu model for $macc \1479.
+  creating $alu model for $macc \1793.
+  creating $alu model for $macc \832.
+  creating $alu model for $macc \970.
+  creating $alu model for $macc \1501.
+  creating $alu model for $macc \1465.
+  creating $alu model for $macc \1947.
+  creating $alu model for $macc \1248.
+  creating $alu model for $macc \1499.
+  creating $alu model for $macc \929.
+  creating $alu model for $macc \1763.
+  creating $alu model for $macc \984.
+  creating $alu model for $macc \1481.
+  creating $alu model for $macc \1748.
+  creating $alu model for $macc \1404.
+  creating $alu model for $macc \1430.
+  creating $alu model for $macc \1778.
+  creating $alu model for $macc \33.
+  creating $alu model for $macc \1733.
+  creating $alu model for $macc \1282.
+  creating $alu model for $macc \1924.
+  creating $alu model for $macc \1813.
+  creating $alu model for $macc \44.
+  creating $alu model for $macc \987.
+  creating $alu model for $macc \711.
+  creating $macc cell for \921: $auto$alumacc.cc:365:replace_macc$1398
+  creating $macc cell for \333: $auto$alumacc.cc:365:replace_macc$1399
+  creating $macc cell for \1011: $auto$alumacc.cc:365:replace_macc$1400
+  creating $alu model for \1476 ($gt): new $alu
+  creating $alu model for \1496 ($gt): new $alu
+  creating $alu model for \1811 ($gt): new $alu
+  creating $alu model for \344 ($lt): new $alu
+  creating $alu model for \346 ($gt): new $alu
+  creating $alu model for \61 ($ge): new $alu
+  creating $alu model for \63 ($ge): new $alu
+  creating $alu model for \981 ($gt): new $alu
+  creating $alu cell for \981: $auto$alumacc.cc:485:replace_alu$1409
+  creating $alu cell for \63: $auto$alumacc.cc:485:replace_alu$1414
+  creating $alu cell for \61: $auto$alumacc.cc:485:replace_alu$1425
+  creating $alu cell for \346: $auto$alumacc.cc:485:replace_alu$1436
+  creating $alu cell for \344: $auto$alumacc.cc:485:replace_alu$1443
+  creating $alu cell for \1811: $auto$alumacc.cc:485:replace_alu$1456
+  creating $alu cell for \711: $auto$alumacc.cc:485:replace_alu$1463
+  creating $alu cell for \987: $auto$alumacc.cc:485:replace_alu$1466
+  creating $alu cell for \44: $auto$alumacc.cc:485:replace_alu$1469
+  creating $alu cell for \1813: $auto$alumacc.cc:485:replace_alu$1472
+  creating $alu cell for \1924: $auto$alumacc.cc:485:replace_alu$1475
+  creating $alu cell for \1282: $auto$alumacc.cc:485:replace_alu$1478
+  creating $alu cell for \1733: $auto$alumacc.cc:485:replace_alu$1481
+  creating $alu cell for \33: $auto$alumacc.cc:485:replace_alu$1484
+  creating $alu cell for \1778: $auto$alumacc.cc:485:replace_alu$1487
+  creating $alu cell for \1430: $auto$alumacc.cc:485:replace_alu$1490
+  creating $alu cell for \1404: $auto$alumacc.cc:485:replace_alu$1493
+  creating $alu cell for \1748: $auto$alumacc.cc:485:replace_alu$1496
+  creating $alu cell for \1481: $auto$alumacc.cc:485:replace_alu$1499
+  creating $alu cell for \984: $auto$alumacc.cc:485:replace_alu$1502
+  creating $alu cell for \1476: $auto$alumacc.cc:485:replace_alu$1505
+  creating $alu cell for \1763: $auto$alumacc.cc:485:replace_alu$1510
+  creating $alu cell for \929: $auto$alumacc.cc:485:replace_alu$1513
+  creating $alu cell for \1499: $auto$alumacc.cc:485:replace_alu$1516
+  creating $alu cell for \1248: $auto$alumacc.cc:485:replace_alu$1519
+  creating $alu cell for \1947: $auto$alumacc.cc:485:replace_alu$1522
+  creating $alu cell for \1465: $auto$alumacc.cc:485:replace_alu$1525
+  creating $alu cell for \1501: $auto$alumacc.cc:485:replace_alu$1528
+  creating $alu cell for \970: $auto$alumacc.cc:485:replace_alu$1531
+  creating $alu cell for \832: $auto$alumacc.cc:485:replace_alu$1534
+  creating $alu cell for \1496: $auto$alumacc.cc:485:replace_alu$1537
+  creating $alu cell for \1793: $auto$alumacc.cc:485:replace_alu$1542
+  creating $alu cell for \1479: $auto$alumacc.cc:485:replace_alu$1545
+  creating $alu cell for \1843: $auto$alumacc.cc:485:replace_alu$1548
+  creating $alu cell for \384: $auto$alumacc.cc:485:replace_alu$1551
+  created 35 $alu and 3 $macc cells.
+
+2.13. Executing SHARE pass (SAT-based resource sharing).
+
+2.14. Executing OPT pass (performing simple optimizations).
+
+2.14.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~3 debug messages>
+
+2.14.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.14.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~35 debug messages>
+
+2.14.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.14.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.14.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.14.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 201 unused cells and 605 unused wires.
+<suppressed ~799 debug messages>
+
+2.14.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.14.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.14.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~35 debug messages>
+
+2.14.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.14.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.14.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.14.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.14.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.14.16. Finished OPT passes. (There is nothing left to do.)
+
+2.15. Executing MEMORY pass.
+
+2.15.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+2.15.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+2.15.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+2.15.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+2.15.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+2.15.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.15.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+2.15.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+2.15.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.15.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+2.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.17. Executing OPT pass (performing simple optimizations).
+
+2.17.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~179 debug messages>
+
+2.17.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.17.3. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $auto$ff.cc:266:slice$1331 ($adffe) from module topEntity (D = \result_4 [3:0], Q = \result_5 [3:0]).
+Adding EN signal on $auto$ff.cc:266:slice$1330 ($adffe) from module topEntity (D = \result_6 [3:0], Q = \result_7 [3:0]).
+
+2.17.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 12 unused cells and 31 unused wires.
+<suppressed ~13 debug messages>
+
+2.17.5. Rerunning OPT passes. (Removed registers in this run.)
+
+2.17.6. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~2 debug messages>
+
+2.17.7. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.17.8. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.17.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+2.17.10. Finished fast OPT passes.
+
+2.18. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+2.19. Executing OPT pass (performing simple optimizations).
+
+2.19.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.19.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.19.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~32 debug messages>
+
+2.19.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+    Consolidated identical input bits for $mux cell \1238:
+      Old ports: A=\window_0 [6471:72], B={ \\c$t_case_alt_2\ [6463:6400] \window_0 [6407:72] }, Y=\\c$t_case_alt_1\
+      New ports: A=\window_0 [6471:6408], B=\\c$t_case_alt_2\ [6463:6400], Y=\\c$t_case_alt_1\ [6399:6336]
+      New connections: \\c$t_case_alt_1\ [6335:0] = \window_0 [6407:72]
+    Consolidated identical input bits for $mux cell \1477:
+      Old ports: A=\\c$app_arg_11\, B={ $auto$ghdl.cc:806:import_module$411 [7:1] \\c$app_arg_11\ [0] }, Y=\result_40
+      New ports: A=\\c$app_arg_11\ [7:1], B=$auto$ghdl.cc:806:import_module$411 [7:1], Y=\result_40 [7:1]
+      New connections: \result_40 [0] = \\c$app_arg_11\ [0]
+    Consolidated identical input bits for $mux cell \1497:
+      Old ports: A=\\c$app_arg_12\, B={ $auto$ghdl.cc:806:import_module$417 [7:1] \\c$app_arg_12\ [0] }, Y=\result_41
+      New ports: A=\\c$app_arg_12\ [7:1], B=$auto$ghdl.cc:806:import_module$417 [7:1], Y=\result_41 [7:1]
+      New connections: \result_41 [0] = \\c$app_arg_12\ [0]
+    Consolidated identical input bits for $mux cell \31:
+      Old ports: A={ $auto$ghdl.cc:806:import_module$2 [63:4] 4'x }, B=64'0000000000000000000000000000000000000000000000000000011111010000, Y=\result_4
+      New ports: A={ $auto$ghdl.cc:806:import_module$2 [63:4] 1'x }, B=61'0000000000000000000000000000000000000000000000000000011111010, Y={ \result_4 [63:4] \result_4 [0] }
+      New connections: \result_4 [3:1] = { \result_4 [0] \result_4 [0] \result_4 [0] }
+    Consolidated identical input bits for $mux cell \373:
+      Old ports: A=\window [6471:72], B={ \\c$t_case_alt_0\ [6463:6400] \window [6407:72] }, Y=\\c$t_case_alt\
+      New ports: A=\window [6471:6408], B=\\c$t_case_alt_0\ [6463:6400], Y=\\c$t_case_alt\ [6399:6336]
+      New connections: \\c$t_case_alt\ [6335:0] = \window [6407:72]
+    Consolidated identical input bits for $mux cell \42:
+      Old ports: A={ $auto$ghdl.cc:806:import_module$4 [63:4] 4'x }, B=64'0000000000000000000000000000000000000000000000000000011111010000, Y=\result_6
+      New ports: A={ $auto$ghdl.cc:806:import_module$4 [63:4] 1'x }, B=61'0000000000000000000000000000000000000000000000000000011111010, Y={ \result_6 [63:4] \result_6 [0] }
+      New connections: \result_6 [3:1] = { \result_6 [0] \result_6 [0] \result_6 [0] }
+    Consolidated identical input bits for $mux cell \982:
+      Old ports: A={ \\c$app_arg_8\ [7:1] \iteratei_3.iteratei_ho1_0_res_3 [8] }, B={ $auto$ghdl.cc:806:import_module$258 [7:1] \iteratei_3.iteratei_ho1_0_res_3 [8] }, Y=\result_28
+      New ports: A=\\c$app_arg_8\ [7:1], B=$auto$ghdl.cc:806:import_module$258 [7:1], Y=\result_28 [7:1]
+      New connections: \result_28 [0] = \iteratei_3.iteratei_ho1_0_res_3 [8]
+  Optimizing cells in module \topEntity.
+Performed a total of 7 changes.
+
+2.19.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.19.6. Executing OPT_SHARE pass.
+
+2.19.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.19.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.19.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.19.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+2.19.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \topEntity..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~32 debug messages>
+
+2.19.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \topEntity.
+Performed a total of 0 changes.
+
+2.19.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.19.14. Executing OPT_SHARE pass.
+
+2.19.15. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.19.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+
+2.19.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+
+2.19.18. Finished OPT passes. (There is nothing left to do.)
+
+2.20. Executing TECHMAP pass (map to technology primitives).
+
+2.20.1. Executing Verilog-2005 frontend: /usr/local/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/usr/local/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `\$__div_mod_u'.
+Generating RTLIL representation for module `\$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `\$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Successfully finished Verilog frontend.
+
+2.20.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $adffe.
+Using extmapper simplemap for cells of type $xor.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $ne.
+Using extmapper simplemap for cells of type $mux.
+Using template $paramod$c3cd1564c35d873179656addd6052d7ea8b6d991\_90_alu for cells of type $alu.
+Using template $paramod$54969db7f41ab9ffc93887c2d8e2d7f68e10b42f\_90_alu for cells of type $alu.
+Using template $paramod$00819ee312535487c5f9630c77090a19bd4c925f\_90_alu for cells of type $alu.
+Using template $paramod$535aa88649f17d946763c5e2788469ae9c842d7a\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $dffe.
+Using extmapper maccmap for cells of type $macc.
+  add \x_6 (64 bits, unsigned)
+  add \window_0 [6407:6344] (64 bits, unsigned)
+  add \window_0 [2311:2248] (64 bits, unsigned)
+  add \window_0 [4359:4296] (64 bits, unsigned)
+  add \window_0 [5383:5320] (64 bits, unsigned)
+  add \window_0 [5895:5832] (64 bits, unsigned)
+  add \window_0 [6151:6088] (64 bits, unsigned)
+  add \window_0 [6279:6216] (64 bits, unsigned)
+  add \window_0 [6343:6280] (64 bits, unsigned)
+  add \window_0 [263:200] (64 bits, unsigned)
+  add \window_0 [1287:1224] (64 bits, unsigned)
+  add \window_0 [1799:1736] (64 bits, unsigned)
+  add \window_0 [2055:1992] (64 bits, unsigned)
+  add \window_0 [2183:2120] (64 bits, unsigned)
+  add \window_0 [2247:2184] (64 bits, unsigned)
+  add \window_0 [3335:3272] (64 bits, unsigned)
+  add \window_0 [3847:3784] (64 bits, unsigned)
+  add \window_0 [4103:4040] (64 bits, unsigned)
+  add \window_0 [4231:4168] (64 bits, unsigned)
+  add \window_0 [4295:4232] (64 bits, unsigned)
+  add \window_0 [4871:4808] (64 bits, unsigned)
+  add \window_0 [5127:5064] (64 bits, unsigned)
+  add \window_0 [5255:5192] (64 bits, unsigned)
+  add \window_0 [5319:5256] (64 bits, unsigned)
+  add \window_0 [5639:5576] (64 bits, unsigned)
+  add \window_0 [5767:5704] (64 bits, unsigned)
+  add \window_0 [5831:5768] (64 bits, unsigned)
+  add \window_0 [6023:5960] (64 bits, unsigned)
+  add \window_0 [6087:6024] (64 bits, unsigned)
+  add \window_0 [6215:6152] (64 bits, unsigned)
+  add \window_0 [135:72] (64 bits, unsigned)
+  add \window_0 [199:136] (64 bits, unsigned)
+  add \window_0 [775:712] (64 bits, unsigned)
+  add \window_0 [1031:968] (64 bits, unsigned)
+  add \window_0 [1159:1096] (64 bits, unsigned)
+  add \window_0 [1223:1160] (64 bits, unsigned)
+  add \window_0 [1543:1480] (64 bits, unsigned)
+  add \window_0 [1671:1608] (64 bits, unsigned)
+  add \window_0 [1735:1672] (64 bits, unsigned)
+  add \window_0 [1927:1864] (64 bits, unsigned)
+  add \window_0 [1991:1928] (64 bits, unsigned)
+  add \window_0 [2119:2056] (64 bits, unsigned)
+  add \window_0 [2823:2760] (64 bits, unsigned)
+  add \window_0 [3079:3016] (64 bits, unsigned)
+  add \window_0 [3207:3144] (64 bits, unsigned)
+  add \window_0 [3271:3208] (64 bits, unsigned)
+  add \window_0 [3591:3528] (64 bits, unsigned)
+  add \window_0 [3719:3656] (64 bits, unsigned)
+  add \window_0 [3783:3720] (64 bits, unsigned)
+  add \window_0 [3975:3912] (64 bits, unsigned)
+  add \window_0 [4039:3976] (64 bits, unsigned)
+  add \window_0 [4167:4104] (64 bits, unsigned)
+  add \window_0 [4615:4552] (64 bits, unsigned)
+  add \window_0 [4743:4680] (64 bits, unsigned)
+  add \window_0 [4807:4744] (64 bits, unsigned)
+  add \window_0 [4999:4936] (64 bits, unsigned)
+  add \window_0 [5063:5000] (64 bits, unsigned)
+  add \window_0 [5191:5128] (64 bits, unsigned)
+  add \window_0 [5511:5448] (64 bits, unsigned)
+  add \window_0 [5575:5512] (64 bits, unsigned)
+  add \window_0 [5703:5640] (64 bits, unsigned)
+  add \window_0 [5959:5896] (64 bits, unsigned)
+  add \window_0 [71:8] (64 bits, unsigned)
+  add \window_0 [519:456] (64 bits, unsigned)
+  add \window_0 [647:584] (64 bits, unsigned)
+  add \window_0 [711:648] (64 bits, unsigned)
+  add \window_0 [903:840] (64 bits, unsigned)
+  add \window_0 [967:904] (64 bits, unsigned)
+  add \window_0 [1095:1032] (64 bits, unsigned)
+  add \window_0 [1415:1352] (64 bits, unsigned)
+  add \window_0 [1479:1416] (64 bits, unsigned)
+  add \window_0 [1607:1544] (64 bits, unsigned)
+  add \window_0 [1863:1800] (64 bits, unsigned)
+  add \window_0 [2567:2504] (64 bits, unsigned)
+  add \window_0 [2695:2632] (64 bits, unsigned)
+  add \window_0 [2759:2696] (64 bits, unsigned)
+  add \window_0 [2951:2888] (64 bits, unsigned)
+  add \window_0 [3015:2952] (64 bits, unsigned)
+  add \window_0 [3143:3080] (64 bits, unsigned)
+  add \window_0 [3463:3400] (64 bits, unsigned)
+  add \window_0 [3527:3464] (64 bits, unsigned)
+  add \window_0 [3655:3592] (64 bits, unsigned)
+  add \window_0 [3911:3848] (64 bits, unsigned)
+  add \window_0 [4487:4424] (64 bits, unsigned)
+  add \window_0 [4551:4488] (64 bits, unsigned)
+  add \window_0 [4679:4616] (64 bits, unsigned)
+  add \window_0 [4935:4872] (64 bits, unsigned)
+  add \window_0 [5447:5384] (64 bits, unsigned)
+  add \window_0 [391:328] (64 bits, unsigned)
+  add \window_0 [455:392] (64 bits, unsigned)
+  add \window_0 [583:520] (64 bits, unsigned)
+  add \window_0 [839:776] (64 bits, unsigned)
+  add \window_0 [1351:1288] (64 bits, unsigned)
+  add \window_0 [2439:2376] (64 bits, unsigned)
+  add \window_0 [2503:2440] (64 bits, unsigned)
+  add \window_0 [2631:2568] (64 bits, unsigned)
+  add \window_0 [2887:2824] (64 bits, unsigned)
+  add \window_0 [3399:3336] (64 bits, unsigned)
+  add \window_0 [4423:4360] (64 bits, unsigned)
+  add \window_0 [327:264] (64 bits, unsigned)
+  add \window_0 [2375:2312] (64 bits, unsigned)
+Using template $paramod$c66b509f0dbff04a70da2bd22d8e6a343f873dbd\_90_alu for cells of type $alu.
+Using template $paramod$fe6b3e538e4fdd86350a508c46c939e9ba7c63ef\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $reduce_or.
+  add \x_3 (64 bits, unsigned)
+  add \y_0 (64 bits, unsigned)
+  add \\c$out1_case_alt\ (64 bits, unsigned)
+Using extmapper simplemap for cells of type $eq.
+Using template $paramod$10ed987432f06055e5279101f9ec60a49861b43c\_90_alu for cells of type $alu.
+Using template $paramod$38e8498ccdc425801fe5312e427e3cf0d9089c58\_90_alu for cells of type $alu.
+  add \window [6407:6344] (64 bits, unsigned)
+  add \window [2311:2248] (64 bits, unsigned)
+  add \window [4359:4296] (64 bits, unsigned)
+  add \window [5383:5320] (64 bits, unsigned)
+  add \window [5895:5832] (64 bits, unsigned)
+  add \window [6151:6088] (64 bits, unsigned)
+  add \window [6279:6216] (64 bits, unsigned)
+  add \window [6343:6280] (64 bits, unsigned)
+  add \window [263:200] (64 bits, unsigned)
+  add \window [1287:1224] (64 bits, unsigned)
+  add \window [1799:1736] (64 bits, unsigned)
+  add \window [2055:1992] (64 bits, unsigned)
+  add \window [2183:2120] (64 bits, unsigned)
+  add \window [2247:2184] (64 bits, unsigned)
+  add \window [3335:3272] (64 bits, unsigned)
+  add \window [3847:3784] (64 bits, unsigned)
+  add \window [4103:4040] (64 bits, unsigned)
+  add \window [4231:4168] (64 bits, unsigned)
+  add \window [4295:4232] (64 bits, unsigned)
+  add \window [4871:4808] (64 bits, unsigned)
+  add \window [5127:5064] (64 bits, unsigned)
+  add \window [5255:5192] (64 bits, unsigned)
+  add \window [5319:5256] (64 bits, unsigned)
+  add \window [5639:5576] (64 bits, unsigned)
+  add \window [5767:5704] (64 bits, unsigned)
+  add \window [5831:5768] (64 bits, unsigned)
+  add \window [6023:5960] (64 bits, unsigned)
+  add \window [6087:6024] (64 bits, unsigned)
+  add \window [6215:6152] (64 bits, unsigned)
+  add \window [135:72] (64 bits, unsigned)
+  add \window [199:136] (64 bits, unsigned)
+  add \window [775:712] (64 bits, unsigned)
+  add \window [1031:968] (64 bits, unsigned)
+  add \window [1159:1096] (64 bits, unsigned)
+  add \window [1223:1160] (64 bits, unsigned)
+  add \window [1543:1480] (64 bits, unsigned)
+  add \window [1671:1608] (64 bits, unsigned)
+  add \window [1735:1672] (64 bits, unsigned)
+  add \window [1927:1864] (64 bits, unsigned)
+  add \window [1991:1928] (64 bits, unsigned)
+  add \window [2119:2056] (64 bits, unsigned)
+  add \window [2823:2760] (64 bits, unsigned)
+  add \window [3079:3016] (64 bits, unsigned)
+  add \window [3207:3144] (64 bits, unsigned)
+  add \window [3271:3208] (64 bits, unsigned)
+  add \window [3591:3528] (64 bits, unsigned)
+  add \window [3719:3656] (64 bits, unsigned)
+  add \window [3783:3720] (64 bits, unsigned)
+  add \window [3975:3912] (64 bits, unsigned)
+  add \window [4039:3976] (64 bits, unsigned)
+  add \window [4167:4104] (64 bits, unsigned)
+  add \window [4615:4552] (64 bits, unsigned)
+  add \window [4743:4680] (64 bits, unsigned)
+  add \window [4807:4744] (64 bits, unsigned)
+  add \window [4999:4936] (64 bits, unsigned)
+  add \window [5063:5000] (64 bits, unsigned)
+  add \window [5191:5128] (64 bits, unsigned)
+  add \window [5511:5448] (64 bits, unsigned)
+  add \window [5575:5512] (64 bits, unsigned)
+  add \window [5703:5640] (64 bits, unsigned)
+  add \window [5959:5896] (64 bits, unsigned)
+  add \window [71:8] (64 bits, unsigned)
+  add \window [519:456] (64 bits, unsigned)
+  add \window [647:584] (64 bits, unsigned)
+  add \window [711:648] (64 bits, unsigned)
+  add \window [903:840] (64 bits, unsigned)
+  add \window [967:904] (64 bits, unsigned)
+  add \window [1095:1032] (64 bits, unsigned)
+  add \window [1415:1352] (64 bits, unsigned)
+  add \window [1479:1416] (64 bits, unsigned)
+  add \window [1607:1544] (64 bits, unsigned)
+  add \window [1863:1800] (64 bits, unsigned)
+  add \window [2567:2504] (64 bits, unsigned)
+  add \window [2695:2632] (64 bits, unsigned)
+  add \window [2759:2696] (64 bits, unsigned)
+  add \window [2951:2888] (64 bits, unsigned)
+  add \window [3015:2952] (64 bits, unsigned)
+  add \window [3143:3080] (64 bits, unsigned)
+  add \window [3463:3400] (64 bits, unsigned)
+  add \window [3527:3464] (64 bits, unsigned)
+  add \window [3655:3592] (64 bits, unsigned)
+  add \window [3911:3848] (64 bits, unsigned)
+  add \window [4487:4424] (64 bits, unsigned)
+  add \window [4551:4488] (64 bits, unsigned)
+  add \window [4679:4616] (64 bits, unsigned)
+  add \window [4935:4872] (64 bits, unsigned)
+  add \window [5447:5384] (64 bits, unsigned)
+  add \window [391:328] (64 bits, unsigned)
+  add \window [455:392] (64 bits, unsigned)
+  add \window [583:520] (64 bits, unsigned)
+  add \window [839:776] (64 bits, unsigned)
+  add \window [1351:1288] (64 bits, unsigned)
+  add \window [2439:2376] (64 bits, unsigned)
+  add \window [2503:2440] (64 bits, unsigned)
+  add \window [2631:2568] (64 bits, unsigned)
+  add \window [2887:2824] (64 bits, unsigned)
+  add \window [3399:3336] (64 bits, unsigned)
+  add \window [4423:4360] (64 bits, unsigned)
+  add \window [327:264] (64 bits, unsigned)
+  add \window [2375:2312] (64 bits, unsigned)
+Using template $paramod$403a3c2fa431a154c52a6a5429d7a6260b5d144f\_90_alu for cells of type $alu.
+Using template $paramod$c4905825bb8ecc38b98eb4167e8b007447af7884\_90_alu for cells of type $alu.
+Using template $paramod$7e708ae28ab761f11d0fb59d3ffc72f6a4baf5d9\_90_alu for cells of type $alu.
+Using template $paramod$89e6018118041664448800cd912a3b31e5316ca7\_90_alu for cells of type $alu.
+Using template $paramod$9cfaa5b7a62bd2391802c1be28bdae97aa527b15\_90_alu for cells of type $alu.
+Using template $paramod$039520c137afc9cd69dd56c3fb11a4e1fbe5f664\_90_alu for cells of type $alu.
+Using template $paramod$a950948e19702336540a1f557d0a91306bdb9188\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $logic_not.
+Using template $paramod$cc80a4e89b0341cb117f5d28b0e7244620640141\_90_alu for cells of type $alu.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000001000 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000001000000 for cells of type $lcu.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000111100 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000001000000 for cells of type $fa.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000000111 for cells of type $lcu.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000000010 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~8120 debug messages>
+
+2.21. Executing OPT pass (performing simple optimizations).
+
+2.21.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~6205 debug messages>
+
+2.21.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+<suppressed ~2247 debug messages>
+Removed a total of 749 cells.
+
+2.21.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.21.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 2111 unused cells and 5237 unused wires.
+<suppressed ~2132 debug messages>
+
+2.21.5. Finished fast OPT passes.
+
+2.22. Executing ABC pass (technology mapping using ABC).
+
+2.22.1. Extracting gate netlist of module `\topEntity' to `<abc-temp-dir>/input.blif'..
+Replacing 12811 occurrences of constant undef bits with constant zero bits
+Extracted 82825 gates and 96919 wires to a netlist network with 14091 inputs and 13616 outputs.
+
+2.22.1.1. Executing ABC.
+Running ABC command: "<yosys-exe-dir>/yosys-abc" -s -f <abc-temp-dir>/abc.script 2>&1
+ABC: ABC command line: "source <abc-temp-dir>/abc.script".
+ABC: 
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: Entered genlib library with 13 gates from file "<abc-temp-dir>/stdcells.genlib".
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+2.22.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:    14070
+ABC RESULTS:               NOT cells:     2269
+ABC RESULTS:              XNOR cells:     9531
+ABC RESULTS:              NAND cells:     3173
+ABC RESULTS:               MUX cells:     1185
+ABC RESULTS:             ORNOT cells:      775
+ABC RESULTS:                OR cells:     8463
+ABC RESULTS:               NOR cells:     4916
+ABC RESULTS:            ANDNOT cells:    23061
+ABC RESULTS:               XOR cells:    16878
+ABC RESULTS:              ZERO cells:        2
+ABC RESULTS:        internal signals:    69212
+ABC RESULTS:           input signals:    14091
+ABC RESULTS:          output signals:    13616
+Removing temp directory.
+
+2.23. Executing OPT pass (performing simple optimizations).
+
+2.23.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~273 debug messages>
+
+2.23.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+<suppressed ~219 debug messages>
+Removed a total of 73 cells.
+
+2.23.3. Executing OPT_DFF pass (perform DFF optimizations).
+Setting constant 0-bit at position 0 on $auto$ff.cc:266:slice$31302 ($_DFFE_PP0P_) from module topEntity.
+Setting constant 0-bit at position 0 on $auto$ff.cc:266:slice$31306 ($_DFFE_PP0P_) from module topEntity.
+
+2.23.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 7 unused cells and 31204 unused wires.
+<suppressed ~83 debug messages>
+
+2.23.5. Rerunning OPT passes. (Removed registers in this run.)
+
+2.23.6. Executing OPT_EXPR pass (perform const folding).
+Optimizing module topEntity.
+<suppressed ~2 debug messages>
+
+2.23.7. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\topEntity'.
+Removed a total of 0 cells.
+
+2.23.8. Executing OPT_DFF pass (perform DFF optimizations).
+
+2.23.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \topEntity..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+2.23.10. Finished fast OPT passes.
+
+2.24. Executing HIERARCHY pass (managing design hierarchy).
+
+2.24.1. Analyzing design hierarchy..
+Top module:  \topEntity
+
+2.24.2. Analyzing design hierarchy..
+Top module:  \topEntity
+Removed 0 unused modules.
+
+2.25. Printing statistics.
+
+=== topEntity ===
+
+   Number of wires:              71466
+   Number of wire bits:         278874
+   Number of public wires:         826
+   Number of public wire bits:  208234
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:              98493
+     $_ANDNOT_                   23057
+     $_AND_                      14069
+     $_DFFE_PP0P_                14010
+     $_DFFE_PP1P_                   39
+     $_DFFE_PP_                    205
+     $_MUX_                       1185
+     $_NAND_                      3173
+     $_NOR_                       4847
+     $_NOT_                       2264
+     $_ORNOT_                      775
+     $_OR_                        8460
+     $_XNOR_                      9531
+     $_XOR_                      16878
+
+2.26. Executing CHECK pass (checking for obvious problems).
+Checking module topEntity...
+Found and reported 0 problems.
+
+3. Printing statistics.
+
+=== topEntity ===
+
+   Number of wires:              71466
+   Number of wire bits:         278874
+   Number of public wires:         826
+   Number of public wire bits:  208234
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:              98493
+     $_ANDNOT_                   23057
+     $_AND_                      14069
+     $_DFFE_PP0P_                14010
+     $_DFFE_PP1P_                   39
+     $_DFFE_PP_                    205
+     $_MUX_                       1185
+     $_NAND_                      3173
+     $_NOR_                       4847
+     $_NOT_                       2264
+     $_ORNOT_                      775
+     $_OR_                        8460
+     $_XNOR_                      9531
+     $_XOR_                      16878
+
+End of script. Logfile hash: 7f52709cdc, CPU: user 191.11s system 0.63s, MEM: 450.72 MB peak
+Yosys 0.36+42 (git sha1 70d35314d, clang 11.0.1-2 -fPIC -Os)
+Time spent: 71% 20x opt_dff (143 sec), 8% 26x opt_clean (16 sec), ...
