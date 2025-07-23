@@ -1,0 +1,12 @@
+
+type, evaluation_layer, name
+------------------------------
+input0, 0, gps_x
+input1, 0, num_satellites
+input2, 0, imu_acc_x
+
+type, periodic/event-based, evalution_layer, name
+------------------------------
+output0, periodic, 1, gps_emitted_enough
+output1, event-based, 1, few_satellites
+output2, periodic, 1, is_unreliable_gps_data

@@ -1,0 +1,12 @@
+
+type, evaluation_layer, name
+------------------------------
+input0, 0, lat
+input1, 0, lon
+
+type, periodic/event-based, evalution_layer, name
+------------------------------
+output0, event-based, 1, distance
+output1, event-based, 2, closer
+output2, event-based, 3, trigger_closer
+output3, periodic, 1, is_good

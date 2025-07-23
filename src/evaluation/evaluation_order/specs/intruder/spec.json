@@ -1,0 +1,854 @@
+{
+  "inputs": [
+    {
+      "name": "lat",
+      "ty": {
+        "Int": "Int64"
+      },
+      "accessed_by": [
+        [
+          {
+            "Out": 0
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ]
+      ],
+      "aggregated_by": [],
+      "layer": {
+        "spawn": 0,
+        "evaluation": 0
+      },
+      "memory_bound": {
+        "Bounded": 1
+      },
+      "reference": {
+        "In": 0
+      }
+    },
+    {
+      "name": "lon",
+      "ty": {
+        "Int": "Int64"
+      },
+      "accessed_by": [
+        [
+          {
+            "Out": 0
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ]
+      ],
+      "aggregated_by": [],
+      "layer": {
+        "spawn": 0,
+        "evaluation": 0
+      },
+      "memory_bound": {
+        "Bounded": 1
+      },
+      "reference": {
+        "In": 1
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "name": "distance",
+      "kind": {
+        "NamedOutput": "distance"
+      },
+      "ty": {
+        "Int": "Int64"
+      },
+      "spawn": {
+        "expression": null,
+        "pacing": "Constant",
+        "condition": null
+      },
+      "eval": {
+        "clauses": [
+          {
+            "condition": null,
+            "expression": {
+              "kind": {
+                "ArithLog": [
+                  "Add",
+                  [
+                    {
+                      "kind": {
+                        "ArithLog": [
+                          "Sub",
+                          [
+                            {
+                              "kind": {
+                                "LoadConstant": {
+                                  "Int": 249
+                                }
+                              },
+                              "ty": {
+                                "Int": "Int64"
+                              }
+                            },
+                            {
+                              "kind": {
+                                "StreamAccess": {
+                                  "target": {
+                                    "In": 0
+                                  },
+                                  "parameters": [],
+                                  "access_kind": "Sync"
+                                }
+                              },
+                              "ty": {
+                                "Int": "Int64"
+                              }
+                            }
+                          ]
+                        ]
+                      },
+                      "ty": {
+                        "Int": "Int64"
+                      }
+                    },
+                    {
+                      "kind": {
+                        "ArithLog": [
+                          "Sub",
+                          [
+                            {
+                              "kind": {
+                                "LoadConstant": {
+                                  "Int": 23
+                                }
+                              },
+                              "ty": {
+                                "Int": "Int64"
+                              }
+                            },
+                            {
+                              "kind": {
+                                "StreamAccess": {
+                                  "target": {
+                                    "In": 1
+                                  },
+                                  "parameters": [],
+                                  "access_kind": "Sync"
+                                }
+                              },
+                              "ty": {
+                                "Int": "Int64"
+                              }
+                            }
+                          ]
+                        ]
+                      },
+                      "ty": {
+                        "Int": "Int64"
+                      }
+                    }
+                  ]
+                ]
+              },
+              "ty": {
+                "Int": "Int64"
+              }
+            },
+            "pacing": {
+              "Event": {
+                "Conjunction": [
+                  {
+                    "Stream": {
+                      "In": 0
+                    }
+                  },
+                  {
+                    "Stream": {
+                      "In": 1
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "eval_pacing": {
+          "Event": {
+            "Conjunction": [
+              {
+                "Stream": {
+                  "In": 0
+                }
+              },
+              {
+                "Stream": {
+                  "In": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "close": {
+        "condition": null,
+        "pacing": "Constant",
+        "has_self_reference": false
+      },
+      "accesses": [
+        [
+          {
+            "In": 0
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ],
+        [
+          {
+            "In": 1
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ]
+      ],
+      "accessed_by": [
+        [
+          {
+            "Out": 1
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "Offset": {
+                  "Past": 1
+                }
+              }
+            ],
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ],
+        [
+          {
+            "Out": 2
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ]
+      ],
+      "aggregated_by": [],
+      "memory_bound": {
+        "Bounded": 2
+      },
+      "layer": {
+        "spawn": 0,
+        "evaluation": 1
+      },
+      "reference": {
+        "Out": 0
+      },
+      "params": []
+    },
+    {
+      "name": "closer",
+      "kind": {
+        "NamedOutput": "closer"
+      },
+      "ty": "Bool",
+      "spawn": {
+        "expression": null,
+        "pacing": "Constant",
+        "condition": null
+      },
+      "eval": {
+        "clauses": [
+          {
+            "condition": null,
+            "expression": {
+              "kind": {
+                "ArithLog": [
+                  "Ge",
+                  [
+                    {
+                      "kind": {
+                        "Default": {
+                          "expr": {
+                            "kind": {
+                              "StreamAccess": {
+                                "target": {
+                                  "Out": 0
+                                },
+                                "parameters": [],
+                                "access_kind": {
+                                  "Offset": {
+                                    "Past": 1
+                                  }
+                                }
+                              }
+                            },
+                            "ty": {
+                              "Option": {
+                                "Int": "Int64"
+                              }
+                            }
+                          },
+                          "default": {
+                            "kind": {
+                              "StreamAccess": {
+                                "target": {
+                                  "Out": 0
+                                },
+                                "parameters": [],
+                                "access_kind": "Sync"
+                              }
+                            },
+                            "ty": {
+                              "Int": "Int64"
+                            }
+                          }
+                        }
+                      },
+                      "ty": {
+                        "Int": "Int64"
+                      }
+                    },
+                    {
+                      "kind": {
+                        "StreamAccess": {
+                          "target": {
+                            "Out": 0
+                          },
+                          "parameters": [],
+                          "access_kind": "Sync"
+                        }
+                      },
+                      "ty": {
+                        "Int": "Int64"
+                      }
+                    }
+                  ]
+                ]
+              },
+              "ty": "Bool"
+            },
+            "pacing": {
+              "Event": {
+                "Conjunction": [
+                  {
+                    "Stream": {
+                      "In": 0
+                    }
+                  },
+                  {
+                    "Stream": {
+                      "In": 1
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "eval_pacing": {
+          "Event": {
+            "Conjunction": [
+              {
+                "Stream": {
+                  "In": 0
+                }
+              },
+              {
+                "Stream": {
+                  "In": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "close": {
+        "condition": null,
+        "pacing": "Constant",
+        "has_self_reference": false
+      },
+      "accesses": [
+        [
+          {
+            "Out": 0
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "Offset": {
+                  "Past": 1
+                }
+              }
+            ],
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ]
+      ],
+      "accessed_by": [
+        [
+          {
+            "Out": 2
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ]
+      ],
+      "aggregated_by": [],
+      "memory_bound": {
+        "Bounded": 1
+      },
+      "layer": {
+        "spawn": 0,
+        "evaluation": 2
+      },
+      "reference": {
+        "Out": 1
+      },
+      "params": []
+    },
+    {
+      "name": "trigger_closer",
+      "kind": {
+        "NamedOutput": "trigger_closer"
+      },
+      "ty": "Bool",
+      "spawn": {
+        "expression": null,
+        "pacing": "Constant",
+        "condition": null
+      },
+      "eval": {
+        "clauses": [
+          {
+            "condition": null,
+            "expression": {
+              "kind": {
+                "ArithLog": [
+                  "And",
+                  [
+                    {
+                      "kind": {
+                        "StreamAccess": {
+                          "target": {
+                            "Out": 1
+                          },
+                          "parameters": [],
+                          "access_kind": "Sync"
+                        }
+                      },
+                      "ty": "Bool"
+                    },
+                    {
+                      "kind": {
+                        "ArithLog": [
+                          "Lt",
+                          [
+                            {
+                              "kind": {
+                                "StreamAccess": {
+                                  "target": {
+                                    "Out": 0
+                                  },
+                                  "parameters": [],
+                                  "access_kind": "Sync"
+                                }
+                              },
+                              "ty": {
+                                "Int": "Int64"
+                              }
+                            },
+                            {
+                              "kind": {
+                                "LoadConstant": {
+                                  "Int": 1
+                                }
+                              },
+                              "ty": {
+                                "Int": "Int64"
+                              }
+                            }
+                          ]
+                        ]
+                      },
+                      "ty": "Bool"
+                    }
+                  ]
+                ]
+              },
+              "ty": "Bool"
+            },
+            "pacing": {
+              "Event": {
+                "Conjunction": [
+                  {
+                    "Stream": {
+                      "In": 0
+                    }
+                  },
+                  {
+                    "Stream": {
+                      "In": 1
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "eval_pacing": {
+          "Event": {
+            "Conjunction": [
+              {
+                "Stream": {
+                  "In": 0
+                }
+              },
+              {
+                "Stream": {
+                  "In": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "close": {
+        "condition": null,
+        "pacing": "Constant",
+        "has_self_reference": false
+      },
+      "accesses": [
+        [
+          {
+            "Out": 0
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ],
+        [
+          {
+            "Out": 1
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              "Sync"
+            ]
+          ]
+        ]
+      ],
+      "accessed_by": [
+        [
+          {
+            "Out": 3
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "SlidingWindow": {
+                  "Sliding": 0
+                }
+              }
+            ]
+          ]
+        ]
+      ],
+      "aggregated_by": [
+        [
+          {
+            "Out": 3
+          },
+          {
+            "Sliding": 0
+          }
+        ]
+      ],
+      "memory_bound": {
+        "Bounded": 1
+      },
+      "layer": {
+        "spawn": 0,
+        "evaluation": 3
+      },
+      "reference": {
+        "Out": 2
+      },
+      "params": []
+    },
+    {
+      "name": "is_good",
+      "kind": {
+        "NamedOutput": "is_good"
+      },
+      "ty": "Bool",
+      "spawn": {
+        "expression": null,
+        "pacing": "Constant",
+        "condition": null
+      },
+      "eval": {
+        "clauses": [
+          {
+            "condition": null,
+            "expression": {
+              "kind": {
+                "ArithLog": [
+                  "Lt",
+                  [
+                    {
+                      "kind": {
+                        "StreamAccess": {
+                          "target": {
+                            "Out": 2
+                          },
+                          "parameters": [],
+                          "access_kind": {
+                            "SlidingWindow": {
+                              "Sliding": 0
+                            }
+                          }
+                        }
+                      },
+                      "ty": {
+                        "UInt": "UInt64"
+                      }
+                    },
+                    {
+                      "kind": {
+                        "LoadConstant": {
+                          "UInt": 5
+                        }
+                      },
+                      "ty": {
+                        "UInt": "UInt64"
+                      }
+                    }
+                  ]
+                ]
+              },
+              "ty": "Bool"
+            },
+            "pacing": {
+              "GlobalPeriodic": [
+                1000,
+                1
+              ]
+            }
+          }
+        ],
+        "eval_pacing": {
+          "GlobalPeriodic": [
+            1000,
+            1
+          ]
+        }
+      },
+      "close": {
+        "condition": null,
+        "pacing": "Constant",
+        "has_self_reference": false
+      },
+      "accesses": [
+        [
+          {
+            "Out": 2
+          },
+          [
+            [
+              {
+                "Eval": 0
+              },
+              {
+                "SlidingWindow": {
+                  "Sliding": 0
+                }
+              }
+            ]
+          ]
+        ]
+      ],
+      "accessed_by": [],
+      "aggregated_by": [],
+      "memory_bound": {
+        "Bounded": 1
+      },
+      "layer": {
+        "spawn": 0,
+        "evaluation": 1
+      },
+      "reference": {
+        "Out": 3
+      },
+      "params": []
+    }
+  ],
+  "time_driven": [
+    {
+      "reference": {
+        "Out": 3
+      },
+      "frequency": [
+        1000,
+        1
+      ],
+      "locality": "Global"
+    }
+  ],
+  "event_driven": [
+    {
+      "reference": {
+        "Out": 0
+      },
+      "ac": {
+        "Conjunction": [
+          {
+            "Stream": {
+              "In": 0
+            }
+          },
+          {
+            "Stream": {
+              "In": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "reference": {
+        "Out": 1
+      },
+      "ac": {
+        "Conjunction": [
+          {
+            "Stream": {
+              "In": 0
+            }
+          },
+          {
+            "Stream": {
+              "In": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "reference": {
+        "Out": 2
+      },
+      "ac": {
+        "Conjunction": [
+          {
+            "Stream": {
+              "In": 0
+            }
+          },
+          {
+            "Stream": {
+              "In": 1
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "discrete_windows": [],
+  "sliding_windows": [
+    {
+      "target": {
+        "Out": 2
+      },
+      "caller": {
+        "Out": 3
+      },
+      "duration": {
+        "secs": 0,
+        "nanos": 10000000
+      },
+      "num_buckets": {
+        "Bounded": 10
+      },
+      "bucket_size": {
+        "secs": 0,
+        "nanos": 1000000
+      },
+      "wait": false,
+      "op": "Count",
+      "reference": {
+        "Sliding": 0
+      },
+      "ty": {
+        "UInt": "UInt64"
+      }
+    }
+  ],
+  "instance_aggregations": [],
+  "triggers": []
+}

@@ -1,0 +1,20 @@
+
+type, evaluation_layer, name
+------------------------------
+input0, 0, acceleration_x
+input1, 0, gps_sats
+input2, 0, lat_gps
+
+type, periodic/event-based, evalution_layer, name
+------------------------------
+output0, periodic, 1, acceleration_x_periodic
+output1, periodic, 2, acceleration_x_rising
+output2, periodic, 2, acceleration_x_sinking
+output3, periodic, 3, acceleration_x_direction_change
+output4, periodic, 4, acceleration_x_changes
+output5, periodic, 5, trigger_acc
+output6, periodic, 1, gps_missed_beat
+output7, periodic, 1, gps_medium_loss
+output8, periodic, 1, gps_high_loss
+output9, periodic, 1, gps_very_high_loss
+output10, periodic, 1, trigger_gps_sats

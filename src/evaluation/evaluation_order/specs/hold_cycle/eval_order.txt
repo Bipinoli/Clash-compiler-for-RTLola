@@ -1,0 +1,15 @@
+
+type, evaluation_layer, name
+------------------------------
+input0, 0, x
+input1, 0, y
+
+type, periodic/event-based, evalution_layer, name
+------------------------------
+output0, event-based, 1, a
+output1, periodic, 1, b
+output2, periodic, 2, c
+output3, event-based, 1, d
+output4, periodic, 1, e
+output5, periodic, 2, f
+output6, periodic, 3, g
