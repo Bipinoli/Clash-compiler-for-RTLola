@@ -25,7 +25,8 @@ def plot_total_cells(results):
     ax.set_xticklabels([f"spec{i}" for i in range(1, num_specs + 1)])
     ax.legend()
     ax.set_ylim(0, 120000)
-    plt.show()
+    plt.savefig("plots/total_cells.svg", format="svg")
+    # plt.show()
 
 
 def plot_sequential_cells(results):
@@ -48,7 +49,8 @@ def plot_sequential_cells(results):
     ax.set_xticklabels([f"spec{i}" for i in range(1, num_specs + 1)])
     ax.legend()
     ax.set_ylim(0, 20000)
-    plt.show()
+    plt.savefig("plots/sequential_cells.svg", format="svg")
+    # plt.show()
 
 
 def plot_combinational_cells(results):
@@ -71,7 +73,8 @@ def plot_combinational_cells(results):
     ax.set_xticklabels([f"spec{i}" for i in range(1, num_specs + 1)])
     ax.legend()
     ax.set_ylim(0, 120000)
-    plt.show()
+    plt.savefig("plots/combinational_cells.svg", format="svg")
+    # plt.show()
 
 
 def plot_wire_bits(results):
@@ -94,7 +97,8 @@ def plot_wire_bits(results):
     ax.set_xticklabels([f"spec{i}" for i in range(1, num_specs + 1)])
     ax.legend()
     ax.set_ylim(0, 340000)
-    plt.show()
+    plt.savefig("plots/wire_bits.svg", format="svg")
+    # plt.show()
 
 
 def plot_wires(results):
@@ -117,7 +121,8 @@ def plot_wires(results):
     ax.set_xticklabels([f"spec{i}" for i in range(1, num_specs + 1)])
     ax.legend()
     ax.set_ylim(0, 100000)
-    plt.show()
+    plt.savefig("plots/wires.svg", format="svg")
+    # plt.show()
 
 
 def plot_public_wires(results):
@@ -140,12 +145,13 @@ def plot_public_wires(results):
     ax.set_xticklabels([f"spec{i}" for i in range(1, num_specs + 1)])
     ax.legend()
     ax.set_ylim(0, 2000)
-    plt.show()
+    plt.savefig("plots/public_wires.svg", format="svg")
+    # plt.show()
 
 
-# plot_total_cells(results)
-# plot_sequential_cells(results)
-# plot_combinational_cells(results)
-# plot_wire_bits(results)
-# plot_wires(results)
+plot_total_cells(results)
+plot_sequential_cells(results)
+plot_combinational_cells(results)
+plot_wire_bits(results)
+plot_wires(results)
 plot_public_wires(results)
