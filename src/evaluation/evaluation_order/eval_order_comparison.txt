@@ -1,0 +1,25 @@
+drone_example
+------------------------
+New:
+---
+0: input0, input2, input1
+1: output0
+2: output2, output1
+3: output3
+4: sw0
+5: output4, sw4, sw5, sw3, sw2, sw1, sw6
+6: output5, output8, output7, output6, output9, output10
+
+
+Old:
+---
+0: input0, input1, input2
+1: 
+    Event: [] 
+    Periodic: []
+2:
+3:
+4:
+5:
+
+
