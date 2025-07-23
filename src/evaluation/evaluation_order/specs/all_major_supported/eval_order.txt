@@ -9,3 +9,5 @@ output0, event-based, 1, a
 output1, event-based, 2, b
 output2, periodic, 1, c
 output3, periodic, 2, d
+
+Toal number of sliding window buckets: 200

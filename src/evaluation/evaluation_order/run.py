@@ -13,6 +13,13 @@ def extract(content):
         is_periodic = 'GlobalPeriodic' in otpt['eval']['eval_pacing']
         stream_type = "periodic" if is_periodic else "event-based"
         retval += f"output{i}, {stream_type}, {otpt['layer']['evaluation']}, {otpt['name']}\n"
+
+    total_sliding_window_buckets = 0
+    for sw in content['sliding_windows']:
+        total_sliding_window_buckets += sw['num_buckets']['Bounded']
+
+    retval += f"\nToal number of sliding window buckets: {total_sliding_window_buckets}\n"
+
     return retval
 
 
@@ -50,5 +57,6 @@ def extract_eval_orders(specs_path):
 specs_path = "./specs"
 
 if __name__ == "__main__":
-    generate_mirs(specs_path)
+    # generate_mirs(specs_path)
     extract_eval_orders(specs_path)
+    print(f"Done! view the results in the {specs_path}")

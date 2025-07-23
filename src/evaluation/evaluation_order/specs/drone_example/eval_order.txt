@@ -18,3 +18,5 @@ output7, periodic, 1, gps_medium_loss
 output8, periodic, 1, gps_high_loss
 output9, periodic, 1, gps_very_high_loss
 output10, periodic, 1, trigger_gps_sats
+
+Toal number of sliding window buckets: 215

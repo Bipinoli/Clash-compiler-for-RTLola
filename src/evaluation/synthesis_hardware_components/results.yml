@@ -1,8 +1,10 @@
 specs:
-  - drone_example:
+  - result:
+      name: drone_example
+      eval_nodes: 21
+      sliding_window_buckets: 215
       new_architecture: 
         pipeline_wait: 0
-        eval_steps: 7
         number_wire_bits: 321892
         number_cells: 106034
         number_sequential_cells: 16131
@@ -12,7 +14,10 @@ specs:
         number_cells: 98108
         number_sequential_cells: 17679
         number_combinational_cells: 80429
-  - intruder:
+  - result:
+      name: intruder
+      eval_nodes: 7
+      sliding_window_buckets: 10
       new_architecture: 
         pipeline_wait: 0
         number_wire_bits: 34306
@@ -24,7 +29,10 @@ specs:
         number_cells: 9867
         number_sequential_cells: 2985
         number_combinational_cells: 6882
-  - sensor_data_validation:
+  - result:
+      name: sensor_data_validation
+      eval_nodes: 8
+      sliding_window_buckets: 8
       new_architecture: 
         pipeline_wait: 0
         number_wire_bits: 23466
@@ -36,7 +44,10 @@ specs:
         number_cells: 9387
         number_sequential_cells: 3356
         number_combinational_cells: 6031
-  - hold_cycle: 
+  - result:
+      name: hold_cycle
+      eval_nodes: 9
+      sliding_window_buckets: 0
       new_architecture: 
         pipeline_wait: 2
         number_wire_bits: 18240
@@ -48,7 +59,10 @@ specs:
         number_cells: 7708
         number_sequential_cells: 3007
         number_combinational_cells: 4701
-  - with_pipeline_wait:
+  - result:
+      name: with_pipeline_wait
+      eval_nodes: 5
+      sliding_window_buckets: 0
       new_architecture: 
         pipeline_wait: 2
         number_wire_bits: 9985
@@ -60,7 +74,10 @@ specs:
         number_cells: 5022
         number_sequential_cells: 2008
         number_combinational_cells: 3014 
-  - recursive_defaults:
+  - result:
+      name: recursive_defaults
+      eval_nodes: 5
+      sliding_window_buckets: 10
       new_architecture: 
         pipeline_wait: 0
         number_wire_bits: 30410
@@ -72,7 +89,10 @@ specs:
         number_cells: 10352
         number_sequential_cells: 3286
         number_combinational_cells: 7066
-  - only_forward_offsets:
+  - result:
+      name: only_forward_offsets
+      eval_nodes: 5
+      sliding_window_buckets: 0
       new_architecture: 
         pipeline_wait: 0
         number_wire_bits: 14490
@@ -84,7 +104,10 @@ specs:
         number_cells: 5394
         number_sequential_cells: 2333
         number_combinational_cells: 3061
-  - offset_with_loop:
+  - result:
+      name: offset_with_loop
+      eval_nodes: 5
+      sliding_window_buckets: 0
       new_architecture: 
         pipeline_wait: 1
         number_wire_bits: 17955
@@ -96,7 +119,10 @@ specs:
         number_cells: 6908
         number_sequential_cells: 2398
         number_combinational_cells: 4510
-  - all_major_supported:
+  - result:
+      name: all_major_supported
+      eval_nodes: 7
+      sliding_window_buckets: 200
       new_architecture: 
         pipeline_wait: 2
         number_wire_bits: 

@@ -10,3 +10,5 @@ type, periodic/event-based, evalution_layer, name
 output0, periodic, 1, gps_emitted_enough
 output1, event-based, 1, few_satellites
 output2, periodic, 1, is_unreliable_gps_data
+
+Toal number of sliding window buckets: 8
