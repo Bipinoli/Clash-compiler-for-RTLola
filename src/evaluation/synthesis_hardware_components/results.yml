@@ -1,136 +1,244 @@
 specs:
   - result:
       name: drone_example
-      eval_nodes: 21
-      sliding_window_buckets: 215
+      number_of_eval_nodes: 21
+      number_of_sliding_window_buckets: 215
       new_architecture: 
         pipeline_wait: 0
-        number_wire_bits: 321892
-        number_cells: 106034
-        number_sequential_cells: 16131
-        number_combinational_cells: 89903
+        number_of_wires:              76570
+        number_of_wire_bits:         321892
+        number_of_public_wires:        1518
+        number_of_public_wire_bits:  246840
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:             106034
+        number_of_sequential_cells: 16131
+        number_of_combinational_cells: 89903
       old_architecture:
-        number_wire_bits: 117345
-        number_cells: 98108
-        number_sequential_cells: 17679
-        number_combinational_cells: 80429
+        number_of_wires:              81021
+        number_of_wire_bits:         117345
+        number_of_public_wires:        1243
+        number_of_public_wire_bits:   35874
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:              98108
+        number_of_sequential_cells: 17679
+        number_of_combinational_cells: 80429
   - result:
       name: intruder
-      eval_nodes: 7
-      sliding_window_buckets: 10
+      number_of_eval_nodes: 7
+      number_of_sliding_window_buckets: 10
       new_architecture: 
         pipeline_wait: 0
-        number_wire_bits: 34306
-        number_cells: 11121
-        number_sequential_cells: 2141
-        number_combinational_cells: 8980
+        number_of_wires:               8321
+        number_of_wire_bits:          34306
+        number_of_public_wires:         475
+        number_of_public_wire_bits:   26460
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:              11121
+        number_of_sequential_cells: 2141
+        number_of_combinational_cells: 8980
       old_architecture:
-        number_wire_bits: 18845
-        number_cells: 9867
-        number_sequential_cells: 2985
-        number_combinational_cells: 6882
+        number_of_wires:               7221
+        number_of_wire_bits:          18845
+        number_of_public_wires:         568
+        number_of_public_wire_bits:   11588
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:               9867
+        number_of_sequential_cells: 2985
+        number_of_combinational_cells: 6882
   - result:
       name: sensor_data_validation
-      eval_nodes: 8
-      sliding_window_buckets: 8
+      number_of_eval_nodes: 8
+      number_of_sliding_window_buckets: 8
       new_architecture: 
         pipeline_wait: 0
-        number_wire_bits: 23466
-        number_cells: 6042
-        number_sequential_cells: 1199
-        number_combinational_cells: 4843
+        number_of_wires:               4285
+        number_of_wire_bits:          23466
+        number_of_public_wires:         294
+        number_of_public_wire_bits:   19475
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:               6042
+        number_of_sequential_cells: 1199
+        number_of_combinational_cells: 4843
       old_architecture:
-        number_wire_bits: 19926
-        number_cells: 9387
-        number_sequential_cells: 3356
-        number_combinational_cells: 6031
+        number_of_wires:               6324
+        number_of_wire_bits:          19926
+        number_of_public_wires:         627
+        number_of_public_wire_bits:   13277
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:               9387
+        number_of_sequential_cells: 3356
+        number_of_combinational_cells: 6031
   - result:
       name: hold_cycle
-      eval_nodes: 9
-      sliding_window_buckets: 0
+      number_of_eval_nodes: 9
+      number_of_sliding_window_buckets: 0
       new_architecture: 
         pipeline_wait: 2
-        number_wire_bits: 18240
-        number_cells: 7975
-        number_sequential_cells: 1867
-        number_combinational_cells: 6108
+        number_of_wires:               5539
+        number_of_wire_bits:          18240
+        number_of_public_wires:         327
+        number_of_public_wire_bits:   13028
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:               7975
+        number_of_sequential_cells: 1867
+        number_of_combinational_cells: 6108
       old_architecture:
-        number_wire_bits: 20723
-        number_cells: 7708
-        number_sequential_cells: 3007
-        number_combinational_cells: 4701
+        number_of_wires:               5268
+        number_of_wire_bits:          20723
+        number_of_public_wires:         680
+        number_of_public_wire_bits:   15832
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:               7708
+        number_of_sequential_cells: 3007
+        number_of_combinational_cells: 4701
   - result:
       name: with_pipeline_wait
-      eval_nodes: 5
-      sliding_window_buckets: 0
+      number_of_eval_nodes: 5
+      number_of_sliding_window_buckets: 0
       new_architecture: 
         pipeline_wait: 2
-        number_wire_bits: 9985
-        number_cells: 4572
-        number_sequential_cells: 1049
-        number_combinational_cells: 3523
+        number_of_wires:               3193
+        number_of_wire_bits:           9985
+        number_of_public_wires:         214
+        number_of_public_wire_bits:    7006
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:               4572
+        number_of_sequential_cells: 1049
+        number_of_combinational_cells: 3523
       old_architecture:
-        number_wire_bits: 13312
-        number_cells: 5022
-        number_sequential_cells: 2008
-        number_combinational_cells: 3014 
+        number_of_wires:               3347
+        number_of_wire_bits:          13312
+        number_of_public_wires:         445
+        number_of_public_wire_bits:   10109
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:               5022
+        number_of_sequential_cells: 2008
+        number_of_combinational_cells: 3014 
   - result:
       name: recursive_defaults
-      eval_nodes: 5
-      sliding_window_buckets: 10
+      number_of_eval_nodes: 5
+      number_of_sliding_window_buckets: 10
       new_architecture: 
         pipeline_wait: 0
-        number_wire_bits: 30410
-        number_cells: 10314
-        number_sequential_cells: 2077
-        number_combinational_cells: 8237
+        number_of_wires:               7361
+        number_of_wire_bits:          30410
+        number_of_public_wires:         301
+        number_of_public_wire_bits:   23350
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:              10314
+        number_of_sequential_cells: 2077
+        number_of_combinational_cells: 8237
       old_architecture:
-        number_wire_bits: 20532
-        number_cells: 10352
-        number_sequential_cells: 3286
-        number_combinational_cells: 7066
+        number_of_wires:               7317
+        number_of_wire_bits:          20532
+        number_of_public_wires:         480
+        number_of_public_wire_bits:   13091
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:              10352
+        number_of_sequential_cells: 3286
+        number_of_combinational_cells: 7066
   - result:
       name: only_forward_offsets
-      eval_nodes: 5
-      sliding_window_buckets: 0
+      number_of_eval_nodes: 5
+      number_of_sliding_window_buckets: 0
       new_architecture: 
         pipeline_wait: 0
-        number_wire_bits: 14490
-        number_cells: 5156
-        number_sequential_cells: 1184
-        number_combinational_cells: 3972
+        number_of_wires:               3570
+        number_of_wire_bits:          14490
+        number_of_public_wires:         269
+        number_of_public_wire_bits:   11189
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:               5156
+        number_of_sequential_cells: 1184
+        number_of_combinational_cells: 3972
       old_architecture:
-        number_wire_bits: 14592
-        number_cells: 5394
-        number_sequential_cells: 2333
-        number_combinational_cells: 3061
+        number_of_wires:               3402
+        number_of_wire_bits:          14592
+        number_of_public_wires:         453
+        number_of_public_wire_bits:   11342
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:               5394
+        number_of_sequential_cells: 2333
+        number_of_combinational_cells: 3061
   - result:
       name: offset_with_loop
-      eval_nodes: 5
-      sliding_window_buckets: 0
+      number_of_eval_nodes: 5
+      number_of_sliding_window_buckets: 0
       new_architecture: 
         pipeline_wait: 1
-        number_wire_bits: 17955
-        number_cells: 7975
-        number_sequential_cells: 1261
-        number_combinational_cells: 6714
+        number_of_wires:               6338
+        number_of_wire_bits:          17955
+        number_of_public_wires:         296
+        number_of_public_wire_bits:   11913
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:               7975
+        number_of_sequential_cells: 1261
+        number_of_combinational_cells: 6714
       old_architecture:
-        number_wire_bits: 16496
-        number_cells: 6908
-        number_sequential_cells: 2398
-        number_combinational_cells: 4510
+        number_of_wires:               4859
+        number_of_wire_bits:          16496
+        number_of_public_wires:         461
+        number_of_public_wire_bits:   11797
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:               6908
+        number_of_sequential_cells: 2398
+        number_of_combinational_cells: 4510
   - result:
       name: all_major_supported
-      eval_nodes: 7
-      sliding_window_buckets: 200
+      number_of_eval_nodes: 7
+      number_of_sliding_window_buckets: 200
       new_architecture: 
         pipeline_wait: 2
-        number_wire_bits: 
-        number_cells: 98493 
-        number_sequential_cells: 14254
-        number_combinational_cells: 84239 
+        number_of_wires:              71466
+        number_of_wire_bits:         278874
+        number_of_public_wires:         826
+        number_of_public_wire_bits:  208234
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:              98493 
+        number_of_sequential_cells: 14254
+        number_of_combinational_cells: 84239 
       old_architecture:
-        number_wire_bits: 94091
-        number_cells: 84245
-        number_sequential_cells: 15137
-        number_combinational_cells: 69108 
+        number_of_wires:              69289
+        number_of_wire_bits:          94091
+        number_of_public_wires:         525
+        number_of_public_wire_bits:   24164
+        number_of_memories:               0
+        number_of_memory_bits:            0
+        number_of_processes:              0
+        number_of_cells:              84245
+        number_of_sequential_cells: 15137
+        number_of_combinational_cells: 69108 
