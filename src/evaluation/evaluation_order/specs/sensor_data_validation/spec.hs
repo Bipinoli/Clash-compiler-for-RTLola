@@ -21,26 +21,26 @@ import Clash.Prelude
 
 -- Evaluation Order
 --------------------
--- num_satellites, gps_x, imu_acc_x
+-- num_satellites, imu_acc_x, gps_x
 -- few_satellites
 -- sw(gps_x,gps_emitted_enough), sw(few_satellites,is_unreliable_gps_data)
 -- gps_emitted_enough, is_unreliable_gps_data
 
 -- Memory Window
 -----------------
--- window sw(gps_x,gps_emitted_enough) = 1
--- window imu_acc_x = 1
--- window gps_x = 2
 -- window sw(few_satellites,is_unreliable_gps_data) = 1
--- window few_satellites = 3
+-- window gps_x = 2
+-- window imu_acc_x = 1
+-- window is_unreliable_gps_data = 1
+-- window sw(gps_x,gps_emitted_enough) = 1
 -- window gps_emitted_enough = 1
 -- window num_satellites = 1
--- window is_unreliable_gps_data = 1
+-- window few_satellites = 3
 
 -- Pipeline Visualization
 --------------------------
 
--- num_satellites,gps_x,imu_acc_x                                         | num_satellites,gps_x,imu_acc_x                                         | num_satellites,gps_x,imu_acc_x                                         | num_satellites,gps_x,imu_acc_x                                         | num_satellites,gps_x,imu_acc_x                                         | num_satellites,gps_x,imu_acc_x                                         | num_satellites,gps_x,imu_acc_x                                         | num_satellites,gps_x,imu_acc_x                                         | num_satellites,gps_x,imu_acc_x                                         | num_satellites,gps_x,imu_acc_x                                        
+-- num_satellites,imu_acc_x,gps_x                                         | num_satellites,imu_acc_x,gps_x                                         | num_satellites,imu_acc_x,gps_x                                         | num_satellites,imu_acc_x,gps_x                                         | num_satellites,imu_acc_x,gps_x                                         | num_satellites,imu_acc_x,gps_x                                         | num_satellites,imu_acc_x,gps_x                                         | num_satellites,imu_acc_x,gps_x                                         | num_satellites,imu_acc_x,gps_x                                         | num_satellites,imu_acc_x,gps_x                                        
 -- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                                                                        | few_satellites                                                         | few_satellites                                                         | few_satellites                                                         | few_satellites                                                         | few_satellites                                                         | few_satellites                                                         | few_satellites                                                         | few_satellites                                                         | few_satellites                                                        
 -- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -62,13 +62,13 @@ import Clash.Prelude
 
 ---------------------------------------------------------------
 
-data ValidBool = ValidBool {
-    value :: Bool,
+data ValidInt = ValidInt {
+    value :: Int,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
-data ValidInt = ValidInt {
-    value :: Int,
+data ValidBool = ValidBool {
+    value :: Bool,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
@@ -382,8 +382,8 @@ llc event = bundle (toPop, outputs)
         pOut2 = (.pacingOut2) <$> pacings
         
         tIn1 = genTag (getPacing <$> pIn1)
-        tIn0 = genTag (getPacing <$> pIn0)
         tIn2 = genTag (getPacing <$> pIn2)
+        tIn0 = genTag (getPacing <$> pIn0)
         tOut1 = genTag (getPacing <$> pOut1)
         tSw0 = genTag (getPacing <$> pIn0)
         tSw1 = genTag (getPacing <$> pOut1)
@@ -422,8 +422,8 @@ llc event = bundle (toPop, outputs)
         nullT = invalidTag
 
         enIn1 = delayFor d1 nullPacingIn1 pIn1
-        enIn0 = delayFor d1 nullPacingIn0 pIn0
         enIn2 = delayFor d1 nullPacingIn2 pIn2
+        enIn0 = delayFor d1 nullPacingIn0 pIn0
         enOut1 = delayFor d2 nullPacingOut1 pOut1
         enSw0 = delayFor d3 nullPacingIn0 pIn0
         sld0 = delayFor d3 False slide0

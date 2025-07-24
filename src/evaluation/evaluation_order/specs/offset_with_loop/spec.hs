@@ -27,9 +27,9 @@ import Clash.Prelude
 
 -- Memory Window
 -----------------
--- window x = 2
--- window a = 3
 -- window b = 2
+-- window a = 3
+-- window x = 2
 -- window c = 1
 -- window d = 1
 

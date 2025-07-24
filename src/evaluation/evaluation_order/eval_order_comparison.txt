@@ -1,25 +1,198 @@
 drone_example
-------------------------
+
 New:
----
-0: input0, input2, input1
-1: output0
-2: output2, output1
-3: output3
+0: in0, in2, in1
+1: out0
+2: out2, out1
+3: out3
 4: sw0
-5: output4, sw4, sw5, sw3, sw2, sw1, sw6
-6: output5, output8, output7, output6, output9, output10
+5: out4, sw4, sw5, sw3, sw2, sw1, sw6
+6: out5, out8, out7, out6, out9, out10
 
 
 Old:
 ---
-0: input0, input1, input2
-1: 
-    Event: [] 
-    Periodic: []
-2:
-3:
-4:
-5:
+Event-based:
+0: in0, in1, in2
 
 
+Periodic (manually adapted from the provided to fix aggregate of aggregate):
+0: 
+1: sw1, sw2, sw3, sw4, sw5, sw6
+2: out0, out6, out7, out8, out9, out10
+3: out1, out2
+4: out3
+5: sw0
+6: out4
+7: out5 
+
+------------------------------------------------
+all_major_supported
+
+
+New:
+0: in0, out0
+1: out1
+2: sw0
+3: out2
+4: sw1
+5: out3
+
+Old:
+---
+Event-based:
+0: in0
+1: out0
+2: out1
+
+Periodic:
+0: 
+1: sw0
+2: out2
+3. sw1
+4: out3
+
+------------------------------------------------
+hold_cycle
+
+
+New:
+0: in0, in1
+1: out0, out3, out4
+2: out5, out1
+3: out6, out2
+
+Old:    
+---
+Event-based:
+0: in0, in1
+1: out0, out3
+
+Periodic:
+0: 
+1: out1, out4
+2: out2, out5
+3: out6
+
+
+------------------------------------------------
+intruder
+
+
+New:
+0: in1, in0
+1: out0
+2: out1
+3: out2
+4: sw0
+5: out3
+
+Old:
+---
+Event-based:
+0: in0, in1
+1: out0
+2: out1
+3: out2
+
+Periodic:
+0: 
+1: sw0
+1: out3
+
+------------------------------------------------
+offset_with_loop
+
+New:
+0: in0, out0, out1
+1: out2
+2: out3
+
+Old:
+---
+Event-based:
+0: in0
+1: out0, out1
+2: out2
+
+Periodic:
+0: 
+1: out3
+
+------------------------------------------------
+only_forward_offsets
+
+New:
+0: out1, in0, out0, out2
+1: out3
+
+Old:
+---
+Event-based:
+0: in0
+1: out0, out1, out2
+
+Periodic:
+0: 
+1: out3
+
+------------------------------------------------
+recursive_defaults
+
+New:
+0: in1, in0
+1: out0
+2: sw0
+3: out1
+
+Old:
+---
+Event-based:
+0: in0, in1
+1: out0
+
+Periodic:
+0: 
+1: sw0
+2: out1
+
+------------------------------------------------
+sensor_data_validation
+
+New:
+0: in1, in2, in0
+1: out1
+2: sw0, sw1
+3: out0, out2
+
+Old:
+---
+Event-based:
+0: in0, in1, in2
+1: out1
+
+Periodic:
+0: 
+1: sw0, sw1
+2: out0, out2
+
+------------------------------------------------
+with_pipeline_wait
+
+New:
+0: in0
+1: out0
+2: out1, out3
+3: out2
+
+Old:
+---
+Event-based:
+0: in0
+1: out0
+2: out1
+3: out2
+
+Periodic:
+0: 
+1: out3

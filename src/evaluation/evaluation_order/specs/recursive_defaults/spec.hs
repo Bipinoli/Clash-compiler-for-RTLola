@@ -28,10 +28,10 @@ import Clash.Prelude
 -- Memory Window
 -----------------
 -- window x = 3
+-- window a = 3
 -- window y = 2
 -- window sw(a,counts) = 1
 -- window counts = 1
--- window a = 3
 
 -- Pipeline Visualization
 --------------------------

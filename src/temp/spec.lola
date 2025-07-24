@@ -1,9 +1,21 @@
-input x : UInt
-input y : UInt
+input x : Int
+output a @1Hz := x.aggregate(over:1s, using: sum)
+output b @2Hz := a.aggregate(over: 1s, using: sum)
+output c @3Hz := b.aggregate(over: 1s, using: sum)
+output d @4Hz := c.aggregate(over: 1s, using: sum) 
 
-output a := x + y
-output b := x * y + d.offset(by: -1).defaults(to: 0) 
-output c := x + b.offset(by: -3).defaults(to: 0)
-output d := a + b + f.hold(or: 0) 
-output e := d < 5 or d > 10
-output f @1kHz := e.aggregate(over: 0.01s, using: count)
+
+x: shift = 0, eval = 1
+a: shift = 1, eval = 2
+b: shift = 1, eval = 3
+c: shift = 1, eval = 4
+d: shift = 1, eval = 5
+
+layers:
+0: 
+1: x
+2: 
+3: a
+4: b
+5: c
+6: d

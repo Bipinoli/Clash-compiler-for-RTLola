@@ -1,12 +1,31 @@
+input in0 : Int
+input in1 : Int
+
+output out0 := in1 + in0.offset(by: -2).defaults(to: 
+                    in1.offset(by: -1).defaults(to: 10) 
+                    + out0.offset(by: -1).defaults(to: 
+                        in0.offset(by: -1).defaults(to: 20))) 
+output out1 @1kHz := out0.aggregate(over: 0.01s, using: count) --------------------------------------------------
+
+Event-based:
+0: in0, in1
+1: out0
+
+Periodic:
+0: 
+1: out1
 
 type, evaluation_layer, name
 ------------------------------
-input0, 0, x
-input1, 0, y
+in0, 0, x
+in1, 0, y
 
 type, periodic/event-based, evalution_layer, name
 ------------------------------
-output0, event-based, 1, a
-output1, periodic, 1, counts
+out0, event-based, 1, a
+out1, periodic, 1, counts
+
+Sliding windows
+sw0 = sw(out0, out1)
 
 Toal number of sliding window buckets: 10

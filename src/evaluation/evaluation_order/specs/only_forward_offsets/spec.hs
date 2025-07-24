@@ -20,21 +20,21 @@ import Clash.Prelude
 
 -- Evaluation Order
 --------------------
--- c, a, b, x
+-- b, x, a, c
 -- d
 
 -- Memory Window
 -----------------
--- window x = 2
--- window b = 2
--- window c = 2
 -- window d = 1
+-- window b = 2
+-- window x = 2
 -- window a = 3
+-- window c = 2
 
 -- Pipeline Visualization
 --------------------------
 
--- c,a,b,x | c,a,b,x | c,a,b,x | c,a,b,x | c,a,b,x | c,a,b,x | c,a,b,x | c,a,b,x | c,a,b,x | c,a,b,x
+-- b,x,a,c | b,x,a,c | b,x,a,c | b,x,a,c | b,x,a,c | b,x,a,c | b,x,a,c | b,x,a,c | b,x,a,c | b,x,a,c
 -- -------------------------------------------------------------------------------------------------
 --         | d       | d       | d       | d       | d       | d       | d       | d       | d      
 -- -------------------------------------------------------------------------------------------------
@@ -338,10 +338,10 @@ llc event = bundle (toPop, outputs)
         pOut2 = (.pacingOut2) <$> pacings
         pOut3 = (.pacingOut3) <$> pacings
         
-        tOut2 = genTag (getPacing <$> pOut2)
-        tOut0 = genTag (getPacing <$> pOut0)
         tOut1 = genTag (getPacing <$> pOut1)
         tIn0 = genTag (getPacing <$> pIn0)
+        tOut0 = genTag (getPacing <$> pOut0)
+        tOut2 = genTag (getPacing <$> pOut2)
         tOut3 = genTag (getPacing <$> pOut3)
 
         -- tag generation takes 1 cycle so we need to delay the input
@@ -365,10 +365,10 @@ llc event = bundle (toPop, outputs)
         curTagsLevel2 = delayFor d2 tagsDefault curTags
         nullT = invalidTag
 
-        enOut2 = delayFor d1 nullPacingOut2 pOut2
-        enOut0 = delayFor d1 nullPacingOut0 pOut0
         enOut1 = delayFor d1 nullPacingOut1 pOut1
         enIn0 = delayFor d1 nullPacingIn0 pIn0
+        enOut0 = delayFor d1 nullPacingOut0 pOut0
+        enOut2 = delayFor d1 nullPacingOut2 pOut2
         enOut3 = delayFor d2 nullPacingOut3 pOut3
 
         output0Aktv = delayFor d3 False (getPacing <$> pOut0)

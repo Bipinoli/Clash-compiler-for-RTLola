@@ -23,7 +23,7 @@ import Clash.Prelude
 
 -- Evaluation Order
 --------------------
--- lat, lon
+-- lon, lat
 -- distance
 -- closer
 -- trigger_closer
@@ -32,18 +32,18 @@ import Clash.Prelude
 
 -- Memory Window
 -----------------
--- window trigger_closer = 3
--- window lat = 1
 -- window lon = 1
+-- window lat = 1
+-- window closer = 4
+-- window trigger_closer = 3
 -- window sw(trigger_closer,is_good) = 1
 -- window is_good = 1
 -- window distance = 5
--- window closer = 4
 
 -- Pipeline Visualization
 --------------------------
 
--- lat,lon                    | lat,lon                    | lat,lon                    | lat,lon                    | lat,lon                    | lat,lon                    | lat,lon                    | lat,lon                    | lat,lon                    | lat,lon                   
+-- lon,lat                    | lon,lat                    | lon,lat                    | lon,lat                    | lon,lat                    | lon,lat                    | lon,lat                    | lon,lat                    | lon,lat                    | lon,lat                   
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                            | distance                   | distance                   | distance                   | distance                   | distance                   | distance                   | distance                   | distance                   | distance                  
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -68,13 +68,13 @@ import Clash.Prelude
 
 ---------------------------------------------------------------
 
-data ValidBool = ValidBool {
-    value :: Bool,
+data ValidInt = ValidInt {
+    value :: Int,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
-data ValidInt = ValidInt {
-    value :: Int,
+data ValidBool = ValidBool {
+    value :: Bool,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
@@ -382,8 +382,8 @@ llc event = bundle (toPop, outputs)
         pOut2 = (.pacingOut2) <$> pacings
         pOut3 = (.pacingOut3) <$> pacings
         
-        tIn0 = genTag (getPacing <$> pIn0)
         tIn1 = genTag (getPacing <$> pIn1)
+        tIn0 = genTag (getPacing <$> pIn0)
         tOut0 = genTag (getPacing <$> pOut0)
         tOut1 = genTag (getPacing <$> pOut1)
         tOut2 = genTag (getPacing <$> pOut2)
@@ -420,8 +420,8 @@ llc event = bundle (toPop, outputs)
         curTagsLevel6 = delayFor d6 tagsDefault curTags
         nullT = invalidTag
 
-        enIn0 = delayFor d1 nullPacingIn0 pIn0
         enIn1 = delayFor d1 nullPacingIn1 pIn1
+        enIn0 = delayFor d1 nullPacingIn0 pIn0
         enOut0 = delayFor d2 nullPacingOut0 pOut0
         enOut1 = delayFor d3 nullPacingOut1 pOut1
         enOut2 = delayFor d4 nullPacingOut2 pOut2

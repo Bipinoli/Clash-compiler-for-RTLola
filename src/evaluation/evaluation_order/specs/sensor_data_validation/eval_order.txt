@@ -1,14 +1,35 @@
+input in0 : Int
+input num_satellites: Int
+input imu_acc_x: Int 
+
+output out0 @1Hz := in0.aggregate(over: 3s, using: count) < 10
+output out1 := in1 < 9
+output out2 @1Hz := 
+    out1.aggregate(over: 5s, using: count) > 12
+--------------------------------------------------
+
+Event-based:
+0: in0, in1, in2
+1: out1
+
+Periodic:
+0: 
+1: out0, out2
 
 type, evaluation_layer, name
 ------------------------------
-input0, 0, gps_x
-input1, 0, num_satellites
-input2, 0, imu_acc_x
+in0, 0, gps_x
+in1, 0, num_satellites
+in2, 0, imu_acc_x
 
 type, periodic/event-based, evalution_layer, name
 ------------------------------
-output0, periodic, 1, gps_emitted_enough
-output1, event-based, 1, few_satellites
-output2, periodic, 1, is_unreliable_gps_data
+out0, periodic, 1, gps_emitted_enough
+out1, event-based, 1, few_satellites
+out2, periodic, 1, is_unreliable_gps_data
+
+Sliding windows
+sw0 = sw(in0, out0)
+sw1 = sw(out1, out2)
 
 Toal number of sliding window buckets: 8

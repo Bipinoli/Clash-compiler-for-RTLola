@@ -1,22 +1,66 @@
+input acceleration_x: Int64
+input gps_sats: UInt64
+input lat_gps: Int64
+
+output out0 @2kHz := in0.hold(or: 0) 
+output out1 := delta(acceleration_x_periodic, dft: acceleration_x_periodic) > 5
+output out2 := delta(acceleration_x_periodic, dft: acceleration_x_periodic) < -5 
+
+output out3 := (out1 ∧ out2.offset(by: -1).defaults(to: false)) ∨ (out2 ∧ out1.offset(by: -1).defaults(to: false))
+
+output out4 @2kHz := out3.aggregate(over: 0.05s, using: count)
+output out5 := out4 > 5
+
+output gps_missed_beat: Bool @ 2kHz := in2.aggregate(over: 0.055s, using: count) < 1
+output gps_medium_loss: Bool @ 0.1kHz := in2.aggregate(over: 0.01s, using: count) < 15 && in2.aggregate(over: 0.01s, using: count) >= 10
+output gps_high_loss: Bool @ 0.1kHz := in2.aggregate(over: 0.01s, using: count) < 10 && in2.aggregate(over: 0.01s, using: count) >= 5
+output gps_very_high_loss: Bool @ 0.1kHz := in2.aggregate(over: 0.01s, using: count) < 5
+output trigger_gps_sats: Bool @ 0.1kHz := in1.hold(or: 0)  < 6
+--------------------------------------------------
+
+Event-based:
+0: in0, in1, in2
+1: 
+2: 
+3: 
+4: 
+5: 
+
+Periodic:
+0: 
+1: out0, out6, out7, out8, out9, out10
+2: out1, out2
+3: out3
+4: out4
+5: out5
 
 type, evaluation_layer, name
 ------------------------------
-input0, 0, acceleration_x
-input1, 0, gps_sats
-input2, 0, lat_gps
+in0, 0, acceleration_x
+in1, 0, gps_sats
+in2, 0, lat_gps
 
 type, periodic/event-based, evalution_layer, name
 ------------------------------
-output0, periodic, 1, acceleration_x_periodic
-output1, periodic, 2, acceleration_x_rising
-output2, periodic, 2, acceleration_x_sinking
-output3, periodic, 3, acceleration_x_direction_change
-output4, periodic, 4, acceleration_x_changes
-output5, periodic, 5, trigger_acc
-output6, periodic, 1, gps_missed_beat
-output7, periodic, 1, gps_medium_loss
-output8, periodic, 1, gps_high_loss
-output9, periodic, 1, gps_very_high_loss
-output10, periodic, 1, trigger_gps_sats
+out0, periodic, 1, acceleration_x_periodic
+out1, periodic, 2, acceleration_x_rising
+out2, periodic, 2, acceleration_x_sinking
+out3, periodic, 3, acceleration_x_direction_change
+out4, periodic, 4, acceleration_x_changes
+out5, periodic, 5, trigger_acc
+out6, periodic, 1, gps_missed_beat
+out7, periodic, 1, gps_medium_loss
+out8, periodic, 1, gps_high_loss
+out9, periodic, 1, gps_very_high_loss
+out10, periodic, 1, trigger_gps_sats
+
+Sliding windows
+sw0 = sw(out3, out4)
+sw1 = sw(in2, out6)
+sw2 = sw(in2, out7)
+sw3 = sw(in2, out7)
+sw4 = sw(in2, out8)
+sw5 = sw(in2, out8)
+sw6 = sw(in2, out9)
 
 Toal number of sliding window buckets: 215

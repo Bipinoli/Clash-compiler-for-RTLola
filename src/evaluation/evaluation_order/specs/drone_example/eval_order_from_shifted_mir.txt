@@ -1,0 +1,70 @@
+input acceleration_x: Int64
+input gps_sats: UInt64
+input lat_gps: Int64
+
+output out0 @2kHz := in0.hold(or: 0) 
+output out1 := delta(acceleration_x_periodic, dft: acceleration_x_periodic) > 5
+output out2 := delta(acceleration_x_periodic, dft: acceleration_x_periodic) < -5 
+
+output out3 := (out1 ∧ out2.offset(by: -1).defaults(to: false)) ∨ (out2 ∧ out1.offset(by: -1).defaults(to: false))
+
+output out4 @2kHz := out3.aggregate(over: 0.05s, using: count)
+output out5 := out4 > 5
+
+output gps_missed_beat: Bool @ 2kHz := in2.aggregate(over: 0.055s, using: count) < 1
+output gps_medium_loss: Bool @ 0.1kHz := in2.aggregate(over: 0.01s, using: count) < 15 && in2.aggregate(over: 0.01s, using: count) >= 10
+output gps_high_loss: Bool @ 0.1kHz := in2.aggregate(over: 0.01s, using: count) < 10 && in2.aggregate(over: 0.01s, using: count) >= 5
+output gps_very_high_loss: Bool @ 0.1kHz := in2.aggregate(over: 0.01s, using: count) < 5
+output trigger_gps_sats: Bool @ 0.1kHz := in1.hold(or: 0)  < 6
+--------------------------------------------------
+
+Event-based:
+0: 
+1: in0, in1, in2
+2: 
+3: 
+4: 
+5: 
+6: 
+7: 
+
+Periodic:
+0: 
+1: 
+2: 
+3: out0, out6, out7, out8, out9, out10
+4: out1, out2
+5: out3
+6: out4
+7: out5
+
+type, evaluation_layer, name
+------------------------------
+in0, 1, acceleration_x
+in1, 1, gps_sats
+in2, 1, lat_gps
+
+type, periodic/event-based, evalution_layer, name
+------------------------------
+out0, periodic, 3, acceleration_x_periodic
+out1, periodic, 4, acceleration_x_rising
+out2, periodic, 4, acceleration_x_sinking
+out3, periodic, 5, acceleration_x_direction_change
+out4, periodic, 6, acceleration_x_changes
+out5, periodic, 7, trigger_acc
+out6, periodic, 3, gps_missed_beat
+out7, periodic, 3, gps_medium_loss
+out8, periodic, 3, gps_high_loss
+out9, periodic, 3, gps_very_high_loss
+out10, periodic, 3, trigger_gps_sats
+
+Sliding windows
+sw0 = sw(out3, out4)
+sw1 = sw(in2, out6)
+sw2 = sw(in2, out7)
+sw3 = sw(in2, out7)
+sw4 = sw(in2, out8)
+sw5 = sw(in2, out8)
+sw6 = sw(in2, out9)
+
+Toal number of sliding window buckets: 215

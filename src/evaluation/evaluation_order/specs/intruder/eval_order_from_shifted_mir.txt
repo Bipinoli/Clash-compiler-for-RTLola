@@ -1,0 +1,44 @@
+input lat: Int
+input lon: Int
+constant intruder_lat: Int := 249
+constant intruder_lon: Int := 23
+
+output distance: Int := (intruder_in0 - lat) + (intruder_in1 - lon)
+output closer: Bool := out0.offset(by: -1).defaults(to: distance) >= distance
+output trigger_out1 := out1 && out0 < 1
+output out3 @1kHz := 
+    trigger_out1.aggregate(over: 0.01s, using: count) < 5
+--------------------------------------------------
+
+Event-based:
+0: 
+1: in0, in1
+2: 
+3: out0
+4: out1
+5: out2
+
+Periodic:
+0: 
+1: 
+2: 
+3: out3
+4: 
+5: 
+
+type, evaluation_layer, name
+------------------------------
+in0, 1, lat
+in1, 1, lon
+
+type, periodic/event-based, evalution_layer, name
+------------------------------
+out0, event-based, 3, distance
+out1, event-based, 4, closer
+out2, event-based, 5, trigger_closer
+out3, periodic, 3, is_good
+
+Sliding windows
+sw0 = sw(out2, out3)
+
+Toal number of sliding window buckets: 10

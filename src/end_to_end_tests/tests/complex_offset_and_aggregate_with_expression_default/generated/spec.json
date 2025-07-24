@@ -83,20 +83,26 @@
             "Out": 5
           },
           {
+            "Eval": 0
+          },
+          {
             "Sliding": 0
           }
         ]
       ],
+      "aggregates": [],
       "layer": {
         "spawn": 0,
-        "evaluation": 0
+        "shift": 0,
+        "evaluation": 1
       },
       "memory_bound": {
         "Bounded": 3
       },
       "reference": {
         "In": 0
-      }
+      },
+      "tags": {}
     },
     {
       "name": "y",
@@ -145,16 +151,19 @@
         ]
       ],
       "aggregated_by": [],
+      "aggregates": [],
       "layer": {
         "spawn": 0,
-        "evaluation": 0
+        "shift": 0,
+        "evaluation": 1
       },
       "memory_bound": {
         "Bounded": 1
       },
       "reference": {
         "In": 1
-      }
+      },
+      "tags": {}
     }
   ],
   "outputs": [
@@ -445,17 +454,20 @@
         ]
       ],
       "aggregated_by": [],
+      "aggregates": [],
       "memory_bound": {
         "Bounded": 1
       },
       "layer": {
         "spawn": 0,
-        "evaluation": 1
+        "shift": 1,
+        "evaluation": 2
       },
       "reference": {
         "Out": 0
       },
-      "params": []
+      "params": [],
+      "tags": {}
     },
     {
       "name": "b",
@@ -627,17 +639,20 @@
         ]
       ],
       "aggregated_by": [],
+      "aggregates": [],
       "memory_bound": {
         "Bounded": 1
       },
       "layer": {
         "spawn": 0,
-        "evaluation": 1
+        "shift": 1,
+        "evaluation": 2
       },
       "reference": {
         "Out": 1
       },
-      "params": []
+      "params": [],
+      "tags": {}
     },
     {
       "name": "c",
@@ -858,17 +873,20 @@
         ]
       ],
       "aggregated_by": [],
+      "aggregates": [],
       "memory_bound": {
         "Bounded": 1
       },
       "layer": {
         "spawn": 0,
-        "evaluation": 2
+        "shift": 1,
+        "evaluation": 3
       },
       "reference": {
         "Out": 2
       },
-      "params": []
+      "params": [],
+      "tags": {}
     },
     {
       "name": "d",
@@ -1135,21 +1153,27 @@
             "Out": 7
           },
           {
+            "Eval": 0
+          },
+          {
             "Sliding": 1
           }
         ]
       ],
+      "aggregates": [],
       "memory_bound": {
         "Bounded": 2
       },
       "layer": {
         "spawn": 0,
-        "evaluation": 3
+        "shift": 1,
+        "evaluation": 4
       },
       "reference": {
         "Out": 3
       },
-      "params": []
+      "params": [],
+      "tags": {}
     },
     {
       "name": "e",
@@ -1301,17 +1325,20 @@
         ]
       ],
       "aggregated_by": [],
+      "aggregates": [],
       "memory_bound": {
         "Bounded": 2
       },
       "layer": {
         "spawn": 0,
-        "evaluation": 1
+        "shift": 1,
+        "evaluation": 2
       },
       "reference": {
         "Out": 4
       },
-      "params": []
+      "params": [],
+      "tags": {}
     },
     {
       "name": "f",
@@ -1403,17 +1430,32 @@
         ]
       ],
       "aggregated_by": [],
+      "aggregates": [
+        [
+          {
+            "In": 0
+          },
+          {
+            "Eval": 0
+          },
+          {
+            "Sliding": 0
+          }
+        ]
+      ],
       "memory_bound": {
         "Bounded": 1
       },
       "layer": {
         "spawn": 0,
-        "evaluation": 1
+        "shift": 1,
+        "evaluation": 2
       },
       "reference": {
         "Out": 5
       },
-      "params": []
+      "params": [],
+      "tags": {}
     },
     {
       "name": "g",
@@ -1582,17 +1624,20 @@
       ],
       "accessed_by": [],
       "aggregated_by": [],
+      "aggregates": [],
       "memory_bound": {
         "Bounded": 1
       },
       "layer": {
         "spawn": 0,
-        "evaluation": 2
+        "shift": 1,
+        "evaluation": 3
       },
       "reference": {
         "Out": 6
       },
-      "params": []
+      "params": [],
+      "tags": {}
     },
     {
       "name": "h",
@@ -1670,17 +1715,32 @@
       ],
       "accessed_by": [],
       "aggregated_by": [],
+      "aggregates": [
+        [
+          {
+            "Out": 3
+          },
+          {
+            "Eval": 0
+          },
+          {
+            "Sliding": 1
+          }
+        ]
+      ],
       "memory_bound": {
         "Bounded": 1
       },
       "layer": {
         "spawn": 0,
-        "evaluation": 1
+        "shift": 1,
+        "evaluation": 2
       },
       "reference": {
         "Out": 7
       },
-      "params": []
+      "params": [],
+      "tags": {}
     }
   ],
   "time_driven": [
@@ -1830,6 +1890,15 @@
       },
       "ty": {
         "Int": "Int64"
+      },
+      "origin": {
+        "Eval": 0
+      },
+      "pacing": {
+        "GlobalPeriodic": [
+          1000,
+          1
+        ]
       }
     },
     {
@@ -1857,9 +1926,19 @@
       },
       "ty": {
         "Int": "Int64"
+      },
+      "origin": {
+        "Eval": 0
+      },
+      "pacing": {
+        "GlobalPeriodic": [
+          1000,
+          1
+        ]
       }
     }
   ],
   "instance_aggregations": [],
-  "triggers": []
+  "triggers": [],
+  "global_tags": {}
 }

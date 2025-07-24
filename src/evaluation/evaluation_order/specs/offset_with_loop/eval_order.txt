@@ -1,13 +1,34 @@
+input in0 : Int
+
+output out0 := in0.offset(by: -1).defaults(to: 0) 
+                + out1.offset(by: -1).defaults(to: 0) 
+                + out2.offset(by: -1).defaults(to: 0) 
+output out1 := out0.offset(by: -3).defaults(to: 0) 
+            + in0.offset(by: -2).defaults(to: 0)   
+output out2 := in0 + out0 + b
+output out3 @1kHz := out2.hold(or: 0)--------------------------------------------------
+
+Event-based:
+0: in0
+1: out0, out1
+2: out2
+
+Periodic:
+0: 
+1: out3
+2: 
 
 type, evaluation_layer, name
 ------------------------------
-input0, 0, x
+in0, 0, x
 
 type, periodic/event-based, evalution_layer, name
 ------------------------------
-output0, event-based, 1, a
-output1, event-based, 1, b
-output2, event-based, 2, c
-output3, periodic, 1, d
+out0, event-based, 1, a
+out1, event-based, 1, b
+out2, event-based, 2, c
+out3, periodic, 1, d
+
+Sliding windows
 
 Toal number of sliding window buckets: 0

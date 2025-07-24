@@ -33,35 +33,35 @@ import Clash.Prelude
 --------------------
 -- acceleration_x, lat_gps, gps_sats
 -- acceleration_x_periodic
--- acceleration_x_sinking, acceleration_x_rising
+-- acceleration_x_rising, acceleration_x_sinking
 -- acceleration_x_direction_change
 -- sw(acceleration_x_direction_change,acceleration_x_changes)
--- acceleration_x_changes, sw(lat_gps,gps_high_loss), sw(lat_gps,gps_high_loss), sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_missed_beat), sw(lat_gps,gps_very_high_loss)
--- trigger_acc, gps_high_loss, gps_medium_loss, gps_missed_beat, gps_very_high_loss, trigger_gps_sats
+-- acceleration_x_changes, sw(lat_gps,gps_high_loss), sw(lat_gps,gps_high_loss), sw(lat_gps,gps_missed_beat), sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_medium_loss), sw(lat_gps,gps_very_high_loss)
+-- trigger_acc, gps_high_loss, gps_missed_beat, gps_medium_loss, gps_very_high_loss, trigger_gps_sats
 
 -- Memory Window
 -----------------
--- window sw(lat_gps,gps_missed_beat) = 1
--- window gps_sats = 6
--- window sw(lat_gps,gps_medium_loss) = 1
--- window sw(acceleration_x_direction_change,acceleration_x_changes) = 1
--- window gps_medium_loss = 1
--- window lat_gps = 5
--- window acceleration_x_sinking = 5
--- window sw(lat_gps,gps_medium_loss) = 1
--- window acceleration_x_changes = 2
 -- window acceleration_x_direction_change = 4
--- window sw(lat_gps,gps_high_loss) = 1
--- window gps_high_loss = 1
--- window gps_very_high_loss = 1
--- window sw(lat_gps,gps_high_loss) = 1
--- window sw(lat_gps,gps_very_high_loss) = 1
--- window gps_missed_beat = 1
--- window acceleration_x = 1
+-- window sw(lat_gps,gps_missed_beat) = 1
 -- window acceleration_x_periodic = 6
--- window trigger_gps_sats = 1
--- window acceleration_x_rising = 5
+-- window sw(lat_gps,gps_very_high_loss) = 1
 -- window trigger_acc = 1
+-- window gps_high_loss = 1
+-- window acceleration_x = 1
+-- window gps_medium_loss = 1
+-- window sw(acceleration_x_direction_change,acceleration_x_changes) = 1
+-- window gps_sats = 6
+-- window acceleration_x_changes = 2
+-- window acceleration_x_sinking = 5
+-- window gps_missed_beat = 1
+-- window lat_gps = 5
+-- window trigger_gps_sats = 1
+-- window sw(lat_gps,gps_high_loss) = 1
+-- window sw(lat_gps,gps_high_loss) = 1
+-- window gps_very_high_loss = 1
+-- window sw(lat_gps,gps_medium_loss) = 1
+-- window acceleration_x_rising = 5
+-- window sw(lat_gps,gps_medium_loss) = 1
 
 -- Pipeline Visualization
 --------------------------
@@ -70,15 +70,15 @@ import Clash.Prelude
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                                                                                                                                                                                               | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                       | acceleration_x_periodic                                                                                                                                                                      
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                                                                                                                                                                                               |                                                                                                                                                                                               | acceleration_x_sinking,acceleration_x_rising                                                                                                                                                  | acceleration_x_sinking,acceleration_x_rising                                                                                                                                                  | acceleration_x_sinking,acceleration_x_rising                                                                                                                                                  | acceleration_x_sinking,acceleration_x_rising                                                                                                                                                  | acceleration_x_sinking,acceleration_x_rising                                                                                                                                                  | acceleration_x_sinking,acceleration_x_rising                                                                                                                                                  | acceleration_x_sinking,acceleration_x_rising                                                                                                                                                  | acceleration_x_sinking,acceleration_x_rising                                                                                                                                                 
+--                                                                                                                                                                                               |                                                                                                                                                                                               | acceleration_x_rising,acceleration_x_sinking                                                                                                                                                  | acceleration_x_rising,acceleration_x_sinking                                                                                                                                                  | acceleration_x_rising,acceleration_x_sinking                                                                                                                                                  | acceleration_x_rising,acceleration_x_sinking                                                                                                                                                  | acceleration_x_rising,acceleration_x_sinking                                                                                                                                                  | acceleration_x_rising,acceleration_x_sinking                                                                                                                                                  | acceleration_x_rising,acceleration_x_sinking                                                                                                                                                  | acceleration_x_rising,acceleration_x_sinking                                                                                                                                                 
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | acceleration_x_direction_change                                                                                                                                                               | acceleration_x_direction_change                                                                                                                                                               | acceleration_x_direction_change                                                                                                                                                               | acceleration_x_direction_change                                                                                                                                                               | acceleration_x_direction_change                                                                                                                                                               | acceleration_x_direction_change                                                                                                                                                               | acceleration_x_direction_change                                                                                                                                                              
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                    | sw(acceleration_x_direction_change,acceleration_x_changes)                                                                                                                                   
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_very_high_loss)
+--                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_very_high_loss) | acceleration_x_changes,sw(lat_gps,gps_high_loss),sw(lat_gps,gps_high_loss),sw(lat_gps,gps_missed_beat),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_medium_loss),sw(lat_gps,gps_very_high_loss)
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | trigger_acc,gps_high_loss,gps_medium_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_medium_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_medium_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_medium_loss,gps_missed_beat,gps_very_high_loss,trigger_gps_sats                                                                                                
+--                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               |                                                                                                                                                                                               | trigger_acc,gps_high_loss,gps_missed_beat,gps_medium_loss,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_missed_beat,gps_medium_loss,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_missed_beat,gps_medium_loss,gps_very_high_loss,trigger_gps_sats                                                                                                 | trigger_acc,gps_high_loss,gps_missed_beat,gps_medium_loss,gps_very_high_loss,trigger_gps_sats                                                                                                
 -- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Nicknames
@@ -107,13 +107,13 @@ import Clash.Prelude
 
 ---------------------------------------------------------------
 
-data ValidBool = ValidBool {
-    value :: Bool,
+data ValidInt = ValidInt {
+    value :: Int,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
-data ValidInt = ValidInt {
-    value :: Int,
+data ValidBool = ValidBool {
+    value :: Bool,
     valid :: Bool
 } deriving (Generic, NFDataX)
 
@@ -538,21 +538,21 @@ llc event = bundle (toPop, outputs)
         tIn2 = genTag (getPacing <$> pIn2)
         tIn1 = genTag (getPacing <$> pIn1)
         tOut0 = genTag (getPacing <$> pOut0)
-        tOut2 = genTag (getPacing <$> pOut2)
         tOut1 = genTag (getPacing <$> pOut1)
+        tOut2 = genTag (getPacing <$> pOut2)
         tOut3 = genTag (getPacing <$> pOut3)
         tSw0 = genTag (getPacing <$> pOut3)
         tOut4 = genTag (getPacing <$> pOut4)
         tSw4 = genTag (getPacing <$> pIn2)
         tSw5 = genTag (getPacing <$> pIn2)
+        tSw1 = genTag (getPacing <$> pIn2)
         tSw2 = genTag (getPacing <$> pIn2)
         tSw3 = genTag (getPacing <$> pIn2)
-        tSw1 = genTag (getPacing <$> pIn2)
         tSw6 = genTag (getPacing <$> pIn2)
         tOut5 = genTag (getPacing <$> pOut5)
         tOut8 = genTag (getPacing <$> pOut8)
-        tOut7 = genTag (getPacing <$> pOut7)
         tOut6 = genTag (getPacing <$> pOut6)
+        tOut7 = genTag (getPacing <$> pOut7)
         tOut9 = genTag (getPacing <$> pOut9)
         tOut10 = genTag (getPacing <$> pOut10)
 
@@ -620,8 +620,8 @@ llc event = bundle (toPop, outputs)
         enIn2 = delayFor d1 nullPacingIn2 pIn2
         enIn1 = delayFor d1 nullPacingIn1 pIn1
         enOut0 = delayFor d2 nullPacingOut0 pOut0
-        enOut2 = delayFor d3 nullPacingOut2 pOut2
         enOut1 = delayFor d3 nullPacingOut1 pOut1
+        enOut2 = delayFor d3 nullPacingOut2 pOut2
         enOut3 = delayFor d4 nullPacingOut3 pOut3
         enSw0 = delayFor d5 nullPacingOut3 pOut3
         sld0 = delayFor d5 False slide0
@@ -630,18 +630,18 @@ llc event = bundle (toPop, outputs)
         sld4 = delayFor d6 False slide4
         enSw5 = delayFor d6 nullPacingIn2 pIn2
         sld5 = delayFor d6 False slide5
+        enSw1 = delayFor d6 nullPacingIn2 pIn2
+        sld1 = delayFor d6 False slide1
         enSw2 = delayFor d6 nullPacingIn2 pIn2
         sld2 = delayFor d6 False slide2
         enSw3 = delayFor d6 nullPacingIn2 pIn2
         sld3 = delayFor d6 False slide3
-        enSw1 = delayFor d6 nullPacingIn2 pIn2
-        sld1 = delayFor d6 False slide1
         enSw6 = delayFor d6 nullPacingIn2 pIn2
         sld6 = delayFor d6 False slide6
         enOut5 = delayFor d7 nullPacingOut5 pOut5
         enOut8 = delayFor d7 nullPacingOut8 pOut8
-        enOut7 = delayFor d7 nullPacingOut7 pOut7
         enOut6 = delayFor d7 nullPacingOut6 pOut6
+        enOut7 = delayFor d7 nullPacingOut7 pOut7
         enOut9 = delayFor d7 nullPacingOut9 pOut9
         enOut10 = delayFor d7 nullPacingOut10 pOut10
 
@@ -1114,10 +1114,10 @@ outputStream10 en tag in1_0 = result
 
 
 
-windowFunc0 :: Int -> Bool -> Int
+windowFunc0 :: Int -> Int -> Int
 windowFunc0 acc item = acc + 1
 
-windowFunc1 :: Int -> Int -> Int
+windowFunc1 :: Int -> Bool -> Int
 windowFunc1 acc item = acc + 1
 
 windowFunc2 :: Int -> Int -> Int
@@ -1151,7 +1151,7 @@ slidingWindow0 newData slide tag inpt = window
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
                 lastBucketUpdated = 
-                    replace 0 (windowFunc0 (head win) dta) win
+                    replace 0 (windowFunc1 (head win) dta) win
 
 slidingWindow1 :: HiddenClockResetEnable dom 
     => Signal dom PacingIn2 
@@ -1180,7 +1180,7 @@ slidingWindow1 newData slide tag inpt = window
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
                 lastBucketUpdated = 
-                    replace 0 (windowFunc1 (head win) dta) win
+                    replace 0 (windowFunc0 (head win) dta) win
 
 slidingWindow2 :: HiddenClockResetEnable dom 
     => Signal dom PacingIn2 
@@ -1209,7 +1209,7 @@ slidingWindow2 newData slide tag inpt = window
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
                 lastBucketUpdated = 
-                    replace 0 (windowFunc1 (head win) dta) win
+                    replace 0 (windowFunc0 (head win) dta) win
 
 slidingWindow3 :: HiddenClockResetEnable dom 
     => Signal dom PacingIn2 
@@ -1238,7 +1238,7 @@ slidingWindow3 newData slide tag inpt = window
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
                 lastBucketUpdated = 
-                    replace 0 (windowFunc1 (head win) dta) win
+                    replace 0 (windowFunc0 (head win) dta) win
 
 slidingWindow4 :: HiddenClockResetEnable dom 
     => Signal dom PacingIn2 
@@ -1267,7 +1267,7 @@ slidingWindow4 newData slide tag inpt = window
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
                 lastBucketUpdated = 
-                    replace 0 (windowFunc1 (head win) dta) win
+                    replace 0 (windowFunc0 (head win) dta) win
 
 slidingWindow5 :: HiddenClockResetEnable dom 
     => Signal dom PacingIn2 
@@ -1296,7 +1296,7 @@ slidingWindow5 newData slide tag inpt = window
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
                 lastBucketUpdated = 
-                    replace 0 (windowFunc1 (head win) dta) win
+                    replace 0 (windowFunc0 (head win) dta) win
 
 slidingWindow6 :: HiddenClockResetEnable dom 
     => Signal dom PacingIn2 
@@ -1325,7 +1325,7 @@ slidingWindow6 newData slide tag inpt = window
                     (True, False) -> 0 +>> win
                     (True, True) -> 0 +>> lastBucketUpdated
                 lastBucketUpdated = 
-                    replace 0 (windowFunc1 (head win) dta) win
+                    replace 0 (windowFunc0 (head win) dta) win
 
 
 
