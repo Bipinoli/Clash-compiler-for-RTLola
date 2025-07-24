@@ -7,7 +7,10 @@ def read_layer(layer):
     # However, when there are aggregates of aggregates the shift doesn't seem to increase
     # so the output with `shift_layer` feature doesn't make complete sense to me 
     shift = layer['shift'] if 'shift' in layer else 0
-    return layer['evaluation'] + shift
+    # UPDATE: After talking to Federick I found that my assumption of shift is wrong
+    # It is not made for this purpose
+    shift = 0
+    return layer['evaluation'] 
 
 def has_shift(mir):
     if 'inputs' in mir:
