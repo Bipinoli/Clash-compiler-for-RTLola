@@ -251,6 +251,24 @@ def print_table(results):
         print(f"[Spec{i+1}], [{result['number_of_eval_nodes']}], [{result['number_of_sliding_window_buckets']}], [{result['new_architecture']['pipeline_wait']}],")
 
 
+def plot_throughput():
+    specs = ['Spec1', 'Spec2', 'Spec3', 'Spec4', 'Spec5', 'Spec6', 'Spec7', 'Spec8', 'Spec9']
+    x = np.arange(len(specs))
+    throughput_old = [1/9, 1/7, 1/5, 1/6, 1/6, 1/5, 1/4, 1/5, 1/8]
+    throughput_new = [1, 1, 1, 1/3, 1/3, 1, 1, 1/2, 1/3]
+    width = 0.35
+    fig, ax = plt.subplots(layout='constrained', figsize=(10, 5))
+    rects1 = ax.bar(x - width/2, throughput_old, width, label='Existing architecture')
+    rects2 = ax.bar(x + width/2, throughput_new, width, label='Our architecture')
+    ax.set_ylabel('Evaluation throughput')
+    ax.set_title("Throughput")
+    ax.set_xticks(x)
+    ax.set_xticklabels(specs)
+    ax.legend()
+    ax.set_ylim(0, 1)
+    plt.savefig("plots/throughput.svg", format="svg")
+    plt.show()
+
 
 # plot_total_cells(results)
 # plot_sequential_cells(results)
@@ -259,9 +277,10 @@ def print_table(results):
 # plot_wires(results)
 # plot_public_wires(results)
 # plot_sequential_ratio(results)
-plot_total_cells_relative(results)
-plot_wire_bits_relative(results)
-plot_wires_relative(results)
+# plot_total_cells_relative(results)
+# plot_wire_bits_relative(results)
+# plot_wires_relative(results)
+plot_throughput()
 # print_table(results)
 
 
