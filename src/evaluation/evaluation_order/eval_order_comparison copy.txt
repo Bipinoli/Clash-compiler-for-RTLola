@@ -1,0 +1,198 @@
+drone_example
+
+New:
++ i0, i2, i1
++ o0
++ o2, o1
++ o3
++ sw0
++ o4, sw4, sw5, sw3, sw2, sw1, sw6
++ o5, o8, o7, o6, o9, o10
+
+
+Old:
+---
+Event-based:
++ i0, i1, i2
+
+
+Periodic (manually adapted from the provided to fix aggregate of aggregate):
++ 
++ sw1, sw2, sw3, sw4, sw5, sw6
++ o0, o6, o7, o8, o9, o10
++ o1, o2
++ o3
++ sw0
++ o4
++ o5 
+
+------------------------------------------------
+all_major_supported
+
+
+New:
++ i0, o0
++ o1
++ sw0
++ o2
++ sw1
++ o3
+
+Old:
+---
+Event-based:
++ i0
++ o0
++ o1
+
+Periodic:
++ 
++ sw0
++ o2
++ sw1
++ o3
+
+------------------------------------------------
+hold_cycle
+
+
+New:
++ i0, i1
++ o0, o3, o4
++ o5, o1
++ o6, o2
+
+Old:    
+---
+Event-based:
++ i0, i1
++ o0, o3
+
+Periodic:
++ 
++ o1, o4
++ o2, o5
++ o6
+
+
+------------------------------------------------
+intruder
+
+
+New:
++ i1, i0
++ o0
++ o1
++ o2
++ sw0
++ o3
+
+Old:
+---
+Event-based:
++ i0, i1
++ o0
++ o1
++ o2
+
+Periodic:
++ 
++ sw0
++ o3
+
+------------------------------------------------
+offset_with_loop
+
+New:
++ i0, o0, o1
++ o2
++ o3
+
+Old:
+---
+Event-based:
++ i0
++ o0, o1
++ o2
+
+Periodic:
++ 
++ o3
+
+------------------------------------------------
+only_forward_offsets
+
+New:
++ o1, i0, o0, o2
++ o3
+
+Old:
+---
+Event-based:
++ i0
++ o0, o1, o2
+
+Periodic:
++ 
++ o3
+
+------------------------------------------------
+recursive_defaults
+
+New:
++ i1, i0
++ o0
++ sw0
++ o1
+
+Old:
+---
+Event-based:
++ i0, i1
++ o0
+
+Periodic:
++ 
++ sw0
++ o1
+
+------------------------------------------------
+sensor_data_validation
+
+New:
++ i1, i2, i0
++ o1
++ sw0, sw1
++ o0, o2
+
+Old:
+---
+Event-based:
++ i0, i1, i2
++ o1
+
+Periodic:
++ 
++ sw0, sw1
++ o0, o2
+
+------------------------------------------------
+with_pipelie_wait
+
+New:
++ i0
++ o0
++ o1, o3
++ o2
+
+Old:
+---
+Event-based:
++ i0
++ o0
++ o1
++ o2
+
+Periodic:
++ 
++ o3
